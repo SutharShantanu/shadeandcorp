@@ -3,7 +3,73 @@
 @tailwind utilities;
 
 body {
-  color: white;
-  background: black;
+  color: #333333; /* Softer text color */
+  background: #f4f4f4; /* Light background for better readability */
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: #f4f4f4; /* Lighter background */
+    --foreground: #333333; /* Darker text for good contrast */
+    --card: #ffffff; /* White cards for contrast */
+    --card-foreground: #333333; /* Dark text on cards */
+    --popover: #ffffff; /* White popovers */
+    --popover-foreground: #333333; /* Dark text on popovers */
+    --primary: #2d2d2d; /* Darker primary color */
+    --primary-foreground: #fafafa; /* Lighter foreground */
+    --secondary: #f9f9f9; /* Soft light secondary background */
+    --secondary-foreground: #2d2d2d; /* Dark text on secondary */
+    --muted: #e1e1e1; /* Muted light gray */
+    --muted-foreground: #666666; /* Slightly darker muted text */
+    --accent: #4b8e8d; /* Soft teal accent */
+    --accent-foreground: #ffffff; /* Light accent text */
+    --destructive: #e57373; /* Softer red for destructive actions */
+    --destructive-foreground: #333333; /* Dark text on destructive */
+    --border: #d1d1d1; /* Soft border color */
+    --input: #ffffff; /* White input fields */
+    --ring: #4b8e8d; /* Accent color for focus ring */
+    --chart-1: #f4a261; /* Softer orange for charts */
+    --chart-2: #06d6a0; /* Soft green */
+    --chart-3: #457b9d; /* Soft blue */
+    --chart-4: #f77f00; /* Muted yellow */
+    --chart-5: #e63946; /* Soft red */
+    --radius: 0.5rem; /* Rounded corners */
+  }
+
+  .dark {
+    --background: #2d2d2d; /* Dark background for dark mode */
+    --foreground: #fafafa; /* Light text in dark mode */
+    --card: #333333; /* Dark cards */
+    --card-foreground: #fafafa; /* Light text on dark cards */
+    --popover: #333333; /* Dark popovers */
+    --popover-foreground: #fafafa; /* Light text on dark popovers */
+    --primary: #fafafa; /* Light primary text */
+    --primary-foreground: #2d2d2d; /* Dark foreground on primary */
+    --secondary: #444444; /* Darker secondary background */
+    --secondary-foreground: #fafafa; /* Light text on dark secondary */
+    --muted: #555555; /* Darker muted background */
+    --muted-foreground: #a3a3a3; /* Light muted text */
+    --accent: #2d2d2d; /* Dark accent */
+    --accent-foreground: #fafafa; /* Light accent text */
+    --destructive: #d32f2f; /* Softer red for dark mode destructive actions */
+    --destructive-foreground: #fafafa; /* Light text on dark destructive */
+    --border: #555555; /* Darker borders */
+    --input: #444444; /* Darker input fields */
+    --ring: #e1e1e1; /* Light ring color */
+    --chart-1: #3b82f6; /* Soft blue */
+    --chart-2: #10b981; /* Soft green */
+    --chart-3: #f59e0b; /* Muted yellow */
+    --chart-4: #9333ea; /* Soft purple */
+    --chart-5: #ec4899; /* Soft pink */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

@@ -2,13 +2,81 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { Menu, Search, ShoppingCart, User, Heart, Tag, Star } from "lucide-react";
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+    NavigationMenu,
+    NavigationMenuContent,
+    NavigationMenuItem,
+    NavigationMenuLink,
+    NavigationMenuList,
+    NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { Menu, Search, ShoppingCart, User, Heart } from "lucide-react";
 import Link from "next/link";
+
+const menuLinks = [
+    {
+        href: "/shop/men",
+        label: "Men",
+        icon: <User className="w-5 h-5" />,
+        subcategories: [
+            "T-Shirts", "Jeans", "Shirts", "Jackets", "Footwear", "Suits", "Activewear", "Accessories"
+        ]
+    },
+    {
+        href: "/shop/women",
+        label: "Women",
+        icon: <User className="w-5 h-5" />,
+        subcategories: [
+            "Dresses", "Tops", "Skirts", "Jeans", "Shirts", "Sweaters", "Footwear", "Bags", "Jewelry"
+        ]
+    },
+    {
+        href: "/shop/accessories",
+        label: "Accessories",
+        icon: <Heart className="w-5 h-5" />,
+        subcategories: [
+            "Watches", "Bags", "Jewelry", "Sunglasses", "Wallets", "Belts", "Hats", "Caps"
+        ]
+    },
+    {
+        href: "/shop/footwear",
+        label: "Footwear",
+        icon: <ShoppingCart className="w-5 h-5" />,
+        subcategories: [
+            "Men's Shoes", "Women's Shoes", "Kids' Shoes", "Sports Shoes", "Boots", "Flip-flops"
+        ]
+    },
+    {
+        href: "/offers",
+        label: "Offers",
+        icon: <Search className="w-5 h-5" />
+    },
+    {
+        href: "/new-arrivals",
+        label: "New Arrivals",
+        icon: <ShoppingCart className="w-5 h-5" />
+    },
+    {
+        href: "/contact",
+        label: "Contact",
+        icon: <User className="w-5 h-5" />
+    },
+    {
+        href: "/faq",
+        label: "FAQ",
+        icon: <Search className="w-5 h-5" />
+    },
+];
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
-    const [showSubNavbar, setShowSubNavbar] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const router = useRouter();
 
@@ -16,7 +84,6 @@ const Navbar = () => {
         const handleScroll = () => {
             const scrollTop = window.scrollY;
             setIsScrolled(scrollTop > 0);
-            setShowSubNavbar(scrollTop > 100);
         };
 
         window.addEventListener("scroll", handleScroll);
@@ -37,121 +104,104 @@ const Navbar = () => {
 
     return (
         <>
-            <motion.div
-                initial={{ backgroundColor: "white" }}
-                animate={{
-                    boxShadow: isScrolled ? "0 1px 2px 0 rgb(0 0 0 / 0.05)" : "none",
-                }}
-                transition={{ duration: 0.3 }}
-                className="fixed top-0 left-0 w-full z-50 transition-all duration-300"
+            <div
+                className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? "shadow-sm bg-primary-foreground" : "bg-transparent"
+                    }`}
+                role="navigation"
             >
-                <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 max-w-7xl mx-auto">
+                <div className="container mx-auto flex items-center justify-between px-4 py-4">
                     <Link href="/">
-                        <motion.div
-                            initial={{ opacity: 0, y: -20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className="text-2xl sm:text-3xl font-extrabold tracking-wide text-heading select-none"
-                        >
-                            Shade & Co.
-                        </motion.div>
+                        <div className="text-2xl font-bold text-primary">Shade & Co.</div>
                     </Link>
-                    <div className="hidden md:flex items-center w-1/3">
-                        <div className="relative w-full">
-                            <motion.input
-                                initial={{ width: 0 }}
-                                animate={{ width: "100%" }}
-                                transition={{ duration: 0.5 }}
-                                type="text"
-                                placeholder="Search for products..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onKeyDown={handleKeyPress}
-                                className="w-full py-2 px-4 text-sm text-paragraph bg-background border-b border-border focus:border-heading focus:outline-none"
-                            />
-                            <Search
-                                className="absolute right-3 top-2.5 w-5 h-5 text-paragraph cursor-pointer"
-                                onClick={handleSearch}
-                            />
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-x-4 sm:gap-x-6">
+
+                    <NavigationMenu className="hidden md:flex">
+                        <NavigationMenuList>
+                            <NavigationMenuItem>
+                                <NavigationMenuTrigger>Shop</NavigationMenuTrigger>
+                                <NavigationMenuContent>
+                                    <ul className="grid grid-cols-2 gap-4 p-4">
+                                        {menuLinks.slice(0, 3).map((link) => (
+                                            <li key={link.href} className="flex items-center gap-x-2">
+                                                {link.icon}
+                                                <NavigationMenuLink asChild>
+                                                    <Link href={link.href} className="text-primary-default hover:text-accent-foreground">
+                                                        {link.label}
+                                                    </Link>
+                                                </NavigationMenuLink>
+                                                <ul className="pl-6 text-sm">
+                                                    {link.subcategories.map((subcategory, index) => (
+                                                        <li key={index} className="text-primary-foreground hover:text-accent-foreground">
+                                                            {subcategory}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </NavigationMenuContent>
+                            </NavigationMenuItem>
+                            <NavigationMenuItem>
+                                <NavigationMenuTrigger >More</NavigationMenuTrigger>
+                                <NavigationMenuContent >
+                                    <ul className="p-4">
+                                        {menuLinks.slice(3).map((link) => (
+                                            <li key={link.href} className="flex items-center gap-x-2">
+                                                {link.icon}
+                                                <NavigationMenuLink asChild>
+                                                    <Link href={link.href} className="text-primary-default hover:text-accent-foreground">
+                                                        {link.label}
+                                                    </Link>
+                                                </NavigationMenuLink>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </NavigationMenuContent>
+                            </NavigationMenuItem>
+                        </NavigationMenuList>
+                    </NavigationMenu>
+
+                    <div className="hidden md:flex items-center gap-x-4">
                         <Link href="/wishlist">
-                            <Heart className="w-6 h-6 text-heading hover:scale-105 transition-all ease-in-out cursor-pointer" />
+                            <Heart className="w-6 h-6 text-primary-foreground hover:text-accent-foreground cursor-pointer" aria-label="Wishlist" />
                         </Link>
                         <Link href="/cart">
-                            <ShoppingCart className="w-6 h-6 text-heading hover:scale-105 transition-all ease-in-out cursor-pointer" />
+                            <ShoppingCart className="w-6 h-6 text-primary-foreground hover:text-accent-foreground cursor-pointer" aria-label="Cart" />
                         </Link>
                         <Link href="/account">
-                            <User className="w-6 h-6 text-heading hover:scale-105 transition-all ease-in-out cursor-pointer" />
+                            <User className="w-6 h-6 text-primary-foreground hover:text-accent-foreground cursor-pointer" aria-label="Account" />
                         </Link>
-                        <Menu className="w-6 h-6 text-heading md:hidden hover:scale-105 transition-all ease-in-out cursor-pointer" />
+                    </div>
+
+                    <div className="md:hidden">
+                        <Sheet>
+                            <SheetTrigger>
+                                <Menu className="w-6 h-6 text-primary-foreground hover:text-accent-foreground cursor-pointer" aria-label="Open menu" />
+                            </SheetTrigger>
+                            <SheetContent side="left" className="bg-background">
+                                <SheetHeader>
+                                    <SheetTitle className="text-primary-foreground">Menu</SheetTitle>
+                                </SheetHeader>
+                                <nav className="flex flex-col gap-y-4 mt-4">
+                                    {menuLinks.map((link) => (
+                                        <Link key={link.href} href={link.href} className="text-lg font-medium text-primary-foreground hover:text-accent-foreground">
+                                            {link.icon} {link.label}
+                                        </Link>
+                                    ))}
+                                    <div className="mt-4">
+                                        <button
+                                            className="absolute top-4 right-4 text-primary-foreground"
+                                            onClick={() => document.activeElement.blur()}
+                                            aria-label="Close menu"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                </nav>
+                            </SheetContent>
+                        </Sheet>
                     </div>
                 </div>
-            </motion.div>
-            {showSubNavbar && (
-                <motion.div
-                    initial={{ y: -100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                    className="fixed top-[4.2rem] left-0 w-full bg-tw-white z-40 shadow-sm py-2"
-                >
-                    <div className="flex flex-wrap items-center justify-center py-2 gap-x-4 sm:gap-x-8 max-w-7xl mx-auto">
-                        <Link
-                            href="/shop/men"
-                            className="relative text-heading  font-medium group"
-                        >
-                            Men
-                            <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-tw-black scale-x-0 group-hover:scale-x-100 transition-all duration-300 origin-left" />
-                        </Link>
-                        <Link
-                            href="/shop/women"
-                            className="relative text-heading  font-medium group"
-                        >
-                            Women
-                            <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-tw-black scale-x-0 group-hover:scale-x-100 transition-all duration-300 origin-left" />
-                        </Link>
-                        <Link
-                            href="/shop/accessories"
-                            className="relative text-heading  font-medium group"
-                        >
-                            Accessories
-                            <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-tw-black scale-x-0 group-hover:scale-x-100 transition-all duration-300 origin-left" />
-                        </Link>
-                        <Link
-                            href="/offers"
-                            className="flex items-center gap-x-2 relative group"
-                        >
-                            <Tag className="w-5 text-danger" />
-                            <span className="text-danger font-semibold">Offers</span>
-                            <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-danger scale-x-0 group-hover:scale-x-100 transition-all duration-300 origin-left" />
-                        </Link>
-                        <Link
-                            href="/new-arrivals"
-                            className="flex items-center gap-x-2 relative group"
-                        >
-                            <Star className="w-5 text-secondary" />
-                            <span className="text-secondary font-semibold">New Arrivals</span>
-                            <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-secondary scale-x-0 group-hover:scale-x-100 transition-all duration-300 origin-left" />
-                        </Link>
-                        <Link
-                            href="/contact"
-                            className="relative text-heading  font-medium group"
-                        >
-                            Contact
-                            <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-tw-black scale-x-0 group-hover:scale-x-100 transition-all duration-300 origin-left" />
-                        </Link>
-                        <Link
-                            href="/faq"
-                            className="relative text-heading  font-medium group"
-                        >
-                            FAQ
-                            <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-tw-black scale-x-0 group-hover:scale-x-100 transition-all duration-300 origin-left" />
-
-                        </Link>
-                    </div>
-                </motion.div>
-            )}
+            </div>
         </>
     );
 };
