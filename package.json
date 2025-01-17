@@ -28,6 +28,13 @@
     "@radix-ui/react-tooltip": "^1.1.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "embla-carousel-auto-height": "^8.5.2",
+    "embla-carousel-auto-scroll": "^8.5.2",
+    "embla-carousel-autoplay": "^8.5.2",
+    "embla-carousel-class-names": "^8.5.2",
+    "embla-carousel-fade": "^8.5.2",
+    "embla-carousel-react": "^8.5.2",
+    "embla-carousel-wheel-gestures": "^8.0.1",
     "framer-motion": "^11.15.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.469.0",
@@ -39,6 +46,7 @@
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
+    "vaul": "^1.1.2",
     "zod": "^3.24.1"
   },
   "devDependencies": {

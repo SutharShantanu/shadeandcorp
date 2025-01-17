@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet";
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/components/ui/drawer"
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -26,7 +29,14 @@ const menuLinks = [
         label: "Men",
         icon: <User className="w-5 h-5" />,
         subcategories: [
-            "T-Shirts", "Jeans", "Shirts", "Jackets", "Footwear", "Suits", "Activewear", "Accessories"
+            { label: "T-Shirts", href: "/shop/men/t-shirts" },
+            { label: "Jeans", href: "/shop/men/jeans" },
+            { label: "Shirts", href: "/shop/men/shirts" },
+            { label: "Jackets", href: "/shop/men/jackets" },
+            { label: "Footwear", href: "/shop/men/footwear" },
+            { label: "Suits", href: "/shop/men/suits" },
+            { label: "Activewear", href: "/shop/men/activewear" },
+            { label: "Accessories", href: "/shop/men/accessories" }
         ]
     },
     {
@@ -34,7 +44,15 @@ const menuLinks = [
         label: "Women",
         icon: <User className="w-5 h-5" />,
         subcategories: [
-            "Dresses", "Tops", "Skirts", "Jeans", "Shirts", "Sweaters", "Footwear", "Bags", "Jewelry"
+            { label: "Dresses", href: "/shop/women/dresses" },
+            { label: "Tops", href: "/shop/women/tops" },
+            { label: "Skirts", href: "/shop/women/skirts" },
+            { label: "Jeans", href: "/shop/women/jeans" },
+            { label: "Shirts", href: "/shop/women/shirts" },
+            { label: "Sweaters", href: "/shop/women/sweaters" },
+            { label: "Footwear", href: "/shop/women/footwear" },
+            { label: "Bags", href: "/shop/women/bags" },
+            { label: "Jewelry", href: "/shop/women/jewelry" }
         ]
     },
     {
@@ -42,7 +60,14 @@ const menuLinks = [
         label: "Accessories",
         icon: <Heart className="w-5 h-5" />,
         subcategories: [
-            "Watches", "Bags", "Jewelry", "Sunglasses", "Wallets", "Belts", "Hats", "Caps"
+            { label: "Watches", href: "/shop/accessories/watches" },
+            { label: "Bags", href: "/shop/accessories/bags" },
+            { label: "Jewelry", href: "/shop/accessories/jewelry" },
+            { label: "Sunglasses", href: "/shop/accessories/sunglasses" },
+            { label: "Wallets", href: "/shop/accessories/wallets" },
+            { label: "Belts", href: "/shop/accessories/belts" },
+            { label: "Hats", href: "/shop/accessories/hats" },
+            { label: "Caps", href: "/shop/accessories/caps" }
         ]
     },
     {
@@ -50,7 +75,12 @@ const menuLinks = [
         label: "Footwear",
         icon: <ShoppingCart className="w-5 h-5" />,
         subcategories: [
-            "Men's Shoes", "Women's Shoes", "Kids' Shoes", "Sports Shoes", "Boots", "Flip-flops"
+            { label: "Men's Shoes", href: "/shop/footwear/mens" },
+            { label: "Women's Shoes", href: "/shop/footwear/womens" },
+            { label: "Kids' Shoes", href: "/shop/footwear/kids" },
+            { label: "Sports Shoes", href: "/shop/footwear/sports" },
+            { label: "Boots", href: "/shop/footwear/boots" },
+            { label: "Flip-flops", href: "/shop/footwear/flipflops" }
         ]
     },
     {
@@ -105,7 +135,7 @@ const Navbar = () => {
     return (
         <>
             <div
-                className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? "shadow-sm bg-primary-foreground" : "bg-transparent"
+                className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isScrolled ? "shadow-sm border-muted-foreground bg-primary-foreground" : "bg-transparent"
                     }`}
                 role="navigation"
             >
@@ -114,49 +144,22 @@ const Navbar = () => {
                         <div className="text-2xl font-bold text-primary">Shade & Co.</div>
                     </Link>
 
-                    <NavigationMenu className="hidden md:flex">
-                        <NavigationMenuList>
-                            <NavigationMenuItem>
-                                <NavigationMenuTrigger>Shop</NavigationMenuTrigger>
-                                <NavigationMenuContent>
-                                    <ul className="grid grid-cols-2 gap-4 p-4">
-                                        {menuLinks.slice(0, 3).map((link) => (
-                                            <li key={link.href} className="flex items-center gap-x-2">
-                                                {link.icon}
-                                                <NavigationMenuLink asChild>
-                                                    <Link href={link.href} className="text-primary-default hover:text-accent-foreground">
-                                                        {link.label}
-                                                    </Link>
-                                                </NavigationMenuLink>
-                                                <ul className="pl-6 text-sm">
-                                                    {link.subcategories.map((subcategory, index) => (
-                                                        <li key={index} className="text-primary-foreground hover:text-accent-foreground">
-                                                            {subcategory}
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </NavigationMenuContent>
-                            </NavigationMenuItem>
-                            <NavigationMenuItem>
-                                <NavigationMenuTrigger >More</NavigationMenuTrigger>
-                                <NavigationMenuContent >
-                                    <ul className="p-4">
-                                        {menuLinks.slice(3).map((link) => (
-                                            <li key={link.href} className="flex items-center gap-x-2">
-                                                {link.icon}
-                                                <NavigationMenuLink asChild>
-                                                    <Link href={link.href} className="text-primary-default hover:text-accent-foreground">
-                                                        {link.label}
-                                                    </Link>
-                                                </NavigationMenuLink>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </NavigationMenuContent>
-                            </NavigationMenuItem>
+                    <NavigationMenu className="hidden md:flex w-full">
+                        <NavigationMenuList className="">
+                            {menuLinks.map((link) => (
+                                <NavigationMenuItem key={link.href} className="">
+                                    <NavigationMenuTrigger className="">{link.label}</NavigationMenuTrigger>
+                                    <NavigationMenuContent className="">
+                                        <ul className="grid grid-cols-6 gap-4 p-4">
+                                            {link.subcategories && link.subcategories.map((subcategory, index) => (
+                                                <li key={index} className="text-primary-default text-xs hover:border-primary-default border-b border-transparent py-1">
+                                                    <Link href={subcategory.href}>{subcategory.label}</Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </NavigationMenuContent>
+                                </NavigationMenuItem>
+                            ))}
                         </NavigationMenuList>
                     </NavigationMenu>
 
@@ -173,17 +176,17 @@ const Navbar = () => {
                     </div>
 
                     <div className="md:hidden">
-                        <Sheet>
-                            <SheetTrigger>
-                                <Menu className="w-6 h-6 text-primary-foreground hover:text-accent-foreground cursor-pointer" aria-label="Open menu" />
-                            </SheetTrigger>
-                            <SheetContent side="left" className="bg-background">
-                                <SheetHeader>
-                                    <SheetTitle className="text-primary-foreground">Menu</SheetTitle>
-                                </SheetHeader>
+                        <Drawer direction="bottom">
+                            <DrawerTrigger>
+                                <Menu className="w-6 h-6 text-accent-foreground cursor-pointer" aria-label="Open menu" />
+                            </DrawerTrigger>
+                            <DrawerContent side="left" className="bg-primary-foreground">
+                                <DrawerHeader>
+                                    <DrawerTitle className="text-primary-foreground">Menu</DrawerTitle>
+                                </DrawerHeader>
                                 <nav className="flex flex-col gap-y-4 mt-4">
                                     {menuLinks.map((link) => (
-                                        <Link key={link.href} href={link.href} className="text-lg font-medium text-primary-foreground hover:text-accent-foreground">
+                                        <Link key={link.href} href={link.href} className="text-lg font-medium text-primary-default hover:text-accent-foreground">
                                             {link.icon} {link.label}
                                         </Link>
                                     ))}
@@ -197,8 +200,8 @@ const Navbar = () => {
                                         </button>
                                     </div>
                                 </nav>
-                            </SheetContent>
-                        </Sheet>
+                            </DrawerContent>
+                        </Drawer>
                     </div>
                 </div>
             </div>
