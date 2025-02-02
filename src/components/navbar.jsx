@@ -141,7 +141,7 @@ const Navbar = () => {
             >
                 <div className="container mx-auto flex items-center justify-between px-4 py-4">
                     <Link href="/">
-                        <div className="text-2xl font-bold text-primary">Shade & Co.</div>
+                        <div className="text-title text-primary-default font-forum">Shade & Co.</div>
                     </Link>
 
                     <NavigationMenu className="hidden md:flex w-full">
@@ -165,13 +165,13 @@ const Navbar = () => {
 
                     <div className="hidden md:flex items-center gap-x-4">
                         <Link href="/wishlist">
-                            <Heart className="w-6 h-6 text-primary-foreground hover:text-accent-foreground cursor-pointer" aria-label="Wishlist" />
+                            <Heart className="w-6 h-6 text-primary-default cursor-pointer" aria-label="Wishlist" />
                         </Link>
                         <Link href="/cart">
-                            <ShoppingCart className="w-6 h-6 text-primary-foreground hover:text-accent-foreground cursor-pointer" aria-label="Cart" />
+                            <ShoppingCart className="w-6 h-6 text-primary-default cursor-pointer" aria-label="Cart" />
                         </Link>
                         <Link href="/account">
-                            <User className="w-6 h-6 text-primary-foreground hover:text-accent-foreground cursor-pointer" aria-label="Account" />
+                            <User className="w-6 h-6 text-primary-default cursor-pointer" aria-label="Account" />
                         </Link>
                     </div>
 
