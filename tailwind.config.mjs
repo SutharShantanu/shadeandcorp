@@ -19,6 +19,7 @@ const config = {
         },
         background: "#f4f4f4",
         border: "#d1d1d1",
+        separator: "#d1d1d1",
         foreground: "#333333",
         card: {
           default: "#ffffff",

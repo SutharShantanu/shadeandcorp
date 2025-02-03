@@ -20,7 +20,16 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { Menu, Search, ShoppingCart, User, Heart } from "lucide-react";
+import {
+  Menu,
+  Search,
+  ShoppingCart,
+  User,
+  Heart,
+  HelpCircle,
+  RefreshCw,
+  MapPin,
+} from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -34,6 +43,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ShoppingBag, LogOut, Settings } from "lucide-react";
 import { Input } from "./ui/input";
+import Image from "next/image";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 const menuLinks = [
   {
@@ -95,26 +111,26 @@ const menuLinks = [
       { label: "Flip-flops", href: "/shop/footwear/flipflops" },
     ],
   },
-  {
-    href: "/offers",
-    label: "Offers",
-    icon: <Search className="w-5 h-5" />,
-  },
-  {
-    href: "/new-arrivals",
-    label: "New Arrivals",
-    icon: <ShoppingCart className="w-5 h-5" />,
-  },
-  {
-    href: "/contact",
-    label: "Contact",
-    icon: <User className="w-5 h-5" />,
-  },
-  {
-    href: "/faq",
-    label: "FAQ",
-    icon: <Search className="w-5 h-5" />,
-  },
+  //   {
+  //     href: "/offers",
+  //     label: "Offers",
+  //     icon: <Search className="w-5 h-5" />,
+  //   },
+  //   {
+  //     href: "/new-arrivals",
+  //     label: "New Arrivals",
+  //     icon: <ShoppingCart className="w-5 h-5" />,
+  //   },
+  //   {
+  //     href: "/contact",
+  //     label: "Contact",
+  //     icon: <User className="w-5 h-5" />,
+  //   },
+  //   {
+  //     href: "/faq",
+  //     label: "FAQ",
+  //     icon: <Search className="w-5 h-5" />,
+  //   },
 ];
 
 const Navbar = () => {
@@ -175,8 +191,15 @@ const Navbar = () => {
                   <NavigationMenuTrigger className="">
                     {link.label}
                   </NavigationMenuTrigger>
-                  <NavigationMenuContent className="">
-                    <ul className="grid grid-cols-6 gap-4 p-4">
+                  <NavigationMenuContent className="p-4 flex-row rounded-sm">
+                    <Image
+                      src="https://picsum.photos/200/300"
+                      width={500}
+                      height={500}
+                      alt=""
+                      className="w-[300px] max-h-[250px] object-cover rounded-md"
+                    />
+                    <ul className="grid grid-cols-4 gap-4 p-4">
                       {link.subcategories &&
                         link.subcategories.map((subcategory, index) => (
                           <li
@@ -199,13 +222,13 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-x-4">
             {/* Search Bar (Desktop) */}
             <div className="relative">
-              <input
+              <Input
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="px-4 py-2 rounded-full border border-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary-default"
+                className=" rounded-sm border-none outline-none"
               />
               <Search
                 className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground cursor-pointer"
@@ -283,7 +306,7 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full rounded-full border-none"
+                className="w-full rounded-full border-none outline-none"
               />
             </div>
           )}
@@ -295,44 +318,74 @@ const Navbar = () => {
 
 export default Navbar;
 
-// ProfileDropdown Component
+const menuItems = [
+  { label: "Profile", icon: User, link: "/profile" },
+  { label: "Orders", icon: ShoppingBag, link: "/orders" },
+  { label: "Settings", icon: Settings, link: "/settings" },
+  { label: "Help & Support", icon: HelpCircle, link: "/help" },
+  { label: "Returns & Exchanges", icon: RefreshCw, link: "/returns" },
+  { label: "Track Order", icon: MapPin, link: "/track-order" },
+];
+
 const ProfileDropdown = () => {
   return (
-    <DropdownMenu>
+    <DropdownMenu className="bg-primary-foreground relative">
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src="/path/to/user-avatar.png" alt="User Avatar" />
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar>
-        </Button>
+        <Avatar className="h-8 w-8 select-none bg-primary-foreground border-muted-foreground cursor-pointer">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <AvatarImage
+                  src="https://picsum.photos/150/150"
+                  alt="User Avatar"
+                />
+                <AvatarFallback className="text-primary-default text-subheading">
+                  U
+                </AvatarFallback>
+              </TooltipTrigger>
+              <TooltipContent>User Name</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">John Doe</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              john.doe@example.com
-            </p>
+      <DropdownMenuContent
+        className="w-56 bg-primary-foreground p-0"
+        align="end"
+        forceMount
+      >
+        <DropdownMenuLabel className="font-normal rounded-md select-none mb-0">
+          <div className="flex flex-row">
+            <Avatar className="select-none bg-primary-foreground mr-3">
+              <AvatarImage
+                src="https://picsum.photos/150/150"
+                alt="User Avatar"
+              />
+              <AvatarFallback className="text-primary-default text-subheading">
+                U
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col justify-around">
+              <p className="text-sm font-medium leading-none">John Doe</p>
+              <p className="text-xs leading-none text-muted-foreground">
+                john.doe@example.com
+              </p>
+            </div>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User className="mr-2 h-4 w-4" />
-          <span>Profile</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <ShoppingBag className="mr-2 h-4 w-4" />
-          <span>Orders</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+        <DropdownMenuSeparator className="bg-separator mt-0" />
+        {menuItems.map((item, index) => (
+          <Link href={item.link} key={index}>
+            <DropdownMenuItem className="flex items-center gap-x-2 p-2 hover:bg-primary-default cursor-pointer group transition-all ease-in-out m-1">
+              <item.icon className="h-4 w-4 group-hover:text-primary-foreground" />
+              <span className="group-hover:text-primary-foreground">
+                {item.label}
+              </span>
+            </DropdownMenuItem>
+          </Link>
+        ))}
+        <DropdownMenuItem className="text-destructive-default m-1 cursor-pointer hover:bg-destructive-default group transition-all ease-in-out">
+          <LogOut className="mr-2 h-4 w-4 group-hover:text-primary-foreground" />
+          <span className="group-hover:text-primary-foreground">Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
