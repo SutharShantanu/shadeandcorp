@@ -34,7 +34,7 @@ const config = {
           foreground: "#666666",
         },
         accent: {
-          default: "#4b8e8d",
+          default: "#fb6900",
           foreground: "#2d2d2d",
         },
         destructive: {

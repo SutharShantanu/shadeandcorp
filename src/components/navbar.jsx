@@ -29,6 +29,8 @@ import {
   HelpCircle,
   RefreshCw,
   MapPin,
+  ArrowUpRight,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -53,84 +55,355 @@ import {
 
 const menuLinks = [
   {
-    href: "/shop/men",
-    label: "Men",
-    icon: <User className="w-5 h-5" />,
-    subcategories: [
-      { label: "T-Shirts", href: "/shop/men/t-shirts" },
-      { label: "Jeans", href: "/shop/men/jeans" },
-      { label: "Shirts", href: "/shop/men/shirts" },
-      { label: "Jackets", href: "/shop/men/jackets" },
-      { label: "Footwear", href: "/shop/men/footwear" },
-      { label: "Suits", href: "/shop/men/suits" },
-      { label: "Activewear", href: "/shop/men/activewear" },
-      { label: "Accessories", href: "/shop/men/accessories" },
+    name: "Men",
+    href: "/Men",
+    images: ["men1.jpg", "men2.jpg", "men3.jpg"],
+    categories: [
+      {
+        name: "Topwear",
+        href: "/men/topwear",
+        subcategories: [
+          { name: "T-Shirts", href: "/men/topwear/t-shirts" },
+          { name: "Casual Shirts", href: "/men/topwear/casual-shirts" },
+          { name: "Formal Shirts", href: "/men/topwear/formal-shirts" },
+          { name: "Sweatshirts", href: "/men/topwear/sweatshirts" },
+          { name: "Sweaters", href: "/men/topwear/sweaters" },
+          { name: "Jackets", href: "/men/topwear/jackets" },
+          { name: "Blazers & Coats", href: "/men/topwear/blazers-coats" },
+          { name: "Suits", href: "/men/topwear/suits" },
+          { name: "Rain Jackets", href: "/men/topwear/rain-jackets" },
+        ],
+      },
+      {
+        name: "Bottomwear",
+        href: "/men/bottomwear",
+        subcategories: [
+          { name: "Jeans", href: "/men/bottomwear/jeans" },
+          { name: "Casual Trousers", href: "/men/bottomwear/casual-trousers" },
+          { name: "Formal Trousers", href: "/men/bottomwear/formal-trousers" },
+          { name: "Shorts", href: "/men/bottomwear/shorts" },
+          {
+            name: "Track Pants & Joggers",
+            href: "/men/bottomwear/track-pants-joggers",
+          },
+        ],
+      },
+      {
+        name: "Sportswear",
+        href: "/men/sportswear",
+        subcategories: [
+          { name: "Activewear", href: "/men/sportswear/activewear" },
+          { name: "Gym Apparel", href: "/men/sportswear/gym-apparel" },
+          { name: "Sports T-Shirts", href: "/men/sportswear/sports-t-shirts" },
+          { name: "Track Pants", href: "/men/sportswear/track-pants" },
+          { name: "Gym Shorts", href: "/men/sportswear/gym-shorts" },
+          { name: "Running Shoes", href: "/men/sportswear/running-shoes" },
+        ],
+      },
+      {
+        name: "Winterwear",
+        href: "/men/winterwear",
+        subcategories: [
+          { name: "Jackets", href: "/men/winterwear/jackets" },
+          { name: "Hoodies", href: "/men/winterwear/hoodies" },
+          { name: "Sweaters", href: "/men/winterwear/sweaters" },
+          { name: "Thermal Wear", href: "/men/winterwear/thermal-wear" },
+          { name: "Woolen Coats", href: "/men/winterwear/woolen-coats" },
+          { name: "Puffer Jackets", href: "/men/winterwear/puffer-jackets" },
+          { name: "Cardigans", href: "/men/winterwear/cardigans" },
+        ],
+      },
+      {
+        name: "Swimwear",
+        href: "/men/swimwear",
+        subcategories: [
+          { name: "Swim Trunks", href: "/men/swimwear/swim-trunks" },
+          { name: "Board Shorts", href: "/men/swimwear/board-shorts" },
+          { name: "Rash Guards", href: "/men/swimwear/rash-guards" },
+        ],
+      },
+      {
+        name: "Sleepwear",
+        href: "/men/sleepwear",
+        subcategories: [
+          { name: "Pajamas", href: "/men/sleepwear/pajamas" },
+          { name: "Night Suits", href: "/men/sleepwear/night-suits" },
+          { name: "Sleep Shorts", href: "/men/sleepwear/sleep-shorts" },
+          { name: "Lounge Pants", href: "/men/sleepwear/lounge-pants" },
+        ],
+      },
+      {
+        name: "Footwear",
+        href: "/men/footwear",
+        subcategories: [
+          { name: "Casual Shoes", href: "/men/footwear/casual-shoes" },
+          { name: "Sports Shoes", href: "/men/footwear/sports-shoes" },
+          { name: "Formal Shoes", href: "/men/footwear/formal-shoes" },
+          { name: "Sneakers", href: "/men/footwear/sneakers" },
+          {
+            name: "Sandals & Floaters",
+            href: "/men/footwear/sandals-floaters",
+          },
+          { name: "Flip Flops", href: "/men/footwear/flip-flops" },
+          { name: "Socks", href: "/men/footwear/socks" },
+        ],
+      },
+      {
+        name: "Sports Footwear",
+        href: "/men/sports-footwear",
+        subcategories: [
+          { name: "Running Shoes", href: "/men/sports-footwear/running-shoes" },
+          {
+            name: "Training Shoes",
+            href: "/men/sports-footwear/training-shoes",
+          },
+          {
+            name: "Basketball Shoes",
+            href: "/men/sports-footwear/basketball-shoes",
+          },
+          { name: "Hiking Boots", href: "/men/sports-footwear/hiking-boots" },
+          {
+            name: "Football Cleats",
+            href: "/men/sports-footwear/football-cleats",
+          },
+        ],
+      },
+      {
+        name: "Casual Footwear",
+        href: "/men/casual-footwear",
+        subcategories: [
+          { name: "Loafers", href: "/men/casual-footwear/loafers" },
+          { name: "Moccasins", href: "/men/casual-footwear/moccasins" },
+          { name: "Espadrilles", href: "/men/casual-footwear/espadrilles" },
+          { name: "Slip-Ons", href: "/men/casual-footwear/slip-ons" },
+          { name: "Casual Boots", href: "/men/casual-footwear/casual-boots" },
+          { name: "Boat Shoes", href: "/men/casual-footwear/boat-shoes" },
+        ],
+      },
+      {
+        name: "Rainwear Footwear",
+        href: "/men/rainwear-footwear",
+        subcategories: [
+          {
+            name: "Waterproof Boots",
+            href: "/men/rainwear-footwear/waterproof-boots",
+          },
+          {
+            name: "Rubber Sandals",
+            href: "/men/rainwear-footwear/rubber-sandals",
+          },
+          { name: "Rain Shoes", href: "/men/rainwear-footwear/rain-shoes" },
+        ],
+      },
+      {
+        name: "Fragrances",
+        href: "/men/fragrances",
+        subcategories: [
+          { name: "Perfumes", href: "/men/fragrances/perfumes" },
+          { name: "Body Sprays", href: "/men/fragrances/body-sprays" },
+          { name: "Deodorants", href: "/men/fragrances/deodorants" },
+          { name: "Aftershave", href: "/men/fragrances/aftershave" },
+          { name: "Cologne", href: "/men/fragrances/cologne" },
+        ],
+      },
+      {
+        name: "Watches",
+        href: "/men/watches",
+        subcategories: [
+          { name: "Smart Watches", href: "/men/watches/smart-watches" },
+          { name: "Analog Watches", href: "/men/watches/analog-watches" },
+          { name: "Digital Watches", href: "/men/watches/digital-watches" },
+        ],
+      },
+      {
+        name: "Grooming",
+        href: "/men/grooming",
+        subcategories: [
+          { name: "Shaving Kits", href: "/men/grooming/shaving-kits" },
+          { name: "Beard Oils", href: "/men/grooming/beard-oils" },
+          { name: "Beard Balms", href: "/men/grooming/beard-balms" },
+          { name: "Trimmers", href: "/men/grooming/trimmers" },
+          { name: "Aftershave Balms", href: "/men/grooming/aftershave-balms" },
+        ],
+      },
     ],
   },
   {
-    href: "/shop/women",
-    label: "Women",
-    icon: <User className="w-5 h-5" />,
-    subcategories: [
-      { label: "Dresses", href: "/shop/women/dresses" },
-      { label: "Tops", href: "/shop/women/tops" },
-      { label: "Skirts", href: "/shop/women/skirts" },
-      { label: "Jeans", href: "/shop/women/jeans" },
-      { label: "Shirts", href: "/shop/women/shirts" },
-      { label: "Sweaters", href: "/shop/women/sweaters" },
-      { label: "Footwear", href: "/shop/women/footwear" },
-      { label: "Bags", href: "/shop/women/bags" },
-      { label: "Jewelry", href: "/shop/women/jewelry" },
+    name: "Women",
+    href: "/Women",
+    images: ["women1.jpg", "women2.jpg", "women3.jpg"],
+    categories: [
+      {
+        name: "Topwear",
+        href: "/women/topwear",
+        subcategories: [
+          { name: "Kurtis", href: "/women/topwear/kurtis" },
+          { name: "Tops", href: "/women/topwear/tops" },
+          { name: "Blouses", href: "/women/topwear/blouses" },
+          { name: "Sweaters", href: "/women/topwear/sweaters" },
+          { name: "Shirts", href: "/women/topwear/shirts" },
+          { name: "Tunics", href: "/women/topwear/tunics" },
+          { name: "Tees", href: "/women/topwear/tees" },
+        ],
+      },
+      {
+        name: "Bottomwear",
+        href: "/women/bottomwear",
+        subcategories: [
+          { name: "Jeans", href: "/women/bottomwear/jeans" },
+          { name: "Trousers", href: "/women/bottomwear/trousers" },
+          { name: "Leggings", href: "/women/bottomwear/leggings" },
+          { name: "Palazzos", href: "/women/bottomwear/palazzos" },
+          { name: "Skirts", href: "/women/bottomwear/skirts" },
+          { name: "Shorts", href: "/women/bottomwear/shorts" },
+        ],
+      },
+      {
+        name: "Activewear",
+        href: "/women/activewear",
+        subcategories: [
+          { name: "Sports Bras", href: "/women/activewear/sports-bras" },
+          { name: "Running Shoes", href: "/women/activewear/running-shoes" },
+          { name: "Leggings", href: "/women/activewear/leggings" },
+          { name: "Tank Tops", href: "/women/activewear/tank-tops" },
+          { name: "Workout Tops", href: "/women/activewear/workout-tops" },
+          { name: "Gym Shorts", href: "/women/activewear/gym-shorts" },
+        ],
+      },
+      {
+        name: "Winterwear",
+        href: "/women/winterwear",
+        subcategories: [
+          { name: "Sweaters", href: "/women/winterwear/sweaters" },
+          { name: "Cardigans", href: "/women/winterwear/cardigans" },
+          { name: "Woolen Coats", href: "/women/winterwear/woolen-coats" },
+          { name: "Puffer Jackets", href: "/women/winterwear/puffer-jackets" },
+          { name: "Jackets", href: "/women/winterwear/jackets" },
+          { name: "Fleece Wear", href: "/women/winterwear/fleece-wear" },
+        ],
+      },
+      {
+        name: "Sleepwear",
+        href: "/women/sleepwear",
+        subcategories: [
+          { name: "Night Suits", href: "/women/sleepwear/night-suits" },
+          { name: "Pajamas", href: "/women/sleepwear/pajamas" },
+          { name: "Night Gowns", href: "/women/sleepwear/night-gowns" },
+          { name: "Robes", href: "/women/sleepwear/robes" },
+          { name: "Sleep Shorts", href: "/women/sleepwear/sleep-shorts" },
+          { name: "Lingerie Sets", href: "/women/sleepwear/lingerie-sets" },
+        ],
+      },
+      {
+        name: "Swimwear",
+        href: "/women/swimwear",
+        subcategories: [
+          { name: "Bikinis", href: "/women/swimwear/bikinis" },
+          {
+            name: "One-Piece Swimsuits",
+            href: "/women/swimwear/one-piece-swimsuits",
+          },
+          { name: "Cover-Ups", href: "/women/swimwear/cover-ups" },
+          { name: "Rash Guards", href: "/women/swimwear/rash-guards" },
+        ],
+      },
+      {
+        name: "Footwear",
+        href: "/women/footwear",
+        subcategories: [
+          { name: "Casual Shoes", href: "/women/footwear/casual-shoes" },
+          { name: "Flats", href: "/women/footwear/flats" },
+          { name: "Heels", href: "/women/footwear/heels" },
+          { name: "Boots", href: "/women/footwear/boots" },
+          { name: "Sandals", href: "/women/footwear/sandals" },
+          { name: "Sneakers", href: "/women/footwear/sneakers" },
+        ],
+      },
+      {
+        name: "Sports Footwear",
+        href: "/women/sports-footwear",
+        subcategories: [
+          {
+            name: "Running Shoes",
+            href: "/women/sports-footwear/running-shoes",
+          },
+          {
+            name: "Training Shoes",
+            href: "/women/sports-footwear/training-shoes",
+          },
+          { name: "Hiking Boots", href: "/women/sports-footwear/hiking-boots" },
+          {
+            name: "Football Cleats",
+            href: "/women/sports-footwear/football-cleats",
+          },
+        ],
+      },
+      {
+        name: "Casual Footwear",
+        href: "/women/casual-footwear",
+        subcategories: [
+          { name: "Loafers", href: "/women/casual-footwear/loafers" },
+          { name: "Flats", href: "/women/casual-footwear/flats" },
+          { name: "Slip-Ons", href: "/women/casual-footwear/slip-ons" },
+          { name: "Espadrilles", href: "/women/casual-footwear/espadrilles" },
+          { name: "Casual Boots", href: "/women/casual-footwear/casual-boots" },
+        ],
+      },
+      {
+        name: "Rainwear Footwear",
+        href: "/women/rainwear-footwear",
+        subcategories: [
+          {
+            name: "Waterproof Boots",
+            href: "/women/rainwear-footwear/waterproof-boots",
+          },
+          { name: "Rain Shoes", href: "/women/rainwear-footwear/rain-shoes" },
+          { name: "Flip Flops", href: "/women/rainwear-footwear/flip-flops" },
+        ],
+      },
+      {
+        name: "Fragrances",
+        href: "/women/fragrances",
+        subcategories: [
+          { name: "Perfumes", href: "/women/fragrances/perfumes" },
+          { name: "Body Sprays", href: "/women/fragrances/body-sprays" },
+          { name: "Deodorants", href: "/women/fragrances/deodorants" },
+          { name: "Cologne", href: "/women/fragrances/cologne" },
+        ],
+      },
+      {
+        name: "Watches",
+        href: "/women/watches",
+        subcategories: [
+          { name: "Smart Watches", href: "/women/watches/smart-watches" },
+          { name: "Analog Watches", href: "/women/watches/analog-watches" },
+          { name: "Digital Watches", href: "/women/watches/digital-watches" },
+        ],
+      },
+      {
+        name: "Grooming",
+        href: "/women/grooming",
+        subcategories: [
+          { name: "Makeup", href: "/women/grooming/makeup" },
+          { name: "Face Creams", href: "/women/grooming/face-creams" },
+          { name: "Shampoos", href: "/women/grooming/shampoos" },
+          { name: "Hair Oils", href: "/women/grooming/hair-oils" },
+          { name: "Conditioners", href: "/women/grooming/conditioners" },
+          { name: "Face Wash", href: "/women/grooming/face-wash" },
+        ],
+      },
+      {
+        name: "Hair Accessories",
+        href: "/women/hair-accessories",
+        subcategories: [
+          { name: "Hair Bands", href: "/women/hair-accessories/hair-bands" },
+          { name: "Bobby Pins", href: "/women/hair-accessories/bobby-pins" },
+          { name: "Clips", href: "/women/hair-accessories/clips" },
+          { name: "Combs", href: "/women/hair-accessories/combs" },
+        ],
+      },
     ],
   },
-  {
-    href: "/shop/accessories",
-    label: "Accessories",
-    icon: <Heart className="w-5 h-5" />,
-    subcategories: [
-      { label: "Watches", href: "/shop/accessories/watches" },
-      { label: "Bags", href: "/shop/accessories/bags" },
-      { label: "Jewelry", href: "/shop/accessories/jewelry" },
-      { label: "Sunglasses", href: "/shop/accessories/sunglasses" },
-      { label: "Wallets", href: "/shop/accessories/wallets" },
-      { label: "Belts", href: "/shop/accessories/belts" },
-      { label: "Hats", href: "/shop/accessories/hats" },
-      { label: "Caps", href: "/shop/accessories/caps" },
-    ],
-  },
-  {
-    href: "/shop/footwear",
-    label: "Footwear",
-    icon: <ShoppingCart className="w-5 h-5" />,
-    subcategories: [
-      { label: "Men's Shoes", href: "/shop/footwear/mens" },
-      { label: "Women's Shoes", href: "/shop/footwear/womens" },
-      { label: "Kids' Shoes", href: "/shop/footwear/kids" },
-      { label: "Sports Shoes", href: "/shop/footwear/sports" },
-      { label: "Boots", href: "/shop/footwear/boots" },
-      { label: "Flip-flops", href: "/shop/footwear/flipflops" },
-    ],
-  },
-  //   {
-  //     href: "/offers",
-  //     label: "Offers",
-  //     icon: <Search className="w-5 h-5" />,
-  //   },
-  //   {
-  //     href: "/new-arrivals",
-  //     label: "New Arrivals",
-  //     icon: <ShoppingCart className="w-5 h-5" />,
-  //   },
-  //   {
-  //     href: "/contact",
-  //     label: "Contact",
-  //     icon: <User className="w-5 h-5" />,
-  //   },
-  //   {
-  //     href: "/faq",
-  //     label: "FAQ",
-  //     icon: <Search className="w-5 h-5" />,
-  //   },
 ];
 
 const Navbar = () => {
@@ -182,32 +455,55 @@ const Navbar = () => {
               Shade & Co.
             </div>
           </Link>
-
-          {/* Desktop Navigation */}
           <NavigationMenu className="hidden md:flex w-full">
             <NavigationMenuList className="">
-              {menuLinks.map((link) => (
-                <NavigationMenuItem key={link.href} className="">
+              {menuLinks.map((item) => (
+                <NavigationMenuItem key={item.href} className="">
                   <NavigationMenuTrigger className="">
-                    {link.label}
+                    {item.name}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="p-4 flex-row flex justify-between rounded-sm">
-                    <Image
-                      src="https://picsum.photos/200/300"
-                      width={500}
-                      height={500}
-                      alt=""
-                      className="w-[300px] max-h-[250px] object-cover rounded-md"
-                    />
-                    <ul className="grid grid-cols-4 gap-4 p-4">
-                      {link.subcategories &&
-                        link.subcategories.map((subcategory, index) => (
+                    <div className="w-[300px] max-h-[250px]">
+                      {/* {item.images &&
+                        item.images.map((image, index) => (
+                          <Image
+                            key={`${image.href}-image-${index}`}
+                            src={image}
+                            width={500}
+                            height={500}
+                            alt={image.label}
+                            className="w-full h-full object-cover rounded-md"
+                          />
+                        ))} */}
+                    </div>
+                    <ul className="grid grid-cols-6 gap-4 p-4 divide-2">
+                      {item.categories &&
+                        item.categories.map((items, index) => (
                           <li
-                            key={index}
-                            className="text-primary-default text-xs hover:border-primary-default border-b border-transparent py-1"
+                            key={`${items.href}-subcategory-${index}`}
+                            className="text-primary-default text-xs py-1 group"
                           >
-                            <Link href={subcategory.href}>
-                              {subcategory.label}
+                            <Link href={items.href}>
+                              <span className="text-accent-default hover:underline underline-offset-2 rounded-md group-hover:bg-accent-default group-hover:text-primary-foreground transition-all ease-in-out px-2 py-1 whitespace-nowrap">
+                                {items.name}
+                              </span>{" "}
+                              <ul className="pl-2 my-1">
+                                {items.subcategories &&
+                                  items.subcategories.map(
+                                    (subitem, subIndex) => (
+                                      <li
+                                        key={subIndex}
+                                        className="text-muted-foreground text-xs hover:border-muted-foreground py-1 hover:pl-2 transition-all ease-in-out"
+                                      >
+                                        <Link href={subitem.href}>
+                                          <span className="text-muted-foreground flex items-center whitespace-nowrap">
+                                            {subitem.name}
+                                          </span>
+                                        </Link>
+                                      </li>
+                                    )
+                                  )}
+                              </ul>
                             </Link>
                           </li>
                         ))}
