@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Separator } from "@/components/ui/separator";
 import {
   Drawer,
   DrawerClose,
@@ -29,8 +30,8 @@ import {
   HelpCircle,
   RefreshCw,
   MapPin,
-  ArrowUpRight,
-  ArrowRight,
+  X,
+  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -52,6 +53,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
+import { ScrollArea } from "./ui/scroll-area";
 
 const menuLinks = [
   {
@@ -409,8 +411,14 @@ const menuLinks = [
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchVisible, setIsSearchVisible] = useState(false); // For mobile search bar
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [openCategory, setOpenCategory] = useState(null);
   const router = useRouter();
+  const currentYear = new Date().getFullYear();
+
+  const toggleCategory = (category) => {
+    setOpenCategory(openCategory === category ? null : category);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -448,7 +456,7 @@ const Navbar = () => {
         }`}
         role="navigation"
       >
-        <div className="container mx-auto flex items-center justify-between py-4">
+        <div className="container mx-auto flex items-center justify-between py-4 px-4 md:px-2 lg:px-0">
           {/* Logo */}
           <Link href="/">
             <div className="text-title text-primary-default font-forum whitespace-nowrap">
@@ -479,6 +487,7 @@ const Navbar = () => {
                     <ul className="grid grid-cols-6 gap-4 p-4 divide-2">
                       {item.categories &&
                         item.categories.map((items, index) => (
+                          // <NavigationMenuLink asChild>
                           <li
                             key={`${items.href}-subcategory-${index}`}
                             className="text-primary-default text-xs py-1 group"
@@ -506,6 +515,7 @@ const Navbar = () => {
                               </ul>
                             </Link>
                           </li>
+                          // </NavigationMenuLink>
                         ))}
                     </ul>
                   </NavigationMenuContent>
@@ -514,7 +524,6 @@ const Navbar = () => {
             </NavigationMenuList>
           </NavigationMenu>
 
-          {/* Desktop Icons (Wishlist, Cart, Profile Dropdown) */}
           <div className="hidden md:flex items-center gap-x-4">
             {/* Search Bar (Desktop) */}
             <div className="relative">
@@ -547,7 +556,6 @@ const Navbar = () => {
             <ProfileDropdown />
           </div>
 
-          {/* Mobile Menu */}
           <div className="md:hidden flex items-center gap-x-4">
             {/* Search Icon (Mobile) */}
             <Search
@@ -555,7 +563,6 @@ const Navbar = () => {
               onClick={toggleSearch}
             />
 
-            {/* Hamburger Menu */}
             <Drawer direction="bottom">
               <DrawerTrigger>
                 <Menu
@@ -563,32 +570,88 @@ const Navbar = () => {
                   aria-label="Open menu"
                 />
               </DrawerTrigger>
-              <DrawerContent side="left" className="bg-primary-foreground">
+              <DrawerContent
+                side="left"
+                className="bg-primary-foreground p-4 border border-red-500"
+              >
                 <DrawerHeader>
-                  <DrawerTitle className="text-primary-foreground">
+                  <DrawerTitle className="text-primary-default">
                     Menu
                   </DrawerTitle>
-                </DrawerHeader>
-                <nav className="flex flex-col gap-y-4 mt-4">
-                  {menuLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="text-lg font-medium text-primary-default hover:text-accent-foreground"
-                    >
-                      {link.icon} {link.label}
-                    </Link>
-                  ))}
-                  <div className="mt-4">
-                    <Button
-                      className="absolute top-4 right-4 text-primary-foreground"
-                      onClick={() => document.activeElement.blur()}
-                      aria-label="Close menu"
-                    >
-                      ✕
+                  <DrawerClose>
+                    <Button size="icon">
+                      <X />
                     </Button>
-                  </div>
-                </nav>
+                  </DrawerClose>
+                </DrawerHeader>
+
+                <ScrollArea className="max-h-[400px] overflow-y-auto">
+                  {menuLinks.map((item) => (
+                    <div key={item.name} className="border-b border-gray-300">
+                      {/* Title & Chevron */}
+                      <div className="flex justify-between items-center py-2">
+                        <Link
+                          href={item.href}
+                          className="text-lg font-semibold text-primary-default"
+                        >
+                          {item.name}
+                        </Link>
+                        {item.categories && (
+                          <button
+                            onClick={() => toggleCategory(item.name)}
+                            className="p-1 rounded-md hover:bg-gray-200 transition"
+                          >
+                            <ChevronDown
+                              className={`w-5 h-5 transition-all ease-in-out ${
+                                openCategory === item.name
+                                  ? "rotate-180"
+                                  : "rotate-0"
+                              }`}
+                            />
+                          </button>
+                        )}
+                      </div>
+                      <Separator />
+                      {openCategory === item.name && item.categories && (
+                        <ul className="pl-4 space-y-1">
+                          {item.categories.map((subItem, index) => (
+                            <li
+                              key={index}
+                              className="text-muted-foreground text-sm py-1"
+                            >
+                              <Link
+                                href={subItem.href}
+                                className="hover:text-primary-default transition-all ease-in-out"
+                              >
+                                {subItem.name}
+                              </Link>
+                              {/* Sub-subcategories */}
+                              {subItem.subcategories && (
+                                <ul className="pl-4 mt-1 space-y-1">
+                                  {subItem.subcategories.map(
+                                    (subSubItem, subIndex) => (
+                                      <li
+                                        key={subIndex}
+                                        className="text-xs text-muted-foreground hover:pl-2 transition-all ease-in-out"
+                                      >
+                                        <Link href={subSubItem.href}>
+                                          {subSubItem.name}
+                                        </Link>
+                                      </li>
+                                    )
+                                  )}
+                                </ul>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </ScrollArea>
+                <DrawerFooter className="space-y-2">
+                  © {currentYear} Shade and Crop. All rights reserved.
+                </DrawerFooter>
               </DrawerContent>
             </Drawer>
           </div>

@@ -141,6 +141,8 @@ const Footer = () => {
     },
   ];
 
+  const currentYear = new Date().getFullYear();
+
   return (
     <motion.footer
       initial="hidden"
@@ -214,7 +216,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
-          <p>© 2024 Shade and Crop. All rights reserved.</p>
+          <p>© {currentYear} Shade and Crop. All rights reserved.</p>
         </div>
       </div>
     </motion.footer>
