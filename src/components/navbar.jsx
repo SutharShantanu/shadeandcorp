@@ -191,7 +191,7 @@ const Navbar = () => {
                   <NavigationMenuTrigger className="">
                     {link.label}
                   </NavigationMenuTrigger>
-                  <NavigationMenuContent className="p-4 flex-row rounded-sm">
+                  <NavigationMenuContent className="p-4 flex-row flex justify-between rounded-sm">
                     <Image
                       src="https://picsum.photos/200/300"
                       width={500}
