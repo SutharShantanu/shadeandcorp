@@ -1,7 +1,7 @@
 "use client";
 
 
-import Homepage from '@/app/homepage/homepage';
+import Homepage from '@/app/homepage/page';
 import React from 'react';
 
 export default function Home () {
