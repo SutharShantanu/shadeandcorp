@@ -46,7 +46,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ShoppingBag, LogOut, Settings } from "lucide-react";
 import { Input } from "./ui/input";
-import Image from "next/image";
 import {
   Tooltip,
   TooltipContent,
@@ -588,7 +587,6 @@ const Navbar = () => {
                 <ScrollArea className="max-h-[400px] overflow-y-auto">
                   {menuLinks.map((item) => (
                     <div key={item.name} className="border-b border-gray-300">
-                      {/* Title & Chevron */}
                       <div className="flex justify-between items-center py-2">
                         <Link
                           href={item.href}
@@ -625,7 +623,6 @@ const Navbar = () => {
                               >
                                 {subItem.name}
                               </Link>
-                              {/* Sub-subcategories */}
                               {subItem.subcategories && (
                                 <ul className="pl-4 mt-1 space-y-1">
                                   {subItem.subcategories.map(
@@ -656,7 +653,6 @@ const Navbar = () => {
             </Drawer>
           </div>
 
-          {/* Mobile Search Bar (Conditional Rendering) */}
           {isSearchVisible && (
             <div className="md:hidden absolute top-16 left-0 w-full">
               <Input
