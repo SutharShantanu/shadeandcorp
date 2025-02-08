@@ -17,13 +17,14 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
+import { motion } from "framer-motion";
 
 const signupSchema = z
   .object({
     firstName: z.string().min(2, "First name is required"),
     lastName: z.string().optional(),
     email: z.string().email("Invalid email address"),
-    phone: z.string().min(10, "Phone number is required"),
+    phone: z.string().min(10, "Phone number is required").regex(/^\d{10,15}$/, "Invalid phone number"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Password confirmation is required"),
     terms: z.literal(true, { errorMap: () => ({ message: "You must accept the terms and conditions" }) }),
@@ -41,7 +42,12 @@ const FormInput = ({ name, label, type, placeholder, control, Component = Input 
       <FormItem>
         <FormLabel>{label}</FormLabel>
         <FormControl>
-          <Component type={type} placeholder={placeholder} {...field} />
+          <motion.div
+            whileFocus={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Component type={type} placeholder={placeholder} {...field} />
+          </motion.div>
         </FormControl>
         <FormMessage />
       </FormItem>
@@ -58,7 +64,12 @@ const PasswordField = ({ name, label, control }) => {
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <PasswordInput {...field} />
+            <motion.div
+              whileFocus={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <PasswordInput {...field} />
+            </motion.div>
           </FormControl>
           <FormMessage />
         </FormItem>
@@ -96,16 +107,31 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center">
-      <div className="w-full max-w-sm md:max-w-3xl lg:max-w-6xl bg-primary-foreground rounded-md border-border shadow-md grid md:grid-cols-2">
+    <motion.div
+      className="flex min-h-svh flex-col items-center justify-center"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
+      <motion.div
+        className="w-full max-w-sm md:max-w-3xl lg:max-w-6xl bg-primary-foreground rounded-md border-border shadow-md grid md:grid-cols-2"
+        initial={{ y: 50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
         <Card className="overflow-hidden border-none shadow-none p-8">
           <CardContent className="p-0">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-                <div className="flex flex-col items-center text-center my-4">
+                <motion.div
+                  className="flex flex-col items-center text-center my-4"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
                   <h1 className="font-forum text-heading">Join Shade & Co.</h1>
                   <p className="text-muted-foreground">Create an account to start shopping the latest fashion trends</p>
-                </div>
+                </motion.div>
                 <Separator />
                 <div className="flex flex-col gap-y-3 justify-between">
                   <div className="flex items-center gap-2 w-full">
@@ -145,7 +171,8 @@ const Signup = () => {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full bg-primary-default text-primary-foreground rounded-md hover:bg-primary-default/80" disabled={loading}>
+                <Button type="submit" className="w-full bg-primary-default text-primary-foreground rounded-md hover:bg-primary-default/80" disabled={loading} aria-busy={loading}
+                  aria-disabled={loading}>
                   {loading ? (
                     <>
                       <span>Signing Up...</span>
@@ -189,8 +216,8 @@ const Signup = () => {
         <div className="relative hidden bg-muted md:block rounded-tr-lg rounded-br-lg">
           <Image src="https://picsum.photos/2000/2000" alt="Image" width={500} height={500} className="absolute inset-0 h-full w-full object-cover rounded-tr-lg rounded-br-lg dark:brightness-[0.2] dark:grayscale" />
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
