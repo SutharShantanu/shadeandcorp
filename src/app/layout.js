@@ -4,6 +4,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import Loading from "@/components/loading";
 import { Suspense } from "react";
+import { Toaster } from "@/components/ui/sonner";
 
 const forum = Forum({ weight: "400", subsets: ["latin"] });
 const workSans = Work_Sans({ weight: "400", subsets: ["latin"] });
@@ -20,6 +21,7 @@ export default function RootLayout({ children }) {
         <Suspense fallback={<Loading />}>
           <Navbar />
           {children}
+          <Toaster richColors position="bottom-right" />
           <Footer />
         </Suspense>
       </body>
