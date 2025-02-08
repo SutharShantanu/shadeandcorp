@@ -143,8 +143,8 @@ const Signup = () => {
                     <FormInput name="phone" label="Phone Number" control={form.control} Component={PhoneInput} />
                   </div>
                   <div className="flex items-center gap-2 mb-8">
-                    <PasswordField name="password" label="Password" control={form.control} Component={PasswordInput} />
-                    <PasswordField name="confirmPassword" label="Confirm Password" control={form.control} Component={PasswordInput} />
+                    <PasswordField name="password" label="Password" placeholder="******" control={form.control} Component={PasswordInput} />
+                    <PasswordField name="confirmPassword" label="Confirm Password" placeholder="******" control={form.control} Component={PasswordInput} />
                   </div>
                 </div>
                 <FormField
