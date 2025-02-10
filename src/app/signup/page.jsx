@@ -24,7 +24,7 @@ const signupSchema = z
     firstName: z.string().min(2, "First name is required"),
     lastName: z.string().optional(),
     email: z.string().email("Invalid email address"),
-    phone: z.string().min(10, "Phone number is required").regex(/^\d{10,15}$/, "Invalid phone number"),
+    phone: z.string().min(10, "Phone number is required"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Password confirmation is required"),
     terms: z.literal(true, { errorMap: () => ({ message: "You must accept the terms and conditions" }) }),
