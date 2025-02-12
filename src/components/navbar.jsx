@@ -1,13 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "./ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Input } from "./ui/input";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback
+} from "@/components/ui/avatar";
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
@@ -17,7 +26,6 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
@@ -32,10 +40,10 @@ import {
   MapPin,
   X,
   ChevronDown,
+  ShoppingBag,
+  LogOut,
+  Settings
 } from "lucide-react";
-import Link from "next/link";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -44,15 +52,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { ShoppingBag, LogOut, Settings } from "lucide-react";
-import { Input } from "./ui/input";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import { ScrollArea } from "./ui/scroll-area";
 
 const menuLinks = [
   {
@@ -412,8 +417,9 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [openCategory, setOpenCategory] = useState(null);
-  const router = useRouter();
   const currentYear = new Date().getFullYear();
+  const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
 
   const toggleCategory = (category) => {
     setOpenCategory(openCategory === category ? null : category);
@@ -446,21 +452,23 @@ const Navbar = () => {
   };
 
   return (
-    <>
-      <div
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "shadow-sm border-muted-foreground bg-primary-foreground"
-            : "bg-transparent"
-        }`}
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="fixed top-0 left-0 w-full z-[999]"
+    >
+      <motion.div
+        className={`transition-all z-[998] ease-in-out border-b ${isScrolled ? "shadow-sm border-border bg-primary-foreground" : "bg-transparent border-transparent"
+          }`}
         role="navigation"
-      >
-        <div className="container mx-auto flex items-center justify-between py-4 px-4 md:px-2 lg:px-0">
-          {/* Logo */}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}>
+        <motion.div className="container mx-auto flex items-center justify-between py-4 px-4 md:px-2 lg:px-0">
           <Link href="/">
-            <div className="text-title text-primary-default font-forum whitespace-nowrap">
+            <motion.div className="text-title text-primary-default font-forum whitespace-nowrap">
               Shade & Co.
-            </div>
+            </motion.div>
           </Link>
           <NavigationMenu className="hidden md:flex w-full">
             <NavigationMenuList className="">
@@ -470,7 +478,7 @@ const Navbar = () => {
                     {item.name}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent className="p-4 flex-row flex justify-between rounded-sm">
-                    <div className="w-[300px] max-h-[250px]">
+                    <motion.div className="w-[300px] max-h-[250px]">
                       {/* {item.images &&
                         item.images.map((image, index) => (
                           <Image
@@ -482,7 +490,7 @@ const Navbar = () => {
                             className="w-full h-full object-cover rounded-md"
                           />
                         ))} */}
-                    </div>
+                    </motion.div>
                     <ul className="grid grid-cols-6 gap-4 p-4 divide-2">
                       {item.categories &&
                         item.categories.map((items, index) => (
@@ -522,10 +530,8 @@ const Navbar = () => {
               ))}
             </NavigationMenuList>
           </NavigationMenu>
-
-          <div className="hidden md:flex items-center gap-x-4">
-            {/* Search Bar (Desktop) */}
-            <div className="relative">
+          <motion.div className="hidden md:flex items-center gap-x-4">
+            <motion.div className="relative">
               <Input
                 type="text"
                 placeholder="Search..."
@@ -538,7 +544,7 @@ const Navbar = () => {
                 className="absolute right-3 top-2.5 h-5 w-5 text-muted-foreground cursor-pointer"
                 onClick={handleSearch}
               />
-            </div>
+            </motion.div>
 
             <Link href="/wishlist">
               <Heart
@@ -553,10 +559,8 @@ const Navbar = () => {
               />
             </Link>
             <ProfileDropdown />
-          </div>
-
-          <div className="md:hidden flex items-center gap-x-4">
-            {/* Search Icon (Mobile) */}
+          </motion.div>
+          <motion.div className="md:hidden flex items-center gap-x-4">
             <Search
               className="w-6 h-6 text-primary-default cursor-pointer"
               onClick={toggleSearch}
@@ -600,11 +604,10 @@ const Navbar = () => {
                             className="p-1 rounded-md hover:bg-gray-200 transition"
                           >
                             <ChevronDown
-                              className={`w-5 h-5 transition-all ease-in-out ${
-                                openCategory === item.name
-                                  ? "rotate-180"
-                                  : "rotate-0"
-                              }`}
+                              className={`w-5 h-5 transition-all ease-in-out ${openCategory === item.name
+                                ? "rotate-180"
+                                : "rotate-0"
+                                }`}
                             />
                           </button>
                         )}
@@ -651,10 +654,9 @@ const Navbar = () => {
                 </DrawerFooter>
               </DrawerContent>
             </Drawer>
-          </div>
-
+          </motion.div>
           {isSearchVisible && (
-            <div className="md:hidden absolute top-16 left-0 w-full">
+            <motion.div className="md:hidden absolute top-16 left-0 w-full">
               <Input
                 type="text"
                 placeholder="Search..."
@@ -663,11 +665,25 @@ const Navbar = () => {
                 onKeyPress={handleKeyPress}
                 className="w-full rounded-full border-none outline-none"
               />
-            </div>
+            </motion.div>
           )}
-        </div>
-      </div>
-    </>
+        </motion.div>
+      </motion.div>
+      {isHovered && (
+        // <motion.div
+        //   initial={{ opacity: 0, y: -10 }}
+        //   animate={{ opacity: 1, y: 0 }}
+        //   exit={{ opacity: 0, y: -10 }}
+        //   transition={{ duration: 0.3 }}
+        //   // border-muted-foreground border-b
+        //   className="absolute -bottom-2 left-0 w-full border border-blue-500 bg-primary-foreground
+        //    shadow-sm"
+        // >
+        <BreadCrumbs />
+        // </motion.div>
+      )}
+
+    </motion.div>
   );
 };
 
@@ -744,5 +760,42 @@ const ProfileDropdown = () => {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+};
+
+
+const BreadCrumbs = () => {
+  const router = useRouter();
+  const pathSegments = router?.pathname?.split("/").filter(Boolean);
+
+  if (pathSegments?.length < 2) {
+    return null;
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="absolute -bottom-[33px] left-0 right-0 z-[997] bg-primary-foreground border-b shadow-sm border-border w-full "
+    >
+      <ul className="container mx-auto flex items-center justify-between py-4 px-4 md:px-2 lg:px-0 space-x-2 text-sm text-muted-foreground">
+        {pathSegments?.map((segment, index) => {
+          const path = `/${pathSegments.slice(0, index + 1).join("/")}`;
+          return (
+            <li key={index} className="flex items-center">
+              <Link href={path}>
+                <a className="hover:underline">
+                  {segment || "Home"}
+                </a>
+              </Link>
+              {index < pathSegments.length - 1 && (
+                <ChevronRight className="w-4 h-4 mx-2" />
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </motion.div>
   );
 };

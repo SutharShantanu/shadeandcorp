@@ -8,11 +8,11 @@ import React from "react";
 const Homepage = () => {
   return (
     <div>
-      {/* <Banner /> */}
+      <Banner />
       <TrustedBrand />
       <FAQ />
     </div>
-  );
+  );``
 };
 
 export default Homepage;
