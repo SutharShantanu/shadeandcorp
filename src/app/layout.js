@@ -17,7 +17,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${forum.className} ${workSans.className} antialiased`}>
+      <body className={`${forum.className} ${workSans.className} antialiased`} suppressHydrationWarning={true}>
         <Suspense fallback={<Loading />}>
           <Navbar />
           {children}

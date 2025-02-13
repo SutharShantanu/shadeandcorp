@@ -7,11 +7,7 @@ import { Input } from "./ui/input";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback
-} from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Drawer,
   DrawerClose,
@@ -44,7 +40,7 @@ import {
   LogOut,
   Settings,
   HomeIcon,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -67,7 +63,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+} from "@/components/ui/breadcrumb";
 import { useEffect, useState } from "react";
 
 const menuLinks = [
@@ -424,7 +420,6 @@ const menuLinks = [
 ];
 
 const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [openCategory, setOpenCategory] = useState(null);
@@ -434,16 +429,6 @@ const Navbar = () => {
   const toggleCategory = (category) => {
     setOpenCategory(openCategory === category ? null : category);
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      setIsScrolled(scrollTop > 0);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -470,7 +455,8 @@ const Navbar = () => {
     >
       <motion.div
         className="transition-all z-[998] ease-in-out border-b shadow-sm border-border/20 bg-transparent backdrop-blur-sm"
-        role="navigation">
+        role="navigation"
+      >
         <motion.div className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0">
           <Link href="/">
             <motion.div className="text-title text-primary-default font-forum whitespace-nowrap">
@@ -611,10 +597,11 @@ const Navbar = () => {
                             className="p-1 rounded-md hover:bg-gray-200 transition"
                           >
                             <ChevronDown
-                              className={`w-5 h-5 transition-all ease-in-out ${openCategory === item.name
-                                ? "rotate-180"
-                                : "rotate-0"
-                                }`}
+                              className={`w-5 h-5 transition-all ease-in-out ${
+                                openCategory === item.name
+                                  ? "rotate-180"
+                                  : "rotate-0"
+                              }`}
                             />
                           </button>
                         )}
@@ -677,7 +664,7 @@ const Navbar = () => {
         </motion.div>
       </motion.div>
       <BreadCrumbs />
-    </motion.div >
+    </motion.div>
   );
 };
 
@@ -757,21 +744,9 @@ const ProfileDropdown = () => {
   );
 };
 
-
 const BreadCrumbs = () => {
   const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = useState(false);
   const pathSegments = pathname?.split("/").filter(Boolean);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      setIsScrolled(scrollTop > 0);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const capitalize = (str) => {
     return str
@@ -779,9 +754,11 @@ const BreadCrumbs = () => {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
+  console.log(pathSegments[0]);
+
   return (
     <>
-      {pathSegments.length >= 1 && (
+      {pathSegments?.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -790,36 +767,40 @@ const BreadCrumbs = () => {
         >
           <ul className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0 space-x-2 text-sm text-muted-foreground">
             <Breadcrumb className="flex items-center">
-              {/* <BreadcrumbItem>
-                <BreadcrumbLink href="/" className="hover:underline flex items-center text-xs underline-offset-2">
-                  <HomeIcon className="w-4 h-4 mr-1" />
-                  Home
-                </BreadcrumbLink>
-                {pathSegments?.length > 0 && (
-                  <BreadcrumbSeparator>
-                    <ChevronRight className="w-4 h-4 mx-2" />
-                  </BreadcrumbSeparator>
-                )}
-              </BreadcrumbItem> */}
-              {pathSegments?.map((segment, index) => {
-                const path = `/${pathSegments?.slice(0, index + 1).join("/")}`;
-                const isLast = index === pathSegments.length - 1;
-                return (
-                  <BreadcrumbItem key={index}>
-                    <BreadcrumbLink asChild
-                      href={path}
-                      className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-md ${isLast ? "bg-primary-default text-primary-foreground hover:text-primary-foreground" : " text-primary-default"}`}
-                    >
-                      {capitalize(segment)}
-                    </BreadcrumbLink>
-                    {!isLast && (
-                      <BreadcrumbSeparator>
-                        <ChevronRight className="w-4 h-4 mx-2" />
-                      </BreadcrumbSeparator>
-                    )}
-                  </BreadcrumbItem>
-                );
-              })}
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbLink
+                    href="/"
+                    className="hover:underline flex items-center text-xs underline-offset-2"
+                  >
+                    <HomeIcon className="w-4 h-4 mr-1" />
+                    Home
+                  </BreadcrumbLink>
+                </BreadcrumbItem>
+                {pathSegments?.map((segment, index) => {
+                  const path = `/${pathSegments
+                    ?.slice(0, index + 1)
+                    .join("/")}`;
+                  const isLast = index === pathSegments.length - 1;
+                  return (
+                    <>
+                      <BreadcrumbSeparator />
+                      <BreadcrumbItem key={index}>
+                        <BreadcrumbLink
+                          href={path}
+                          className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-md ${
+                            isLast
+                              ? "bg-primary-default text-primary-foreground hover:text-primary-foreground"
+                              : " text-primary-default"
+                          }`}
+                        >
+                          {capitalize(segment)}
+                        </BreadcrumbLink>
+                      </BreadcrumbItem>
+                    </>
+                  );
+                })}
+              </BreadcrumbList>
             </Breadcrumb>
           </ul>
         </motion.div>

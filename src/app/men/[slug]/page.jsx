@@ -1,9 +1,15 @@
-import React from 'react'
+"use client";
 
-const page = () => {
-    return (
-        <div>page</div>
-    )
-}
+import { useParams } from "next/navigation";
 
-export default page
+const CategoryPage = () => {
+  const { slug } = useParams(); // Correct parameter name
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold">Men's {slug}</h1>
+    </div>
+  );
+};
+
+export default CategoryPage;
