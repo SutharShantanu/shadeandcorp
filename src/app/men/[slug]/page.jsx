@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 
 const CategoryPage = () => {
-  const { slug } = useParams(); // Correct parameter name
+  const { slug } = useParams();
 
   return (
     <div className="p-4">
