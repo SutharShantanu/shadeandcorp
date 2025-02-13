@@ -65,6 +65,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useEffect, useState } from "react";
+import React from "react";
 
 const menuLinks = [
   {
@@ -597,11 +598,10 @@ const Navbar = () => {
                             className="p-1 rounded-md hover:bg-gray-200 transition"
                           >
                             <ChevronDown
-                              className={`w-5 h-5 transition-all ease-in-out ${
-                                openCategory === item.name
+                              className={`w-5 h-5 transition-all ease-in-out ${openCategory === item.name
                                   ? "rotate-180"
                                   : "rotate-0"
-                              }`}
+                                }`}
                             />
                           </button>
                         )}
@@ -768,12 +768,12 @@ const BreadCrumbs = () => {
           <ul className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0 space-x-2 text-sm text-muted-foreground">
             <Breadcrumb className="flex items-center">
               <BreadcrumbList>
-                <BreadcrumbItem>
+                <BreadcrumbItem key="home">
                   <BreadcrumbLink
                     href="/"
                     className="hover:underline flex items-center text-xs underline-offset-2"
                   >
-                    <HomeIcon className="w-4 h-4 mr-1" />
+                    <HomeIcon className="w-3 h-3 mr-1" />
                     Home
                   </BreadcrumbLink>
                 </BreadcrumbItem>
@@ -783,21 +783,20 @@ const BreadCrumbs = () => {
                     .join("/")}`;
                   const isLast = index === pathSegments.length - 1;
                   return (
-                    <>
+                    <React.Fragment key={index}>
                       <BreadcrumbSeparator />
-                      <BreadcrumbItem key={index}>
+                      <BreadcrumbItem>
                         <BreadcrumbLink
                           href={path}
-                          className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-md ${
-                            isLast
+                          className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-md ${isLast
                               ? "bg-primary-default text-primary-foreground hover:text-primary-foreground"
                               : " text-primary-default"
-                          }`}
+                            }`}
                         >
                           {capitalize(segment)}
                         </BreadcrumbLink>
                       </BreadcrumbItem>
-                    </>
+                    </React.Fragment>
                   );
                 })}
               </BreadcrumbList>
