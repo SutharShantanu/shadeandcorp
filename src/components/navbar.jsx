@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "./ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "./ui/input";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -26,6 +25,7 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
@@ -42,7 +42,9 @@ import {
   ChevronDown,
   ShoppingBag,
   LogOut,
-  Settings
+  Settings,
+  HomeIcon,
+  ChevronRight
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -57,7 +59,16 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "./ui/tooltip";
+} from "@/components/ui/tooltip";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { useEffect, useState } from "react";
 
 const menuLinks = [
   {
@@ -418,7 +429,6 @@ const Navbar = () => {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [openCategory, setOpenCategory] = useState(null);
   const currentYear = new Date().getFullYear();
-  const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
 
   const toggleCategory = (category) => {
@@ -459,12 +469,9 @@ const Navbar = () => {
       className="fixed top-0 left-0 w-full z-[999]"
     >
       <motion.div
-        className={`transition-all z-[998] ease-in-out border-b ${isScrolled ? "shadow-sm border-border bg-primary-foreground" : "bg-transparent border-transparent"
-          }`}
-        role="navigation"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}>
-        <motion.div className="container mx-auto flex items-center justify-between py-4 px-4 md:px-2 lg:px-0">
+        className="transition-all z-[998] ease-in-out border-b shadow-sm border-border/20 bg-transparent backdrop-blur-sm"
+        role="navigation">
+        <motion.div className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0">
           <Link href="/">
             <motion.div className="text-title text-primary-default font-forum whitespace-nowrap">
               Shade & Co.
@@ -499,7 +506,7 @@ const Navbar = () => {
                             key={`${items.href}-subcategory-${index}`}
                             className="text-primary-default text-xs py-1 group"
                           >
-                            <Link href={items.href}>
+                            <NavigationMenuLink href={items.href}>
                               <span className="text-accent-default hover:underline underline-offset-2 rounded-md group-hover:bg-accent-default group-hover:text-primary-foreground transition-all ease-in-out px-2 py-1 whitespace-nowrap">
                                 {items.name}
                               </span>{" "}
@@ -520,7 +527,7 @@ const Navbar = () => {
                                     )
                                   )}
                               </ul>
-                            </Link>
+                            </NavigationMenuLink>
                           </li>
                           // </NavigationMenuLink>
                         ))}
@@ -669,21 +676,8 @@ const Navbar = () => {
           )}
         </motion.div>
       </motion.div>
-      {isHovered && (
-        // <motion.div
-        //   initial={{ opacity: 0, y: -10 }}
-        //   animate={{ opacity: 1, y: 0 }}
-        //   exit={{ opacity: 0, y: -10 }}
-        //   transition={{ duration: 0.3 }}
-        //   // border-muted-foreground border-b
-        //   className="absolute -bottom-2 left-0 w-full border border-blue-500 bg-primary-foreground
-        //    shadow-sm"
-        // >
-        <BreadCrumbs />
-        // </motion.div>
-      )}
-
-    </motion.div>
+      <BreadCrumbs />
+    </motion.div >
   );
 };
 
@@ -765,37 +759,71 @@ const ProfileDropdown = () => {
 
 
 const BreadCrumbs = () => {
-  const router = useRouter();
-  const pathSegments = router?.pathname?.split("/").filter(Boolean);
+  const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const pathSegments = pathname?.split("/").filter(Boolean);
 
-  if (pathSegments?.length < 2) {
-    return null;
-  }
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      setIsScrolled(scrollTop > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const capitalize = (str) => {
+    return str
+      .replace(/[^a-zA-Z0-9 ]/g, "")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="absolute -bottom-[33px] left-0 right-0 z-[997] bg-primary-foreground border-b shadow-sm border-border w-full "
-    >
-      <ul className="container mx-auto flex items-center justify-between py-4 px-4 md:px-2 lg:px-0 space-x-2 text-sm text-muted-foreground">
-        {pathSegments?.map((segment, index) => {
-          const path = `/${pathSegments.slice(0, index + 1).join("/")}`;
-          return (
-            <li key={index} className="flex items-center">
-              <Link href={path}>
-                <a className="hover:underline">
-                  {segment || "Home"}
-                </a>
-              </Link>
-              {index < pathSegments.length - 1 && (
-                <ChevronRight className="w-4 h-4 mx-2" />
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    </motion.div>
+    <>
+      {pathSegments.length >= 1 && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="transition-all ease-in-out absolute -bottom-13 left-0 right-0 -z-[1] border-border/20 border-b shadow-sm w-full backdrop-blur-sm"
+        >
+          <ul className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0 space-x-2 text-sm text-muted-foreground">
+            <Breadcrumb className="flex items-center">
+              {/* <BreadcrumbItem>
+                <BreadcrumbLink href="/" className="hover:underline flex items-center text-xs underline-offset-2">
+                  <HomeIcon className="w-4 h-4 mr-1" />
+                  Home
+                </BreadcrumbLink>
+                {pathSegments?.length > 0 && (
+                  <BreadcrumbSeparator>
+                    <ChevronRight className="w-4 h-4 mx-2" />
+                  </BreadcrumbSeparator>
+                )}
+              </BreadcrumbItem> */}
+              {pathSegments?.map((segment, index) => {
+                const path = `/${pathSegments?.slice(0, index + 1).join("/")}`;
+                const isLast = index === pathSegments.length - 1;
+                return (
+                  <BreadcrumbItem key={index}>
+                    <BreadcrumbLink asChild
+                      href={path}
+                      className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-md ${isLast ? "bg-primary-default text-primary-foreground hover:text-primary-foreground" : " text-primary-default"}`}
+                    >
+                      {capitalize(segment)}
+                    </BreadcrumbLink>
+                    {!isLast && (
+                      <BreadcrumbSeparator>
+                        <ChevronRight className="w-4 h-4 mx-2" />
+                      </BreadcrumbSeparator>
+                    )}
+                  </BreadcrumbItem>
+                );
+              })}
+            </Breadcrumb>
+          </ul>
+        </motion.div>
+      )}
+    </>
   );
 };
