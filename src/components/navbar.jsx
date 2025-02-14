@@ -64,7 +64,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const menuLinks = [
   {
@@ -754,8 +754,6 @@ const BreadCrumbs = () => {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  console.log(pathSegments[0]);
-
   return (
     <>
       {pathSegments?.length > 0 && (
@@ -768,7 +766,7 @@ const BreadCrumbs = () => {
           <ul className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0 space-x-2 text-sm text-muted-foreground">
             <Breadcrumb className="flex items-center">
               <BreadcrumbList>
-                <BreadcrumbItem>
+                <BreadcrumbItem key="home">
                   <BreadcrumbLink
                     href="/"
                     className="hover:underline flex items-center text-xs underline-offset-2"
@@ -782,10 +780,11 @@ const BreadCrumbs = () => {
                     ?.slice(0, index + 1)
                     .join("/")}`;
                   const isLast = index === pathSegments.length - 1;
+
                   return (
-                    <>
+                    <React.Fragment key={index}>
                       <BreadcrumbSeparator />
-                      <BreadcrumbItem key={index}>
+                      <BreadcrumbItem>
                         <BreadcrumbLink
                           href={path}
                           className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-md ${
@@ -797,7 +796,7 @@ const BreadCrumbs = () => {
                           {capitalize(segment)}
                         </BreadcrumbLink>
                       </BreadcrumbItem>
-                    </>
+                    </React.Fragment>
                   );
                 })}
               </BreadcrumbList>
