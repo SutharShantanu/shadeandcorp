@@ -1,4 +1,4 @@
-const MenTopwear = [
+export const MenTopwear = [
     {
       "category": "T-Shirts",
       "name": "Classic Cotton T-Shirt",

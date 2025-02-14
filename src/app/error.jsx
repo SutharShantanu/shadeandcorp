@@ -36,7 +36,7 @@ const Error = ({ error, reset, originPath }) => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-2 bg-primary-foreground border- shadow-md px-4 py-3 rounded-md my-2"
+          className="flex flex-col items-center gap-2 bg-primary-foreground border- shadow-md px-4 py-3 rounded-md my-2 max-w-[80vw]"
         >
           <span className="text-destructive-default text-title p-3">
             {error.message || "Something went wrong!"}

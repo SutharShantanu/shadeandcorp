@@ -64,8 +64,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useEffect, useState } from "react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const menuLinks = [
   {
@@ -754,8 +753,6 @@ const BreadCrumbs = () => {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
-  console.log(pathSegments[0]);
-
   return (
     <>
       {pathSegments?.length > 0 && (
@@ -782,6 +779,7 @@ const BreadCrumbs = () => {
                     ?.slice(0, index + 1)
                     .join("/")}`;
                   const isLast = index === pathSegments.length - 1;
+
                   return (
                     <React.Fragment key={index}>
                       <BreadcrumbSeparator />
