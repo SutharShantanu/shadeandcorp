@@ -17,10 +17,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${forum.className} ${workSans.className} antialiased`} suppressHydrationWarning={true}>
+      <body
+        className={`${forum.className} ${workSans.className} antialiased`}
+        suppressHydrationWarning={true}
+      >
         <Suspense fallback={<Loading />}>
           <Navbar />
-          {children}
+          <div className="min-h-screen h-[calc(100vh-120px)]">{children}</div>
           <Toaster richColors position="bottom-right" />
           <Footer />
         </Suspense>

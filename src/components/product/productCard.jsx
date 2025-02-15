@@ -14,17 +14,17 @@ import { Button } from "../ui/button";
 const ProductCard = ({ product }) => {
   return (
     <motion.div>
-      <Card className="w-full md:w-60 rounded-xl shadow-lg hover:shadow-xl transition-transform duration-300 hover:scale-105">
-        <CardHeader>
+      <Card className="w-full p-6 rounded-none border-none">
+        <CardHeader className="p-0">
           <Image
             width={500}
             height={500}
             src={product.image}
             alt={product.name}
-            className="h-48 w-full object-cover rounded-t-xl"
+            className="h-48 w-full object-cover rounded-md"
           />
         </CardHeader>
-        <CardContent className="p-4">
+        <CardContent className="p-0">
           <CardTitle className="text-lg font-semibold mb-2">
             {product.name}
           </CardTitle>
