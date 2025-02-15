@@ -38,7 +38,7 @@ const config = {
           foreground: "#2d2d2d",
         },
         destructive: {
-          default: "#e57373",
+          default: "#ef4444",
           foreground: "#333333",
         },
         input: "#ffffff",

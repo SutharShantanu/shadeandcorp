@@ -74,7 +74,7 @@ body {
   }
 
   ::selection {
-    background-color: #2d2d2d;
+    background-color: #fb6900;
     color: #fafafa;
     transition: background-color 0.3s ease, color 0.3s ease-in-out;
   }
