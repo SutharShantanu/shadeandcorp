@@ -19,7 +19,8 @@ const ProductCard = ({ product }) => {
 
   return (
     <motion.div
-      className="border border-border border-separate border-dashed m-2 cursor-pointer group group hover:bg-muted-default/20 hover:shadow-md rounded-lg">
+      key={product.id}
+      className="border border-border border-separate border-dashed cursor-pointer group group hover:bg-muted-default/20 hover:shadow-md rounded-lg">
       <Card className="w-full border-none">
         <CardHeader className="p-0 w-full overflow-hidden relative rounded-t-md">
           <Image
@@ -38,7 +39,7 @@ const ProductCard = ({ product }) => {
           <div className="flex items-center gap-2 justify-between">
             <CardTitle className="text-description font-normal truncate">{product.name}</CardTitle>
             {product.discount && (
-              <Badge className="text-xs bg-accent-default text-primary-foreground px-2 py-[2px]">
+              <Badge className="text-xs bg-accent-default text-primary-foreground px-2 py-[2px] text-nowrap">
                 {product.discount}% OFF
               </Badge>
             )}
@@ -72,14 +73,14 @@ const ProductCard = ({ product }) => {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col items-center p-0 sm:flex-row sm:justify-between divide-x divide-border">
-          <Button className="w-full bg-primary-default text-primary-foreground rounded-none hover:bg-primary-default/80">
+          <Button className="w-full bg-primary-default text-primary-foreground rounded-none rounded-bl-md hover:bg-primary-default/80">
             <ShoppingCart
               className="w-5 h-5 text-primary-foreground cursor-pointer"
               aria-label="add to cart"
             />
             Add to Cart
           </Button>
-          <Button className="w-full bg-primary-default text-primary-foreground rounded-none hover:bg-primary-default/80">
+          <Button className="w-full bg-primary-default text-primary-foreground rounded-none rounded-br-md hover:bg-primary-default/80">
             <Sparkles
               className="w-5 h-5 text-primary-foreground cursor-pointer"
               aria-label="buy now" />
