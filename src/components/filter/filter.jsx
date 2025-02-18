@@ -3,15 +3,6 @@ import { Label } from '../ui/label';
 import { Checkbox } from '../ui/checkbox';
 import { Slider } from "../ui/slider"
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select"
-import {
   Accordion,
   AccordionContent,
   AccordionItem,
