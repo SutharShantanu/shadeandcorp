@@ -1,5 +1,5 @@
+// CategoryPage.jsx
 "use client";
-
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -14,6 +14,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import FilterBar from "@/components/filter/filter";
+import ProductListingHeader from "@/components/product/productListingHeader";
+import { useState } from "react";
 
 const CategoryPage = () => {
   const { slug } = useParams();
@@ -41,15 +44,33 @@ const CategoryPage = () => {
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
+  const capitalizedSlug = slug.charAt(0).toUpperCase() + slug.slice(1);
+  const [layout, setLayout] = useState('grid');
+
+  const handleLayoutChange = (selectedLayout) => {
+    setLayout(selectedLayout);
+  };
 
   return (
     <motion.div className="py-6 container mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Men's {slug}</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-        {currentItems.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      <motion.div className="flex flex-col">
+        <motion.div className="flex items-center gap-x-2 justify-between">
+          <h1 className="text-heading mb-6">Men's {capitalizedSlug}</h1>
+          <ProductListingHeader
+            layout={layout}
+            onLayoutChange={handleLayoutChange}
+          />
+        </motion.div>
+        <motion.div className="flex gap-2 justify-between">
+          <FilterBar />
+          <motion.div
+            className={`w-5/6 grid ${layout === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2' : 'grid-cols-2'} gap-2`}
+          >
+            {currentItems.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </motion.div>
+        </motion.div>
       <Pagination className="my-4">
         <PaginationContent>
           <PaginationItem>
@@ -76,7 +97,8 @@ const CategoryPage = () => {
           </PaginationItem>
         </PaginationContent>
       </Pagination>
-    </motion.div>
+      </motion.div>
+    </motion.div >
   );
 };
 
