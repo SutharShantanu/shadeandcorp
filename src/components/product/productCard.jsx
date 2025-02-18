@@ -1,45 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import ProductCard from "@/components/product/productCard";
 import { MenTopwear } from "@/dummy/clothes";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { Heart, ShoppingCart, Sparkles } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { Separator } from "../ui/separator";
+import { Button } from "../ui/button";
 
 const CategoryPage = () => {
-  const { slug } = useParams();
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
-
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = MenTopwear.slice(indexOfFirstItem, indexOfLastItem);
-
-  const totalPages = Math.ceil(MenTopwear.length / itemsPerPage);
-
-  const handlePageChange = (page) => setCurrentPage(page);
+  const [isFavourite, setIsFavourite] = useState(false);
 
   return (
     <motion.div
       className="border border-border border-separate border-dashed m-2 cursor-pointer group group hover:bg-muted-default/20 hover:shadow-md rounded-lg">
       <Card className="w-full border-none">
         <CardHeader className="p-0 w-full overflow-hidden relative rounded-t-md">
-          <Image
+          {/* <Image
             width={500}
             height={500}
-            src={product.image}
-            alt={product.name}
+            src={MenTopwear.image}
+            alt={MenTopwear.name}
             className="h-64 w-full object-cover rounded-t-md transition-transform ease-in-out group-hover:scale-105"
-          />
+          /> */}
           <Heart
             onClick={() => { }}
             absoluteStrokeWidth="1px"
@@ -47,40 +31,40 @@ const CategoryPage = () => {
         </CardHeader>
         <CardContent className="p-4">
           <div className="flex items-center gap-2 justify-between">
-            <CardTitle className="text-description font-normal truncate">{product.name}</CardTitle>
-            {product.discount && (
+            <CardTitle className="text-description font-normal truncate">{MenTopwear.name}</CardTitle>
+            {MenTopwear.discount && (
               <Badge className="text-xs bg-accent-default text-primary-foreground px-2 py-[2px]">
-                {product.discount}% OFF
+                {MenTopwear.discount}% OFF
               </Badge>
             )}
           </div>
           <CardDescription className="text-xs font-light my-2 text-muted-foreground/80 line-clamp-2 text-wrap truncate">
-            {product.description}
+            {MenTopwear.description}
           </CardDescription>
           <Separator className="my-2" />
-          {product.colors && (
-            <div className="flex items-center gap-2">
+          {MenTopwear.colors && (
+            <motion.div className="flex items-center gap-2">
               <span className="text-small">Colors:</span>
-              {product.colors.map((color, index) => (
-                <button key={index} style={{ backgroundColor: color }} className="w-5 h-5 rounded-full border-2" />
+              {MenTopwear.colors.map((color, index) => (
+                <Button key={index} style={{ backgroundColor: color }} className="w-5 h-5 rounded-full border-2" />
               ))}
-            </div>
+            </motion.div>
           )}
-          <div className="flex items-center gap-2 my-2">
-            {product.discounted_price ? (
-              <>
+          <motion.div className="flex items-center gap-2 my-2">
+            {MenTopwear.discounted_price ? (
+              <motion.div>
                 <span className="text-small">Price:</span>
 
-                <span className="text-lg font-bold text-destructive-default">${product.discounted_price}</span>
-                <span className="text-sm line-through text-gray-400">${product.original_price}</span>
-              </>
+                <span className="text-lg font-bold text-destructive-default">${MenTopwear.discounted_price}</span>
+                <span className="text-sm line-through text-gray-400">${MenTopwear.original_price}</span>
+              </motion.div>
             ) : (
-              <>
+              <motion.div>
                 <span className="text-small">Price:</span>
-                <span className="text-lg text-primary-default font-bold">${product.original_price}</span>
-              </>
+                <span className="text-lg text-primary-default font-bold">${MenTopwear.original_price}</span>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         </CardContent>
         <CardFooter className="flex flex-col items-center p-0 sm:flex-row sm:justify-between divide-x divide-border">
           <Button className="w-full bg-primary-default text-primary-foreground rounded-none hover:bg-primary-default/80">

@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/pagination";
 import FilterBar from "@/components/filter/filter";
 import ProductListingHeader from "@/components/product/productListingHeader";
-import { useState } from "react";
 
 const CategoryPage = () => {
   const { slug } = useParams();
