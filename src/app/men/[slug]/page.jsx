@@ -1,9 +1,7 @@
-// CategoryPage.jsx
 "use client";
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import ProductCard from "@/components/product/productCard";
 import { MenTopwear } from "@/dummy/clothes";
 import {
   Pagination,
@@ -16,10 +14,12 @@ import {
 } from "@/components/ui/pagination";
 import FilterBar from "@/components/filter/filter";
 import ProductListingHeader from "@/components/product/productListingHeader";
+import ProductCard from "@/components/product/productCard";
 
 const CategoryPage = () => {
   const { slug } = useParams();
   const [currentPage, setCurrentPage] = useState(1);
+  const [layout, setLayout] = useState('grid');
   const itemsPerPage = 8;
 
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -44,7 +44,6 @@ const CategoryPage = () => {
     setCurrentPage(page);
   };
   const capitalizedSlug = slug.charAt(0).toUpperCase() + slug.slice(1);
-  const [layout, setLayout] = useState('grid');
 
   const handleLayoutChange = (selectedLayout) => {
     setLayout(selectedLayout);
@@ -63,39 +62,39 @@ const CategoryPage = () => {
         <motion.div className="flex gap-2 justify-between">
           <FilterBar />
           <motion.div
-            className={`w-5/6 grid ${layout === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2' : 'grid-cols-2'} gap-2`}
+            className={`w-5/6 grid ${layout === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2'} gap-2 h-fit`}
           >
-            {currentItems.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {currentItems.map((product, index) => (
+              <ProductCard key={product.id || index} product={product} />
             ))}
           </motion.div>
         </motion.div>
-      <Pagination className="my-4">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-            />
-          </PaginationItem>
-          {Array.from({ length: totalPages }, (_, index) => (
-            <PaginationItem key={index + 1}>
-              <PaginationLink
-                onClick={() => handlePageChange(index + 1)}
-                isActive={currentPage === index + 1}
-              >
-                {index + 1}
-              </PaginationLink>
+        <Pagination className="my-4 w-fit mr-0">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={handlePrevPage}
+                disabled={currentPage === 1}
+              />
             </PaginationItem>
-          ))}
-          <PaginationItem>
-            <PaginationNext
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <PaginationItem key={index + 1}>
+                <PaginationLink
+                  onClick={() => handlePageChange(index + 1)}
+                  isActive={currentPage === index + 1}
+                >
+                  {index + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </motion.div>
     </motion.div >
   );

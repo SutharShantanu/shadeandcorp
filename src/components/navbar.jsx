@@ -65,6 +65,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import React, { useEffect, useState } from "react";
+import { usePathSegments } from "@/app/functions/pathname";
 
 const menuLinks = [
   {
@@ -598,8 +599,8 @@ const Navbar = () => {
                           >
                             <ChevronDown
                               className={`w-5 h-5 transition-all ease-in-out ${openCategory === item.name
-                                  ? "rotate-180"
-                                  : "rotate-0"
+                                ? "rotate-180"
+                                : "rotate-0"
                                 }`}
                             />
                           </button>
@@ -744,8 +745,8 @@ const ProfileDropdown = () => {
 };
 
 const BreadCrumbs = () => {
-  const pathname = usePathname();
-  const pathSegments = pathname?.split("/").filter(Boolean);
+
+  const pathSegments = usePathSegments();
 
   const capitalize = (str) => {
     return str
@@ -787,8 +788,8 @@ const BreadCrumbs = () => {
                         <BreadcrumbLink
                           href={path}
                           className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-md ${isLast
-                              ? "bg-primary-default text-primary-foreground hover:text-primary-foreground"
-                              : " text-primary-default"
+                            ? "bg-primary-default text-primary-foreground hover:text-primary-foreground"
+                            : " text-primary-default"
                             }`}
                         >
                           {capitalize(segment)}

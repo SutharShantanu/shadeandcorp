@@ -1,8 +1,6 @@
 import * as React from "react"
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
-
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button";
 
 const Pagination = ({
   className,
@@ -19,13 +17,13 @@ Pagination.displayName = "Pagination"
 const PaginationContent = React.forwardRef(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("flex flex-row items-center gap-1", className)}
+    className={cn("flex flex-row items-center gap-3", className)}
     {...props} />
 ))
 PaginationContent.displayName = "PaginationContent"
 
 const PaginationItem = React.forwardRef(({ className, ...props }, ref) => (
-  <li ref={ref} className={cn("", className)} {...props} />
+  <li ref={ref} className={cn("flex items-center gap-2", className)} {...props} />
 ))
 PaginationItem.displayName = "PaginationItem"
 
@@ -37,10 +35,16 @@ const PaginationLink = ({
 }) => (
   <a
     aria-current={isActive ? "page" : undefined}
-    className={cn(buttonVariants({
-      variant: isActive ? "outline" : "ghost",
-      size,
-    }), className)}
+    className={cn(
+      "inline-flex rounded-full text-xs items-center justify-center transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
+      {
+        "bg-accent-default hover:bg-accent-default/80 text-primary-foreground": isActive,
+        "bg-primary-default/10 hover:text-accent-foreground": !isActive,
+        "w-7 h-7": size === "icon",
+        "px-3 py-1.5": size !== "icon",
+      },
+      className
+    )}
     {...props} />
 )
 PaginationLink.displayName = "PaginationLink"
@@ -52,10 +56,10 @@ const PaginationPrevious = ({
   <PaginationLink
     aria-label="Go to previous page"
     size="default"
-    className={cn("gap-1 pl-2.5", className)}
+    className={cn(" pl-2.5 cursor-pointer bg-primary-default hover:bg-primary-default/80 rounded-md", className)}
     {...props}>
-    <ChevronLeft className="h-4 w-4" />
-    <span>Previous</span>
+    <ChevronLeft className="h-4 w-4 text-primary-foreground" />
+    <span className="text-primary-foreground">Previous</span>
   </PaginationLink>
 )
 PaginationPrevious.displayName = "PaginationPrevious"
@@ -67,10 +71,10 @@ const PaginationNext = ({
   <PaginationLink
     aria-label="Go to next page"
     size="default"
-    className={cn("gap-1 pr-2.5", className)}
+    className={cn(" pr-2.5 cursor-pointer bg-primary-default hover:bg-primary-default/80 rounded-md", className)}
     {...props}>
-    <span>Next</span>
-    <ChevronRight className="h-4 w-4" />
+    <span className="text-primary-foreground">Next</span>
+    <ChevronRight className="h-4 w-4 text-primary-foreground" />
   </PaginationLink>
 )
 PaginationNext.displayName = "PaginationNext"
