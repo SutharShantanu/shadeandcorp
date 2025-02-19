@@ -15,7 +15,12 @@ export const MenTopwear = [
     country_of_origin: "India",
     date_of_product_launch: "2024-05-15",
     sizes: ["S", "M", "L", "XL"],
-    stock: { S: 40, M: 50, L: 40, XL: 20 },
+    stock: [
+      { size: "S", quantity: 40 },
+      { size: "M", quantity: 50 },
+      { size: "L", quantity: 40 },
+      { size: "XL", quantity: 20 },
+    ],
     description:
       "A classic cotton t-shirt perfect for everyday wear. Made from high-quality cotton, it offers unmatched comfort and durability. The fabric is soft, breathable, and ideal for all seasons. Available in multiple colors to suit your style, this t-shirt is a must-have in your wardrobe.",
     colors: ["Red", "Blue", "Black"],
@@ -39,7 +44,12 @@ export const MenTopwear = [
     country_of_origin: "India",
     date_of_product_launch: "2024-06-10",
     sizes: ["M", "L", "XL", "XXL"],
-    stock: { M: 30, L: 40, XL: 20, XXL: 10 },
+    stock: [
+      { size: "M", quantity: 30 },
+      { size: "L", quantity: 40 },
+      { size: "XL", quantity: 20 },
+      { size: "XXL", quantity: 10 },
+    ],
     description:
       "A comfortable linen shirt designed for casual outings. Its breathable fabric keeps you cool and relaxed even on warm days. The lightweight material ensures ease of movement, making it perfect for a laid-back yet stylish look. Pair it with jeans or chinos for a complete outfit.",
     colors: ["White", "Beige", "Navy"],
@@ -63,7 +73,12 @@ export const MenTopwear = [
     country_of_origin: "India",
     date_of_product_launch: "2024-04-22",
     sizes: ["S", "M", "L", "XL"],
-    stock: { S: 20, M: 30, L: 20, XL: 5 },
+    stock: [
+      { size: "S", quantity: 20 },
+      { size: "M", quantity: 30 },
+      { size: "L", quantity: 20 },
+      { size: "XL", quantity: 5 },
+    ],
     description:
       "A sleek slim-fit formal shirt tailored for professional settings. The crisp fabric and modern cut give you a sharp and polished appearance. Ideal for office wear or formal events, this shirt is designed to make you stand out. Available in versatile colors to match any suit.",
     colors: ["White", "Light Blue", "Gray"],
@@ -87,7 +102,11 @@ export const MenTopwear = [
     country_of_origin: "India",
     date_of_product_launch: "2024-03-18",
     sizes: ["S", "M", "L"],
-    stock: { S: 50, M: 70, L: 80 },
+    stock: [
+      { size: "S", quantity: 50 },
+      { size: "M", quantity: 70 },
+      { size: "L", quantity: 80 },
+    ],
     description:
       "A trendy graphic print t-shirt designed for the youth. Featuring vibrant and eye-catching designs, this t-shirt is perfect for making a fashion statement. The soft fabric ensures all-day comfort, while the modern fit flatters your physique. A great choice for casual outings or hangouts with friends.",
     colors: ["Yellow", "Green", "Orange"],
@@ -111,7 +130,11 @@ export const MenTopwear = [
     country_of_origin: "India",
     date_of_product_launch: "2024-07-01",
     sizes: ["M", "L", "XL"],
-    stock: { M: 15, L: 20, XL: 15 },
+    stock: [
+      { size: "M", quantity: 15 },
+      { size: "L", quantity: 20 },
+      { size: "XL", quantity: 15 },
+    ],
     description:
       "A stylish denim shirt that adds a rugged yet fashionable touch to your wardrobe. Made from premium denim, this shirt is durable and versatile. It can be paired with jeans for a double-denim look or with chinos for a more refined style. Perfect for casual outings or weekend adventures.",
     colors: ["Blue", "Black"],
@@ -129,37 +152,18 @@ export const MenTopwear = [
       "https://assets.myntassets.com/h_720,q_90,w_540/v1/assets/images/29586622/2024/5/16/e7fa7401-f66a-4d51-8ded-549f87cc87601715844899685RegularFitT-shirt1.jpg",
       "https://assets.myntassets.com/h_720,q_90,w_540/v1/assets/images/29586622/2024/5/16/e7fa7401-f66a-4d51-8ded-549f87cc87601715844899685RegularFitT-shirt1.jpg",
     ],
-    original_price: 899,
-    discount: 10,
-    discounted_price: 809.1,
-    country_of_origin: "India",
-    date_of_product_launch: "2024-02-10",
-    sizes: ["S", "M", "L", "XL"],
-    stock: { S: 30, M: 40, L: 30, XL: 10 },
-    description:
-      "A classic polo t-shirt that combines style and comfort. Perfect for both casual and semi-formal occasions, this polo t-shirt is made from high-quality fabric that ensures breathability and durability. The timeless design makes it a versatile addition to your wardrobe.",
-    colors: ["White", "Black", "Navy"],
-    emiOptions: ["3 Months", "6 Months", "12 Months"],
-    offerEndTime: "2024-12-31T23:59:59",
-    totalBuyers: 456,
-  },
-  {
-    id: 7,
-    category: "Casual Shirts",
-    name: "Checked Casual Shirt",
-    brand: "UrbanStyle",
-    images: [
-      "https://assets.myntassets.com/h_720,q_90,w_540/v1/assets/images/29586622/2024/5/16/e7fa7401-f66a-4d51-8ded-549f87cc87601715844899685RegularFitT-shirt1.jpg",
-      "https://assets.myntassets.com/h_720,q_90,w_540/v1/assets/images/29586622/2024/5/16/e7fa7401-f66a-4d51-8ded-549f87cc87601715844899685RegularFitT-shirt1.jpg",
-      "https://assets.myntassets.com/h_720,q_90,w_540/v1/assets/images/29586622/2024/5/16/e7fa7401-f66a-4d51-8ded-549f87cc87601715844899685RegularFitT-shirt1.jpg",
-    ],
     original_price: 1299,
     discount: 15,
     discounted_price: 1104.15,
     country_of_origin: "India",
     date_of_product_launch: "2024-01-05",
     sizes: ["S", "M", "L", "XL"],
-    stock: { S: 25, M: 35, L: 20, XL: 10 },
+    stock: [
+      { size: "S", quantity: 2 },
+      { size: "M", quantity: 35 },
+      { size: "L", quantity: 20 },
+      { size: "XL", quantity: 10 },
+    ],
     description:
       "A stylish checked casual shirt that adds a touch of sophistication to your casual wardrobe. Made from soft and breathable fabric, this shirt is perfect for a relaxed yet polished look. Pair it with jeans or chinos for a complete outfit.",
     colors: ["Blue", "Green", "Gray"],
@@ -183,7 +187,12 @@ export const MenTopwear = [
     country_of_origin: "India",
     date_of_product_launch: "2024-03-01",
     sizes: ["S", "M", "L", "XL"],
-    stock: { S: 15, M: 25, L: 20, XL: 10 },
+    stock: [
+      { size: "S", quantity: 15 },
+      { size: "M", quantity: 25 },
+      { size: "L", quantity: 20 },
+      { size: "XL", quantity: 10 },
+    ],
     description:
       "A regular fit formal shirt that offers a perfect blend of comfort and style. Made from premium cotton, this shirt is ideal for long hours of wear in professional settings. The classic design and versatile colors make it a staple in any formal wardrobe.",
     colors: ["White", "Light Blue", "Pink"],
@@ -207,7 +216,11 @@ export const MenTopwear = [
     country_of_origin: "India",
     date_of_product_launch: "2024-04-10",
     sizes: ["S", "M", "L"],
-    stock: { S: 40, M: 50, L: 30 },
+    stock: [
+      { size: "S", quantity: 40 },
+      { size: "M", quantity: 50 },
+      { size: "L", quantity: 30 },
+    ],
     description:
       "A stylish striped t-shirt that adds a touch of sophistication to your casual wardrobe. Made from soft and breathable fabric, this t-shirt is perfect for a relaxed yet polished look. Pair it with jeans or shorts for a complete outfit.",
     colors: ["Blue", "Black", "Gray"],

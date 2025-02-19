@@ -15,9 +15,12 @@ import {
 } from "@/components/ui/tooltip"
 import Image from "next/image";
 import Link from "next/link";
+import { usePathSegments } from "@/app/functions/pathname";
 
 const ProductCard = ({ product }) => {
   const [isFavourite, setIsFavourite] = useState(false);
+  const pathSegments = usePathSegments();
+  const formattedPath = pathSegments.join("/");
 
   return (
     <motion.div
@@ -46,7 +49,7 @@ const ProductCard = ({ product }) => {
             className={`absolute top-0 right-2 bg-transparent rounded-full p-0 transition-all ease-in-out ${isFavourite ? "text-accent-default fill-accent-default" : "text-primary-default"}`} />
         </CardHeader>
         <CardContent className="p-4 hover:cursor-pointer group">
-          <Link href={`/product/${product.id}`} passHref>
+          <Link href={`/${formattedPath}/${product.id}`} passHref>
             <div className="flex items-center gap-2 justify-between">
               <CardTitle className="text-description font-description truncate group-hover:underline underline-offset-2 group-hover:text-accent-default">{product.name}</CardTitle>
             </div>
