@@ -5,25 +5,37 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Heart, Clock, Users } from "lucide-react";
+import { Heart, Clock, Users, Ruler, ShoppingBag, ShoppingCart } from "lucide-react";
 import { MenTopwear } from "@/dummy/clothes";
 import Loading from "@/components/loading";
 import Image from "next/image";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useCountdown } from "@/app/functions/timer";
 
 const ProductPage = () => {
     const { productId } = useParams();
+    const [product, setProduct] = useState(null);
     const [selectedSize, setSelectedSize] = useState("");
-    const [selectedColor, setSelectedColor] = useState("");
     const [isWishlisted, setIsWishlisted] = useState(false);
     const [pincode, setPincode] = useState("");
+    const timeLeft = useCountdown(product?.offerEndTime);
     const [isZoomed, setIsZoomed] = useState(false);
-    const [product, setProduct] = useState(null);
-    const [activeImage, setActiveImage] = useState(product?.images?.[0]);
+    const [activeImage, setActiveImage] = useState(product?.images[0]);
+    const [selectedColor, setSelectedColor] = useState(product?.colors[0]);
+
+    const imageColorMap = product?.images?.map((image, index) => ({
+        image,
+        color: product?.colors[index],
+    }));
+
+    const handleImageClick = (item) => {
+        setActiveImage(item.image);
+        setSelectedColor(item.color);
+    };
 
     useEffect(() => {
-        // Fetch product based on productId from dummy data
         const foundProduct = MenTopwear.find((item) => item.id === parseInt(productId));
         setProduct(foundProduct);
     }, [productId]);
@@ -31,74 +43,108 @@ const ProductPage = () => {
     if (!product) return <Loading />;
 
     return (
-        <div className="container mx-auto py-6">
-            <div className="flex items-start justify-between gap-6">
-                <motion.div className="flex items-start justify-between gap-2 h-fit w-[45%]">
-                    <div className="relative">
-                        {/* <AspectRatio ratio={16 / 9}> */}
-                        <Image
-                            src={activeImage}
-                            width={500}
-                            height={500}
-                            alt="Active product image"
-                            className="object-cover w-[500px] rounded-md border border-border"
-                        />
-                        {/* </AspectRatio> */}
-                    </div>
-
-                    <div className="flex flex-col gap-2 items-center justify-around w-fit">
-                        {product?.images?.slice(0, 3).map((item, index) => (
-                            <div
-                                key={index}
-                                className={`p-1 border ${activeImage === item ? "border-primary-default/50" : "border-border"} rounded-md cursor-pointer`}
-                                onClick={() => setActiveImage(item)}
-                            >
-                                <Image
-                                    src={item}
-                                    width={100}
-                                    height={100}
-                                    alt={`Thumbnail ${index + 1}`}
-                                    className="w-[100px] object-cover rounded-lg"
-                                />
-                            </div>
-                        ))}
-                    </div>
+        <motion.div className="container mx-auto py-6">
+            <motion.div className="flex items-start justify-between gap-6">
+                <motion.div className="grid grid-cols-2 grid-rows-4 h-fit w-2/3">
+                    {product?.images?.map((item, index) => (
+                        <motion.div
+                            key={index}
+                            className="border border-border -m-[.5px] rounded-none"
+                            onClick={() => setActiveImage(item)}>
+                            <Image
+                                src={item}
+                                width={1000}
+                                height={1000}
+                                alt={`Thumbnail ${index + 1}`}
+                                className="object-cover w-full h-full"
+                            />
+                        </motion.div>
+                    ))}
                 </motion.div>
-                <Separator orientation="vertical" className="mx-4" />
-                <motion.div className="w-[55%]">
-                    <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-                    <p className="text-2xl font-semibold mb-4">${product.price}</p>
+                <motion.div className="flex flex-col gap-4 w-1/3">
+                    <motion.div className="">
+                        <motion.div div className="flex items-center gap-2 justify-between" >
+                            <h1 className="text-subheading font-subheading">{product.name}</h1>
+                            <Button size="icon" onClick={() => setIsWishlisted(!isWishlisted)} className="border border-border rounded-full w-fit h-fit p-2 hover:bg-primary-default/10">
+                                <Heart size={18} className={` ${isWishlisted ? "text-destructive-default fill-destructive-default" : "text-primary-default"}`} />
+                            </Button>
+                        </motion.div >
+                        <motion.div className="flex items-center gap-2">
+                            <Users className="w-3 h-3" />
+                            <p className="text-xs">{product.totalBuyers} people bought this</p>
+                        </motion.div>
+                    </motion.div>
+                    <motion.div className="flex flex-col gap-2 ">
+                        <motion.div className="flex flex-wrap gap-2 items-baseline">
+                            <p className="text-primary-default text-description">Price:</p>
+                            <p className="text-small text-muted-foreground line-through font-description">${product.original_price}</p>
+                            <p className="text-subheading font-description px-2 py-1 -skew-x-12 bg-accent-default">${product.discounted_price}</p>
+                        </motion.div>
+                    </motion.div>
 
-                    {/* Sizes */}
-                    <div className="mb-6">
-                        <h3 className="text-lg font-medium mb-2">Select Size</h3>
-                        <div className="flex gap-2">
-                            {product.sizes.map((size) => (
-                                <Button key={size} variant={selectedSize === size ? "default" : "outline"} onClick={() => setSelectedSize(size)}>
-                                    {size}
-                                </Button>
+                    <motion.div className="gap-2 flex flex-col">
+                        <motion.div className="flex gap-4 w-fit">
+                            <h3 className="text-small font-description">Color:</h3>
+                            {imageColorMap?.slice(0, 3).map((item, index) => (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger>
+                                            <motion.div
+                                                key={index}
+                                                className={`border ${activeImage === item.image ? "border-accent-default text-accent-default" : "border-border"
+                                                    } rounded-md cursor-pointer`}
+                                                onClick={() => handleImageClick(item)}>
+                                                <Image
+                                                    src={item.image}
+                                                    width={100}
+                                                    height={100}
+                                                    alt={`Thumbnail ${index + 1}`}
+                                                    className="w-[80px] object-cover rounded-lg"
+                                                />
+                                            </motion.div>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" >
+                                            {selectedColor} this is tooltip
+                                            <TooltipArrow />
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             ))}
-                        </div>
-                        {/* <p className="text-sm text-gray-500 mt-2">{product.stock} items left</p> */}
-                    </div>
-
-                    {/* Colors */}
-                    <div className="mb-6">
-                        <h3 className="text-lg font-medium mb-2">Select Color</h3>
-                        <div className="flex gap-2">
-                            {product.colors.map((color) => (
-                                <div
-                                    key={color}
-                                    className={`w-8 h-8 rounded-full cursor-pointer border-2 ${selectedColor === color ? "border-black" : "border-transparent"}`}
-                                    style={{ backgroundColor: color }}
-                                    onClick={() => setSelectedColor(color)}
-                                />
+                        </motion.div>
+                    </motion.div>
+                    <motion.div className="gap-2 flex flex-col">
+                        <motion.div className="flex gap-4">
+                            {product.stock.map(({ size, quantity }) => (
+                                <motion.div className="flex flex-col items-start gap-2" key={size}>
+                                    <Button
+                                        className={`rounded-md outline outline-1 ${selectedSize === size ? "bg-accent-default outline-accent-default" : "outline-border text-primary-default"} min-w-20 w-full hover:bg-primary-default/10 transition-all font-heading ease-in-out select-none`}
+                                        onClick={() => setSelectedSize(size)}>
+                                        {size}
+                                    </Button>
+                                    <span className="text-muted-foreground/70 text-xs">
+                                        {quantity} left
+                                    </span>
+                                </motion.div>
                             ))}
-                        </div>
-                    </div>
+                        </motion.div>
+                        <motion.div className="flex items-center gap-2 justify-between">
+                            <h3 className="text-small">Sizes:
+                                {selectedSize && <Badge className="mx-2 text-xs bg-primary-default">
+                                    {selectedSize}
+                                </Badge>}
+                            </h3>
+                            <p className="flex items-center gap-2 text-xs">
+                                Need Help? Check our size guide
+                                <Link href={"#"} className="flex items-center gap-1 my-4 hover:underline underline-offset-2">
+                                    <Ruler className="w-4 h-4" />
+                                    Size Guide
+                                </Link>
+                            </p>
+                        </motion.div>
+                    </motion.div>
 
                     {/* EMI Options */}
-                    <div className="mb-6">
+                    <motion.div div className="gap-2 flex flex-col" >
                         <h3 className="text-lg font-medium mb-2">EMI Options</h3>
                         <Select>
                             <SelectTrigger className="w-full">
@@ -112,48 +158,41 @@ const ProductPage = () => {
                                 ))}
                             </SelectContent>
                         </Select>
-                    </div>
-
+                    </motion.div >
                     {/* Pincode Check */}
-                    <div className="mb-6">
+                    <motion.div div className="gap-2 flex flex-col" >
                         <h3 className="text-lg font-medium mb-2">Check Delivery</h3>
-                        <div className="flex gap-2">
+                        <motion.div className="flex gap-2">
                             <Input placeholder="Enter Pincode" value={pincode} onChange={(e) => setPincode(e.target.value)} />
                             <Button>Check</Button>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div >
 
                     {/* Offer Timer */}
-                    <div className="mb-6">
+                    <motion.div className="gap-2 flex flex-col">
                         <h3 className="text-lg font-medium mb-2">Offer Ends In</h3>
-                        <div className="flex items-center gap-2">
+                        <motion.div className="flex items-center gap-2">
                             <Clock className="w-5 h-5" />
-                            <p className="text-sm">{product.offerEndTime}</p>
-                        </div>
-                    </div>
+                            <p className="text-sm">
+                                {timeLeft.days}d : {timeLeft.hours}h : {timeLeft.minutes}m : {timeLeft.seconds}s
+                            </p>
+                        </motion.div>
+                    </motion.div>
 
                     {/* Total Buyers */}
-                    <div className="mb-6">
+                    <motion.div div className="mb-6" >
                         <h3 className="text-lg font-medium mb-2">Total Buyers</h3>
-                        <div className="flex items-center gap-2">
-                            <Users className="w-5 h-5" />
-                            <p className="text-sm">{product.totalBuyers} people bought this</p>
-                        </div>
-                    </div>
 
-                    {/* Wishlist */}
-                    <div className="mb-6">
-                        <Button variant="outline" onClick={() => setIsWishlisted(!isWishlisted)}>
-                            <Heart className={`w-5 h-5 mr-2 ${isWishlisted ? "text-red-500 fill-red-500" : ""}`} />
-                            {isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
-                        </Button>
-                    </div>
+                    </motion.div >
 
-                    {/* Add to Cart */}
-                    <Button className="w-full">Add to Cart</Button>
-                </motion.div>
-            </div>
-        </div >
+                    <span className="text-small text-primary-default line-through">${product.discount} off</span>
+                    <Button className="w-full bg-primary-default font-extralight" >
+                        Add To Cart
+                        <ShoppingCart className="w-5 h-5" />
+                    </Button >
+                </motion.div >
+            </motion.div >
+        </motion.div >
     );
 };
 

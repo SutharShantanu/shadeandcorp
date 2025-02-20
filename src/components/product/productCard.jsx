@@ -25,7 +25,7 @@ const ProductCard = ({ product }) => {
   return (
     <motion.div
       key={product.id}
-      className="border border-border border-separate border-dashed hover:bg-muted-default/20 hover:shadow-md rounded-lg h-fit">
+      className="border border-border border-separate border-dashed hover:bg-muted-default/20 hover:shadow-md h-fit">
       <Card className="w-full border-none h-fit">
         <CardHeader className="p-0 w-full overflow-hidden relative rounded-t-md">
           {/* {product.images.map((image, index) => (
@@ -91,14 +91,14 @@ const ProductCard = ({ product }) => {
           </Link>
         </CardContent>
         <CardFooter className="flex flex-col items-center p-0 sm:flex-row sm:justify-between divide-x divide-border">
-          <Button className="w-full bg-primary-default text-primary-foreground rounded-none rounded-bl-md hover:bg-primary-default/80">
+          <Button className="w-full bg-primary-default text-primary-foreground rounded-none hover:bg-primary-default/80">
             <ShoppingCart
               className="w-5 h-5 text-primary-foreground cursor-pointer"
               aria-label="add to cart"
             />
             Add to Cart
           </Button>
-          <Button className="w-full bg-primary-default text-primary-foreground rounded-none rounded-br-md hover:bg-primary-default/80">
+          <Button className="w-full bg-primary-default text-primary-foreground rounded-none hover:bg-primary-default/80">
             <Sparkles
               className="w-5 h-5 text-primary-foreground cursor-pointer"
               aria-label="buy now" />
