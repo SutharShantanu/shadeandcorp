@@ -3,65 +3,66 @@
 @tailwind utilities;
 
 body {
-  color: #333333; /* Softer text color */
-  background: #f4f4f4; /* Light background for better readability */
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: "Work Sans", sans-serif;
 }
 
 @layer base {
   :root {
-    --background: #f4f4f4; /* Lighter background */
-    --foreground: #333333; /* Darker text for good contrast */
-    --card: #ffffff; /* White cards for contrast */
-    --card-foreground: #333333; /* Dark text on cards */
-    --popover: #ffffff; /* White popovers */
-    --popover-foreground: #333333; /* Dark text on popovers */
-    --primary: #2d2d2d; /* Darker primary color */
-    --primary-foreground: #fafafa; /* Lighter foreground */
-    --secondary: #f9f9f9; /* Soft light secondary background */
-    --secondary-foreground: #2d2d2d; /* Dark text on secondary */
-    --muted: #e1e1e1; /* Muted light gray */
-    --muted-foreground: #666666; /* Slightly darker muted text */
-    --accent: #4b8e8d; /* Soft teal accent */
-    --accent-foreground: #ffffff; /* Light accent text */
-    --destructive: #e57373; /* Softer red for destructive actions */
-    --destructive-foreground: #333333; /* Dark text on destructive */
-    --border: #d1d1d1; /* Soft border color */
-    --input: #ffffff; /* White input fields */
-    --ring: #4b8e8d; /* Accent color for focus ring */
-    --chart-1: #f4a261; /* Softer orange for charts */
-    --chart-2: #06d6a0; /* Soft green */
-    --chart-3: #457b9d; /* Soft blue */
-    --chart-4: #f77f00; /* Muted yellow */
-    --chart-5: #e63946; /* Soft red */
-    --radius: 0.5rem; /* Rounded corners */
+    --background: #f4f4f4;
+    --foreground: #333333;
+    --card: #ffffff;
+    --card-foreground: #333333;
+    --popover: #ffffff;
+    --popover-foreground: #333333;
+    --primary: #2d2d2d;
+    --primary-foreground: #fafafa;
+    --secondary: #f9f9f9;
+    --secondary-foreground: #2d2d2d;
+    --muted: #e1e1e1;
+    --muted-foreground: #666666;
+    --accent: #fb6900;
+    --accent-foreground: #2d2d2d;
+    --destructive: #ef4444;
+    --destructive-foreground: #333333;
+    --border: #d1d1d1;
+    --separator: #d1d1d1;
+    --input: #ffffff;
+    --ring: #4b8e8d;
+    --chart-1: #f4a261;
+    --chart-2: #06d6a0;
+    --chart-3: #457b9d;
+    --chart-4: #f77f00;
+    --chart-5: #e63946;
+    --radius: 0.5rem;
   }
 
   .dark {
-    --background: #2d2d2d; /* Dark background for dark mode */
-    --foreground: #fafafa; /* Light text in dark mode */
-    --card: #333333; /* Dark cards */
-    --card-foreground: #fafafa; /* Light text on dark cards */
-    --popover: #333333; /* Dark popovers */
-    --popover-foreground: #fafafa; /* Light text on dark popovers */
-    --primary: #fafafa; /* Light primary text */
-    --primary-foreground: #2d2d2d; /* Dark foreground on primary */
-    --secondary: #444444; /* Darker secondary background */
-    --secondary-foreground: #fafafa; /* Light text on dark secondary */
-    --muted: #555555; /* Darker muted background */
-    --muted-foreground: #a3a3a3; /* Light muted text */
-    --accent: #2d2d2d; /* Dark accent */
-    --accent-foreground: #fafafa; /* Light accent text */
-    --destructive: #d32f2f; /* Softer red for dark mode destructive actions */
-    --destructive-foreground: #fafafa; /* Light text on dark destructive */
-    --border: #555555; /* Darker borders */
-    --input: #444444; /* Darker input fields */
-    --ring: #e1e1e1; /* Light ring color */
-    --chart-1: #3b82f6; /* Soft blue */
-    --chart-2: #10b981; /* Soft green */
-    --chart-3: #f59e0b; /* Muted yellow */
-    --chart-4: #9333ea; /* Soft purple */
-    --chart-5: #ec4899; /* Soft pink */
+    --background: #2d2d2d;
+    --foreground: #fafafa;
+    --card: #333333;
+    --card-foreground: #fafafa;
+    --popover: #333333;
+    --popover-foreground: #fafafa;
+    --primary: #fafafa;
+    --primary-foreground: #2d2d2d;
+    --secondary: #444444;
+    --secondary-foreground: #fafafa;
+    --muted: #555555;
+    --muted-foreground: #a3a3a3;
+    --accent: #2d2d2d;
+    --accent-foreground: #fafafa;
+    --destructive: #d32f2f;
+    --destructive-foreground: #fafafa;
+    --border: #555555;
+    --input: #444444;
+    --ring: #e1e1e1;
+    --chart-1: #3b82f6;
+    --chart-2: #10b981;
+    --chart-3: #f59e0b;
+    --chart-4: #9333ea;
+    --chart-5: #ec4899;
   }
 }
 
@@ -84,4 +85,33 @@ body {
     color: #2d2d2d;
     transition: background-color 0.3s ease, color 0.3s ease-in-out;
   }
+}
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--primary);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground);
 }
