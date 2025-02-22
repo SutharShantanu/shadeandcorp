@@ -25,7 +25,6 @@ const CategoryPage = () => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = MenTopwear.slice(indexOfFirstItem, indexOfLastItem);
-
   const totalPages = Math.ceil(MenTopwear.length / itemsPerPage);
 
   const handleNextPage = () => {

@@ -16,13 +16,6 @@ import {
     TabsTrigger
 } from "@/components/ui/tabs"
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue
-} from "@/components/ui/select";
-import {
     Heart,
     Clock,
     Users,
@@ -56,16 +49,20 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator";
+import { useRefineUrl } from "@/app/functions/pathname";
+import { calculateEMI } from "@/app/functions/emiCalculate";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 
 const ProductPage = () => {
-    const { productId } = useParams();
+    const { productName } = useParams();
+    const refinedName = useRefineUrl(productName);
     const [product, setProduct] = useState(null);
     const [selectedSize, setSelectedSize] = useState("");
     const [isWishlisted, setIsWishlisted] = useState(false);
     const [pincode, setPincode] = useState("");
-    const timeLeft = useCountdown(product?.offerEndTime);
     const [isZoomed, setIsZoomed] = useState(false);
+    const timeLeft = useCountdown(product?.offerEndTime);
     const [activeImage, setActiveImage] = useState(product?.images[0]);
     const [selectedColor, setSelectedColor] = useState(product?.colors[0]);
 
@@ -80,11 +77,16 @@ const ProductPage = () => {
     };
 
     useEffect(() => {
-        const foundProduct = MenTopwear.find((item) => item.id === parseInt(productId));
+        const foundProduct = MenTopwear.find(
+            (item) => item.name.toLowerCase() === refinedName.toLowerCase()
+        );
+
+        console.log(foundProduct);
         setProduct(foundProduct);
-    }, [productId]);
+    }, [refinedName]);
 
     if (!product) return <Loading />;
+
 
     return (
         <motion.div className="container mx-auto py-6">
@@ -122,7 +124,7 @@ const ProductPage = () => {
                         <motion.div className="flex flex-wrap gap-2 items-baseline">
                             <p className="text-primary-default text-description">Price:</p>
                             <p className="text-small text-muted-foreground line-through font-description">${product.original_price}</p>
-                            <p className="text-subheading font-description px-2 py-1 -skew-x-12 bg-accent-default">${product.discounted_price}</p>
+                            <p className="text-subheading font-description px-2 py-1 -skew-x-12 text-primary-foreground bg-accent-default">${product.discounted_price}</p>
                         </motion.div>
                     </motion.div>
 
@@ -182,23 +184,7 @@ const ProductPage = () => {
                             <SizeGuide />
                         </motion.div>
                     </motion.div>
-
-                    <motion.div className="gap-2 flex flex-col" >
-                        <h3 className="text-lg font-medium mb-2">EMI Options</h3>
-                        <Select>
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select EMI Plan" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {Object.entries(product.emiOptions).map(([key, option]) => (
-                                    <SelectItem key={key} value={key}>
-                                        {`${option.size} - ${option.quantity} months`}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </motion.div >
-
+                    <EMI price={product.discounted_price} />
                     <motion.div className="gap-2 flex flex-col" >
                         <h3 className="text-lg font-medium mb-2">Check Delivery</h3>
                         <motion.div className="flex gap-2">
@@ -230,7 +216,47 @@ const ProductPage = () => {
 
 export default ProductPage;
 
-
+const EMI = ({ price }) => {
+    const emiOptions = calculateEMI(price, [3, 6, 9, 12], 8);
+    return (
+        <Accordion type="single" collapsible className="w-full">
+            <AccordionItem value="emi">
+                <AccordionTrigger className="hover:no-underline">
+                    <span className="flex items-center gap-2">
+                        EMI & Pay Later Options
+                        <Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/2560px-UPI-Logo-vector.svg.png"
+                            alt="UPI Logo"
+                            className="max-w-10 w-10"
+                            width={50} height={50} />
+                    </span>
+                </AccordionTrigger>
+                <AccordionContent>
+                    <p className="mb-2 text-sm text-gray-600">Pay in easy installments with 0% EMI options.</p>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Duration</TableHead>
+                                <TableHead>Monthly Payment</TableHead>
+                                <TableHead>Total Interest</TableHead>
+                                <TableHead>Provider</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {Object.entries(emiOptions).map(([months, emiData], index) => (
+                                <TableRow key={months}>
+                                    <TableCell>{months} Months</TableCell>
+                                    <TableCell>₹{emiData.emi}</TableCell>
+                                    <TableCell>{emiData.interest > 0 ? `₹${emiData.interest}` : "No Interest"}</TableCell>
+                                    <TableCell>{index % 2 === 0 ? "Amazon Pay Later" : "Bajaj Finance"}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </AccordionContent>
+            </AccordionItem>
+        </Accordion>
+    )
+}
 
 const SizeGuide = () => {
 

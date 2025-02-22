@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
 
+/**
+ * Custom hook to create a countdown timer.
+ *
+ * @param {Date|string} targetDate - The target date and time for the countdown.
+ * @returns {Object} An object containing the time left in days, hours, minutes, and seconds.
+ *
+ * @example
+ * const targetDate = new Date('2023-12-31T23:59:59');
+ * const { days, hours, minutes, seconds } = useCountdown(targetDate);
+ */
 export const useCountdown = (targetDate) => {
     const calculateTimeLeft = () => {
         const difference = new Date(targetDate) - new Date();
