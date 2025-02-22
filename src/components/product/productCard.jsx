@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
-import { Heart, Router, ShoppingCart, Sparkles } from "lucide-react";
+import { Heart, ShoppingCart, Sparkles } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
@@ -49,7 +49,7 @@ const ProductCard = ({ product }) => {
             className={`absolute top-0 right-2 bg-transparent rounded-full p-0 transition-all ease-in-out ${isFavourite ? "text-accent-default fill-accent-default" : "text-primary-default"}`} />
         </CardHeader>
         <CardContent className="p-4 hover:cursor-pointer group">
-          <Link href={`/${formattedPath}/${product.id}`} passHref>
+          <Link href={`/${formattedPath}/${product.name}`} passHref>
             <div className="flex items-center gap-2 justify-between">
               <CardTitle className="text-description font-description truncate group-hover:underline underline-offset-2 group-hover:text-accent-default">{product.name}</CardTitle>
             </div>

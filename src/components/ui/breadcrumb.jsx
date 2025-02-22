@@ -23,7 +23,7 @@ BreadcrumbList.displayName = "BreadcrumbList"
 const BreadcrumbItem = React.forwardRef(({ className, ...props }, ref) => (
   <li
     ref={ref}
-    className={cn("inline-flex items-center gap-1.5", className)}
+    className={cn("inline-flex items-center gap-1", className)}
     {...props} />
 ))
 BreadcrumbItem.displayName = "BreadcrumbItem"

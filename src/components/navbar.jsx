@@ -488,7 +488,6 @@ const Navbar = () => {
                     <ul className="grid grid-cols-6 gap-4 p-4 divide-2">
                       {item.categories &&
                         item.categories.map((items, index) => (
-                          // <NavigationMenuLink asChild>
                           <li
                             key={`${items.href}-subcategory-${index}`}
                             className="text-primary-default text-xs py-1 group"
@@ -516,7 +515,6 @@ const Navbar = () => {
                               </ul>
                             </NavigationMenuLink>
                           </li>
-                          // </NavigationMenuLink>
                         ))}
                     </ul>
                   </NavigationMenuContent>
@@ -750,7 +748,7 @@ const BreadCrumbs = () => {
 
   const capitalize = (str) => {
     return str
-      .replace(/[^a-zA-Z0-9 ]/g, "")
+      .replace(/[^a-zA-Z0-9 -]/g, "")
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
