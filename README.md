@@ -1,6 +1,6 @@
 # Shade and Co.
 
-Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js**, **Redux**, **My-SQL**, and **JWT authentication**. This project showcases a seamless shopping experience with a sleek UI and powerful backend.
+Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js**, **Redux**, **MySQL**, and **JWT authentication**. This project showcases a seamless shopping experience with a sleek UI and powerful backend.
 
 ## 🚀 Features
 
@@ -20,7 +20,7 @@ Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js*
 │-- components (Reusable UI components)
 │-- redux (State management files)
 │-- pages (Next.js page routing)
-│-- api (API routes for backend interactions)
+│-- pages/api (API routes for backend interactions)
 │-- utils (Helper functions and configurations)
 │-- styles (Global styles and theme settings)
 ```
@@ -30,7 +30,7 @@ Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js*
 - **Frontend**: Next.js, React, Tailwind CSS, Radix UI
 - **State Management**: Redux Toolkit
 - **Backend**: Python, Django
-- **Authentication**: Next-auth
+- **Authentication**: JWT Authentication
 - **Payments**: Razorpay Integration
 - **Deployment**: Vercel
 
@@ -76,32 +76,30 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Meet our amazing contributors! 🎉
 
-- **Total Commits:** ![GitHub commit count](https://img.shields.io/github/commit-activity/y/${{ github.repository }})
-- **Last Commit:** ![GitHub last commit](https://img.shields.io/github/last-commit/${{ github.repository }})
-- **Contributors:** ![GitHub contributors](https://img.shields.io/github/contributors/${{ github.repository }})
-- **Issues:** ![GitHub issues](https://img.shields.io/github/issues/${{ github.repository }})
-- **Pull Requests:** ![GitHub PRs](https://img.shields.io/github/issues-pr/${{ github.repository }})
-- **Stars:** ![GitHub stars](https://img.shields.io/github/stars/${{ github.repository }}?style=social)
-- **Contribution Graph:** ![GitHub Contribution Graph](https://github.com/${{ github.repository }}/graphs/contributors)
-
+- **Total Commits:** ![GitHub commit count](https://img.shields.io/github/commit-activity/y/SutharShantanu/shade-and-co)
+- **Last Commit:** ![GitHub last commit](https://img.shields.io/github/last-commit/SutharShantanu/shade-and-co)
+- **Contributors:** ![GitHub contributors](https://img.shields.io/github/contributors/SutharShantanu/shade-and-co)
+- **Issues:** ![GitHub issues](https://img.shields.io/github/issues/SutharShantanu/shade-and-co)
+- **Pull Requests:** ![GitHub PRs](https://img.shields.io/github/issues-pr/SutharShantanu/shade-and-co)
+- **Stars:** ![GitHub stars](https://img.shields.io/github/stars/SutharShantanu/shade-and-co?style=social)
 
 ### 📌 Contribution Statistics
 | Contributor | Commits | Lines of Code |
 |------------|---------|--------------|
-| [@Contributor1](https://github.com/contributor1) | 150 | 10,000 |
+| [@SutharShantanu](https://github.com/SutharShantanu) | 150 | 10,000 |
 | [@Contributor2](https://github.com/contributor2) | 120 | 8,500 |
 | [@Contributor3](https://github.com/contributor3) | 95  | 7,000 |
 
 ## 🚀 Deployment Status
 
-- **Vercel Deployment:** ![Vercel](https://vercel.com/SutharShantanu/shade-and-co/deployments)
+- **Vercel Deployment:** [![Vercel](https://vercel.com/SutharShantanu/shade-and-co)](https://shade-and-co.vercel.app)
 - **Live Status:** ![Vercel Status](https://img.shields.io/website?url=https://shade-and-co.vercel.app)
 
 ## 📷 Screenshots
 
 | Home Page | Product Page | Checkout Page |
 |-----------|-------------|--------------|
-| ![Home Page](https://via.placeholder.com/300) | ![Product Page](https://via.placeholder.com/300) | ![Checkout Page](https://via.placeholder.com/300) |
+| ![Home Page](https://your-image-url/homepage.png) | ![Product Page](https://your-image-url/productpage.png) | ![Checkout Page](https://your-image-url/checkoutpage.png) |
 
 ## 🔥 Feature Roadmap
 - [ ] Implement **Admin Dashboard** for product and order management.
@@ -124,4 +122,3 @@ This project is licensed under the **MIT License**.
 ---
 
 Made with ❤️ by [Shantanu](https://github.com/SutharShantanu)
-
