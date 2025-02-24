@@ -2,6 +2,8 @@
 
 Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js**, **Redux**, **MySQL**, and **JWT authentication**. This project showcases a seamless shopping experience with a sleek UI and powerful backend.
 
+---
+
 ## 🚀 Features
 
 - **User Authentication**: Secure login and signup using **JWT-based authentication**.
@@ -11,6 +13,36 @@ Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js*
 - **Smooth Animations**: Implemented using Framer Motion and Tailwind CSS.
 - **Responsive Design**: Optimized for both desktop and mobile views.
 - **Payment Gateway**: Secure online payments using **Razorpay**.
+
+---
+
+## 📊 Project Stats
+
+| Statistic       | Badge |
+|---------------|-------|
+| Last Commit   | ![GitHub last commit](https://img.shields.io/github/last-commit/SutharShantanu/shadeandcorp) |
+| Repository Size | ![GitHub repo size](https://img.shields.io/github/repo-size/SutharShantanu/shadeandcorp) |
+| Contributors   | ![GitHub contributors](https://img.shields.io/github/contributors/SutharShantanu/shadeandcorp) |
+| Open Issues   | ![GitHub issues](https://img.shields.io/github/issues/SutharShantanu/shadeandcorp) |
+| Open PRs      | ![GitHub pull requests](https://img.shields.io/github/issues-pr/SutharShantanu/shadeandcorp) |
+| Forks         | ![GitHub forks](https://img.shields.io/github/forks/SutharShantanu/shadeandcorp?style=social) |
+| Stars         | ![GitHub stars](https://img.shields.io/github/stars/SutharShantanu/shadeandcorp?style=social) |
+| Commit Activity | ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/SutharShantanu/shadeandcorp) |
+| Lines of Code | ![GitHub lines of code](https://img.shields.io/tokei/lines/github/SutharShantanu/shadeandcorp) |
+
+---
+
+## 🚀 Deployment Status
+
+| Deployment | Badge |
+|------------|-------|
+| Vercel Deployment | [![Vercel Deployment](https://img.shields.io/github/deployments/SutharShantanu/shadeandcorp/Production)](https://shadeandcorp.vercel.app) |
+| Website Status | ![Vercel Status](https://img.shields.io/website?url=https://shadeandcorp.vercel.app) |
+| Build Status | ![Vercel Build Time](https://img.shields.io/github/actions/workflow/status/SutharShantanu/shadeandcorp/vercel.yml?label=Build%20Status) |
+| Workflow Run | ![Github Workflow Run](https://github.com/github/docs/actions/workflows/update-readme.yml/badge.svg?event=push)
+
+
+---
 
 ## 📂 Project Structure
 
@@ -25,14 +57,20 @@ Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js*
 │-- styles (Global styles and theme settings)
 ```
 
+---
+
 ## 🛠️ Technologies Used
 
-- **Frontend**: Next.js, React, Tailwind CSS, Radix UI
-- **State Management**: Redux Toolkit
-- **Backend**: Python, Django
-- **Authentication**: JWT Authentication
-- **Payments**: Razorpay Integration
-- **Deployment**: Vercel
+| Category | Tools |
+|----------|-------|
+| **Frontend** | Next.js, React, Tailwind CSS, Radix UI |
+| **State Management** | Redux Toolkit |
+| **Backend** | Python, Django |
+| **Authentication** | JWT Authentication |
+| **Payments** | Razorpay Integration |
+| **Deployment** | Vercel |
+
+---
 
 ## 🚀 Getting Started
 
@@ -49,6 +87,7 @@ npm install  # or yarn install
 
 ### 3️⃣ Set Up Environment Variables
 Create a `.env.local` file in the root directory and add the following:
+
 ```env
 NEXT_PUBLIC_API_URL=your_api_url
 DJANGO_BACKEND_URL=your_django_backend_url
@@ -62,49 +101,35 @@ npm run dev  # or yarn dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📊 Project Analytics
-
-- **Collaborators:** See the contributors to the project [here](https://github.com/SutharShantanu/shadeandcorp/graphs/contributors).
-- **Total Contributions:** Displaying total commits per contributor as profile badges.
-- **Last Commit:** ![GitHub last commit](https://img.shields.io/github/last-commit/SutharShantanu/shadeandcorp)
-- **Commit Activity:** ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/SutharShantanu/shadeandcorp)
-- **Repository Timeline Graph:** [View graph](https://github.com/SutharShantanu/shadeandcorp/network)
-- **Open Issues:** ![GitHub issues](https://img.shields.io/github/issues/SutharShantanu/shadeandcorp)
-- **Pull Requests:** ![GitHub pull requests](https://img.shields.io/github/issues-pr/SutharShantanu/shadeandcorp)
+---
 
 ## 👥 Contributors
 
 Meet our amazing contributors! 🎉
 
-- **Total Commits:** ![GitHub commit count](https://img.shields.io/github/commit-activity/y/SutharShantanu/shadeandcorp)
-- **Last Commit:** ![GitHub last commit](https://img.shields.io/github/last-commit/SutharShantanu/shadeandcorp)
-- **Contributors:** ![GitHub contributors](https://img.shields.io/github/contributors/SutharShantanu/shadeandcorp)
-- **Issues:** ![GitHub issues](https://img.shields.io/github/issues/SutharShantanu/shadeandcorp)
-- **Pull Requests:** ![GitHub PRs](https://img.shields.io/github/issues-pr/SutharShantanu/shadeandcorp)
-- **Stars:** ![GitHub stars](https://img.shields.io/github/stars/SutharShantanu/shadeandcorp?style=social)
-
-### 📌 Contribution Statistics
 | Contributor | Commits | Lines of Code |
 |------------|---------|--------------|
-| [@SutharShantanu](https://github.com/SutharShantanu) | 150 | 10,000 |
-| [@Contributor2](https://github.com/contributor2) | 120 | 8,500 |
-| [@Contributor3](https://github.com/contributor3) | 95  | 7,000 |
+| @SutharShantanu | GitHub commits | Lines of Code |
+| @Contributor2 | GitHub commits | Lines of Code |
+| @Contributor3 | GitHub commits | Lines of Code |
 
-## 🚀 Deployment Status
-
-- **Vercel Deployment:** [![Vercel](https://vercel.com/SutharShantanu/shadeandcorp)](https://shadeandcorp.vercel.app)
-- **Live Status:** ![Vercel Status](https://img.shields.io/website?url=https://shadeandcorp.vercel.app)
+---
 
 ## 📷 Screenshots
 
 | Home Page | Product Page | Checkout Page |
-|-----------|-------------|--------------|
-| ![Home Page](https://your-image-url/homepage.png) | ![Product Page](https://your-image-url/productpage.png) | ![Checkout Page](https://your-image-url/checkoutpage.png) |
+|-----------|-------------|---------------|
+| ![Home Page](screenshot_home.png) | ![Product Page](screenshot_product.png) | ![Checkout Page](screenshot_checkout.png) |
+
+---
 
 ## 🔥 Feature Roadmap
-- [ ] Implement **Admin Dashboard** for product and order management.
-- [ ] Add **Order Tracking System**.
-- [ ] Integrate **Live Chat Support**.
+
+- ✅ Implement Admin Dashboard for product and order management.
+- ✅ Add Order Tracking System.
+- 🔄 Integrate Live Chat Support.
+
+---
 
 ## 🛒 Deployment
 
@@ -114,6 +139,8 @@ The project is deployed on **Vercel**. To deploy your own version, follow these 
 2. Go to [Vercel](https://vercel.com/) and import the repository.
 3. Set environment variables on Vercel.
 4. Deploy and enjoy! 🎉
+
+---
 
 ## 📜 License
 
