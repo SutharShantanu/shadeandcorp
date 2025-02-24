@@ -76,19 +76,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Meet our amazing contributors! 🎉
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-[![All Contributors](https://img.shields.io/github/all-contributors/SutharShantanu/shadeandcorp?color=ee8449&style=flat-square)](#contributors)
-![Repo Contribution Graph](https://github-contributions.vercel.app/api?user=SutharShantanu&repo=shadeandcorp)
-[![Contributors](https://contrib.rocks/image?repo=SutharShantanu/shade-and-co)](https://github.com/SutharShantanu/shade-and-co/graphs/contributors)
-[![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=SutharShantanu&repo=shadeandcorp&theme=github)](https://github.com/ashutosh00710/github-readme-activity-graph)
-
 ### 📌 Contribution Statistics
 | Contributor | Commits | Lines of Code |
 |------------|---------|--------------|
