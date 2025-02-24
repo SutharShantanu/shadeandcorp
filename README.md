@@ -20,15 +20,13 @@ Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js*
 
 | Statistic       | Badge |
 |---------------|-------|
-| Last Commit   | ![GitHub last commit](https://img.shields.io/github/last-commit/SutharShantanu/shadeandcorp) |
-| Repository Size | ![GitHub repo size](https://img.shields.io/github/repo-size/SutharShantanu/shadeandcorp) |
-| Contributors   | ![GitHub contributors](https://img.shields.io/github/contributors/SutharShantanu/shadeandcorp) |
-| Open Issues   | ![GitHub issues](https://img.shields.io/github/issues/SutharShantanu/shadeandcorp) |
-| Open PRs      | ![GitHub pull requests](https://img.shields.io/github/issues-pr/SutharShantanu/shadeandcorp) |
-| Forks         | ![GitHub forks](https://img.shields.io/github/forks/SutharShantanu/shadeandcorp?style=social) |
-| Stars         | ![GitHub stars](https://img.shields.io/github/stars/SutharShantanu/shadeandcorp?style=social) |
-| Commit Activity | ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/SutharShantanu/shadeandcorp) |
-| Lines of Code | ![GitHub lines of code](https://img.shields.io/tokei/lines/github/SutharShantanu/shadeandcorp) |
+| Repository Size | ![GitHub repo size](https://img.shields.io/github/repo-size/SutharShantanu/shadeandcorp?style=for-the-badge) |
+| Contributors   | ![GitHub contributors](https://img.shields.io/github/contributors/SutharShantanu/shadeandcorp?style=for-the-badge) |
+| Open Issues   | ![GitHub issues](https://img.shields.io/github/issues/SutharShantanu/shadeandcorp?style=for-the-badge) |
+| Open PRs      | ![GitHub pull requests](https://img.shields.io/github/issues-pr/SutharShantanu/shadeandcorp?style=for-the-badge) |
+| Forks         | ![GitHub forks](https://img.shields.io/github/forks/SutharShantanu/shadeandcorp?style=for-the-badge) |
+| Stars         | ![GitHub stars](https://img.shields.io/github/stars/SutharShantanu/shadeandcorp?style=for-the-badge) |
+| Commit Activity | ![GitHub commit activity](https://img.shields.io/github/commit-activity/t/SutharShantanu/shadeandcorp?style=for-the-badge) |
 
 ---
 
@@ -36,10 +34,10 @@ Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js*
 
 | Deployment | Badge |
 |------------|-------|
-| Vercel Deployment | [![Vercel Deployment](https://img.shields.io/github/deployments/SutharShantanu/shadeandcorp/Production)](https://shadeandcorp.vercel.app) |
-| Website Status | ![Vercel Status](https://img.shields.io/website?url=https://shadeandcorp.vercel.app) |
-| Build Status | ![Vercel Build Time](https://img.shields.io/github/actions/workflow/status/SutharShantanu/shadeandcorp/vercel.yml?label=Build%20Status) |
-| Workflow Run | ![Github Workflow Run](https://github.com/SutharShantanu/shadeandcorp/actions/workflows/update-readme.yml/badge.svg?event=push)
+| Vercel Deployment | ![Vercel Deployment](https://img.shields.io/github/deployments/SutharShantanu/shadeandcorp/Production?style=for-the-badge&logo=vercel) |
+| Website Status | ![Vercel Status](https://img.shields.io/website?url=https://shadeandcorp.vercel.app&style=for-the-badge) |
+| Build Status | ![Vercel Build Time](https://img.shields.io/github/actions/workflow/status/SutharShantanu/shadeandcorp/main.yml?label=Build%20Status&style=for-the-badge&logo=) |
+| Workflow Run | ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/SutharShantanu/shadeandcorp/update-readme.yml?style=for-the-badge&logo=githubactions&logoColor=white) |
 
 
 ---
@@ -109,9 +107,7 @@ Meet our amazing contributors! 🎉
 
 | Contributor | Commits | Lines of Code |
 |------------|---------|--------------|
-| @SutharShantanu | GitHub commits | ![Lines of Code](https://img.shields.io/github/commit-activity/y/SutharShantanu/shadeandcorp) |
-| @Contributor2 | GitHub commits | Lines of Code |
-| @Contributor3 | GitHub commits | Lines of Code |
+| @SutharShantanu | GitHub commits | ![Lines of Code](https://img.shields.io/github/commit-activity/t/SutharShantanu/shadeandcorp?style=for-the-badge) |
 
 ---
 
@@ -139,12 +135,6 @@ The project is deployed on **Vercel**. To deploy your own version, follow these 
 2. Go to [Vercel](https://vercel.com/) and import the repository.
 3. Set environment variables on Vercel.
 4. Deploy and enjoy! 🎉
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**.
 
 ---
 
