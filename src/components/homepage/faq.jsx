@@ -95,7 +95,7 @@ const FAQ = () => {
         <Accordion type="single" collapsible key={index}>
           <AccordionItem
             value={`faq-${index}`}
-            className="group hover:bg-primary-foreground/50 transition-all ease-in-out px-4 hover:rounded-sm border-b"
+            className="group hover:bg-primary-foreground/50 transition-all ease-in-out px-4 hover:rounded-md border-b"
           >
             <AccordionTrigger className="text-default-primary font-subheading group-hover:no-underline flex items-center gap-2">
               {faq.question}

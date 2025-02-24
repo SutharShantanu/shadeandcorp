@@ -61,7 +61,7 @@ const CategoryPage = () => {
         <motion.div className="flex gap-2 justify-between">
           <FilterBar />
           <motion.div
-            className={`w-5/6 grid ${layout === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2'} -m-[.5px] h-fit`}
+            className={`w-5/6 grid gap-2 ${layout === 'grid' ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2'} -m-[.5px] h-fit`}
           >
             {currentItems.map((product, index) => (
               <ProductCard key={product.id || index} product={product} />

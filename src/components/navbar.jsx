@@ -471,7 +471,7 @@ const Navbar = () => {
                   <NavigationMenuTrigger className="">
                     {item.name}
                   </NavigationMenuTrigger>
-                  <NavigationMenuContent className="p-4 flex-row flex justify-between rounded-sm">
+                  <NavigationMenuContent className="p-4 flex-row flex justify-between rounded-md">
                     <motion.div className="w-[300px] max-h-[250px]">
                       {/* {item.images &&
                         item.images.map((image, index) => (
@@ -530,7 +530,7 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className=" rounded-sm border-none outline-none backdrop-blur-lg bg-transparent"
+                className=" rounded-md border-none outline-none backdrop-blur-lg bg-transparent"
               />
               <Search
                 className="absolute right-3 top-2.5 h-5 w-5 text-primary-default cursor-pointer"

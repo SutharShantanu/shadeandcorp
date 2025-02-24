@@ -13,6 +13,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselDots,
+  CarouselItem,
+} from "@/components/ui/carousel"
+
 import Image from "next/image";
 import Link from "next/link";
 import { usePathSegments } from "@/app/functions/pathname";
@@ -25,19 +32,26 @@ const ProductCard = ({ product }) => {
   return (
     <motion.div
       key={product.id}
-      className="border border-border border-separate border-dashed hover:bg-muted-default/20 hover:shadow-md h-fit">
+      className="border border-border border-separate border-dashed rounded-md hover:bg-muted-default/20 hover:shadow-md h-fit">
       <Card className="w-full border-none h-fit">
         <CardHeader className="p-0 w-full overflow-hidden relative rounded-t-md">
-          {/* {product.images.map((image, index) => (
-            <Image
-              key={index}
-              width={500}
-              height={500}
-              src={image}
-              alt={`${product.name} image ${index + 1}`}
-              className="h-64 w-full object-cover rounded-t-md transition-transform duration-[1500] ease-in-out group-hover:scale-105"
-            />
-          ))} */}
+          <Carousel>
+            <CarouselContent>
+              {product.images.map((image, index) => (
+                <CarouselItem key={index}>
+                  <Image
+                    key={index}
+                    width={500}
+                    height={500}
+                    src={image}
+                    alt={`${product.name} image ${index + 1}`}
+                    className="h-64 w-full object-cover rounded-t-md transition-transform duration-[1500] ease-in-out group-hover:scale-105"
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselDots />
+          </Carousel>
           {product.discount && (
             <Badge className="absolute top-0 left-2 text-xs bg-accent-default text-primary-foreground px-2 py-[2px] text-nowrap">
               {product.discount}% OFF
@@ -46,7 +60,7 @@ const ProductCard = ({ product }) => {
           <Heart
             onClick={() => setIsFavourite((prev) => !prev)}
             absoluteStrokeWidth="1px"
-            className={`absolute top-0 right-2 bg-transparent rounded-full p-0 transition-all ease-in-out ${isFavourite ? "text-accent-default fill-accent-default" : "text-primary-default"}`} />
+            className={`absolute cursor-pointer top-0 right-2 bg-transparent rounded-full p-0 transition-all ease-in-out ${isFavourite ? "text-accent-default fill-accent-default" : "text-primary-default"}`} />
         </CardHeader>
         <CardContent className="p-4 hover:cursor-pointer group">
           <Link href={`/${formattedPath}/${product.name}`} passHref>
@@ -91,14 +105,14 @@ const ProductCard = ({ product }) => {
           </Link>
         </CardContent>
         <CardFooter className="flex flex-col items-center p-0 sm:flex-row sm:justify-between divide-x divide-border">
-          <Button className="w-full bg-primary-default text-primary-foreground rounded-none hover:bg-primary-default/80">
+          <Button className="w-full bg-primary-default text-primary-foreground rounded-none rounded-bl-md hover:bg-primary-default/80">
             <ShoppingCart
               className="w-5 h-5 text-primary-foreground cursor-pointer"
               aria-label="add to cart"
             />
             Add to Cart
           </Button>
-          <Button className="w-full bg-primary-default text-primary-foreground rounded-none hover:bg-primary-default/80">
+          <Button className="w-full bg-primary-default text-primary-foreground rounded-none rounded-br-md hover:bg-primary-default/80">
             <Sparkles
               className="w-5 h-5 text-primary-foreground cursor-pointer"
               aria-label="buy now" />
@@ -106,7 +120,7 @@ const ProductCard = ({ product }) => {
           </Button>
         </CardFooter>
       </Card>
-    </motion.div>
+    </motion.div >
   );
 };
 

@@ -47,7 +47,7 @@ const FilterBar = () => {
             <AccordionContent>
               {genders.map((gender) => (
                 <motion.div key={gender} className="flex items-center space-x-2 my-2">
-                  <Checkbox id={gender} className="border-primary-default/50 rounded-sm" />
+                  <Checkbox id={gender} className="border-primary-default/50 rounded-md" />
                   <Label htmlFor={gender} className="text-foreground text-xs">{gender}</Label>
                 </motion.div>
               ))}
@@ -60,7 +60,7 @@ const FilterBar = () => {
             <AccordionContent>
               {categories.map((category) => (
                 <motion.div key={category} className="flex items-center space-x-2 my-2">
-                  <Checkbox id={category} className="border-primary-default/50 rounded-sm" />
+                  <Checkbox id={category} className="border-primary-default/50 rounded-md" />
                   <Label htmlFor={category} className="text-foreground text-xs">{category}</Label>
                 </motion.div>
               ))}
@@ -98,7 +98,7 @@ const FilterBar = () => {
               />
               {filteredColors.map((color) => (
                 <div key={color} className="flex items-center space-x-2 mb-2">
-                  <Checkbox id={color} className="border-primary-default/50 rounded-sm" />
+                  <Checkbox id={color} className="border-primary-default/50 rounded-md" />
                   <Label htmlFor={color} className="text-foreground">{color}</Label>
                 </div>
               ))}
@@ -117,7 +117,7 @@ const FilterBar = () => {
               />
               {filteredSizes.map((size) => (
                 <div key={size} className="flex items-center space-x-2 my-2 cursor-pointer w-full">
-                  <Checkbox id={size} className="border-primary-default/50 rounded-sm" />
+                  <Checkbox id={size} className="border-primary-default/50 rounded-md" />
                   <Label htmlFor={size} className="text-foreground w-full ">{size}</Label>
                 </div>
               ))}
@@ -136,7 +136,7 @@ const FilterBar = () => {
               />
               {filteredBrands.map((brand) => (
                 <div key={brand} className="flex items-center space-x-2 mb-2">
-                  <Checkbox id={brand} className="border-primary-default/50 rounded-sm" />
+                  <Checkbox id={brand} className="border-primary-default/50 rounded-md" />
                   <Label htmlFor={brand} className="text-foreground">{brand}</Label>
                 </div>
               ))}
