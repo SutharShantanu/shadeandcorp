@@ -76,6 +76,15 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Meet our amazing contributors! 🎉
 
+- **Total Commits:** ![GitHub commit count](https://img.shields.io/github/commit-activity/y/${{ github.repository }})
+- **Last Commit:** ![GitHub last commit](https://img.shields.io/github/last-commit/${{ github.repository }})
+- **Contributors:** ![GitHub contributors](https://img.shields.io/github/contributors/${{ github.repository }})
+- **Issues:** ![GitHub issues](https://img.shields.io/github/issues/${{ github.repository }})
+- **Pull Requests:** ![GitHub PRs](https://img.shields.io/github/issues-pr/${{ github.repository }})
+- **Stars:** ![GitHub stars](https://img.shields.io/github/stars/${{ github.repository }}?style=social)
+- **Contribution Graph:** ![GitHub Contribution Graph](https://github.com/${{ github.repository }}/graphs/contributors)
+
+
 ### 📌 Contribution Statistics
 | Contributor | Commits | Lines of Code |
 |------------|---------|--------------|
