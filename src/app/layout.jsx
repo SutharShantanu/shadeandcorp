@@ -5,6 +5,7 @@ import Footer from "@/components/footer";
 import Loading from "@/components/loading";
 import { Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { SessionProvider } from "next-auth/react";
 
 const forum = Forum({ weight: "400", subsets: ["latin"] });
 const workSans = Work_Sans({ weight: "400", subsets: ["latin"] });
@@ -16,20 +17,23 @@ export const metadata = {
 
 export default function RootLayout ({ children }) {
   return (
-    <html lang="en">
-      <body
-        className={`${forum.className} ${workSans.className} antialiased`}
-        suppressHydrationWarning={true}
-      >
-        <Suspense fallback={<Loading />}>
-          <Navbar />
-          <div className="mt-[99px]">{children}
+    <SessionProvider>
+      <html lang="en">
 
-            <Toaster richColors position="bottom-right" />
-            <Footer />
-          </div>
-        </Suspense>
-      </body>
-    </html>
+        <body
+          className={`${forum.className} ${workSans.className} antialiased`}
+          suppressHydrationWarning={true}
+        >
+          <Suspense fallback={<Loading />}>
+            <Navbar />
+            <div className="mt-[99px]">{children}
+
+              <Toaster richColors position="bottom-right" />
+              <Footer />
+            </div>
+          </Suspense>
+        </body>
+      </html>
+    </SessionProvider>
   );
 }
