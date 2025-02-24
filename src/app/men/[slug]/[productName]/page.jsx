@@ -107,7 +107,7 @@ const ProductPage = () => {
     return (
         <motion.div className="container mx-auto py-6">
             <motion.div className="flex items-start justify-between gap-6">
-                <motion.div className="grid grid-cols-2 grid-rows-4 h-fit w-2/3">
+                <motion.div className="grid grid-cols-2 grid-rows-2 h-fit w-2/3">
                     {product?.images?.map((item, index) => (
                         <motion.div
                             key={index}
