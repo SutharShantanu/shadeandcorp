@@ -109,7 +109,7 @@ Meet our amazing contributors! 🎉
 
 | Contributor | Commits | Lines of Code |
 |------------|---------|--------------|
-| @SutharShantanu | GitHub commits | Lines of Code |
+| @SutharShantanu | GitHub commits | ![Lines of Code](https://img.shields.io/github/commit-activity/y/SutharShantanu/shadeandcorp) |
 | @Contributor2 | GitHub commits | Lines of Code |
 | @Contributor3 | GitHub commits | Lines of Code |
 
