@@ -76,6 +76,15 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Meet our amazing contributors! 🎉
 
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+[![All Contributors](https://img.shields.io/github/all-contributors/SutharShantanu/shadeandcorp?color=ee8449&style=flat-square)](#contributors)
 [![Contributors](https://contrib.rocks/image?repo=SutharShantanu/shade-and-co)](https://github.com/SutharShantanu/shade-and-co/graphs/contributors)
 
 ### 📌 Contribution Statistics
