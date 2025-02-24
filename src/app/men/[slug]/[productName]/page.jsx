@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useSession } from "next-auth/react"
 import Loading from "@/components/loading";
 import Image from "next/image";
 import {
@@ -22,7 +23,8 @@ import {
     Ruler,
     ShoppingCart,
     MoveHorizontal,
-    MoveVertical
+    MoveVertical,
+    Truck
 } from "lucide-react";
 import {
     Dialog,
@@ -52,17 +54,18 @@ import { Separator } from "@/components/ui/separator";
 import { useRefineUrl } from "@/app/functions/pathname";
 import { calculateEMI } from "@/app/functions/emiCalculate";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { z } from "zod";
+import axios from "axios";
+import { Spinner } from "@/components/ui/spinner";
 
 
 const ProductPage = () => {
     const { productName } = useParams();
     const refinedName = useRefineUrl(productName);
     const [product, setProduct] = useState(null);
-    const [selectedSize, setSelectedSize] = useState("");
     const [isWishlisted, setIsWishlisted] = useState(false);
-    const [pincode, setPincode] = useState("");
-    const [isZoomed, setIsZoomed] = useState(false);
     const timeLeft = useCountdown(product?.offerEndTime);
+    const [isLoading, setIsLoading] = useState(false);
     const [activeImage, setActiveImage] = useState(product?.images[0]);
     const [selectedColor, setSelectedColor] = useState(product?.colors[0]);
 
@@ -81,9 +84,22 @@ const ProductPage = () => {
             (item) => item.name.toLowerCase() === refinedName.toLowerCase()
         );
 
-        console.log(foundProduct);
         setProduct(foundProduct);
     }, [refinedName]);
+
+    const handleAddToCart = async () => {
+        setIsLoading(true);
+        try {
+            const response = await axios.get(``);
+            if (response.status === 200 || response.ok) {
+                // add functionaly to add product to cart
+            }
+        } catch (error) {
+            console.log(`error`, error)
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     if (!product) return <Loading />;
 
@@ -107,7 +123,7 @@ const ProductPage = () => {
                         </motion.div>
                     ))}
                 </motion.div>
-                <motion.div className="flex flex-col gap-4 w-1/3">
+                <motion.div className="flex flex-col gap-7 w-1/3">
                     <motion.div className="">
                         <motion.div className="flex items-center gap-2 justify-between" >
                             <h1 className="text-subheading font-subheading">{product.name}</h1>
@@ -122,14 +138,13 @@ const ProductPage = () => {
                     </motion.div>
                     <motion.div className="flex flex-col gap-2 ">
                         <motion.div className="flex flex-wrap gap-2 items-baseline">
-                            <p className="text-primary-default text-description">Price:</p>
+                            <p className="text-primary-default text-small">Price:</p>
                             <p className="text-small text-muted-foreground line-through font-description">${product.original_price}</p>
                             <p className="text-subheading font-description px-2 py-1 -skew-x-12 text-primary-foreground bg-accent-default">${product.discounted_price}</p>
                         </motion.div>
                     </motion.div>
-
                     <motion.div className="gap-2 flex flex-col">
-                        <motion.div className="flex gap-4 w-fit">
+                        <motion.div className="flex gap-2 w-fit">
                             <h3 className="text-small font-description">Color:</h3>
                             {imageColorMap?.slice(0, 3).map((item) => (
                                 <TooltipProvider key={item.image}>
@@ -158,98 +173,213 @@ const ProductPage = () => {
                             ))}
                         </motion.div>
                     </motion.div>
-
-
-                    <motion.div className="gap-2 flex flex-col">
-                        <motion.div className="flex gap-4">
-                            {product.stock.map(({ size, quantity }) => (
-                                <motion.div className="flex flex-col items-start gap-2" key={size}>
-                                    <Button
-                                        className={`rounded-md outline outline-1 ${selectedSize === size ? "bg-accent-default outline-accent-default" : "outline-border text-primary-default"} min-w-20 w-full hover:bg-primary-default/10 transition-all font-heading ease-in-out select-none`}
-                                        onClick={() => setSelectedSize(size)}>
-                                        {size}
-                                    </Button>
-                                    <span className="text-muted-foreground/70 text-xs">
-                                        {quantity} left
-                                    </span>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                        <motion.div className="flex items-center gap-2 justify-between">
-                            <h3 className="text-small">Sizes:
-                                {selectedSize && <Badge className="mx-2 text-xs bg-primary-default">
-                                    {selectedSize}
-                                </Badge>}
-                            </h3>
-                            <SizeGuide />
-                        </motion.div>
-                    </motion.div>
+                    <SizeStocks product={product} />
                     <EMI price={product.discounted_price} />
-                    <motion.div className="gap-2 flex flex-col" >
-                        <h3 className="text-lg font-medium mb-2">Check Delivery</h3>
-                        <motion.div className="flex gap-2">
-                            <Input placeholder="Enter Pincode" value={pincode} onChange={(e) => setPincode(e.target.value)} />
-                            <Button>Check</Button>
-                        </motion.div>
-                    </motion.div >
-
-                    <motion.div className="gap-2 flex flex-col">
-                        <h3 className="text-lg font-medium mb-2">Offer Ends In</h3>
-                        <motion.div className="flex items-center gap-2">
-                            <Clock className="w-5 h-5" />
-                            <p className="text-sm">
-                                {timeLeft.days}d : {timeLeft.hours}h : {timeLeft.minutes}m : {timeLeft.seconds}s
-                            </p>
-                        </motion.div>
-                    </motion.div>
-
-                    <span className="text-small text-primary-default line-through">${product.discount} off</span>
-                    <Button className="w-full bg-primary-default font-extralight" >
-                        Add To Cart
-                        <ShoppingCart className="w-5 h-5" />
-                    </Button >
-                </motion.div >
-            </motion.div >
-        </motion.div >
+                    <CheckDelivery />
+                    <Offer timeLeft={timeLeft} />
+                    <Button
+                        onClick={handleAddToCart}
+                        className="w-full h-12 bg-primary-default text-primary-foreground rounded-md hover:bg-primary-default/80">
+                        {isLoading ? (
+                            <motion.div className="flex items-center gap-2 w-fit">
+                                <span>loading ...</span>
+                                <Spinner className="w-5 h-5" />
+                            </motion.div>
+                        ) : (
+                            <motion.div className="flex items-center gap-2 w-fit">
+                                Add To Cart
+                                <ShoppingCart className="w-5 h-5" />
+                            </motion.div>
+                        )}
+                    </Button>
+                </motion.div>
+            </motion.div>
+        </motion.div>
     );
 };
 
 export default ProductPage;
 
-const EMI = ({ price }) => {
-    const emiOptions = calculateEMI(price, [3, 6, 9, 12], 8);
+const Offer = ({ timeLeft }) => {
+
+    return (
+        <motion.div >
+            <h3 className="text-small flex items-center gap-2">
+                Offer Ends In
+            </h3>
+            <motion.div
+                className="flex items-center gap-2 my-2"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+                <Clock className="w-5 h-5 text-primary-default" />
+                <p className="text-description bg-gradient-to-r from-accent-default to-destructive-default text-transparent bg-clip-text drop-shadow-md">
+                    {timeLeft.days}d : {timeLeft.hours}h : {timeLeft.minutes}m : {timeLeft.seconds}s
+                </p>
+            </motion.div>
+        </motion.div >
+    )
+}
+
+const SizeStocks = ({ product }) => {
+
+    const [selectedSize, setSelectedSize] = useState("");
+
+    return (
+        <motion.div className="gap-2 flex flex-col">
+            <motion.div className="flex gap-4">
+                {product?.stock?.map(({ size, quantity }) => (
+                    <motion.div className="flex flex-col items-start gap-2" key={size}>
+                        <Button
+                            className={`rounded-md outline outline-1 ${selectedSize === size ? "bg-accent-default outline-accent-default" : "outline-border text-primary-default"} min-w-20 w-full hover:bg-primary-default/10 transition-all font-heading ease-in-out select-none`}
+                            onClick={() => setSelectedSize(size)}>
+                            {size}
+                        </Button>
+                        <span className="text-muted-foreground/70 text-xs">
+                            {quantity} left
+                        </span>
+                    </motion.div>
+                ))}
+            </motion.div>
+            <motion.div className="flex items-center gap-2 justify-between">
+                <h3 className="text-small">Sizes:
+                    {selectedSize && <Badge className="mx-2 text-xs bg-primary-default">
+                        {selectedSize}
+                    </Badge>}
+                </h3>
+                <SizeGuide />
+            </motion.div>
+        </motion.div>
+    )
+}
+
+const CheckDelivery = () => {
+    const pincodeSchema = z.string().regex(/^\d{6}$/, "Pincode must be a 6-digit number");
+    const { data: session } = useSession();
+    const [pincode, setPincode] = useState("");
+    const [deliveryEstimate, setDeliveryEstimate] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        const storedPincode = sessionStorage.getItem("userPincode") || session?.user?.pincode;
+        if (storedPincode) {
+            setPincode(storedPincode);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (pincode.length === 6) {
+            checkDeliveryTime(pincode);
+        } else {
+            setDeliveryEstimate(null);
+        }
+    }, [pincode]);
+
+    const handleInputChange = (e) => {
+        const value = e.target.value.replace(/\D/g, "");
+        setPincode(value);
+        setError("");
+    };
+
+    const checkDeliveryTime = (pin) => {
+        const result = pincodeSchema.safeParse(pin);
+        if (!result.success) {
+            setError(result.error.errors[0].message);
+            setDeliveryEstimate(null);
+            return;
+        }
+
+        setIsLoading(true);
+        setError("");
+
+        setTimeout(() => {
+            const estimate = "3-5";
+            setDeliveryEstimate(estimate);
+            setIsLoading(false);
+        }, 1000);
+    };
+
+    return (
+        <motion.div className="gap-2 flex flex-col">
+            <h3 className="text-small flex items-center gap-2">
+                Check Delivery
+            </h3>
+            <motion.div className="flex gap-2">
+                <Input
+                    placeholder="Enter Pincode"
+                    value={pincode}
+                    onChange={handleInputChange}
+                    className={`${error ? "border-destructive-default" : "border-border outline-none focus-visible:bg-transparent"} rounded-md focus:border-accent-default`}
+                    maxLength={6}
+                    disabled={isLoading}
+                />
+            </motion.div>
+            {isLoading && <p className="text-muted-foreground text-sm">Checking...</p>}
+            {error && <p className="text-destructive-default text-sm">{error}</p>}
+            {deliveryEstimate && !isLoading && (
+                <p className="text-sm text-muted-foreground flex items-center w-fit gap-2">
+                    Estimated delivery:
+                    <Truck className="w-4 h-4" />
+                    {deliveryEstimate} business days
+                </p>
+            )}
+        </motion.div>
+    );
+};
+
+const EMI = ({ price, interestRate = 16 }) => {
+    const emiOptions = calculateEMI(price, [3, 6, 9, 12, 18, 24], interestRate);
+
     return (
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="emi">
-                <AccordionTrigger className="hover:no-underline">
-                    <span className="flex items-center gap-2">
+                <AccordionTrigger className="hover:no-underline text-small">
+                    <span className="flex items-center gap-2 ">
                         EMI & Pay Later Options
-                        <Image src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/2560px-UPI-Logo-vector.svg.png"
+                        <Image
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/2560px-UPI-Logo-vector.svg.png"
                             alt="UPI Logo"
                             className="max-w-10 w-10"
-                            width={50} height={50} />
+                            width={50}
+                            height={50}
+                        />
                     </span>
                 </AccordionTrigger>
                 <AccordionContent>
-                    <p className="mb-2 text-sm text-gray-600">Pay in easy installments with 0% EMI options.</p>
+                    <p className="mb-2 text-sm text-muted-foreground">
+                        Pay in easy installments with <strong>{interestRate}%</strong> interest.
+                    </p>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Duration</TableHead>
-                                <TableHead>Monthly Payment</TableHead>
-                                <TableHead>Total Interest</TableHead>
-                                <TableHead>Provider</TableHead>
+                                <TableHead>EMI Plan</TableHead>
+                                <TableHead>Interest (pa)</TableHead>
+                                <TableHead>Discount</TableHead>
+                                <TableHead>Total Cost</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {Object.entries(emiOptions).map(([months, emiData], index) => (
-                                <TableRow key={months}>
-                                    <TableCell>{months} Months</TableCell>
-                                    <TableCell>₹{emiData.emi}</TableCell>
-                                    <TableCell>{emiData.interest > 0 ? `₹${emiData.interest}` : "No Interest"}</TableCell>
-                                    <TableCell>{index % 2 === 0 ? "Amazon Pay Later" : "Bajaj Finance"}</TableCell>
-                                </TableRow>
-                            ))}
+                            {Object.entries(emiOptions).map(([months, emiData]) => {
+                                const totalAfterInterest = emiData.emi * months;
+                                const discount = emiData.interest;
+
+                                return (
+                                    <TableRow key={months}>
+                                        <TableCell>
+                                            <strong>₹{emiData.emi}</strong> × {months}m
+                                        </TableCell>
+                                        <TableCell>
+                                            ₹{emiData.interest} ({interestRate}%)
+                                        </TableCell>
+                                        <TableCell className="text-destructive-default">
+                                            - ₹{discount}
+                                        </TableCell>
+                                        <TableCell>₹{price}</TableCell>
+                                    </TableRow>
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </AccordionContent>

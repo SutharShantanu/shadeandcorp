@@ -1,21 +1,21 @@
 /**
- * Calculates the EMI (Equated Monthly Installment) for a given price over a range of months.
+ * Calculates the Equated Monthly Installment (EMI) for a given price over specified months with an optional interest rate.
  *
- * @param {number} price - The total price for which the EMI needs to be calculated.
- * @param {number[]} [monthsArray=[]] - An optional array of months for which to calculate the EMI. Defaults to an array from 3 to 18 months.
- * @param {number} [interestRate=0] - An optional interest rate. Defaults to 0 if not provided.
- * @returns {Object} An object where the keys are the number of months and the values are objects containing the EMI amounts and interest.
+ * @param {number} price - The principal amount for which EMI is to be calculated.
+ * @param {number[]} [monthsArray=[]] - An array of months over which the EMI is to be calculated. Defaults to [3, 6, 9, 12, 18, 24] if not provided.
+ * @param {number} [interestRate=0] - The annual interest rate as a percentage. Defaults to 0 if not provided.
+ * @returns {Object} An object where keys are the number of months and values are objects containing the EMI and total interest.
+ * @returns {Object.<number, {emi: number, interest: number}>} - The EMI and total interest for each month.
  */
 export const calculateEMI = (price, monthsArray = [], interestRate = 0) => {
     if (!price || price <= 0) return {};
 
-    const validMonths = monthsArray.length > 0 ? monthsArray : Array.from({ length: 16 }, (_, i) => i + 3);
+    const validMonths = monthsArray.length > 0 ? monthsArray : [3, 6, 9, 12, 18, 24];
     const result = {};
 
     validMonths.forEach((months) => {
-        if (months >= 3 && months <= 18) {
-            let emi;
-            let totalInterest = 0;
+        if (months >= 3 && months <= 24) {
+            let emi, totalInterest = 0;
 
             if (interestRate > 0) {
                 const monthlyInterestRate = interestRate / 12 / 100;
@@ -28,7 +28,7 @@ export const calculateEMI = (price, monthsArray = [], interestRate = 0) => {
             if (emi > 0) {
                 result[months] = {
                     emi,
-                    interest: totalInterest
+                    interest: totalInterest,
                 };
             }
         }

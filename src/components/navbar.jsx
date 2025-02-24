@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "./ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "./ui/input";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
