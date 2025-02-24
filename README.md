@@ -38,8 +38,8 @@ Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js*
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/SutharShantanu/shade-and-co.git
-cd shade-and-co
+git clone https://github.com/SutharShantanu/shadeandcorp.git
+cd shadeandcorp
 ```
 
 ### 2️⃣ Install Dependencies
@@ -66,22 +66,22 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 - **Collaborators:** See the contributors to the project [here](https://github.com/SutharShantanu/shadeandcorp/graphs/contributors).
 - **Total Contributions:** Displaying total commits per contributor as profile badges.
-- **Last Commit:** ![GitHub last commit](https://img.shields.io/github/last-commit/SutharShantanu/shade-and-co)
-- **Commit Activity:** ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/SutharShantanu/shade-and-co)
-- **Repository Timeline Graph:** [View graph](https://github.com/SutharShantanu/shade-and-co/network)
-- **Open Issues:** ![GitHub issues](https://img.shields.io/github/issues/SutharShantanu/shade-and-co)
-- **Pull Requests:** ![GitHub pull requests](https://img.shields.io/github/issues-pr/SutharShantanu/shade-and-co)
+- **Last Commit:** ![GitHub last commit](https://img.shields.io/github/last-commit/SutharShantanu/shadeandcorp)
+- **Commit Activity:** ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/SutharShantanu/shadeandcorp)
+- **Repository Timeline Graph:** [View graph](https://github.com/SutharShantanu/shadeandcorp/network)
+- **Open Issues:** ![GitHub issues](https://img.shields.io/github/issues/SutharShantanu/shadeandcorp)
+- **Pull Requests:** ![GitHub pull requests](https://img.shields.io/github/issues-pr/SutharShantanu/shadeandcorp)
 
 ## 👥 Contributors
 
 Meet our amazing contributors! 🎉
 
-- **Total Commits:** ![GitHub commit count](https://img.shields.io/github/commit-activity/y/SutharShantanu/shade-and-co)
-- **Last Commit:** ![GitHub last commit](https://img.shields.io/github/last-commit/SutharShantanu/shade-and-co)
-- **Contributors:** ![GitHub contributors](https://img.shields.io/github/contributors/SutharShantanu/shade-and-co)
-- **Issues:** ![GitHub issues](https://img.shields.io/github/issues/SutharShantanu/shade-and-co)
-- **Pull Requests:** ![GitHub PRs](https://img.shields.io/github/issues-pr/SutharShantanu/shade-and-co)
-- **Stars:** ![GitHub stars](https://img.shields.io/github/stars/SutharShantanu/shade-and-co?style=social)
+- **Total Commits:** ![GitHub commit count](https://img.shields.io/github/commit-activity/y/SutharShantanu/shadeandcorp)
+- **Last Commit:** ![GitHub last commit](https://img.shields.io/github/last-commit/SutharShantanu/shadeandcorp)
+- **Contributors:** ![GitHub contributors](https://img.shields.io/github/contributors/SutharShantanu/shadeandcorp)
+- **Issues:** ![GitHub issues](https://img.shields.io/github/issues/SutharShantanu/shadeandcorp)
+- **Pull Requests:** ![GitHub PRs](https://img.shields.io/github/issues-pr/SutharShantanu/shadeandcorp)
+- **Stars:** ![GitHub stars](https://img.shields.io/github/stars/SutharShantanu/shadeandcorp?style=social)
 
 ### 📌 Contribution Statistics
 | Contributor | Commits | Lines of Code |
@@ -92,8 +92,8 @@ Meet our amazing contributors! 🎉
 
 ## 🚀 Deployment Status
 
-- **Vercel Deployment:** [![Vercel](https://vercel.com/SutharShantanu/shade-and-co)](https://shade-and-co.vercel.app)
-- **Live Status:** ![Vercel Status](https://img.shields.io/website?url=https://shade-and-co.vercel.app)
+- **Vercel Deployment:** [![Vercel](https://vercel.com/SutharShantanu/shadeandcorp)](https://shadeandcorp.vercel.app)
+- **Live Status:** ![Vercel Status](https://img.shields.io/website?url=https://shadeandcorp.vercel.app)
 
 ## 📷 Screenshots
 
