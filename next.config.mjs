@@ -7,6 +7,7 @@ const nextConfig = {
       "img.freepik.com",
       "via.placeholder.com",
       "image.hm.com",
+      "upload.wikimedia.org",
     ],
   },
 };
