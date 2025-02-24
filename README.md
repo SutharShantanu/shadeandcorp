@@ -39,7 +39,7 @@ Welcome to **Shade and Co.**, a modern e-commerce platform built with **Next.js*
 | Vercel Deployment | [![Vercel Deployment](https://img.shields.io/github/deployments/SutharShantanu/shadeandcorp/Production)](https://shadeandcorp.vercel.app) |
 | Website Status | ![Vercel Status](https://img.shields.io/website?url=https://shadeandcorp.vercel.app) |
 | Build Status | ![Vercel Build Time](https://img.shields.io/github/actions/workflow/status/SutharShantanu/shadeandcorp/vercel.yml?label=Build%20Status) |
-| Workflow Run | ![Github Workflow Run](https://github.com/github/docs/actions/workflows/update-readme.yml/badge.svg?event=push)
+| Workflow Run | ![Github Workflow Run](https://github.com/SutharShantanu/shadeandcorp/actions/workflows/update-readme.yml/badge.svg?event=push)
 
 
 ---
