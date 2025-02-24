@@ -64,7 +64,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📊 Project Analytics
 
-- **Collaborators:** See the contributors to the project [here](https://github.com/SutharShantanu/shade-and-co/graphs/contributors).
+- **Collaborators:** See the contributors to the project [here](https://github.com/SutharShantanu/shadeandcorp/graphs/contributors).
 - **Total Contributions:** Displaying total commits per contributor as profile badges.
 - **Last Commit:** ![GitHub last commit](https://img.shields.io/github/last-commit/SutharShantanu/shade-and-co)
 - **Commit Activity:** ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/SutharShantanu/shade-and-co)
