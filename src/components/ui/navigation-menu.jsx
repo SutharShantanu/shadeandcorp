@@ -37,7 +37,7 @@ NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName;
 const NavigationMenuItem = NavigationMenuPrimitive.Item;
 
 const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-10 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50 "
+  "group inline-flex h-10 w-max items-center justify-center rounded-xs bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50 "
 );
 
 const NavigationMenuTrigger = React.forwardRef(
@@ -77,12 +77,12 @@ const NavigationMenuViewport = React.forwardRef(
   ({ className, ...props }, ref) => (
     <div
       className={cn(
-        "absolute rounded-md w-[70vw] max-w-[100vw] left-1/2 top-full flex justify-center bg-primary-foreground transform -translate-x-[45%]"
+        "absolute rounded-xs w-[70vw] max-w-[100vw] left-1/2 top-full flex justify-center bg-primary-foreground transform -translate-x-[45%]"
       )}
     >
       <NavigationMenuPrimitive.Viewport
         className={cn(
-          "origin-top-center relative m-0 rounded-md h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90",
+          "origin-top-center relative m-0 rounded-xs h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden bg-popover text-popover-foreground shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90",
           className
         )}
         ref={ref}

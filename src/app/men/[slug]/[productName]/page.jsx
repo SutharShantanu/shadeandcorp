@@ -121,7 +121,7 @@ const ProductPage = () => {
                     <SizeStocks product={product} />
                     <EMI price={product.discounted_price} />
                     <CheckDelivery />
-                    {timeLeft && <Offer timeLeft={timeLeft} />}
+                    <Offer timeLeft={timeLeft} />
                     <AddToCartButton isLoading={isLoading} handleAddToCart={handleAddToCart} />
                 </motion.div>
             </motion.div>
@@ -154,6 +154,7 @@ const ProductImageGrid = ({ product, setActiveImage }) => {
         </motion.div>
     );
 };
+
 
 const ProductHeader = ({ product }) => {
     const [isWishlisted, setIsWishlisted] = useState(false);

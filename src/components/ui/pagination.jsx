@@ -56,7 +56,7 @@ const PaginationPrevious = ({
   <PaginationLink
     aria-label="Go to previous page"
     size="default"
-    className={cn(" pl-2.5 cursor-pointer bg-primary-default hover:bg-primary-default/80 rounded-md", className)}
+    className={cn(" pl-2.5 cursor-pointer bg-primary-default hover:bg-primary-default/80 rounded-xs", className)}
     {...props}>
     <ChevronLeft className="h-4 w-4 text-primary-foreground" />
     <span className="text-primary-foreground">Previous</span>
@@ -71,7 +71,7 @@ const PaginationNext = ({
   <PaginationLink
     aria-label="Go to next page"
     size="default"
-    className={cn(" pr-2.5 cursor-pointer bg-primary-default hover:bg-primary-default/80 rounded-md", className)}
+    className={cn(" pr-2.5 cursor-pointer bg-primary-default hover:bg-primary-default/80 rounded-xs", className)}
     {...props}>
     <span className="text-primary-foreground">Next</span>
     <ChevronRight className="h-4 w-4 text-primary-foreground" />

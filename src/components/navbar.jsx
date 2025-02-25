@@ -471,7 +471,7 @@ const Navbar = () => {
                   <NavigationMenuTrigger className="">
                     {item.name}
                   </NavigationMenuTrigger>
-                  <NavigationMenuContent className="p-4 flex-row flex justify-between rounded-md">
+                  <NavigationMenuContent className="p-4 flex-row flex justify-between rounded-xs">
                     <motion.div className="w-[300px] max-h-[250px]">
                       {/* {item.images &&
                         item.images.map((image, index) => (
@@ -481,7 +481,7 @@ const Navbar = () => {
                             width={500}
                             height={500}
                             alt={image.label}
-                            className="w-full h-full object-cover rounded-md"
+                            className="w-full h-full object-cover rounded-xs"
                           />
                         ))} */}
                     </motion.div>
@@ -493,7 +493,7 @@ const Navbar = () => {
                             className="text-primary-default text-xs py-1 group"
                           >
                             <NavigationMenuLink href={items.href}>
-                              <span className="text-accent-default hover:underline underline-offset-2 rounded-md group-hover:bg-accent-default group-hover:text-primary-foreground transition-all ease-in-out px-2 py-1 whitespace-nowrap">
+                              <span className="text-accent-default hover:underline underline-offset-2 rounded-xs group-hover:bg-accent-default group-hover:text-primary-foreground transition-all ease-in-out px-2 py-1 whitespace-nowrap">
                                 {items.name}
                               </span>{" "}
                               <ul className="pl-2 my-1">
@@ -530,7 +530,7 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className=" rounded-md border-none outline-none backdrop-blur-lg bg-transparent"
+                className=" rounded-xs border-none outline-none backdrop-blur-lg bg-transparent"
               />
               <Search
                 className="absolute right-3 top-2.5 h-5 w-5 text-primary-default cursor-pointer"
@@ -593,7 +593,7 @@ const Navbar = () => {
                         {item.categories && (
                           <button
                             onClick={() => toggleCategory(item.name)}
-                            className="p-1 rounded-md hover:bg-gray-200 transition"
+                            className="p-1 rounded-xs hover:bg-gray-200 transition"
                           >
                             <ChevronDown
                               className={`w-5 h-5 transition-all ease-in-out ${openCategory === item.name
@@ -703,7 +703,7 @@ const ProfileDropdown = () => {
         align="end"
         forceMount
       >
-        <DropdownMenuLabel className="font-normal rounded-md select-none mb-0">
+        <DropdownMenuLabel className="font-normal rounded-xs select-none mb-0">
           <div className="flex flex-row">
             <Avatar className="select-none bg-primary-foreground mr-3">
               <AvatarImage
@@ -785,7 +785,7 @@ const BreadCrumbs = () => {
                       <BreadcrumbItem>
                         <BreadcrumbLink
                           href={path}
-                          className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-md ${isLast
+                          className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-xs ${isLast
                             ? "bg-primary-default text-primary-foreground hover:text-primary-foreground"
                             : " text-primary-default"
                             }`}

@@ -36,7 +36,7 @@ const FilterBar = () => {
   const filteredBrands = brands.filter(brand => brand.toLowerCase().includes(searchBrand.toLowerCase()));
 
   return (
-    <ScrollArea className="h-fit w-1/6 rounded-md border border-border bg-background">
+    <ScrollArea className="h-fit w-1/6 rounded-xs border border-border bg-background">
       <motion.div className="p-4">
         <h2 className="text-subheading font-semibold text-foreground">Filters</h2>
         <Separator className="my-2" />
@@ -47,7 +47,7 @@ const FilterBar = () => {
             <AccordionContent>
               {genders.map((gender) => (
                 <motion.div key={gender} className="flex items-center space-x-2 my-2">
-                  <Checkbox id={gender} className="border-primary-default/50 rounded-md" />
+                  <Checkbox id={gender} className="border-primary-default/50 rounded-xs" />
                   <Label htmlFor={gender} className="text-foreground text-xs">{gender}</Label>
                 </motion.div>
               ))}
@@ -60,7 +60,7 @@ const FilterBar = () => {
             <AccordionContent>
               {categories.map((category) => (
                 <motion.div key={category} className="flex items-center space-x-2 my-2">
-                  <Checkbox id={category} className="border-primary-default/50 rounded-md" />
+                  <Checkbox id={category} className="border-primary-default/50 rounded-xs" />
                   <Label htmlFor={category} className="text-foreground text-xs">{category}</Label>
                 </motion.div>
               ))}
@@ -94,11 +94,11 @@ const FilterBar = () => {
                 value={searchColor}
                 onChange={(e) => setSearchColor(e.target.value)}
                 placeholder="Search Color"
-                className="mb-2 py-0 rounded-md h-8 border-none bg-primary-default/10"
+                className="mb-2 py-0 rounded-xs h-8 border-none bg-primary-default/10"
               />
               {filteredColors.map((color) => (
                 <div key={color} className="flex items-center space-x-2 mb-2">
-                  <Checkbox id={color} className="border-primary-default/50 rounded-md" />
+                  <Checkbox id={color} className="border-primary-default/50 rounded-xs" />
                   <Label htmlFor={color} className="text-foreground">{color}</Label>
                 </div>
               ))}
@@ -113,11 +113,11 @@ const FilterBar = () => {
                 value={searchSize}
                 onChange={(e) => setSearchSize(e.target.value)}
                 placeholder="Search Size"
-                className="mb-2 py-0 rounded-md h-8 border-none bg-primary-default/10"
+                className="mb-2 py-0 rounded-xs h-8 border-none bg-primary-default/10"
               />
               {filteredSizes.map((size) => (
                 <div key={size} className="flex items-center space-x-2 my-2 cursor-pointer w-full">
-                  <Checkbox id={size} className="border-primary-default/50 rounded-md" />
+                  <Checkbox id={size} className="border-primary-default/50 rounded-xs" />
                   <Label htmlFor={size} className="text-foreground w-full ">{size}</Label>
                 </div>
               ))}
@@ -132,11 +132,11 @@ const FilterBar = () => {
                 value={searchBrand}
                 onChange={(e) => setSearchBrand(e.target.value)}
                 placeholder="Search Brand"
-                className="mb-2 py-0 rounded-md h-8 border-none bg-primary-default/10"
+                className="mb-2 py-0 rounded-xs h-8 border-none bg-primary-default/10"
               />
               {filteredBrands.map((brand) => (
                 <div key={brand} className="flex items-center space-x-2 mb-2">
-                  <Checkbox id={brand} className="border-primary-default/50 rounded-md" />
+                  <Checkbox id={brand} className="border-primary-default/50 rounded-xs" />
                   <Label htmlFor={brand} className="text-foreground">{brand}</Label>
                 </div>
               ))}

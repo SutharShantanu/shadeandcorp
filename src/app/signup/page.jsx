@@ -139,7 +139,7 @@ const Signup = () => {
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
       <motion.div
-        className="w-full max-w-sm md:max-w-3xl lg:max-w-6xl bg-primary-foreground rounded-md border-border shadow-md grid md:grid-cols-2"
+        className="w-full max-w-sm md:max-w-3xl lg:max-w-6xl bg-primary-foreground rounded-xs border-border shadow-md grid md:grid-cols-2"
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -242,7 +242,7 @@ const Signup = () => {
                 />
                 <Button
                   type="submit"
-                  className="w-full bg-primary-default text-primary-foreground rounded-md hover:bg-primary-default/80"
+                  className="w-full bg-primary-default text-primary-foreground rounded-xs hover:bg-primary-default/80"
                   disabled={loading}
                   aria-busy={loading}
                   aria-disabled={loading}
@@ -264,7 +264,7 @@ const Signup = () => {
                 <div className="flex justify-center gap-4 mt-4">
                   <Button
                     size="icon"
-                    className="w-full bg-primary-default text-primary-foreground rounded-md hover:bg-primary-default/80"
+                    className="w-full bg-primary-default text-primary-foreground rounded-xs hover:bg-primary-default/80"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -295,7 +295,7 @@ const Signup = () => {
                   </Button>
                   <Button
                     size="icon"
-                    className="w-full bg-primary-default text-primary-foreground rounded-md hover:bg-primary-default/80"
+                    className="w-full bg-primary-default text-primary-foreground rounded-xs hover:bg-primary-default/80"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

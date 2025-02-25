@@ -49,7 +49,7 @@ const ProductListingHeader = ({ layout, onSortChange, onLayoutChange }) => (
             {layoutOptions.map(({ type, icon: Icon }) => (
                 <Button
                     key={type}
-                    className={`border rounded-md ${layout === type ? 'bg-primary-default text-primary-foreground' : 'bg-primary-foreground text-primary-default'}`}
+                    className={`border rounded-xs ${layout === type ? 'bg-primary-default text-primary-foreground' : 'bg-primary-foreground text-primary-default'}`}
                     onClick={() => onLayoutChange(type)}
                 >
                     <Icon className={`${layout === type ? 'text-primary-foreground' : 'text-primary-default'}`} />

@@ -32,7 +32,7 @@ const ProductCard = ({ product }) => {
   return (
     <motion.div
       key={product.id}
-      className="border border-border border-separate border-dashed rounded-md hover:bg-muted-default/20 hover:shadow-md h-fit">
+      className="border border-border border-separate border-dashed rounded-xs hover:bg-muted-default/20 hover:shadow-md h-fit">
       <Card className="w-full border-none h-fit">
         <CardHeader className="p-0 w-full overflow-hidden relative rounded-t-md">
           <Carousel>

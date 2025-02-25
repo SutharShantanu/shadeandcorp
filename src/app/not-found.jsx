@@ -47,7 +47,7 @@ const NotFound = () => {
       </motion.div>
       <Button
         onClick={() => router.push("/")}
-        className=" bg-primary-default text-primary-foreground hover:bg-primary-default/90 rounded-md shadow-md hover:shadow-lg transition-all ease-in-out"
+        className=" bg-primary-default text-primary-foreground hover:bg-primary-default/90 rounded-xs shadow-md hover:shadow-lg transition-all ease-in-out"
       >
         Go to Home
       </Button>

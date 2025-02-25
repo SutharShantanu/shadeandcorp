@@ -36,7 +36,7 @@ const Error = ({ error, reset, originPath }) => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="flex flex-col items-center gap-2 bg-primary-foreground border- shadow-md px-4 py-3 rounded-md my-2 max-w-[80vw]"
+          className="flex flex-col items-center gap-2 bg-primary-foreground border- shadow-md px-4 py-3 rounded-xs my-2 max-w-[80vw]"
         >
           <span className="text-destructive-default text-title p-3">
             {error.message || "Something went wrong!"}
@@ -97,7 +97,7 @@ const Error = ({ error, reset, originPath }) => {
 
       <Button
         onClick={() => reset()}
-        className="bg-primary-default text-primary-foreground hover:bg-primary-default/90 rounded-md shadow-md hover:shadow-lg transition-all ease-in-out"
+        className="bg-primary-default text-primary-foreground hover:bg-primary-default/90 rounded-xs shadow-md hover:shadow-lg transition-all ease-in-out"
       >
         Try Again
       </Button>
