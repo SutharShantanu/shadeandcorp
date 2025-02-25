@@ -107,91 +107,16 @@ const ProductPage = () => {
     return (
         <motion.div className="container mx-auto py-6">
             <motion.div className="flex items-start justify-between gap-6">
-                <motion.div className="grid grid-cols-2 grid-rows-2 h-fit w-2/3">
-                    {product?.images?.map((item, index) => (
-                        <motion.div
-                            key={index}
-                            className="border border-border -m-[.5px] rounded-none"
-                            onClick={() => setActiveImage(item)}>
-                            <Image
-                                src={item}
-                                width={1000}
-                                height={1000}
-                                alt={`Thumbnail ${index + 1}`}
-                                className="object-cover w-full h-full"
-                            />
-                        </motion.div>
-                    ))}
-                </motion.div>
+                <ProductImageGrid product={product} setActiveImage={setActiveImage} />
                 <motion.div className="flex flex-col gap-7 w-1/3">
-                    <motion.div className="">
-                        <motion.div className="flex items-center gap-2 justify-between" >
-                            <h1 className="text-subheading font-subheading">{product.name}</h1>
-                            <Button size="icon" onClick={() => setIsWishlisted(!isWishlisted)} className="border border-border rounded-full w-fit h-fit p-2 hover:bg-primary-default/10">
-                                <Heart size={18} className={` ${isWishlisted ? "text-destructive-default fill-destructive-default" : "text-primary-default"}`} />
-                            </Button>
-                        </motion.div >
-                        <motion.div className="flex items-center gap-2">
-                            <Users className="w-3 h-3" />
-                            <p className="text-xs">{product.totalBuyers} people bought this</p>
-                        </motion.div>
-                    </motion.div>
-                    <motion.div className="flex flex-col gap-2 ">
-                        <motion.div className="flex flex-wrap gap-2 items-baseline">
-                            <p className="text-primary-default text-small">Price:</p>
-                            <p className="text-small text-muted-foreground line-through font-description">${product.original_price}</p>
-                            <p className="text-subheading font-description px-2 py-1 -skew-x-12 text-primary-foreground bg-accent-default">${product.discounted_price}</p>
-                        </motion.div>
-                    </motion.div>
-                    <motion.div className="gap-2 flex flex-col">
-                        <motion.div className="flex gap-2 w-fit">
-                            <h3 className="text-small font-description">Color:</h3>
-                            {imageColorMap?.slice(0, 3).map((item) => (
-                                <TooltipProvider key={item.image}>
-                                    <Tooltip>
-                                        <TooltipTrigger>
-                                            <motion.div
-                                                className={`border ${activeImage === item.image ? "border-accent-default text-accent-default" : "border-border"
-                                                    } rounded-md cursor-pointer`}
-                                                onClick={() => handleImageClick(item)}
-                                            >
-                                                <Image
-                                                    src={item.image}
-                                                    width={100}
-                                                    height={100}
-                                                    alt={`Thumbnail ${item.image}`}
-                                                    className="w-[80px] object-cover rounded-lg"
-                                                />
-                                            </motion.div>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top">
-                                            {selectedColor} this is tooltip
-                                            <TooltipArrow />
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </TooltipProvider>
-                            ))}
-                        </motion.div>
-                    </motion.div>
+                    <ProductHeader product={product} />
+                    <PriceDisplay product={product} />
+                    <ColorSelection imageColorMap={imageColorMap} activeImage={activeImage} handleImageClick={handleImageClick} selectedColor={selectedColor} />
                     <SizeStocks product={product} />
                     <EMI price={product.discounted_price} />
                     <CheckDelivery />
                     <Offer timeLeft={timeLeft} />
-                    <Button
-                        onClick={handleAddToCart}
-                        className="w-full h-12 bg-primary-default text-primary-foreground rounded-md hover:bg-primary-default/80">
-                        {isLoading ? (
-                            <motion.div className="flex items-center gap-2 w-fit">
-                                <span>loading ...</span>
-                                <Spinner className="w-5 h-5" />
-                            </motion.div>
-                        ) : (
-                            <motion.div className="flex items-center gap-2 w-fit">
-                                Add To Cart
-                                <ShoppingCart className="w-5 h-5" />
-                            </motion.div>
-                        )}
-                    </Button>
+                    <AddToCartButton isLoading={isLoading} handleAddToCart={handleAddToCart} />
                 </motion.div>
             </motion.div>
         </motion.div>
@@ -199,6 +124,127 @@ const ProductPage = () => {
 };
 
 export default ProductPage;
+
+// Components starts from here !
+
+const ProductImageGrid = ({ product, setActiveImage }) => {
+    return (
+        <motion.div className="grid grid-cols-2 grid-rows-2 h-fit w-2/3">
+            {product?.images?.map((item, index) => (
+                <motion.div
+                    key={index}
+                    className="border border-border -m-[.5px] rounded-none"
+                    onClick={() => setActiveImage(item)}
+                >
+                    <Image
+                        src={item}
+                        width={1000}
+                        height={1000}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="object-cover w-full h-full"
+                    />
+                </motion.div>
+            ))}
+        </motion.div>
+    );
+};
+
+
+const ProductHeader = ({ product }) => {
+    const [isWishlisted, setIsWishlisted] = useState(false);
+
+    return (
+        <motion.div>
+            <motion.div className="flex items-center gap-2 justify-between">
+                <h1 className="text-subheading font-subheading">{product.name}</h1>
+                <Button
+                    size="icon"
+                    onClick={() => setIsWishlisted(!isWishlisted)}
+                    className="border border-border rounded-full w-fit h-fit p-2 hover:bg-primary-default/10"
+                >
+                    <Heart
+                        size={18}
+                        className={` ${isWishlisted ? "text-destructive-default fill-destructive-default" : "text-primary-default"}`}
+                    />
+                </Button>
+            </motion.div>
+            <motion.div className="flex items-center gap-2">
+                <Users className="w-3 h-3" />
+                <p className="text-xs">{product.totalBuyers} people bought this</p>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+const PriceDisplay = ({ product }) => {
+    return (
+        <motion.div className="flex flex-col gap-2">
+            <motion.div className="flex flex-wrap gap-2 items-baseline">
+                <p className="text-primary-default text-small">Price:</p>
+                <p className="text-small text-muted-foreground line-through font-description">${product.original_price}</p>
+                <p className="text-subheading font-description px-2 py-1 -skew-x-12 text-primary-foreground bg-accent-default">
+                    ${product.discounted_price}
+                </p>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+const ColorSelection = ({ imageColorMap, activeImage, handleImageClick, selectedColor }) => {
+    return (
+        <motion.div className="gap-2 flex flex-col">
+            <motion.div className="flex gap-2 w-fit">
+                <h3 className="text-small font-description">Color:</h3>
+                {imageColorMap?.slice(0, 3).map((item) => (
+                    <TooltipProvider key={item.image}>
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <motion.div
+                                    className={`border ${activeImage === item.image ? "border-accent-default text-accent-default" : "border-border"
+                                        } rounded-xs cursor-pointer`}
+                                    onClick={() => handleImageClick(item)}
+                                >
+                                    <Image
+                                        src={item.image}
+                                        width={100}
+                                        height={100}
+                                        alt={`Thumbnail ${item.image}`}
+                                        className="w-[80px] object-cover rounded-lg"
+                                    />
+                                </motion.div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top">
+                                {selectedColor} this is tooltip
+                                <TooltipArrow />
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                ))}
+            </motion.div>
+        </motion.div>
+    );
+};
+
+const AddToCartButton = ({ isLoading, handleAddToCart }) => {
+    return (
+        <Button
+            onClick={handleAddToCart}
+            className="w-full h-12 bg-primary-default text-primary-foreground rounded-xs hover:bg-primary-default/80"
+        >
+            {isLoading ? (
+                <motion.div className="flex items-center gap-2 w-fit">
+                    <span>loading ...</span>
+                    <Spinner className="w-5 h-5" />
+                </motion.div>
+            ) : (
+                <motion.div className="flex items-center gap-2 w-fit">
+                    Add To Cart
+                    <ShoppingCart className="w-5 h-5" />
+                </motion.div>
+            )}
+        </Button>
+    );
+};
 
 const Offer = ({ timeLeft }) => {
 
@@ -232,7 +278,7 @@ const SizeStocks = ({ product }) => {
                 {product?.stock?.map(({ size, quantity }) => (
                     <motion.div className="flex flex-col items-start gap-2" key={size}>
                         <Button
-                            className={`rounded-md outline outline-1 ${selectedSize === size ? "bg-accent-default outline-accent-default" : "outline-border text-primary-default"} min-w-20 w-full hover:bg-primary-default/10 transition-all font-heading ease-in-out select-none`}
+                            className={`rounded-xs outline outline-1 ${selectedSize === size ? "bg-accent-default outline-accent-default" : "outline-border text-primary-default"} min-w-20 w-full hover:bg-primary-default/10 transition-all font-heading ease-in-out select-none`}
                             onClick={() => setSelectedSize(size)}>
                             {size}
                         </Button>
@@ -311,7 +357,7 @@ const CheckDelivery = () => {
                     placeholder="Enter Pincode"
                     value={pincode}
                     onChange={handleInputChange}
-                    className={`${error ? "border-destructive-default" : "border-border outline-none focus-visible:bg-transparent"} rounded-md focus:border-accent-default`}
+                    className={`${error ? "border-destructive-default" : "border-border outline-none focus-visible:bg-transparent"} rounded-xs focus:border-accent-default`}
                     maxLength={6}
                     disabled={isLoading}
                 />
@@ -517,7 +563,7 @@ const SizeGuide = () => {
                                     alt="Size Guide"
                                     width={500}
                                     height={500}
-                                    className="mx-auto w-full object-cover max-h-[250px] rounded-md border border-gray-300"
+                                    className="mx-auto w-full object-cover max-h-[250px] rounded-xs border border-gray-300"
                                 />
                                 <p className="text-xs text-gray-500 mt-2">Reference this guide for accurate sizing.</p>
                             </motion.div>
@@ -529,4 +575,3 @@ const SizeGuide = () => {
         </motion.div>
     );
 };
-
