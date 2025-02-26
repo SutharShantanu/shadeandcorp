@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useCountdown } from "@/app/functions/timer";
 import { MenTopwear } from "@/dummy/clothes";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSession } from "next-auth/react"
 import Loading from "@/components/loading";
 import Image from "next/image";
+import { toast } from 'sonner';
 import {
     Tabs,
     TabsContent,
@@ -63,11 +64,14 @@ const ProductPage = () => {
     const { productName } = useParams();
     const refinedName = useRefineUrl(productName);
     const [product, setProduct] = useState(null);
-    const [isWishlisted, setIsWishlisted] = useState(false);
     const timeLeft = useCountdown(product?.offerEndTime);
+    console.log(timeLeft);
+
     const [isLoading, setIsLoading] = useState(false);
     const [activeImage, setActiveImage] = useState(product?.images[0]);
     const [selectedColor, setSelectedColor] = useState(product?.colors[0]);
+
+    const router = useRouter();
 
     const imageColorMap = product?.images?.map((image, index) => ({
         image,
@@ -99,6 +103,8 @@ const ProductPage = () => {
         } finally {
             setIsLoading(false);
         }
+        router.push("/cart");
+        toast.success('Product has been added to cart.')
     }
 
     if (!product) return <Loading />;
@@ -115,7 +121,7 @@ const ProductPage = () => {
                     <SizeStocks product={product} />
                     <EMI price={product.discounted_price} />
                     <CheckDelivery />
-                    <Offer timeLeft={timeLeft} />
+                    {timeLeft && <Offer timeLeft={timeLeft} />}
                     <AddToCartButton isLoading={isLoading} handleAddToCart={handleAddToCart} />
                 </motion.div>
             </motion.div>
@@ -148,7 +154,6 @@ const ProductImageGrid = ({ product, setActiveImage }) => {
         </motion.div>
     );
 };
-
 
 const ProductHeader = ({ product }) => {
     const [isWishlisted, setIsWishlisted] = useState(false);
