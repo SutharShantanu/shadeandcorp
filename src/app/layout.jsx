@@ -7,8 +7,8 @@ import { Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "next-auth/react";
 
-const forum = Forum({ weight: "400", subsets: ["latin"] });
-const workSans = Work_Sans({ weight: "400", subsets: ["latin"] });
+const forum = Forum({ weight: "400", subsets: ["latin"], display: "swap" });
+const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" });
 
 export const metadata = {
   title: "Shade & Co.",
@@ -19,6 +19,11 @@ export default function RootLayout ({ children }) {
   return (
     <SessionProvider>
       <html lang="en">
+        <head>
+          <title>{metadata.title}</title>
+          <meta name="description" content={metadata.description} />
+          <link href="./globals.css" rel="stylesheet" />
+        </head>
         <body
           className={`${forum.className} ${workSans.className} antialiased`}
           suppressHydrationWarning={true} >
