@@ -45,7 +45,7 @@ const ProductCard = ({ product }) => {
                     height={500}
                     src={image}
                     alt={`${product.name} image ${index + 1}`}
-                    className="h-64 w-full object-cover rounded-t-md transition-transform duration-[1500] ease-in-out group-hover:scale-105"
+                    className="h-64 w-full object-cover rounded-t-md transition-transform duration-1500 ease-in-out group-hover:scale-105"
                   />
                 </CarouselItem>
               ))}

@@ -93,13 +93,13 @@ const Carousel = ({
                 <div>
                     <button
                         onClick={scrollPrev}
-                        className="absolute right-14 bottom-5 bg-transprent hover:shadow-sm hover:scale-95 transition-all ease-in-out text-primary-foreground rounded-full"
+                        className="absolute right-14 bottom-5 bg-transprent hover:shadow-xs hover:scale-95 transition-all ease-in-out text-primary-foreground rounded-full"
                     >
                         <CircleArrowLeft size={34} strokeWidth={1.5} absoluteStrokeWidth />
                     </button>
                     <button
                         onClick={scrollNext}
-                        className="absolute right-5 bottom-5 bg-transprent hover:shadow-sm hover:scale-95 transition-all ease-in-out text-primary-foreground rounded-full"
+                        className="absolute right-5 bottom-5 bg-transprent hover:shadow-xs hover:scale-95 transition-all ease-in-out text-primary-foreground rounded-full"
                     >
                         <CircleArrowRight size={34} strokeWidth={1.5} absoluteStrokeWidth />
                     </button>

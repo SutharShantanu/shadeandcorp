@@ -452,10 +452,10 @@ const Navbar = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 w-full z-[999]"
+      className="fixed top-0 left-0 w-full z-999"
     >
       <motion.div
-        className="transition-all z-[998] ease-in-out border-b border-border/20 bg-transparent backdrop-blur-lg"
+        className="transition-all z-998 ease-in-out border-b border-border/20 bg-transparent backdrop-blur-lg"
         role="navigation"
       >
         <motion.div className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0">
@@ -530,7 +530,7 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className=" rounded-xs border-none outline-none backdrop-blur-lg bg-transparent"
+                className=" rounded-xs border-none outline-hidden backdrop-blur-lg bg-transparent"
               />
               <Search
                 className="absolute right-3 top-2.5 h-5 w-5 text-primary-default cursor-pointer"
@@ -655,7 +655,7 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full rounded-full border-none outline-none"
+                className="w-full rounded-full border-none outline-hidden"
               />
             </motion.div>
           )}
@@ -699,7 +699,7 @@ const ProfileDropdown = () => {
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-56 bg-primary-foreground p-0 z-[999]"
+        className="w-56 bg-primary-foreground p-0 z-999"
         align="end"
         forceMount
       >
@@ -759,7 +759,7 @@ const BreadCrumbs = () => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="transition-all ease-in-out absolute -bottom-13 left-0 right-0 -z-[1] border-border/20 border-b shadow-sm w-full backdrop-blur-lg"
+          className="transition-all ease-in-out absolute -bottom-13 left-0 right-0 -z-1 border-border/20 border-b shadow-xs w-full backdrop-blur-lg"
         >
           <ul className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0 space-x-2 text-sm text-muted-foreground">
             <Breadcrumb className="flex items-center">

@@ -266,7 +266,7 @@ const Offer = ({ timeLeft }) => {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
             >
                 <Clock className="w-5 h-5 text-primary-default" />
-                <p className="text-description bg-gradient-to-r from-accent-default to-destructive-default text-transparent bg-clip-text drop-shadow-md">
+                <p className="text-description bg-linear-to-r from-accent-default to-destructive-default text-transparent bg-clip-text drop-shadow-md">
                     {timeLeft.days}d : {timeLeft.hours}h : {timeLeft.minutes}m : {timeLeft.seconds}s
                 </p>
             </motion.div>
@@ -363,7 +363,7 @@ const CheckDelivery = () => {
                     placeholder="Enter Pincode"
                     value={pincode}
                     onChange={handleInputChange}
-                    className={`${error ? "border-destructive-default" : "border-border outline-none focus-visible:bg-transparent"} rounded-xs focus:border-accent-default`}
+                    className={`${error ? "border-destructive-default" : "border-border outline-hidden focus-visible:bg-transparent"} rounded-xs focus:border-accent-default`}
                     maxLength={6}
                     disabled={isLoading}
                 />
@@ -556,7 +556,7 @@ const SizeGuide = () => {
                                 <ul className="list-none space-y-2 text-xs my-4 text-gray-600 text-nowrap">
                                     {measurements.map(({ label, icon, description }) => (
                                         <li key={label} className="flex items-center gap-2">
-                                            <span className="flex-shrink-0">{icon}</span>
+                                            <span className="shrink-0">{icon}</span>
                                             <span className="font-medium">{label}:</span>
                                             <span className="text-xs text-gray-500">{description}</span>
                                         </li>

@@ -230,7 +230,7 @@ const Signup = () => {
                         </FormControl>
                         <FormLabel
                           htmlFor="terms"
-                          className="text-xs text-muted-foreground [&_a]:underline hover:[&_a]:text-primary cursor-pointer"
+                          className="text-xs text-muted-foreground [&_a]:underline [&_a]:hover:text-primary cursor-pointer"
                         >
                           I agree to the{" "}
                           <Link href="#">Terms & Conditions</Link>

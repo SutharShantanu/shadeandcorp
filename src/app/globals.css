@@ -1,11 +1,121 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: "Work Sans", sans-serif;
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-primary-default: #2d2d2d;
+  --color-primary-foreground: #fafafa;
+
+  --color-secondary-default: #f9f9f9;
+  --color-secondary-foreground: #2d2d2d;
+
+  --color-background: #f4f4f4;
+  --color-border: #d1d1d1;
+  --color-separator: #d1d1d1;
+  --color-foreground: #333333;
+
+  --color-card-default: #ffffff;
+  --color-card-foreground: #333333;
+
+  --color-popover-default: #ffffff;
+  --color-popover-foreground: #333333;
+
+  --color-muted-default: #e1e1e1;
+  --color-muted-foreground: #666666;
+
+  --color-accent-default: #fb6900;
+  --color-accent-foreground: #2d2d2d;
+
+  --color-destructive-default: #ef4444;
+  --color-destructive-foreground: #333333;
+
+  --color-input: #ffffff;
+  --color-ring: #4b8e8d;
+
+  --color-chart-1: #f4a261;
+  --color-chart-2: #06d6a0;
+  --color-chart-3: #457b9d;
+  --color-chart-4: #f77f00;
+  --color-chart-5: #e63946;
+
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+
+  --font-forum: Forum, serif;
+  --font-worksans: Work Sans, sans-serif;
+
+  --text-title: 2.25rem;
+  --text-title--line-height: 2.75rem;
+  --text-title--font-weight: 700;
+  --text-heading: 1.875rem;
+  --text-heading--line-height: 2.25rem;
+  --text-heading--font-weight: 700;
+  --text-subheading: 1.5rem;
+  --text-subheading--line-height: 2rem;
+  --text-subheading--font-weight: 600;
+  --text-description: 1rem;
+  --text-description--line-height: 1.5rem;
+  --text-description--font-weight: 400;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.25rem;
+  --text-small--font-weight: 400;
+
+  --font-weight-title: 700;
+  --font-weight-heading: 700;
+  --font-weight-subheading: 600;
+  --font-weight-description: 400;
+
+  --leading-title: 2.75rem;
+  --leading-heading: 2.25rem;
+  --leading-subheading: 2rem;
+  --leading-description: 1.5rem;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@layer utilities {
+  body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: 'Work Sans', sans-serif;
+  }
 }
 
 @layer base {
@@ -86,34 +196,36 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease-in-out;
   }
 }
-::-webkit-scrollbar {
-  width: 8px;
-}
+@layer utilities {
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
 
-::-webkit-scrollbar-track {
-  background: var(--secondary);
-  border-radius: 9999px;
-}
+  ::-webkit-scrollbar-track {
+    background: var(--secondary);
+    border-radius: 9999px;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 9999px;
-}
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 9999px;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--muted-foreground);
-}
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
 
-.dark ::-webkit-scrollbar-track {
-  background: var(--primary);
-}
+  .dark ::-webkit-scrollbar-track {
+    background: var(--primary);
+  }
 
-.dark ::-webkit-scrollbar-thumb {
-  background: var(--muted-foreground);
-}
+  .dark ::-webkit-scrollbar-thumb {
+    background: var(--muted-foreground);
+  }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: var(--foreground);
+  }
 }
 
 
