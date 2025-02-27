@@ -7,8 +7,8 @@ import { Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "next-auth/react";
 
-const forum = Forum({ weight: "400", subsets: ["latin"], display: "swap" });
-const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" });
+// const forum = Forum({ weight: "400", subsets: ["latin"], display: "swap" });
+// const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" });
 
 export const metadata = {
   title: "Shade & Co.",
