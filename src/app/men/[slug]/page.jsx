@@ -15,9 +15,10 @@ import {
 import FilterBar from "@/components/filter/filter";
 import ProductListingHeader from "@/components/product/productListingHeader";
 import ProductCard from "@/components/product/productCard";
-import { Frame, MarsStroke, PaintBucket, Shirt, Transgender, Venus, X } from "lucide-react";
+import { Check, CircleCheck, Frame, MarsStroke, PaintBucket, Shirt, Transgender, Venus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const CategoryPage = () => {
   const { slug } = useParams();
@@ -30,6 +31,15 @@ const CategoryPage = () => {
     Size: [],
     Brand: ["Nike"],
   });
+
+  const removeFilter = (category, filterToRemove) => {
+    setAppliedFilters((prevFilters) => ({
+      ...prevFilters,
+      [category]: prevFilters[category].filter((filter) => filter !== filterToRemove),
+    }));
+    toast.success(`Removed ${filterToRemove} from ${category}`);
+  };
+
 
   const itemsPerPage = 8;
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -56,10 +66,6 @@ const CategoryPage = () => {
 
   const handleLayoutChange = (selectedLayout) => {
     setLayout(selectedLayout);
-  };
-
-  const removeFilter = (filterToRemove) => {
-    setAppliedFilters(appliedFilters.filter((filter) => filter !== filterToRemove));
   };
 
   return (
@@ -145,7 +151,7 @@ const AppliedFilters = ({ appliedFilters, onRemoveFilter }) => {
         values.length > 0 ? (
           <motion.div key={category} className="flex items-center gap-2 bg-muted-foreground/20 rounded-full pl-2">
             <motion.div className="text-gray-700 flex items-center gap-1 ">
-              {getCategoryIcon(category, values[0])} {/* Show icon for category */}
+              {getCategoryIcon(category, values[0])}
             </motion.div>
             <motion.div className="flex flex-wrap gap-2">
               {values.map((filter, index) => (

@@ -31,7 +31,10 @@ export default function RootLayout ({ children }) {
           <Suspense fallback={<Loading />}>
             <Navbar />
             <div className="mt-[99px]">{children}
-              <Toaster richColors position="bottom-right" />
+              <Toaster
+                richColors
+                position="bottom-right"
+              />
               <Footer />
             </div>
           </Suspense>
