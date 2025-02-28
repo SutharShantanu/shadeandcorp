@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -100,6 +100,20 @@
   If we ever want to remove these styles, we need to add an explicit border
   color utility to any element that depends on these defaults.
 */
+* {
+  /* Hide number input arrows globally */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    appearance: textfield; /* Standard */
+    -moz-appearance: textfield; /* Firefox */
+  }
+}
+
 @layer base {
   *,
   ::after,
@@ -114,7 +128,7 @@
   body {
     color: var(--foreground);
     background: var(--background);
-    font-family: 'Work Sans', sans-serif;
+    font-family: "Work Sans", sans-serif;
   }
 }
 
@@ -187,13 +201,17 @@
   ::selection {
     background-color: #fb6900;
     color: #fafafa;
-    transition: background-color 0.3s ease, color 0.3s ease-in-out;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease-in-out;
   }
 
   .dark ::selection {
     background-color: #fafafa;
     color: #2d2d2d;
-    transition: background-color 0.3s ease, color 0.3s ease-in-out;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease-in-out;
   }
 }
 @layer utilities {
@@ -227,8 +245,6 @@
     background: var(--foreground);
   }
 }
-
-
 
 @layer base {
   * {

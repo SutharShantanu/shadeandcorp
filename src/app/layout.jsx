@@ -1,14 +1,15 @@
 import { Forum, Work_Sans } from "next/font/google";
-import "./globals.css";
+import Head from 'next/head'
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import Loading from "@/components/loading";
 import { Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "next-auth/react";
+import "./globals.css";
 
-// const forum = Forum({ weight: "400", subsets: ["latin"], display: "swap" });
-// const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" });
+const forum = Forum({ weight: "400", subsets: ["latin"], display: "swap" });
+const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" });
 
 export const metadata = {
   title: "Shade & Co.",
@@ -19,11 +20,11 @@ export default function RootLayout ({ children }) {
   return (
     <SessionProvider>
       <html lang="en">
-        <head>
+        <Head>
           <title>{metadata.title}</title>
           <meta name="description" content={metadata.description} />
           <link href="./globals.css" rel="stylesheet" />
-        </head>
+        </Head>
         <body
           className={`${forum.className} ${workSans.className} antialiased`}
           suppressHydrationWarning={true} >

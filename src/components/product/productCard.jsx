@@ -12,17 +12,141 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
 import {
   Carousel,
   CarouselContent,
   CarouselDots,
   CarouselItem,
-} from "@/components/ui/carousel"
-
+} from "@/components/ui/carousel";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathSegments } from "@/app/functions/pathname";
+import { NumberInput } from "../ui/number-input";
+import axios from "axios";
+import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
+
+const ProductImageCarousel = ({ images }) => (
+  <Carousel>
+    <CarouselContent>
+      {images.map((image, index) => (
+        <CarouselItem key={index}>
+          <Image
+            width={500}
+            height={500}
+            src={image}
+            alt={`Product image ${index + 1}`}
+            className="h-64 w-full object-cover rounded-t-xs transition-transform duration-1500 ease-in-out group-hover:scale-105"
+          />
+        </CarouselItem>
+      ))}
+    </CarouselContent>
+    <CarouselDots />
+  </Carousel>
+);
+
+const FavoriteIcon = ({ isFavourite, toggleFavourite }) => (
+  <Heart
+    onClick={toggleFavourite}
+    absoluteStrokeWidth="1px"
+    className={`absolute cursor-pointer top-2 right-2 bg-transparent rounded-full p-0 transition-all ease-in-out ${isFavourite ? "text-accent-default fill-accent-default" : "text-primary-default"}`}
+  />
+);
+
+const ProductDetails = ({ product, formattedPath }) => (
+  <Link href={`/${formattedPath}/${product.name}`} passHref>
+    <div className="flex items-center gap-2 justify-between">
+      <CardTitle className="text-description font-description truncate group-hover:underline underline-offset-2">{product.name}</CardTitle>
+    </div>
+    <CardDescription className="text-xs font-description my-2 text-muted-foreground/80 line-clamp-2 truncate">
+      {product.description}
+    </CardDescription>
+    <Separator className="my-2" />
+  </Link>
+);
+
+const ProductColors = ({ colors }) => (
+  colors && (
+    <motion.div className="flex items-center gap-2">
+      <span className="text-xs text-muted-foreground/80">Colors:</span>
+      {colors.map((color, index) => (
+        <TooltipProvider key={color || index}>
+          <Tooltip>
+            <TooltipTrigger>
+              <p style={{ backgroundColor: color }} className="w-5 h-5 rounded-full border-2 p-0" />
+            </TooltipTrigger>
+            <TooltipContent className="px-2 py-1 text-xs">
+              <p>{color}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      ))}
+    </motion.div>
+  )
+);
+
+const ProductPrice = ({ product }) => (
+  <motion.div className="flex items-center gap-2 my-2">
+    <span className="text-xs text-muted-foreground/80">Price:</span>
+    {product.discounted_price ? (
+      <motion.div className="flex items-center gap-2">
+        <span className="text-xs line-through text-muted-foreground/80">${product.original_price}</span>
+        <span className="text-small font-subheading text-primary-default">${product.discounted_price}</span>
+      </motion.div>
+    ) : (
+      <span className="text-small text-primary-default font-heading">${product.original_price}</span>
+    )}
+  </motion.div>
+);
+
+const ProductActions = () => {
+  const [quantity, setQuantity] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleCart = async () => {
+    setIsLoading(true);
+    try {
+      // const response = await axios.post("/api/cart", { quantity });
+      // if (response.status === 200 || response.status === 201) {
+      // console.log(`response`, response);
+      toast.success("Product added to cart");
+      setQuantity(prev => prev + 1);
+      // }
+    } catch (error) {
+      console.log(`error`, error);
+      toast.error("Failed to add product to cart");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <CardFooter className="flex flex-col items-center p-0 sm:flex-row sm:justify-between divide-x divide-border">
+      {quantity > 0 ? (
+        <NumberInput value={quantity} min={0} max={10} onChange={setQuantity} className="w-1/2" />
+      ) : (
+        <Button
+          onClick={handleCart}
+          className="w-1/2 bg-primary-default text-primary-foreground rounded-none rounded-bl-xs hover:bg-primary-default/80"
+        >
+          <ShoppingCart className="w-5 h-5 text-primary-foreground cursor-pointer" />
+          {isLoading ? (
+            <motion.div className="flex items-center gap-2">
+              Adding <Spinner />
+            </motion.div>
+          ) : (
+            "Add to Cart"
+          )}
+        </Button>
+      )}
+      <Button className="w-1/2 bg-primary-default text-primary-foreground rounded-none rounded-br-xs hover:bg-primary-default/80">
+        <Sparkles className="w-5 h-5 text-primary-foreground cursor-pointer" />
+        Buy Now
+      </Button>
+    </CardFooter>
+  );
+};
 
 const ProductCard = ({ product }) => {
   const [isFavourite, setIsFavourite] = useState(false);
@@ -30,97 +154,25 @@ const ProductCard = ({ product }) => {
   const formattedPath = pathSegments.join("/");
 
   return (
-    <motion.div
-      key={product.id}
-      className="border border-border border-separate border-dashed rounded-xs hover:bg-muted-default/20 hover:shadow-md h-fit">
+    <motion.div key={product.id} className="border border-border border-separate border-dashed rounded-xs hover:bg-muted-default/20 hover:shadow-md h-fit">
       <Card className="w-full border-none h-fit">
-        <CardHeader className="p-0 w-full overflow-hidden relative rounded-t-md">
-          <Carousel>
-            <CarouselContent>
-              {product.images.map((image, index) => (
-                <CarouselItem key={index}>
-                  <Image
-                    key={index}
-                    width={500}
-                    height={500}
-                    src={image}
-                    alt={`${product.name} image ${index + 1}`}
-                    className="h-64 w-full object-cover rounded-t-md transition-transform duration-1500 ease-in-out group-hover:scale-105"
-                  />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselDots />
-          </Carousel>
+        <CardHeader className="p-0 w-full overflow-hidden relative rounded-t-xs">
+          <ProductImageCarousel images={product.images} />
           {product.discount && (
-            <Badge className="absolute top-0 left-2 text-xs bg-accent-default text-primary-foreground px-2 py-[2px] text-nowrap">
+            <Badge className="absolute top-2 left-2 text-xs bg-accent-default text-primary-foreground px-2 py-[2px] text-nowrap">
               {product.discount}% OFF
             </Badge>
           )}
-          <Heart
-            onClick={() => setIsFavourite((prev) => !prev)}
-            absoluteStrokeWidth="1px"
-            className={`absolute cursor-pointer top-0 right-2 bg-transparent rounded-full p-0 transition-all ease-in-out ${isFavourite ? "text-accent-default fill-accent-default" : "text-primary-default"}`} />
+          <FavoriteIcon isFavourite={isFavourite} toggleFavourite={() => setIsFavourite((prev) => !prev)} />
         </CardHeader>
         <CardContent className="p-4 hover:cursor-pointer group">
-          <Link href={`/${formattedPath}/${product.name}`} passHref>
-            <div className="flex items-center gap-2 justify-between">
-              <CardTitle className="text-description font-description truncate group-hover:underline underline-offset-2 group-hover:text-accent-default">{product.name}</CardTitle>
-            </div>
-            <CardDescription className="text-xs font-description my-2 text-muted-foreground/80 line-clamp-2 text-wrap truncate">
-              {product.description}
-            </CardDescription>
-            <Separator className="my-2" />
-            {product.colors && (
-              <motion.div className="flex i</div>tems-center gap-2">
-                <span className="text-small">Colors:</span>
-                {product.colors.map((color, index) => (
-                  <TooltipProvider key={color || index}>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <p key={color || index} style={{ backgroundColor: color }} className="w-5 h-5 rounded-full border-2 p-0" />
-                      </TooltipTrigger>
-                      <TooltipContent className="px-2 py-1 text-xs">
-                        <p>{color}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ))}
-              </motion.div>
-            )}
-            <motion.div className="flex items-center gap-2 my-2">
-              {product.discounted_price ? (
-                <motion.div className="flex items-center gap-2">
-                  <span className="text-small">Price:</span>
-                  <span className="text-xs line-through text-gray-400">${product.original_price}</span>
-                  <span className="text-small font-subheading text-destructive-default">${product.discounted_price}</span>
-                </motion.div>
-              ) : (
-                <motion.div className="flex items-center gap-2">
-                  <span className="text-small">Price:</span>
-                  <span className="text-small text-primary-default font-heading">${product.original_price}</span>
-                </motion.div>
-              )}
-            </motion.div>
-          </Link>
+          <ProductDetails product={product} formattedPath={formattedPath} />
+          <ProductColors colors={product.colors} />
+          <ProductPrice product={product} />
         </CardContent>
-        <CardFooter className="flex flex-col items-center p-0 sm:flex-row sm:justify-between divide-x divide-border">
-          <Button className="w-full bg-primary-default text-primary-foreground rounded-none rounded-bl-md hover:bg-primary-default/80">
-            <ShoppingCart
-              className="w-5 h-5 text-primary-foreground cursor-pointer"
-              aria-label="add to cart"
-            />
-            Add to Cart
-          </Button>
-          <Button className="w-full bg-primary-default text-primary-foreground rounded-none rounded-br-md hover:bg-primary-default/80">
-            <Sparkles
-              className="w-5 h-5 text-primary-foreground cursor-pointer"
-              aria-label="buy now" />
-            Buy Now
-          </Button>
-        </CardFooter>
+        <ProductActions />
       </Card>
-    </motion.div >
+    </motion.div>
   );
 };
 
