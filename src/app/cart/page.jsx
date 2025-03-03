@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { Heart, Trash2 } from "lucide-react";
-import { NumberInput } from "@/components/ui/number-input";
+import { NumberInput, NumberInputButton, NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
 
 const CartSummary = ({ total }) => (
     <motion.div className="p-4 border-t bg-white rounded-md">
