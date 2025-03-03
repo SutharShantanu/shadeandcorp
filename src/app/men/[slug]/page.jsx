@@ -19,6 +19,7 @@ import { Check, CircleCheck, Frame, MarsStroke, PaintBucket, Shirt, Transgender,
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import PageHeader from "@/components/header/sectionHeader";
 
 const CategoryPage = () => {
   const { slug } = useParams();
@@ -72,10 +73,7 @@ const CategoryPage = () => {
     <motion.div className="py-6 container mx-auto">
       <motion.div className="flex flex-col">
         <motion.div className="flex items-center gap-2 justify-between mb-2">
-          <motion.div className="flex items-baseline gap-2">
-            <h1 className="text-subheading">Men's {capitalizedSlug}</h1>
-            <motion.p className="text-description text-xs">Showing 1-8 of 32 results</motion.p>
-          </motion.div>
+          <PageHeader titlePrefix="Men's " totalResults="5" showingResults="Showing of results" />
           <motion.div className="flex items-center gap-2">
             <AppliedFilters appliedFilters={appliedFilters} onRemoveFilter={removeFilter} />
             <ProductListingHeader

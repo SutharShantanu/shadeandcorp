@@ -3,30 +3,15 @@
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { motion } from "framer-motion";
-
-const CartItem = ({ item, setCart, cart }) => {
-    const updateQuantity = (id, quantity) => {
-        setCart(cart.map((item) => (item.id === id ? { ...item, quantity } : item)));
-    };
-    return (
-        <motion.div className="flex justify-between p-4 border rounded-md bg-white">
-            <div>
-                <h2 className="text-lg font-semibold">{item.name}</h2>
-                <p className="text-sm text-gray-500">${item.price} x {item.quantity}</p>
-                <input
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) => updateQuantity(item.id, Number(e.target.value))}
-                    className="border p-1 w-16"
-                />
-            </div>
-            <p className="text-lg font-semibold">${(item.price * item.quantity).toFixed(2)}</p>
-        </motion.div>
-    );
-};
+import PageHeader from "@/components/header/sectionHeader";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import Image from "next/image";
+import { Heart, Trash2 } from "lucide-react";
+import { NumberInput } from "@/components/ui/number-input";
 
 const CartSummary = ({ total }) => (
-    <motion.div className="p-4 border-t mt-4 bg-white rounded-md">
+    <motion.div className="p-4 border-t bg-white rounded-md">
         <h2 className="text-lg font-semibold">Total: ${total}</h2>
         <Button className="mt-4 w-full">Checkout</Button>
     </motion.div>
@@ -43,14 +28,14 @@ const CouponSection = () => (
 const OffersSection = () => (
     <motion.div className="p-4 border bg-white rounded-md">
         <h2 className="text-lg font-semibold">Available Offers</h2>
-        <p className="text-sm text-gray-500">Use code SAVE10 to get 10% off!</p>
+        <p className="text-sm text-muted-foreground">Use code SAVE10 to get 10% off!</p>
     </motion.div>
 );
 
 const TermsAndConditions = () => (
     <motion.div className="p-4 border bg-white rounded-md">
         <h2 className="text-lg font-semibold">Terms & Conditions</h2>
-        <p className="text-sm text-gray-500">By proceeding, you agree to our terms and conditions.</p>
+        <p className="text-sm text-muted-foreground">By proceeding, you agree to our terms and conditions.</p>
     </motion.div>
 );
 
@@ -65,33 +50,144 @@ const CheckoutSection = () => (
 );
 
 const CartEmpty = () => (
-    <motion.div className="text-center text-gray-500 p-6">Your cart is empty</motion.div>
+    <motion.div className="text-center text-muted-foreground p-6">Your cart is empty</motion.div>
 );
+
+const CartItem = ({ item }) => {
+    return (
+        <motion.div className="flex items-center gap-4">
+            <Image src="https://image.hm.com/assets/hm/a9/4c/a94cb6af4e37b45a9e618c70bba6c017773d9e01.jpg?imwidth=657" alt="Product Image" width={60} height={60} className="object-cover rounded-md border border-border" />
+            <div>
+                <h2 className="text-description font-semibold">{item.name}</h2>
+                <p className="text-xs text-muted-foreground">Brand: XYZ</p>
+                <p className="text-xs text-muted-foreground">Size: Medium</p>
+                <p className="text-xs text-muted-foreground">Color: Black</p>
+                <motion.div className="flex items-center gap-2">
+                    <Button className="text-destructive-default font-normal border border-border h-7 text-xs rounded-xs px-2 cursor-pointer">
+                        Move to Wishlist
+                        <Heart />
+                    </Button>
+                    <Button size="icon" className="text-destructive-default border border-border h-7 text-xs rounded-xs px-2 cursor-pointer">
+                        <Trash2 />
+                    </Button>
+                </motion.div>
+            </div>
+        </motion.div>
+    );
+};
 
 const Cart = () => {
     const [cart, setCart] = useState([
-        { id: 1, name: "Wireless Headphones", price: 99.99, quantity: 2 },
-        { id: 2, name: "Smartwatch", price: 149.99, quantity: 1 },
-        { id: 3, name: "Bluetooth Speaker", price: 79.99, quantity: 3 },
+        { id: 1, name: "Wireless Headphones", price: 99.99, quantity: 2, discount: 10 },
+        { id: 2, name: "Smartwatch", price: 149.99, quantity: 1, discount: 0 },
+        { id: 3, name: "Bluetooth Speaker", price: 79.99, quantity: 3, discount: 5 },
     ]);
 
-    const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const [selectedItems, setSelectedItems] = useState([]);
+    const allSelected = selectedItems.length === cart.length;
+
+    const handleSelectAll = () => {
+        setSelectedItems(allSelected ? [] : cart.map((item) => item.id));
+    };
+
+    const handleSelectItem = (id) => {
+        setSelectedItems((prev) =>
+            prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+        );
+    };
+
+    const totalPrice = (price, quantity, discount) => {
+        const discountedPrice = price - (price * discount) / 100;
+        return (discountedPrice * quantity).toFixed(2);
+    };
+
+    const handleQuantity = (id, value) => {
+        setCart((prevCart) =>
+            prevCart.map((item) =>
+                item.id === id ? { ...item, quantity: Math.max(1, value) } : item
+            )
+        );
+    };
+
+
+    const descriptionContent = (
+        <motion.div>
+            {selectedItems?.length > 0 ? (
+                <span>
+                    <span className="font-heading mx-1 text-subheading">
+                        {selectedItems?.length}
+                    </span>
+                    {selectedItems?.length === 1 ? "Item" : "Items"} Selected
+                </span>
+            ) : (
+                "No Product Selected"
+            )}
+        </motion.div>
+    );
 
     return (
         <motion.div className="container mx-auto py-6 min-h-screen">
+            <motion.div className="flex items-center gap-2 justify-between">
+                <PageHeader
+                    titlePrefix="Shopping Cart"
+                    containerClassName="my-2 w-[65%]"
+                    descriptionPosition="right"
+                    description={descriptionContent}
+                />
+                <PageHeader
+                    titlePrefix="Billing Details"
+                    containerClassName="my-2 w-[32%]"
+                />
+            </motion.div>
             {cart.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="md:col-span-2 space-y-4">
-                        {cart.map((item) => (
-                            <CartItem key={item.id} item={item} setCart={setCart} cart={cart} />
-                        ))}
-                        <CouponSection />
-                        <OffersSection />
-                        <TermsAndConditions />
+                        <Table className="border border-border rounded-xs">
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>
+                                        <Checkbox checked={allSelected} onCheckedChange={handleSelectAll} />
+                                    </TableHead>
+                                    <TableHead>Product</TableHead>
+                                    <TableHead>Quantity</TableHead>
+                                    <TableHead>Price</TableHead>
+                                    <TableHead>Discount</TableHead>
+                                    <TableHead>Total Price</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {cart.map((item) => (
+                                    <TableRow key={item.id} className="border-b border-border">
+                                        <TableCell>
+                                            <Checkbox
+                                                checked={selectedItems.includes(item.id)}
+                                                onCheckedChange={() => handleSelectItem(item.id)}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <CartItem item={item} />
+                                        </TableCell>
+                                        <TableCell>
+                                            <NumberInput
+                                                value={item.quantity}
+                                                min={1}
+                                                onChange={(value) => handleQuantity(item.id, parseInt(value, 10) || 1)}
+                                                className=""
+                                            />
+                                        </TableCell>
+                                        <TableCell>${item.price.toFixed(2)} x {item.quantity}</TableCell>
+                                        <TableCell className="text-destructive-default line-through">{item.discount}%</TableCell>
+                                        <TableCell>${totalPrice(item.price, item.quantity, item.discount)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                     </div>
                     <div className="space-y-4">
-                        <CartSummary total={total.toFixed(2)} />
-                        <CheckoutSection />
+                        <motion.div className="p-4 border bg-white rounded-md">
+                            <h2 className="text-lg font-semibold">Total: ${cart.reduce((acc, item) => acc + (item.price - (item.price * item.discount) / 100) * item.quantity, 0).toFixed(2)}</h2>
+                            <Button className="mt-4 w-full">Checkout</Button>
+                        </motion.div>
                     </div>
                 </div>
             ) : (

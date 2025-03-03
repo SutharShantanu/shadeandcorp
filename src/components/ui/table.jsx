@@ -3,7 +3,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 const Table = React.forwardRef(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto bg-primary-default/10 rounded-xs">
+  <div className="relative w-full overflow-auto bg-primary-foreground rounded-xs">
     <table
       ref={ref}
       className={cn("w-full caption-bottom text-sm border-collapse", className)}
@@ -13,14 +13,14 @@ const Table = React.forwardRef(({ className, ...props }, ref) => (
 Table.displayName = "Table"
 
 const TableHeader = React.forwardRef(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b border-border bg-primary-default rounded-xs ", className)} {...props} />
+  <thead ref={ref} className={cn("[&_tr]:border-b border-transparent bg-primary-foreground rounded-xs ", className)} {...props} />
 ))
 TableHeader.displayName = "TableHeader"
 
 const TableBody = React.forwardRef(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("[&_tr:last-child]:border-1 border-border", className)}
+    className={cn("[&_tr:last-child]:border-none ", className)}
     {...props} />
 ))
 TableBody.displayName = "TableBody"
@@ -28,7 +28,7 @@ TableBody.displayName = "TableBody"
 const TableFooter = React.forwardRef(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
-    className={cn("border-t border-border bg-muted/50 font-description last:[&>tr]:border-b-0", className)}
+    className={cn("border-t border-transparent bg-muted/50 font-description last:[&>tr]:border-b-0", className)}
     {...props} />
 ))
 TableFooter.displayName = "TableFooter"
@@ -37,7 +37,7 @@ const TableRow = React.forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors space-x-1 space-border border-border hover:bg-muted-foreground/10 data-[state=selected]:bg-muted",
+      "border-b transition-colors space-x-1 space-border border-transparent hover:bg-muted-foreground/10 data-[state=selected]:bg-muted",
       className
     )}
     {...props} />
@@ -48,7 +48,7 @@ const TableHead = React.forwardRef(({ className, ...props }, ref) => (
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left select-none align-middle font-description text-primary-foreground [&:has([role=checkbox])]:pr-0",
+      "h-12 px-4 text-left select-none align-middle font-subheading text-primary-default [&:has([role=checkbox])]:pr-0",
       className
     )}
     {...props} />
