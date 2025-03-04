@@ -319,15 +319,15 @@ const TestimonialSection = () => {
       </div>
 
       <div className="mt-10 container ml-auto mr-auto">
-        <Carousel>
-          <CarouselContent>
+        <Carousel className="border-l border-r border-border rounded-xs">
+          <CarouselContent >
             {testimonials.map((testimonial, index) => {
               const fullStars = Math.floor(testimonial.rating);
               const hasHalfStar = testimonial.rating % 1 !== 0;
 
               return (
-                <CarouselItem key={index} className="flex justify-center md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                  <Card className="w-full ">
+                <CarouselItem key={index} className="flex justify-center md:basis-1/2 lg:basis-1/3 xl:basis-1/4 ">
+                  <Card className="w-full rounded-xs">
                     <CardContent className="flex flex-col justify-between gap-8 items-center text-center p-4 h-full">
                       <p className="text-subheading text-muted-foreground font-description">
                         <Quote size={14} className="rotate-180 inline mr-3 text-primary-default fill-primary-default" />
