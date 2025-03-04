@@ -648,7 +648,7 @@ const Navbar = () => {
             </Drawer>
           </motion.div>
           {isSearchVisible && (
-            <motion.div className="md:hidden absolute top-16 left-0 w-full">
+            <motion.div className="absolute md:hidden top-16 left-0 w-full">
               <Input
                 type="text"
                 placeholder="Search..."

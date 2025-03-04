@@ -6,6 +6,9 @@
   --color-primary-default: #2d2d2d;
   --color-primary-foreground: #fafafa;
 
+  --color-rating-default: #facc15;
+  --color-rating-foreground: #2d2d2d;
+
   --color-secondary-default: #f9f9f9;
   --color-secondary-foreground: #2d2d2d;
 
@@ -153,6 +156,8 @@
     --border: #d1d1d1;
     --separator: #d1d1d1;
     --input: #ffffff;
+    --color-rating-default: #facc15;
+    --color-rating-foreground: #2d2d2d;
     --ring: #4b8e8d;
     --chart-1: #f4a261;
     --chart-2: #06d6a0;
@@ -179,6 +184,8 @@
     --accent-foreground: #fafafa;
     --destructive: #d32f2f;
     --destructive-foreground: #fafafa;
+    --color-rating-default: #fbbf24;
+    --color-rating-foreground: #fafafa;
     --border: #555555;
     --input: #444444;
     --ring: #e1e1e1;
