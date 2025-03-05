@@ -284,7 +284,7 @@ const SizeStocks = ({ product }) => {
                 {product?.stock?.map(({ size, quantity }) => (
                     <motion.div className="flex flex-col items-start gap-2" key={size}>
                         <Button
-                            className={`rounded-xs outline outline-1 ${selectedSize === size ? "bg-accent-default outline-accent-default" : "outline-border text-primary-default"} min-w-20 w-full hover:bg-primary-default/10 transition-all font-heading ease-in-out select-none`}
+                            className={`rounded-xs outline ${selectedSize === size ? "bg-accent-default outline-accent-default" : "outline-border text-primary-default"} min-w-20 w-full hover:bg-primary-default/10 transition-all font-heading ease-in-out select-none`}
                             onClick={() => setSelectedSize(size)}>
                             {size}
                         </Button>

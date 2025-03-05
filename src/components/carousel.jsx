@@ -8,10 +8,42 @@ import Fade from "embla-carousel-fade";
 import ClassNames from "embla-carousel-class-names";
 import AutoHeightPlugin from "embla-carousel-auto-height";
 import AutoScrollPlugin from "embla-carousel-auto-scroll";
-import { CheckCircle, CircleArrowLeft, CircleArrowRight, CircleDot, CirclePause, CirclePlay, XCircle } from "lucide-react";
+import { CircleArrowLeft, CircleArrowRight, CircleDot, CirclePause, CirclePlay } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion } from "framer-motion";
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+
+const useAutoplay = (emblaApi) => {
+    const [autoplayIsPlaying, setAutoplayIsPlaying] = useState(false);
+
+    const toggleAutoplay = useCallback(() => {
+        const autoplay = emblaApi?.plugins()?.autoplay;
+        if (!autoplay) return;
+
+        if (autoplay.isPlaying()) {
+            autoplay.stop();
+        } else {
+            autoplay.play();
+        }
+    }, [emblaApi]);
+
+    useEffect(() => {
+        const autoplay = emblaApi?.plugins()?.autoplay;
+        if (!autoplay) return;
+
+        setAutoplayIsPlaying(autoplay.isPlaying());
+
+        emblaApi
+            .on("autoplay:play", () => setAutoplayIsPlaying(true))
+            .on("autoplay:stop", () => setAutoplayIsPlaying(false))
+            .on("reInit", () => setAutoplayIsPlaying(autoplay.isPlaying()));
+    }, [emblaApi]);
+
+    return {
+        autoplayIsPlaying,
+        toggleAutoplay,
+    };
+};
 
 const Carousel = ({
     slides = [],
@@ -21,23 +53,21 @@ const Carousel = ({
     showNavigation = true,
     showStartStop = true,
     stopOnMouseEnter = false,
-    autoplayOptions = { delay: 4000 },
+    autoplayOptions = { delay: 3000 },
     autoHeight = false,
     autoScrollOptions = { speed: 2 },
 }) => {
-    const autoplay = AutoplayPlugin(autoplayOptions); // Autoplay instance
-
     const [emblaRef, emblaApi] = useEmblaCarousel(options, [
         WheelGesturesPlugin(),
         Fade(),
         ClassNames(),
         ...(autoHeight ? [AutoHeightPlugin()] : []),
         AutoScrollPlugin(autoScrollOptions),
-        autoplay, // Ensure autoplay is always added
+        AutoplayPlugin(autoplayOptions),
         ...plugins,
     ]);
 
-    const [isPlaying, setIsPlaying] = useState(true);
+    const { autoplayIsPlaying, toggleAutoplay } = useAutoplay(emblaApi);
     const [selectedIndex, setSelectedIndex] = useState(0);
 
     const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
@@ -49,33 +79,14 @@ const Carousel = ({
         setSelectedIndex(emblaApi.selectedScrollSnap());
     }, [emblaApi]);
 
-    const startAutoplay = useCallback(() => {
-        if (emblaApi?.plugins()?.autoplay) {
-            emblaApi.plugins().autoplay.play();
-            setIsPlaying(true);
-        }
-    }, [emblaApi]);
-
-    const stopAutoplay = useCallback(() => {
-        if (emblaApi?.plugins()?.autoplay) {
-            emblaApi.plugins().autoplay.stop();
-            setIsPlaying(false);
-        }
-    }, [emblaApi]);
-
     useEffect(() => {
         if (!emblaApi) return;
 
         emblaApi.on("select", onSelect);
-
-        // Start autoplay immediately
-        startAutoplay();
-
         return () => {
             emblaApi.off("select", onSelect);
-            stopAutoplay(); // Stop autoplay on unmount
         };
-    }, [emblaApi, onSelect, startAutoplay, stopAutoplay]);
+    }, [emblaApi, onSelect]);
 
     if (!Array.isArray(slides) || slides.length === 0) {
         console.error("Carousel: `slides` must be a non-empty array of React elements.");
@@ -85,20 +96,20 @@ const Carousel = ({
     return (
         <motion.div
             className="relative w-full"
-            onMouseEnter={() => stopOnMouseEnter && stopAutoplay()}
-            onMouseLeave={() => stopOnMouseEnter && startAutoplay()}
+            onMouseEnter={() => stopOnMouseEnter && emblaApi?.plugins()?.autoplay?.stop()}
+            onMouseLeave={() => stopOnMouseEnter && emblaApi?.plugins()?.autoplay?.play()}
         >
             <CarouselViewport emblaRef={emblaRef} slides={slides} />
             {showNavigation && <CarouselNavigation scrollPrev={scrollPrev} scrollNext={scrollNext} />}
             {showIndicators && <CarouselIndicators slides={slides} scrollTo={scrollTo} selectedIndex={selectedIndex} />}
-            {showStartStop && <CarouselControls isPlaying={isPlaying} toggleAutoplay={isPlaying ? stopAutoplay : startAutoplay} />}
+            {showStartStop && <CarouselControls isPlaying={autoplayIsPlaying} toggleAutoplay={toggleAutoplay} />}
         </motion.div>
     );
 };
 
 const CarouselViewport = ({ emblaRef, slides }) => (
     <motion.div className="embla__viewport overflow-hidden w-full rounded-xs" ref={emblaRef}>
-        <motion.div className="embla__container flex h-[500px]">
+        <motion.div className="embla__container flex h-[70vh]">
             {slides.map((slide, index) => (
                 <motion.div key={index} className="embla__slide flex-[0_0_100%] transition-all duration-300">
                     {slide}
@@ -145,7 +156,6 @@ const CarouselIndicators = ({ slides, scrollTo, selectedIndex }) => (
     </motion.div>
 );
 
-
 const CarouselControls = ({ isPlaying, toggleAutoplay }) => (
     <TooltipProvider>
         <Tooltip>
@@ -181,6 +191,5 @@ const CarouselControls = ({ isPlaying, toggleAutoplay }) => (
         </Tooltip>
     </TooltipProvider>
 );
-
 
 export default Carousel;

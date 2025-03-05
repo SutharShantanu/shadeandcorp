@@ -16,8 +16,9 @@ import Marquee from "react-fast-marquee";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Quote, Star, StarHalf } from "lucide-react";
+import { Quote, Star, StarHalf, User } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipArrow } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 
 const Homepage = () => {
@@ -25,6 +26,7 @@ const Homepage = () => {
     <div>
       <Banner />
       <FeaturedProducts />
+      <FeaturesSection />
       <PartnersSection />
       <TestimonialSection />
       <FAQ />
@@ -205,7 +207,58 @@ const FeaturedProducts = () => {
   );
 };
 
-
+export const FeaturesSection = () => (
+  <div className="container mx-auto w-fit">
+    <motion.div className="flex flex-col gap-6">
+      <motion.div className="flex gap-2 flex-col">
+        <h2 className="text-heading font-forum">
+          Discover Our Unique Features
+        </h2>
+        <p className="text-lg max-w-xl lg:max-w-lg leading-relaxed tracking-tight text-muted-foreground text-left">
+          Elevate your style with our exclusive clothing line, designed for comfort and elegance.
+        </p>
+      </motion.div>
+      <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <motion.div className="relative col-span-1 md:col-span-2 h-fit">
+          <Image src="https://images.unsplash.com/photo-1697498435309-2c7864cfd607?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 1" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
+          <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
+            <h3 className="text-subheading text-primary-foreground">Premium Quality</h3>
+            <p className="bg-accent-default/50 text-small">
+              Our clothing is made from high-quality materials to ensure durability and comfort.
+            </p>
+          </div>
+        </motion.div>
+        <motion.div className="relative col-span-1 h-fit">
+          <Image src="https://images.unsplash.com/photo-1690993660127-1a7cdd87ec9e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 2" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
+          <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
+            <h3 className="text-subheading text-primary-foreground">Trendy Designs</h3>
+            <p className="bg-accent-default/50 text-small">
+              Stay ahead of the fashion curve with our latest trendy designs.
+            </p>
+          </div>
+        </motion.div>
+        <motion.div className="relative col-span-1 h-fit">
+          <Image src="https://images.unsplash.com/photo-1558171813-4c088753af8f?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 3" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
+          <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
+            <h3 className="text-subheading text-primary-foreground">Affordable Prices</h3>
+            <p className="bg-accent-default/50 text-small">
+              Enjoy premium quality clothing at prices that won't break the bank.
+            </p>
+          </div>
+        </motion.div>
+        <motion.div className="relative col-span-1 md:col-span-2 h-fit">
+          <Image src="https://plus.unsplash.com/premium_photo-1673125286978-a540fa337c7d?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 4" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
+          <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
+            <h3 className="text-subheading text-primary-foreground">Sustainable Fashion</h3>
+            <p className="bg-accent-default/50 text-small">
+              We are committed to sustainability, using eco-friendly materials and ethical production practices.
+            </p>
+          </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  </div>
+);
 const TestimonialSection = () => {
 
   const testimonials = [

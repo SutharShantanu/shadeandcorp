@@ -9,6 +9,8 @@ const nextConfig = {
       "image.hm.com",
       "upload.wikimedia.org",
       "cdn-icons-png.flaticon.com",
+      "images.unsplash.com",
+      "plus.unsplash.com",
     ],
   },
 };

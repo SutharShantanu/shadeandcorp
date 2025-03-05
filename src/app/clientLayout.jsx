@@ -15,7 +15,7 @@ export default function ClientLayout ({ children }) {
     return (
         <Suspense fallback={<Loading />}>
             <Navbar />
-            <motion.div className={noMarginPages.includes(pathname) ? "mt-0" : "mt-[99px]"}>
+            <motion.div className={noMarginPages.includes(pathname) ? "mt-[60px]" : "mt-[99px]"}>
                 {children}
                 <Toaster richColors position="bottom-right" />
                 <Footer />
