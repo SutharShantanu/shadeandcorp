@@ -23,13 +23,11 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipArrow 
 const Homepage = () => {
   return (
     <div>
-      <HeroSection />
-      <FeaturedProducts />
       <Banner />
+      <FeaturedProducts />
       <PartnersSection />
       <TestimonialSection />
       <FAQ />
-      <NewsletterSignup />
     </div>
   );
 };
@@ -141,53 +139,48 @@ const FAQ = () => {
     }, 1000);
   };
 
-  const visibleFaqs = showAll ? faqs : faqs.slice(0, 10);
+  const visibleFaqs = showAll ? faqs : faqs.slice(0, 8);
 
   return (
     <motion.div className="container mx-auto my-4">
       <p className="text-center text-heading font-forum mb-6">
-        Common Questions & Answers
+        Frequently Asked Questions
       </p>
       <p className="text-center text-description text-muted-foreground mb-8">
         Find out all the essential details about our clothing brand and how we
         can serve your needs.
       </p>
-      {visibleFaqs.map((faq, index) => (
-        <Accordion type="single" collapsible key={index}>
-          <AccordionItem
-            value={`faq-${index}`}
-            className="group hover:bg-primary-foreground/50 transition-all ease-in-out px-4 hover:rounded-xs border-b"
-          >
-            <AccordionTrigger className="text-default-primary font-subheading group-hover:no-underline flex items-center gap-2">
-              {faq.question}
-            </AccordionTrigger>
-            <AccordionContent className="text-default-primary text-small">
-              {faq.answer}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {visibleFaqs.map((faq, index) => (
+          <Accordion type="single" collapsible key={index}>
+            <AccordionItem
+              value={`faq-${index}`}
+              className="group hover:bg-primary-foreground/50 transition-all ease-in-out px-4 hover:rounded-xs border-b"
+            >
+              <AccordionTrigger className="text-default-primary font-subheading group-hover:no-underline flex items-center gap-2">
+                {faq.question}
+              </AccordionTrigger>
+              <AccordionContent className="text-default-primary text-small">
+                {faq.answer}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        ))}
+      </div>
+
       {faqs.length > 10 && (
         <Button
           onClick={handleShowMore}
-          className="mt-6 w-fit mx-auto bg-primary-default text-primary-foreground rounded-xs text-center flex items-center gap-2"
+          className="mt-6 cursor-pointer hover:bg-primary-default/80 w-fit ml-auto bg-primary-default text-primary-foreground rounded-xs text-center flex items-center gap-2"
           disabled={loading}
         >
-          {loading ? <Spinner /> : null}
+          {loading && <Spinner />}
           {showAll ? "Show Less" : "Show More"}
         </Button>
       )}
     </motion.div>
   );
 };
-
-const HeroSection = () => (
-  <motion.div className="text-center py-16 bg-gradient-to-r from-gray-900 to-gray-700 text-white">
-    <h1 className="text-4xl font-bold mb-4">Discover Exclusive Fashion</h1>
-    <p className="text-lg mb-6">Shop the latest trends with unbeatable quality.</p>
-    <Button className="bg-primary-default px-6 py-2 text-lg rounded-md">Shop Now</Button>
-  </motion.div>
-);
 
 const FeaturedProducts = () => {
   const products = [
@@ -212,18 +205,6 @@ const FeaturedProducts = () => {
   );
 };
 
-const NewsletterSignup = () => {
-  return (
-    <motion.div className="text-center py-12 bg-gray-900 text-white">
-      <h2 className="text-2xl font-bold mb-4">Join Our Newsletter</h2>
-      <p className="mb-6">Stay updated on exclusive deals and new arrivals.</p>
-      <motion.div className="flex justify-center">
-        <input type="email" placeholder="Enter your email" className="p-2 w-64 rounded-l-md text-black" />
-        <Button className="bg-primary-default px-4 py-2 rounded-r-md">Subscribe</Button>
-      </motion.div>
-    </motion.div>
-  );
-};
 
 const TestimonialSection = () => {
 
@@ -234,7 +215,6 @@ const TestimonialSection = () => {
       image: "https://picsum.photos/id/64/200/300",
       feedback: "This product exceeded my expectations! The quality is top-notch, and the delivery was super fast.",
       rating: 5,
-      location: "San Francisco, CA"
     },
     {
       name: "Sarah Smith",
@@ -242,7 +222,6 @@ const TestimonialSection = () => {
       image: "https://picsum.photos/id/64/200/300",
       feedback: "The design is stunning, and the material feels premium. Worth every penny!",
       rating: 5,
-      location: "New York, NY"
     },
     {
       name: "Alex Johnson",
@@ -250,7 +229,6 @@ const TestimonialSection = () => {
       image: "https://picsum.photos/id/64/200/300",
       feedback: "Fantastic product with great features. I use it daily and absolutely love it!",
       rating: 5,
-      location: "Los Angeles, CA"
     },
     {
       name: "Emily Davis",
@@ -258,7 +236,6 @@ const TestimonialSection = () => {
       image: "https://picsum.photos/id/64/200/300",
       feedback: "Super comfortable and stylish. I got so many compliments already!",
       rating: 5,
-      location: "Austin, TX"
     },
     {
       name: "Michael Brown",
@@ -266,7 +243,6 @@ const TestimonialSection = () => {
       image: "https://picsum.photos/id/64/200/300",
       feedback: "Impressive quality and great functionality. A must-have for anyone looking for reliability.",
       rating: 4,
-      location: "Seattle, WA"
     },
     {
       name: "Jessica Wilson",
@@ -274,7 +250,6 @@ const TestimonialSection = () => {
       image: "https://picsum.photos/id/64/200/300",
       feedback: "The packaging was so elegant, and the product itself is even better. Highly recommend!",
       rating: 5,
-      location: "Chicago, IL"
     },
     {
       name: "David Lee",
@@ -282,7 +257,6 @@ const TestimonialSection = () => {
       image: "https://picsum.photos/id/64/200/300",
       feedback: "It’s exactly as described. The quality is great, and I’m very happy with my purchase.",
       rating: 4,
-      location: "Boston, MA"
     },
     {
       name: "Sophia Martinez",
@@ -290,7 +264,6 @@ const TestimonialSection = () => {
       image: "https://picsum.photos/id/64/200/300",
       feedback: "Absolutely love it! The colors are vibrant, and the product feels luxurious.",
       rating: 5,
-      location: "Miami, FL"
     },
     {
       name: "James Anderson",
@@ -298,7 +271,6 @@ const TestimonialSection = () => {
       image: "https://picsum.photos/id/64/200/300",
       feedback: "Perfect for my needs! Durable, stylish, and reasonably priced.",
       rating: 5,
-      location: "Denver, CO"
     },
     {
       name: "Olivia Taylor",
@@ -306,16 +278,15 @@ const TestimonialSection = () => {
       image: "https://picsum.photos/id/64/200/300",
       feedback: "This product has changed my daily routine for the better. I’m beyond satisfied!",
       rating: 5,
-      location: "Atlanta, GA"
     }
   ];
 
 
   return (
-    <div className="w-full py-12 bg-gray-100 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What Our Clients Say</h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Real feedback from our happy customers.</p>
+    <div className="w-full py-12 ">
+      <div className="w-fit mx-auto text-center">
+        <h2 className="text-center text-heading font-forum mb-6">What Our Clients Say</h2>
+        <p className="text-muted-foreground dark:text-gray-400 mt-2">Real feedback from our happy customers.</p>
       </div>
 
       <div className="mt-10 container ml-auto mr-auto">
@@ -326,7 +297,7 @@ const TestimonialSection = () => {
               const hasHalfStar = testimonial.rating % 1 !== 0;
 
               return (
-                <CarouselItem key={index} className="flex justify-center md:basis-1/2 lg:basis-1/3 xl:basis-1/4 ">
+                <CarouselItem key={index} className="flex justify-center md:basis-1/2 lg:basis-1/3 ">
                   <Card className="w-full rounded-xs">
                     <CardContent className="flex flex-col justify-between gap-8 items-center text-center p-4 h-full">
                       <p className="text-subheading text-muted-foreground font-description">
@@ -343,7 +314,6 @@ const TestimonialSection = () => {
                           <motion.div className=" text-left">
                             <p className="text-description font-description">{testimonial.name}</p>
                             <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                            <p className="text-xs text-muted-foreground">{testimonial.location}</p>
                           </motion.div>
                         </motion.div>
                         <TooltipProvider>
@@ -359,7 +329,7 @@ const TestimonialSection = () => {
                             </TooltipTrigger>
                             <TooltipContent>
                               <p className="text-xs">{testimonial.rating}/5</p>
-                            <TooltipArrow />
+                              <TooltipArrow />
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>

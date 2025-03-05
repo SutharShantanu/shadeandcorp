@@ -8,8 +8,10 @@ import Fade from "embla-carousel-fade";
 import ClassNames from "embla-carousel-class-names";
 import AutoHeightPlugin from "embla-carousel-auto-height";
 import AutoScrollPlugin from "embla-carousel-auto-scroll";
-import { CircleArrowLeft, CircleArrowRight, CirclePause, CirclePlay } from "lucide-react";
+import { CheckCircle, CircleArrowLeft, CircleArrowRight, CircleDot, CirclePause, CirclePlay, XCircle } from "lucide-react";
 import { Button } from "./ui/button";
+import { motion } from "framer-motion";
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 const Carousel = ({
     slides = [],
@@ -23,13 +25,15 @@ const Carousel = ({
     autoHeight = false,
     autoScrollOptions = { speed: 2 },
 }) => {
+    const autoplay = AutoplayPlugin(autoplayOptions); // Autoplay instance
+
     const [emblaRef, emblaApi] = useEmblaCarousel(options, [
         WheelGesturesPlugin(),
         Fade(),
         ClassNames(),
         ...(autoHeight ? [AutoHeightPlugin()] : []),
-        ...(autoplayOptions ? [AutoplayPlugin(autoplayOptions)] : []),
-        ...(autoScrollOptions ? [AutoScrollPlugin(autoScrollOptions)] : []),
+        AutoScrollPlugin(autoScrollOptions),
+        autoplay, // Ensure autoplay is always added
         ...plugins,
     ]);
 
@@ -61,9 +65,17 @@ const Carousel = ({
 
     useEffect(() => {
         if (!emblaApi) return;
+
         emblaApi.on("select", onSelect);
-        return () => emblaApi.off("select", onSelect);
-    }, [emblaApi, onSelect]);
+
+        // Start autoplay immediately
+        startAutoplay();
+
+        return () => {
+            emblaApi.off("select", onSelect);
+            stopAutoplay(); // Stop autoplay on unmount
+        };
+    }, [emblaApi, onSelect, startAutoplay, stopAutoplay]);
 
     if (!Array.isArray(slides) || slides.length === 0) {
         console.error("Carousel: `slides` must be a non-empty array of React elements.");
@@ -71,76 +83,104 @@ const Carousel = ({
     }
 
     return (
-        <div
+        <motion.div
             className="relative w-full"
             onMouseEnter={() => stopOnMouseEnter && stopAutoplay()}
             onMouseLeave={() => stopOnMouseEnter && startAutoplay()}
         >
-            <div className="embla__viewport overflow-hidden w-full" ref={emblaRef}>
-                <div className="embla__container flex  h-[500px]!">
-                    {slides.map((slide, index) => (
-                        <div
-                            key={index}
-                            className="embla__slide flex-[0_0_100%] transition-all duration-500"
-                        >
-                            {slide}
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {showNavigation && (
-                <div>
-                    <button
-                        onClick={scrollPrev}
-                        className="absolute right-14 bottom-5 bg-transprent hover:shadow-xs hover:scale-95 transition-all ease-in-out text-primary-foreground rounded-full"
-                    >
-                        <CircleArrowLeft size={34} strokeWidth={1.5} absoluteStrokeWidth />
-                    </button>
-                    <button
-                        onClick={scrollNext}
-                        className="absolute right-5 bottom-5 bg-transprent hover:shadow-xs hover:scale-95 transition-all ease-in-out text-primary-foreground rounded-full"
-                    >
-                        <CircleArrowRight size={34} strokeWidth={1.5} absoluteStrokeWidth />
-                    </button>
-                </div>
-            )}
-
-            {showIndicators && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                    {slides.map((_, index) => (
-                        <button
-                            key={index}
-                            onClick={() => scrollTo(index)}
-                            className={`w-3 h-1 rounded-full transition-all ease-in-out ${selectedIndex === index ? "bg-primary-default" : "bg-primary-foreground"
-                                }`}
-                        ></button>
-                    ))}
-                </div>
-            )}
-
-            {showStartStop && (
-                <div className="absolute top-4 right-4 flex gap-2">
-                    <Button
-                        onClick={startAutoplay}
-                        disabled={isPlaying}
-                        className={`bg-black rounded-full ${isPlaying ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-                            }`}
-                    >
-                        <CirclePlay size={34} strokeWidth={1.5} absoluteStrokeWidth />
-                    </Button>
-                    <Button
-                        onClick={stopAutoplay}
-                        disabled={!isPlaying}
-                        className={`bg-black rounded-full ${!isPlaying ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-                            }`}
-                    >
-                        <CirclePause size={34} strokeWidth={1.5} absoluteStrokeWidth />
-                    </Button>
-                </div>
-            )}
-        </div>
+            <CarouselViewport emblaRef={emblaRef} slides={slides} />
+            {showNavigation && <CarouselNavigation scrollPrev={scrollPrev} scrollNext={scrollNext} />}
+            {showIndicators && <CarouselIndicators slides={slides} scrollTo={scrollTo} selectedIndex={selectedIndex} />}
+            {showStartStop && <CarouselControls isPlaying={isPlaying} toggleAutoplay={isPlaying ? stopAutoplay : startAutoplay} />}
+        </motion.div>
     );
 };
+
+const CarouselViewport = ({ emblaRef, slides }) => (
+    <motion.div className="embla__viewport overflow-hidden w-full rounded-xs" ref={emblaRef}>
+        <motion.div className="embla__container flex h-[500px]">
+            {slides.map((slide, index) => (
+                <motion.div key={index} className="embla__slide flex-[0_0_100%] transition-all duration-300">
+                    {slide}
+                </motion.div>
+            ))}
+        </motion.div>
+    </motion.div>
+);
+
+const NavButton = ({ onClick, label, icon: Icon, className }) => (
+    <Tooltip>
+        <TooltipTrigger asChild>
+            <Button
+                size="icon"
+                onClick={onClick}
+                className={`absolute bottom-5 text-primary-foreground cursor-pointer p-2 h-8 w-8 bg-primary-default/20 hover:scale-95 rounded-full ${className}`}
+            >
+                <Icon strokeWidth={1.5} absoluteStrokeWidth />
+            </Button>
+        </TooltipTrigger>
+        <TooltipContent>{label}<TooltipArrow /></TooltipContent>
+    </Tooltip>
+);
+
+const CarouselNavigation = ({ scrollPrev, scrollNext }) => (
+    <TooltipProvider>
+        <motion.div>
+            <NavButton onClick={scrollPrev} label="Previous" icon={CircleArrowLeft} className="right-14" />
+            <NavButton onClick={scrollNext} label="Next" icon={CircleArrowRight} className="right-5" />
+        </motion.div>
+    </TooltipProvider>
+);
+
+const CarouselIndicators = ({ slides, scrollTo, selectedIndex }) => (
+    <motion.div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+        {slides.map((_, index) => (
+            <Button
+                key={index}
+                size="icon"
+                onClick={() => scrollTo(index)}
+                className={`w-2 h-1 p-0 cursor-pointer rounded-full transition-all ${selectedIndex === index ? "bg-primary-default" : "bg-primary-foreground"}`}
+            ></Button>
+        ))}
+    </motion.div>
+);
+
+
+const CarouselControls = ({ isPlaying, toggleAutoplay }) => (
+    <TooltipProvider>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <motion.div className="absolute bottom-4 left-4 flex gap-2">
+                    <Button
+                        onClick={toggleAutoplay}
+                        size="icon"
+                        className="bg-primary-default/20 hover:scale-95 rounded-full p-2 h-8 w-8 cursor-pointer"
+                    >
+                        {isPlaying ? (
+                            <CirclePause strokeWidth={1.5} absoluteStrokeWidth />
+                        ) : (
+                            <CirclePlay strokeWidth={1.5} absoluteStrokeWidth />
+                        )}
+                    </Button>
+                </motion.div>
+            </TooltipTrigger>
+            <TooltipContent className="flex items-center gap-2">
+                {isPlaying ? (
+                    <motion.div className="flex items-center gap-1">
+                        <span>Playing</span>
+                        <CircleDot strokeWidth={1.5} absoluteStrokeWidth className="text-chart-2 animate-pulse w-3 fill-chart-2" />
+                    </motion.div>
+                ) : (
+                    <motion.div className="flex items-center gap-2">
+                        <span>Paused</span>
+                        <CircleDot strokeWidth={1.5} absoluteStrokeWidth className="text-destructive-default animate-pulse w-3 fill-destructive-default" />
+                    </motion.div>
+                )}
+                <TooltipArrow />
+            </TooltipContent>
+        </Tooltip>
+    </TooltipProvider>
+);
+
 
 export default Carousel;

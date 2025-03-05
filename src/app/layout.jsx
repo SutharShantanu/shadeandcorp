@@ -1,12 +1,8 @@
 import { Forum, Work_Sans } from "next/font/google";
-import Head from 'next/head'
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
-import Loading from "@/components/loading";
-import { Suspense } from "react";
-import { Toaster } from "@/components/ui/sonner";
+import Head from "next/head";
 import { SessionProvider } from "next-auth/react";
 import "./globals.css";
+import ClientLayout from "./clientLayout";
 
 const forum = Forum({ weight: "400", subsets: ["latin"], display: "swap" });
 const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" });
@@ -25,19 +21,8 @@ export default function RootLayout ({ children }) {
           <meta name="description" content={metadata.description} />
           <link href="./globals.css" rel="stylesheet" />
         </Head>
-        <body
-          className={`${forum.className} ${workSans.className} antialiased`}
-          suppressHydrationWarning={true} >
-          <Suspense fallback={<Loading />}>
-            <Navbar />
-            <div className="mt-[99px]">{children}
-              <Toaster
-                richColors
-                position="bottom-right"
-              />
-              <Footer />
-            </div>
-          </Suspense>
+        <body className={`${forum.className} ${workSans.className} antialiased`} suppressHydrationWarning>
+          <ClientLayout>{children}</ClientLayout>
         </body>
       </html>
     </SessionProvider>
