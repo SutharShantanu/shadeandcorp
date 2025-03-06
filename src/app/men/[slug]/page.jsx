@@ -15,7 +15,7 @@ import {
 import FilterBar from "@/components/filter/filter";
 import ProductListingHeader from "@/components/product/productListingHeader";
 import ProductCard from "@/components/product/productCard";
-import { Check, CircleCheck, Frame, MarsStroke, PaintBucket, Shirt, Transgender, Venus, X } from "lucide-react";
+import { Frame, MarsStroke, PaintBucket, Shirt, Transgender, Venus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";

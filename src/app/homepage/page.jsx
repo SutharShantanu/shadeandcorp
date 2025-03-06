@@ -3,31 +3,32 @@
 import Banner from "@/components/homepage/banner";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AccordionItem,
   AccordionTrigger,
   Accordion,
   AccordionContent,
 } from "@/components/ui/accordion";
+import { MenTopwear } from "@/dummy/clothes";
 import { Spinner } from "@/components/ui/spinner";
 import Image from "next/image";
 import Marquee from "react-fast-marquee";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Quote, Star, StarHalf, User } from "lucide-react";
+import { ArrowRight, Quote, Star, StarHalf, User } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, TooltipArrow } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
-
+import ProductCard from "@/components/product/productCard";
 
 const Homepage = () => {
   return (
     <div>
       <Banner />
-      <FeaturedProducts />
+      <Products />
       <FeaturesSection />
       <PartnersSection />
+      <Brands />
       <TestimonialSection />
       <FAQ />
     </div>
@@ -35,6 +36,68 @@ const Homepage = () => {
 };
 
 export default Homepage;
+
+const Brands = () => {
+  const brands = [
+    { name: "Nike", logo: "https://cdn-icons-png.flaticon.com/512/732/732229.png", bg: "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/060d0541798249.57b4b1083209e.jpg" },
+    { name: "Adidas", logo: "https://www.vectorlogo.zone/logos/adidas/adidas-ar21.svg", bg: "https://img.goodfon.com/wallpaper/nbig/f/43/adidas-fashion-stella-mccartney-sportivnaia-odezhda-model-ad.webp" },
+    { name: "Puma", logo: "https://raw.githubusercontent.com/simple-icons/simple-icons/2aef7ce65fbaef8a013d254d3ee98cbf054a6aad/icons/puma.svg", bg: "https://w0.peakpx.com/wallpaper/541/98/HD-wallpaper-cara-delevingne-puma-x-2017-8k-cara-delevingne-celebrities-girls-puma.jpg" },
+    { name: "Reebok", logo: "https://logos-world.net/wp-content/uploads/2020/04/Reebok-Logo-700x394.png", bg: "https://img.goodfon.com/wallpaper/nbig/9/4f/dzhidzhi-khadid-gigi-hadid-vintovaia-lestnitsa-reebok-ulybka.webp" },
+    { name: "Under Armour", logo: "https://www.vectorlogo.zone/logos/underarmour/underarmour-ar21.svg", bg: "https://images.unsplash.com/photo-1606813901444-1f7e3c8d3b8b" },
+    { name: "New Balance", logo: "https://www.vectorlogo.zone/logos/newbalance/newbalance-ar21.svg", bg: "https://images.unsplash.com/photo-1606813901444-1f7e3c8d3b8b" },
+    { name: "Asics", logo: "https://www.vectorlogo.zone/logos/asics/asics-ar21.svg", bg: "https://images.unsplash.com/photo-1606813901444-1f7e3c8d3b8b" },
+    { name: "Converse", logo: "https://www.vectorlogo.zone/logos/converse/converse-ar21.svg", bg: "https://images.unsplash.com/photo-1606813901444-1f7e3c8d3b8b" },
+  ];
+
+  const [visibleBrands, setVisibleBrands] = useState(4);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleShowMore = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setVisibleBrands((prev) => (prev + 4 > brands.length ? brands.length : prev + 4));
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  return (
+    <motion.div className="container mx-auto w-full my-10">
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {brands.slice(0, visibleBrands).map((brand, index) => (
+          <motion.div
+            key={index}
+            className="relative overflow-hidden rounded-xs w-full h-[350px] group"
+          >
+            <Image
+              src={brand.bg}
+              alt={brand.name}
+              width={500}
+              height={300}
+              className="absolute inset-0 w-full h-[350px] transition-all ease-in-out scale-105 group-hover:scale-100 object-cover group-hover:blur-sm border border-border brightness-75 group-hover:brightness-100"
+            />
+            <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-500 ease-in-out opacity-0 hover:opacity-100"></div>
+            <div className="relative z-10 flex items-center justify-center h-full">
+              <Image src={brand.logo} alt={brand.name} width={100} height={50} className="object-contain" />
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      <Button
+        isLoading={isLoading}
+        onClick={handleShowMore}
+        className="mt-6 cursor-pointer w-fit ml-auto bg-primary-default text-primary-foreground rounded-xs text-center flex items-center gap-2 transition-all ease-in-out hover:bg-primary-default/80"
+      >
+        {isLoading ? <Spinner /> : (
+          <motion.div className="flex items-center gap-2">
+            Show More Brands
+            <ArrowRight className="w-5 h-5 text-primary-foreground" />
+          </motion.div>
+        )}
+      </Button>
+    </motion.div>
+  );
+};
 
 const PartnersSection = () => {
   const partnerLogos = [
@@ -152,14 +215,14 @@ const FAQ = () => {
         Find out all the essential details about our clothing brand and how we
         can serve your needs.
       </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
         {visibleFaqs.map((faq, index) => (
           <Accordion type="single" collapsible key={index}>
             <AccordionItem
               value={`faq-${index}`}
               className="group hover:bg-primary-foreground/50 transition-all ease-in-out px-4 hover:rounded-xs border-b"
             >
-              <AccordionTrigger className="text-default-primary font-subheading group-hover:no-underline flex items-center gap-2">
+              <AccordionTrigger className="text-default-primary font-subheading group-hover:no-underline flex items-center gap-10">
                 {faq.question}
               </AccordionTrigger>
               <AccordionContent className="text-default-primary text-small">
@@ -184,32 +247,9 @@ const FAQ = () => {
   );
 };
 
-const FeaturedProducts = () => {
-  const products = [
-    { name: "Classic Tee", image: "/images/tee.jpg", price: "$25" },
-    { name: "Denim Jacket", image: "/images/jacket.jpg", price: "$60" },
-    { name: "Sneakers", image: "/images/sneakers.jpg", price: "$80" },
-  ];
-
-  return (
-    <motion.div className="container mx-auto my-12">
-      <h2 className="text-center text-3xl font-bold mb-6">Best Sellers</h2>
-      <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {products.map((product, index) => (
-          <motion.div key={index} className="border p-4 rounded-md shadow-lg">
-            <Image src={product.image} alt={product.name} width={200} height={200} className="w-full rounded-md" />
-            <h3 className="text-lg font-semibold mt-4">{product.name}</h3>
-            <p className="text-primary-default font-bold">{product.price}</p>
-          </motion.div>
-        ))}
-      </motion.div>
-    </motion.div>
-  );
-};
-
 export const FeaturesSection = () => (
-  <div className="container mx-auto w-fit">
-    <motion.div className="flex flex-col gap-6">
+  <div className="container mx-auto w-full">
+    <motion.div className="flex flex-col gap-6 w-full">
       <motion.div className="flex gap-2 flex-col">
         <h2 className="text-heading font-forum">
           Discover Our Unique Features
@@ -400,3 +440,51 @@ const TestimonialSection = () => {
     </div>
   );
 };
+
+export const Products = () => {
+
+  const [api, setApi] = useState();
+  const [current, setCurrent] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  useEffect(() => {
+    if (!api || isHovered) return;
+
+    const interval = setInterval(() => {
+      if (api.selectedScrollSnap() + 1 === api.scrollSnapList().length) {
+        setCurrent(0);
+        api.scrollTo(0);
+      } else {
+        api.scrollNext();
+        setCurrent((prev) => prev + 1);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [api, current, isHovered]);
+
+  return (
+    <motion.div className="container mx-auto w-fit my-10">
+      <motion.div className="flex flex-col gap-10">
+        <h2 className="text-heading font-forum">
+          Trusted by thousands of businesses worldwide
+        </h2>
+        <Carousel
+          setApi={setApi}
+          className="w-full"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <CarouselContent>
+            {MenTopwear.map((product) => (
+              <CarouselItem className="basis-1/4 lg:basis-1/5" key={product.id}>
+                <ProductCard product={product} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </motion.div>
+    </motion.div>
+  );
+};
+
