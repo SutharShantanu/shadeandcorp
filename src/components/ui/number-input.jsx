@@ -1,10 +1,11 @@
 "use client";
 
-import NumberFlow from "@number-flow/react";
-import clsx from "clsx/lite";
 import { Minus, Plus } from "lucide-react";
 import * as React from "react";
 import { Button } from "./button";
+import { motion, MotionConfig } from "framer-motion";
+import NumberFlow, { useCanAnimate } from "@number-flow/react";
+import clsx from "clsx";
 
 const NumberInputRoot = ({ className, children }) => (
     <div
@@ -26,7 +27,7 @@ const NumberInputButton = React.forwardRef(({ className, onClick, disabled, icon
         disabled={disabled}
         onPointerDown={onClick}
     >
-        {icon === "minus" ? <Minus className="size-4" absoluteStrokeWidth strokeWidth={3.5} /> : <Plus className="size-4" absoluteStrokeWidth strokeWidth={3.5} />}
+        {icon === "minus" ? <Minus className="size-4" absoluteStrokeWidth strokeWidth={2} /> : <Plus className="size-4" absoluteStrokeWidth strokeWidth={2} />}
     </Button>
 ));
 
@@ -52,7 +53,7 @@ const NumberInputField = React.forwardRef(({ className, value, onInput, min, max
                 ref={ref}
                 className={clsx(
                     showCaret ? "caret-primary" : "caret-transparent",
-                    "spin-hide w-fit bg-transparent text-center text-subheading font-[inherit] text-transparent outline-none",
+                    "spin-hide w-fit bg-transparent text-center text-description font-[inherit] text-transparent outline-none",
                     className
                 )}
                 style={{ fontKerning: "none" }}
@@ -73,7 +74,7 @@ const NumberInputField = React.forwardRef(({ className, value, onInput, min, max
                 animated={animated}
                 onAnimationsStart={() => setShowCaret(false)}
                 onAnimationsFinish={() => setShowCaret(true)}
-                className="pointer-events-none"
+                className="pointer-events-none text-description font-description"
                 willChange
             />
         </div>
@@ -81,3 +82,41 @@ const NumberInputField = React.forwardRef(({ className, value, onInput, min, max
 });
 
 export { NumberInputRoot, NumberInputButton, NumberInputField };
+
+const MotionNumberFlow = motion(NumberFlow);
+
+export default function AnimatedNumber ({ value, isPercentage = false }) {
+    const canAnimate = useCanAnimate();
+
+    return (
+        <MotionConfig
+            transition={{
+                layout: canAnimate
+                    ? { duration: 0.9, bounce: 0, type: "spring" }
+                    : { duration: 0 },
+            }}
+        >
+            <motion.span
+                className={clsx(
+                    "inline-flex items-center px-1 text-description font-description transition-all ease-in-out"
+                )}
+                layout
+            >
+                <MotionNumberFlow
+                    value={isPercentage ? value / 100 : value}
+                    format={
+                        isPercentage
+                            ? { style: "percent", maximumFractionDigits: 2 }
+                            : { maximumFractionDigits: 2 }
+                    }
+                    style={{
+                        "--number-flow-char-height": "0.85em",
+                        "--number-flow-mask-height": "0.3em",
+                    }}
+                    layout
+                    layoutRoot
+                />
+            </motion.span>
+        </MotionConfig>
+    );
+}

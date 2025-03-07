@@ -2,13 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import PageHeader from "@/components/header/sectionHeader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { Heart, Trash2 } from "lucide-react";
-import { NumberInput, NumberInputButton, NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
+import AnimatedNumber, { NumberInput, NumberInputButton, NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
 
 const CartSummary = ({ total }) => (
     <motion.div className="p-4 border-t bg-white rounded-md">
@@ -200,9 +200,16 @@ const Cart = () => {
                                                 <NumberInputButton onClick={handlePointerDown(item.id, 1)} disabled={value >= max} icon="plus" />
                                             </NumberInputRoot>
                                         </TableCell>
-                                        <TableCell>${item.price.toFixed(2)} x {item.quantity}</TableCell>
-                                        <TableCell className="text-destructive-default line-through">{item.discount}%</TableCell>
-                                        <TableCell>${totalPrice(item.price, item.quantity, item.discount)}</TableCell>
+                                        <TableCell>
+                                            $<AnimatedNumber value={item.price.toFixed(2)} canAnimate={true} /> x{" "}
+                                            <AnimatedNumber value={item.quantity} canAnimate={true}/>
+                                        </TableCell>
+                                        <TableCell className="text-destructive-default line-through">
+                                            <AnimatedNumber value={item.discount} canAnimate={true} isPercentage={true} />
+                                        </TableCell>
+                                        <TableCell>
+                                            $<AnimatedNumber value={totalPrice(item.price, item.quantity, item.discount)} canAnimate={true} />
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
