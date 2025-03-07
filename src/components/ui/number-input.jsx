@@ -9,7 +9,7 @@ import { Button } from "./button";
 const NumberInputRoot = ({ className, children }) => (
     <div
         className={clsx(
-            "group flex items-center border border-border rounded-xs text-subheading font-semibold transition-[box-shadow] dark:ring-zinc-800",
+            "group flex items-center border border-border rounded-xs text-subheading font-semibold transition-[box-shadow] w-fit divide-x h-9 divide-border",
             className
         )}
     >
@@ -17,36 +17,33 @@ const NumberInputRoot = ({ className, children }) => (
     </div>
 );
 
-const NumberInputButton = React.forwardRef(({ className, onClick, disabled, icon: Icon }, ref) => (
+const NumberInputButton = React.forwardRef(({ className, onClick, disabled, icon }, ref) => (
     <Button
         ref={ref}
         aria-hidden="true"
         tabIndex={-1}
-        className={clsx("flex items-center px-2 h-8 w-8 text-primary-default border border-border", className)}
+        className={clsx("flex items-center px-2 rounded-l-xs rounded-none w-8 h-9 text-primary-default", className)}
         disabled={disabled}
         onPointerDown={onClick}
     >
-        <Icon className="size-4" absoluteStrokeWidth strokeWidth={3.5} />
+        {icon === "minus" ? <Minus className="size-4" absoluteStrokeWidth strokeWidth={3.5} /> : <Plus className="size-4" absoluteStrokeWidth strokeWidth={3.5} />}
     </Button>
 ));
 
 const NumberInputField = React.forwardRef(({ className, value, onInput, min, max }, ref) => {
-    const defaultValue = React.useRef(value);
     const [animated, setAnimated] = React.useState(true);
     const [showCaret, setShowCaret] = React.useState(true);
 
     const handleInput = (event) => {
         setAnimated(false);
-        let next = value;
         const el = event.currentTarget;
-        if (el.value === "") {
-            next = defaultValue.current;
+        let next = el.value === "" ? min : parseInt(el.value);
+
+        if (!isNaN(next) && min <= next && next <= max) {
+            onInput?.(next);
         } else {
-            const num = parseInt(el.value);
-            if (!isNaN(num) && min <= num && num <= max) next = num;
+            el.value = String(value);
         }
-        el.value = String(next);
-        onInput?.(next);
     };
 
     return (
@@ -55,7 +52,7 @@ const NumberInputField = React.forwardRef(({ className, value, onInput, min, max
                 ref={ref}
                 className={clsx(
                     showCaret ? "caret-primary" : "caret-transparent",
-                    "spin-hide w-fit bg-transparent py-2 text-center text-subheading font-[inherit] text-transparent outline-none",
+                    "spin-hide w-fit bg-transparent text-center text-subheading font-[inherit] text-transparent outline-none",
                     className
                 )}
                 style={{ fontKerning: "none" }}
@@ -83,25 +80,4 @@ const NumberInputField = React.forwardRef(({ className, value, onInput, min, max
     );
 });
 
-const NumberInput = ({ value = 0, min = -Infinity, max = Infinity, onChange, className }) => {
-    const inputRef = React.useRef(null);
-
-    const handlePointerDown = (diff) => (event) => {
-        if (event.pointerType === "mouse") {
-            event.preventDefault();
-            inputRef.current?.focus();
-        }
-        const newVal = Math.min(Math.max(value + diff, min), max);
-        onChange?.(newVal);
-    };
-
-    return (
-        <NumberInputRoot className={className}>
-            <NumberInputButton onClick={handlePointerDown(-1)} disabled={value <= min} icon={Minus} />
-            <NumberInputField ref={inputRef} value={value} onInput={onChange} min={min} max={max} />
-            <NumberInputButton onClick={handlePointerDown(1)} disabled={value >= max} icon={Plus} />
-        </NumberInputRoot>
-    );
-};
-
-export { NumberInput, NumberInputRoot, NumberInputButton, NumberInputField };
+export { NumberInputRoot, NumberInputButton, NumberInputField };

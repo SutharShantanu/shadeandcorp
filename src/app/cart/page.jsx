@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import PageHeader from "@/components/header/sectionHeader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -85,6 +85,10 @@ const Cart = () => {
 
     const [selectedItems, setSelectedItems] = useState([]);
     const allSelected = selectedItems.length === cart.length;
+    const [value, setValue] = useState(0);
+    const inputRef = useRef(null);
+    const min = 0;
+    const max = 100;
 
     const handleSelectAll = () => {
         setSelectedItems(allSelected ? [] : cart.map((item) => item.id));
@@ -109,6 +113,22 @@ const Cart = () => {
         );
     };
 
+    const handleValueChange = (newValue) => {
+        setValue(Math.min(Math.max(newValue, min), max));
+    };
+
+    const handlePointerDown = (id, diff) => (event) => {
+        event.preventDefault();
+        inputRef.current?.focus();
+
+        setCart((prevCart) =>
+            prevCart.map((item) =>
+                item.id === id
+                    ? { ...item, quantity: Math.max(1, Math.min(item.quantity + diff, max)) }
+                    : item
+            )
+        );
+    };
 
     const descriptionContent = (
         <motion.div>
@@ -168,12 +188,17 @@ const Cart = () => {
                                             <CartItem item={item} />
                                         </TableCell>
                                         <TableCell>
-                                            <NumberInput
-                                                value={item.quantity}
-                                                min={1}
-                                                onChange={(value) => handleQuantity(item.id, parseInt(value, 10) || 1)}
-                                                className=""
-                                            />
+                                            <NumberInputRoot className="" onChange={handleValueChange}>
+                                                <NumberInputButton onClick={handlePointerDown(item.id, -1)} disabled={item.quantity <= 1} icon="minus" />
+                                                <NumberInputField
+                                                    ref={inputRef}
+                                                    value={item.quantity}
+                                                    onInput={(newValue) => handleQuantity(item.id, newValue)}
+                                                    min={min}
+                                                    max={max}
+                                                />
+                                                <NumberInputButton onClick={handlePointerDown(item.id, 1)} disabled={value >= max} icon="plus" />
+                                            </NumberInputRoot>
                                         </TableCell>
                                         <TableCell>${item.price.toFixed(2)} x {item.quantity}</TableCell>
                                         <TableCell className="text-destructive-default line-through">{item.discount}%</TableCell>

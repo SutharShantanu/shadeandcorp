@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Heart, ShoppingCart, Sparkles } from "lucide-react";
@@ -22,7 +22,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathSegments } from "@/app/functions/pathname";
-import { NumberInput } from "../ui/number-input";
+import { NumberInput, NumberInputButton, NumberInputField, NumberInputRoot } from "../ui/number-input";
 import axios from "axios";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
@@ -100,31 +100,94 @@ const ProductPrice = ({ product }) => (
   </motion.div>
 );
 
-const ProductActions = () => {
-  const [quantity, setQuantity] = useState(0);
+const ProductActions = ({ item, setCart, min = 1, max = 10 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const inputRef = useRef(null);
 
+  const handleQuantity = (id, value) => {
+    setCart((prevCart) =>
+      prevCart.map((cartItem) =>
+        cartItem.id === id ? { ...cartItem, quantity: Math.max(min, value) } : cartItem
+      )
+    );
+  };
+
+  const handlePointerDown = (id, diff) => (event) => {
+    event.preventDefault();
+    inputRef.current?.focus();
+
+    setCart((prevCart) =>
+      prevCart.map((cartItem) =>
+        cartItem.id === item.id
+          ? { ...cartItem, quantity: Math.max(1, cartItem.quantity + 1) }
+          : cartItem
+      )
+    );
+
+  };
+
+  // const handleCart = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     // const response = await axios.post("/api/cart", { itemId: item.id, quantity: item.quantity });
+  //     // if (response.status === 200 || response.status === 201) {
+  //     toast.success("Product added to cart");
+  //     setCart((prevCart) =>
+  //       prevCart.map((cartItem) =>
+  //         cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
+  //       )
+  //     );
+  //   } catch (error) {
+  //     console.error("Error adding to cart:", error);
+  //     toast.error("Failed to add product to cart");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
   const handleCart = async () => {
     setIsLoading(true);
     try {
-      // const response = await axios.post("/api/cart", { quantity });
-      // if (response.status === 200 || response.status === 201) {
-      // console.log(`response`, response);
       toast.success("Product added to cart");
-      setQuantity(prev => prev + 1);
-      // }
+      setCart((prevCart) => {
+        console.log("Previous Cart:", prevCart);
+        return prevCart.map((cartItem) => {
+          if (cartItem.id === item.id) {
+            console.log("Updating quantity to:", cartItem.quantity + 1);
+            return { ...cartItem, quantity: cartItem.quantity + 1 };
+          }
+          return cartItem;
+        });
+      });
     } catch (error) {
-      console.log(`error`, error);
+      console.error("Error adding to cart:", error);
       toast.error("Failed to add product to cart");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <CardFooter className="flex flex-col items-center p-0 sm:flex-row sm:justify-between divide-x divide-border">
-      {quantity > 0 ? (
-        <NumberInput value={quantity} min={0} max={10} onChange={setQuantity} className="w-1/2" />
+      {item?.quantity && item?.quantity > 0 ? (
+        <NumberInputRoot className="">
+          <NumberInputButton
+            onClick={handlePointerDown(item.id, -1)}
+            disabled={item.quantity <= min}
+            icon="minus"
+          />
+          <NumberInputField
+            ref={inputRef}
+            value={item.quantity}
+            onInput={(newValue) => handleQuantity(item.id, newValue)}
+            min={min}
+            max={max}
+          />
+          <NumberInputButton
+            onClick={handlePointerDown(item.id, 1)}
+            disabled={item.quantity >= max}
+            icon="plus"
+          />
+        </NumberInputRoot>
       ) : (
         <Button
           onClick={handleCart}
@@ -152,6 +215,7 @@ const ProductCard = ({ product }) => {
   const [isFavourite, setIsFavourite] = useState(false);
   const pathSegments = usePathSegments();
   const formattedPath = pathSegments.join("/");
+  const [cart, setCart] = useState([]);
 
   return (
     <motion.div key={product.id} className="border border-border border-separate border-dashed rounded-xs hover:bg-muted-default/20 hover:shadow-md h-fit">
@@ -170,7 +234,7 @@ const ProductCard = ({ product }) => {
           <ProductColors colors={product.colors} />
           <ProductPrice product={product} />
         </CardContent>
-        <ProductActions />
+        <ProductActions key={product.id} item={product} setCart={setCart} />
       </Card>
     </motion.div>
   );
