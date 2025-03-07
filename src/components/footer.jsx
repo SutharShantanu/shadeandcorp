@@ -13,13 +13,16 @@ import {
   Youtube,
   ArrowUpRight,
   Send,
+  ArrowRight,
+  Mail,
 } from "lucide-react";
+import { useState } from "react";
 
 const FooterSection = ({ title, links }) => {
   return (
-    <div>
-      <h3 className="text-lg font-semibold mb-4">{title}</h3>
-      <ul className="gap-y-4 flex flex-col text-muted-foreground">
+    <motion.div>
+      <h3 className="text-description font-semibold mb-4">{title}</h3>
+      <ul className="gap-4 flex flex-col text-muted-foreground">
         {links.map((link, index) => (
           <li key={index}>
             <Link
@@ -36,7 +39,7 @@ const FooterSection = ({ title, links }) => {
           </li>
         ))}
       </ul>
-    </div>
+    </motion.div>
   );
 };
 
@@ -47,19 +50,13 @@ const SocialIcon = ({ href, icon: Icon, label }) => {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
+      className="group"
     >
-      <Button
-        variant="outline"
-        size="icon"
-        className="text-foreground border-border hover:bg-secondary rounded-full hover:bg-foreground hover:text-background hover:scale-95 transition-all ease-in-out group"
-      >
-        <Icon
-          size={32}
-          strokeWidth={1.75}
-          absoluteStrokeWidth
-          className="group-hover:rotate-6 transition-all ease-in-out"
-        />
-      </Button>
+      <Icon
+        size={24}
+        strokeWidth={1}
+        className="transition-all ease-in-out hover:text-primary-foreground hover:fill-primary-default group-hover:scale-105 "
+      />
     </Link>
   );
 };
@@ -143,31 +140,75 @@ const Footer = () => {
 
   const currentYear = new Date().getFullYear();
 
+  const [isTyping, setIsTyping] = useState(false);
+
+  const handleInputChange = (e) => {
+    setIsTyping(e.target.value.length > 0);
+  };
+
   return (
     <motion.footer
       initial="hidden"
       whileInView="visible"
       variants={fadeIn}
-      className="bg-background text-foreground py-10 border-t border-border"
+      className="w-full py-10 border-t border-border"
     >
-      <div className="container mx-auto">
-        <div className=" p-6 bg-card border border-border rounded-lg">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-semibold mb-2">Shade and Crop</h3>
-              <p className="text-muted-foreground">
+      <motion.div className="container mx-auto w-[90%] lg:w-full">
+        <motion.div className=" p-6 bg-card border border-border rounded-xs">
+          <motion.div className="flex flex-col md:flex-row justify-between items-start">
+            <motion.div className="text-left">
+              <h3 className="text-heading font-forum font-semibold mb-2">Shade and Crop</h3>
+              <p className="text-muted-foreground text-small">
                 Elevate your style with our curated collection of modern
                 clothing and accessories.
               </p>
-              <Button className="mt-4 md:mt-0 bg-primary-default text-primary-foreground hover:bg-primary-default/90">
-                <Link href="/shop" aria-label="Shop Now">
-                  Shop Now
-                </Link>
-              </Button>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
-              <div className="flex gap-4">
+            </motion.div>
+          </motion.div>
+        </motion.div>
+        <Separator orientation="horizontal" className="my-6 w-full" />
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          {sections.map((section, index) => (
+            <FooterSection
+              key={index}
+              title={section.title}
+              links={section.links}
+            />
+          ))}
+          <motion.div className="col-span-2 flex flex-col gap-4">
+            <motion.div className="">
+              <h3 className="text-description font-semibold mb-4">
+                Subscribe to our Newsletter
+              </h3>
+              <div className="flex justify-between gap-1">
+                <motion.div className="flex items-center gap-2 px-2 rounded-xs bg-primary-foreground border border-border w-full">
+                  {!isTyping && (
+                    <Mail size={18} className="text-muted-foreground" strokeWidth={1} />
+                  )}
+                  <Input
+                    type="email"
+                    placeholder=" Enter your email"
+                    className="border-none bg-primary-foreground px-0"
+                    aria-label="Enter your email"
+                    onChange={handleInputChange}
+                  />
+                </motion.div>
+                <Button
+                  className="bg-primary-default text-primary-foreground hover:bg-primary-default/90 w-fit group"
+                  aria-label="Subscribe"
+                >
+                  Subscribe
+                  <Send
+                    size={16}
+                    className="group-hover:rotate-45 transition-all ease-in-out"
+                  />
+                </Button>
+              </div>
+            </motion.div>
+            <motion.div className="flex flex-col gap-6 justify-between">
+              <motion.div className="flex items-center gap-2">
+                <h3 className="text-description font-semibold select-none">Follow Us</h3>
+              </motion.div>
+              <motion.div className="flex gap-4 items-baseline">
                 {socialLinks.map((link, index) => (
                   <SocialIcon
                     key={index}
@@ -176,49 +217,14 @@ const Footer = () => {
                     label={link.label}
                   />
                 ))}
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </div>
-
-        <Separator orientation="horizontal" className="my-6 w-full" />
-
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4">
-          {sections.map((section, index) => (
-            <FooterSection
-              key={index}
-              title={section.title}
-              links={section.links}
-            />
-          ))}
-          <div className="">
-            <h3 className="text-lg font-semibold mb-4">
-              Subscribe to our Newsletter
-            </h3>
-            <div className="flex justify-between gap-1">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="bg-card text-card-foreground border-border"
-                aria-label="Enter your email"
-              />
-              <Button
-                className="bg-primary-default text-primary-foreground hover:bg-primary-default/90 w-fit group"
-                aria-label="Subscribe"
-              >
-                Subscribe
-                <Send
-                  size={16}
-                  className="group-hover:rotate-45 transition-all ease-in-out"
-                />
-              </Button>
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
+        <div className="border-t border-border mt-6 pt-8 text-center text-muted-foreground">
           <p>© {currentYear} Shade and Crop. All rights reserved.</p>
         </div>
-      </div>
+      </motion.div>
     </motion.footer>
   );
 };

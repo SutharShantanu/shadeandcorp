@@ -55,14 +55,17 @@ const Brands = () => {
   const handleShowMore = () => {
     setIsLoading(true);
     setTimeout(() => {
-      setVisibleBrands((prev) => (prev + 4 > brands.length ? brands.length : prev + 4));
+      setVisibleBrands((prev) => (prev >= brands.length ? 4 : prev + 4));
       setIsLoading(false);
     }, 1000);
   };
 
   return (
-    <motion.div className="container mx-auto w-full my-10">
-      
+    <motion.div className="container mx-auto my-10 w-[90%] 2xl:w-full">
+      <motion.div className="flex flex-col gap-2 w-full mb-6">
+        <h2 className="text-heading font-forum">Our Brands</h2>
+        <p className="text-description text-muted-foreground">Discover the top brands we collaborate with.</p>
+      </motion.div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {brands.slice(0, visibleBrands).map((brand, index) => (
           <motion.div
@@ -74,7 +77,7 @@ const Brands = () => {
               alt={brand.name}
               width={500}
               height={300}
-              className="absolute inset-0 w-full h-[350px] transition-all ease-in-out scale-105 group-hover:scale-100 object-cover group-hover:blur-sm border border-border brightness-75 group-hover:brightness-100"
+              className="absolute inset-0 w-full h-[350px] transition-all ease-in-out scale-105 group-hover:scale-100 object-cover group-hover:blur-sm border border-border brightness-75"
             />
             <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-500 ease-in-out opacity-0 hover:opacity-100"></div>
             <div className="relative z-10 flex items-center justify-center h-full">
@@ -86,14 +89,12 @@ const Brands = () => {
       <Button
         isLoading={isLoading}
         onClick={handleShowMore}
-        className="mt-6 cursor-pointer w-fit ml-auto bg-primary-default text-primary-foreground rounded-xs text-center flex items-center gap-2 transition-all ease-in-out hover:bg-primary-default/80"
+        className="mt-6 cursor-pointer ml-auto bg-primary-default text-primary-foreground text-center flex items-center gap-2 transition-all ease-in-out hover:bg-primary-default/80"
       >
-        {isLoading ? <Spinner /> : (
-          <motion.div className="flex items-center gap-2">
-            Show More Brands
-            <ArrowRight className="w-5 h-5 text-primary-foreground" />
-          </motion.div>
-        )}
+        {visibleBrands >= brands.length ? "Show Less" : "Show More"}
+        {isLoading ? <Spinner /> :
+          <ArrowRight className="w-5 h-5 text-primary-foreground" />
+        }
       </Button>
     </motion.div>
   );
@@ -116,8 +117,11 @@ const PartnersSection = () => {
   ];
 
   return (
-    <motion.div className="container mx-auto my-4">
-      <p className="text-center text-heading font-forum mb-6">Our Partners</p>
+    <motion.div className="container mx-auto w-[90%] 2xl:w-full my-10">
+      <motion.div className="flex flex-col gap-2 w-full mb-6">
+        <h2 className="text-heading font-forum">Our Partners</h2>
+        <p className="text-description text-muted-foreground">We strive to be a trusted partner for our customers.</p>
+      </motion.div>
       <Marquee pauseOnHover={true} gradient={true} gradientColor="#f3f4f6" gradientWidth={250} speed={40}>
         {partnerLogos.map((brand, index) => (
           <Image
@@ -207,20 +211,22 @@ const FAQ = () => {
   const visibleFaqs = showAll ? faqs : faqs.slice(0, 8);
 
   return (
-    <motion.div className="container mx-auto my-4">
-      <p className="text-center text-heading font-forum mb-6">
-        Frequently Asked Questions
-      </p>
-      <p className="text-center text-description text-muted-foreground mb-8">
-        Find out all the essential details about our clothing brand and how we
-        can serve your needs.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+    <motion.div className="container mx-auto w-[90%] 2xl:w-full mt-10 mb-5">
+      <motion.div className="flex flex-col gap-2 w-full mb-6">
+        <h2 className="text-heading font-forum">
+          Frequently Asked Questions
+        </h2>
+        <p className="text-description text-muted-foreground">
+          Find out all the essential details about our clothing brand and how we
+          can serve your needs.
+        </p>
+      </motion.div>
+      <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-10">
         {visibleFaqs.map((faq, index) => (
           <Accordion type="single" collapsible key={index}>
             <AccordionItem
               value={`faq-${index}`}
-              className="group hover:bg-primary-foreground/50 transition-all ease-in-out px-4 hover:rounded-xs border-b"
+              className="group hover:bg-primary-foreground/50 transition-all ease-in-out hover:rounded-xs border-b"
             >
               <AccordionTrigger className="text-default-primary font-subheading group-hover:no-underline flex items-center gap-10">
                 {faq.question}
@@ -231,7 +237,7 @@ const FAQ = () => {
             </AccordionItem>
           </Accordion>
         ))}
-      </div>
+      </motion.div>
 
       {faqs.length > 10 && (
         <Button
@@ -239,62 +245,60 @@ const FAQ = () => {
           className="mt-6 cursor-pointer hover:bg-primary-default/80 w-fit ml-auto bg-primary-default text-primary-foreground rounded-xs text-center flex items-center gap-2"
           disabled={loading}
         >
-          {loading && <Spinner />}
-          {showAll ? "Show Less" : "Show More"}
+          {showAll ? "Show Less" : "Show More "}
+          {loading ? <Spinner /> : <ArrowRight className="w-5 h-5 text-primary-foreground" />}
         </Button>
       )}
     </motion.div>
   );
 };
 
-export const FeaturesSection = () => (
-  <div className="container mx-auto w-full">
-    <motion.div className="flex flex-col gap-6 w-full">
-      <motion.div className="flex gap-2 flex-col">
-        <h2 className="text-heading font-forum">
-          Discover Our Unique Features
-        </h2>
-        <p className="text-lg max-w-xl lg:max-w-lg leading-relaxed tracking-tight text-muted-foreground text-left">
-          Elevate your style with our exclusive clothing line, designed for comfort and elegance.
-        </p>
+const FeaturesSection = () => (
+  <div className="container mx-auto w-[90%] 2xl:w-full my-10">
+    <motion.div className="flex flex-col gap-2 w-full mb-6">
+      <h2 className="text-heading font-forum">
+        Discover Our Unique Features
+      </h2>
+      <p className="text-description text-muted-foreground">
+        Elevate your style with our exclusive clothing line, designed for comfort and elegance.
+      </p>
+    </motion.div>
+    <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <motion.div className="relative col-span-1 md:col-span-2 h-fit">
+        <Image src="https://images.unsplash.com/photo-1697498435309-2c7864cfd607?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 1" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
+        <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
+          <h3 className="text-subheading text-primary-foreground">Premium Quality</h3>
+          <p className="bg-accent-default/50 text-small">
+            Our clothing is made from high-quality materials to ensure durability and comfort.
+          </p>
+        </div>
       </motion.div>
-      <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <motion.div className="relative col-span-1 md:col-span-2 h-fit">
-          <Image src="https://images.unsplash.com/photo-1697498435309-2c7864cfd607?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 1" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
-          <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
-            <h3 className="text-subheading text-primary-foreground">Premium Quality</h3>
-            <p className="bg-accent-default/50 text-small">
-              Our clothing is made from high-quality materials to ensure durability and comfort.
-            </p>
-          </div>
-        </motion.div>
-        <motion.div className="relative col-span-1 h-fit">
-          <Image src="https://images.unsplash.com/photo-1690993660127-1a7cdd87ec9e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 2" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
-          <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
-            <h3 className="text-subheading text-primary-foreground">Trendy Designs</h3>
-            <p className="bg-accent-default/50 text-small">
-              Stay ahead of the fashion curve with our latest trendy designs.
-            </p>
-          </div>
-        </motion.div>
-        <motion.div className="relative col-span-1 h-fit">
-          <Image src="https://images.unsplash.com/photo-1558171813-4c088753af8f?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 3" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
-          <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
-            <h3 className="text-subheading text-primary-foreground">Affordable Prices</h3>
-            <p className="bg-accent-default/50 text-small">
-              Enjoy premium quality clothing at prices that won't break the bank.
-            </p>
-          </div>
-        </motion.div>
-        <motion.div className="relative col-span-1 md:col-span-2 h-fit">
-          <Image src="https://plus.unsplash.com/premium_photo-1673125286978-a540fa337c7d?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 4" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
-          <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
-            <h3 className="text-subheading text-primary-foreground">Sustainable Fashion</h3>
-            <p className="bg-accent-default/50 text-small">
-              We are committed to sustainability, using eco-friendly materials and ethical production practices.
-            </p>
-          </div>
-        </motion.div>
+      <motion.div className="relative col-span-1 h-fit">
+        <Image src="https://images.unsplash.com/photo-1690993660127-1a7cdd87ec9e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 2" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
+        <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
+          <h3 className="text-subheading text-primary-foreground">Trendy Designs</h3>
+          <p className="bg-accent-default/50 text-small">
+            Stay ahead of the fashion curve with our latest trendy designs.
+          </p>
+        </div>
+      </motion.div>
+      <motion.div className="relative col-span-1 h-fit">
+        <Image src="https://images.unsplash.com/photo-1558171813-4c088753af8f?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 3" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
+        <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
+          <h3 className="text-subheading text-primary-foreground">Affordable Prices</h3>
+          <p className="bg-accent-default/50 text-small">
+            Enjoy premium quality clothing at prices that won't break the bank.
+          </p>
+        </div>
+      </motion.div>
+      <motion.div className="relative col-span-1 md:col-span-2 h-fit">
+        <Image src="https://plus.unsplash.com/premium_photo-1673125286978-a540fa337c7d?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Feature 4" width={400} height={400} className="w-full rounded-xs max-h-[700px] h-[700px] object-cover" />
+        <div className="flex flex-col absolute bottom-0 left-0 rounded-xs p-6 gap-2 bg-primary-default/20 max-w-2/5 backdrop-blur-sm">
+          <h3 className="text-subheading text-primary-foreground">Sustainable Fashion</h3>
+          <p className="bg-accent-default/50 text-small">
+            We are committed to sustainability, using eco-friendly materials and ethical production practices.
+          </p>
+        </div>
       </motion.div>
     </motion.div>
   </div>
@@ -374,15 +378,14 @@ const TestimonialSection = () => {
     }
   ];
 
-
   return (
-    <div className="w-full py-12 ">
-      <div className="w-fit mx-auto text-center">
-        <h2 className="text-center text-heading font-forum mb-6">What Our Clients Say</h2>
-        <p className="text-muted-foreground dark:text-gray-400 mt-2">Real feedback from our happy customers.</p>
-      </div>
+    <motion.div className="container mx-auto w-[90%] 2xl:w-full my-10">
+      <motion.div className="flex flex-col gap-2 w-full">
+        <h2 className="text-heading font-forum">What Our Clients Say</h2>
+        <p className="text-description text-muted-foreground">Real feedback from our happy customers.</p>
+      </motion.div>
 
-      <div className="mt-10 container ml-auto mr-auto">
+      <motion.div className="mt-10 container w-[80%] lg:w-[90%] xl:w-full ml-auto mr-auto">
         <Carousel className="border-l border-r border-border rounded-xs">
           <CarouselContent >
             {testimonials.map((testimonial, index) => {
@@ -436,12 +439,12 @@ const TestimonialSection = () => {
           <CarouselPrevious />
           <CarouselNext />
         </Carousel>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
-export const Products = () => {
+const Products = () => {
 
   const [api, setApi] = useState();
   const [current, setCurrent] = useState(0);
@@ -464,26 +467,29 @@ export const Products = () => {
   }, [api, current, isHovered]);
 
   return (
-    <motion.div className="container mx-auto w-fit my-10">
-      <motion.div className="flex flex-col gap-10">
+    <motion.div className="container mx-auto w-[90%] 2xl:w-full my-10">
+      <motion.div className="flex flex-col gap-2 w-full mb-6">
         <h2 className="text-heading font-forum">
           Trusted by thousands of businesses worldwide
         </h2>
-        <Carousel
-          setApi={setApi}
-          className="w-full"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          <CarouselContent>
-            {MenTopwear.map((product) => (
-              <CarouselItem className="basis-1/4 lg:basis-1/5" key={product.id}>
-                <ProductCard product={product} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
+        <p className="text-description text-muted-foreground">
+          We provide top-quality products to our customers, ensuring their satisfaction and loyalty.
+        </p>
       </motion.div>
+      <Carousel
+        setApi={setApi}
+        className="w-full"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <CarouselContent>
+          {MenTopwear.map((product) => (
+            <CarouselItem className="basis-1 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5" key={product.id}>
+              <ProductCard product={product} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
     </motion.div>
   );
 };
