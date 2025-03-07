@@ -392,48 +392,47 @@ const TestimonialSection = () => {
               const fullStars = Math.floor(testimonial.rating);
               const hasHalfStar = testimonial.rating % 1 !== 0;
 
-              return (
-                <CarouselItem key={index} className="flex justify-center md:basis-1/2 lg:basis-1/3 ">
+                return (
+                <CarouselItem key={index} className="flex justify-center basis-1/1 md:basis-1/2 lg:basis-1/3 ">
                   <Card className="w-full rounded-xs">
-                    <CardContent className="flex flex-col justify-between gap-8 items-center text-center p-4 h-full">
-                      <p className="text-subheading text-muted-foreground font-description">
-                        <Quote size={14} className="rotate-180 inline mr-3 text-primary-default fill-primary-default" />
-                        {testimonial.feedback}
-                        <Quote size={14} className="inline ml-3 text-primary-default fill-primary-default" />
-                      </p>
-                      <motion.div className="flex items-center w-full justify-between">
-                        <motion.div className="flex items-center gap-2 select-none">
-                          <Avatar className=" bg-muted-foreground " size="xs">
-                            <AvatarImage src={testimonial.image} alt={testimonial.name} />
-                            <AvatarFallback>{testimonial.name[0]}</AvatarFallback>
-                          </Avatar>
-                          <motion.div className=" text-left">
-                            <p className="text-description font-description">{testimonial.name}</p>
-                            <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                          </motion.div>
-                        </motion.div>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <motion.div className="flex">
-                                {[...Array(fullStars)].map((_, i) => (
-                                  <Star strokeWidth={.5} key={`full-${i}`} className="w-5 h-5 text-rating-default fill-rating-default" />
-                                ))}
-                                {hasHalfStar && <StarHalf strokeWidth={.5} key="half" className="w-5 h-5  text-rating-default fill-rating-default" />}
-
-                              </motion.div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p className="text-xs">{testimonial.rating}/5</p>
-                              <TooltipArrow />
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                  <CardContent className="flex flex-col justify-between gap-8 items-center text-center p-4 h-full">
+                    <p className="text-subheading text-muted-foreground font-description">
+                    <Quote size={14} className="rotate-180 inline mr-3 text-primary-default fill-primary-default" />
+                    {testimonial.feedback}
+                    <Quote size={14} className="inline ml-3 text-primary-default fill-primary-default" />
+                    </p>
+                    <motion.div className="flex items-center w-full justify-between">
+                    <motion.div className="flex items-center gap-2 select-none">
+                      <Avatar className=" bg-muted-foreground " size="xs">
+                      <AvatarImage src={testimonial.image} alt={testimonial.name} />
+                      <AvatarFallback>{testimonial.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <motion.div className=" text-left">
+                      <p className="text-description font-description">{testimonial.name}</p>
+                      <p className="text-xs text-muted-foreground">{testimonial.role}</p>
                       </motion.div>
-                    </CardContent>
+                    </motion.div>
+                    <TooltipProvider>
+                      <Tooltip>
+                      <TooltipTrigger>
+                        <motion.div className="flex">
+                        {[...Array(fullStars)].map((_, i) => (
+                          <Star strokeWidth={.5} key={`full-${i}`} className="w-5 h-5 text-rating-default fill-rating-default" />
+                        ))}
+                        {hasHalfStar && <StarHalf strokeWidth={.5} key="half" className="w-5 h-5  text-rating-default fill-rating-default" />}
+                        </motion.div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">{testimonial.rating}/5</p>
+                        <TooltipArrow />
+                      </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    </motion.div>
+                  </CardContent>
                   </Card>
                 </CarouselItem>
-              );
+                );
             })}
           </CarouselContent>
           <CarouselPrevious />
