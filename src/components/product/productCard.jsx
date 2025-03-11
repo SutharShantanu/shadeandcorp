@@ -100,9 +100,11 @@ const ProductPrice = ({ product }) => (
   </motion.div>
 );
 
-const ProductActions = ({ item, setCart, min = 1, max = 10 }) => {
+const ProductActions = ({ item, cart, setCart, min = 1, max = 10 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef(null);
+
+  const cartItem = cart.find((cartItem) => cartItem.id === item.id);
 
   const handleQuantity = (id, value) => {
     setCart((prevCart) =>
@@ -118,45 +120,29 @@ const ProductActions = ({ item, setCart, min = 1, max = 10 }) => {
 
     setCart((prevCart) =>
       prevCart.map((cartItem) =>
-        cartItem.id === item.id
-          ? { ...cartItem, quantity: Math.max(1, cartItem.quantity + 1) }
+        cartItem.id === id
+          ? { ...cartItem, quantity: Math.max(1, cartItem.quantity + diff) }
           : cartItem
       )
     );
-
   };
 
-  // const handleCart = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     // const response = await axios.post("/api/cart", { itemId: item.id, quantity: item.quantity });
-  //     // if (response.status === 200 || response.status === 201) {
-  //     toast.success("Product added to cart");
-  //     setCart((prevCart) =>
-  //       prevCart.map((cartItem) =>
-  //         cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
-  //       )
-  //     );
-  //   } catch (error) {
-  //     console.error("Error adding to cart:", error);
-  //     toast.error("Failed to add product to cart");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
   const handleCart = async () => {
     setIsLoading(true);
     try {
       toast.success("Product added to cart");
       setCart((prevCart) => {
-        console.log("Previous Cart:", prevCart);
-        return prevCart.map((cartItem) => {
-          if (cartItem.id === item.id) {
-            console.log("Updating quantity to:", cartItem.quantity + 1);
-            return { ...cartItem, quantity: cartItem.quantity + 1 };
-          }
-          return cartItem;
-        });
+        const existingItem = prevCart.find((cartItem) => cartItem.id === item.id);
+
+        if (existingItem) {
+          return prevCart.map((cartItem) =>
+            cartItem.id === item.id
+              ? { ...cartItem, quantity: cartItem.quantity + 1 }
+              : cartItem
+          );
+        } else {
+          return [...prevCart, { ...item, quantity: 1 }];
+        }
       });
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -168,24 +154,27 @@ const ProductActions = ({ item, setCart, min = 1, max = 10 }) => {
 
   return (
     <CardFooter className="flex items-center w-full p-0 flex-row sm:justify-between divide-x divide-border">
-      {item?.quantity && item?.quantity > 0 ? (
-        <NumberInputRoot className="">
+      {cartItem ? (
+        <NumberInputRoot className="w-1/2 min-w-1/2 justify-between h-10 rounded-none rounded-bl-xs">
           <NumberInputButton
             onClick={handlePointerDown(item.id, -1)}
-            disabled={item.quantity <= min}
+            disabled={cartItem.quantity <= min}
             icon="minus"
+            className="w-1/3 h-10"
           />
           <NumberInputField
             ref={inputRef}
-            value={item.quantity}
+            value={cartItem.quantity}
             onInput={(newValue) => handleQuantity(item.id, newValue)}
             min={min}
             max={max}
+            className="w-1/3"
           />
           <NumberInputButton
             onClick={handlePointerDown(item.id, 1)}
-            disabled={item.quantity >= max}
+            disabled={cartItem.quantity >= max}
             icon="plus"
+            className="w-1/3 h-10"
           />
         </NumberInputRoot>
       ) : (
@@ -211,6 +200,7 @@ const ProductActions = ({ item, setCart, min = 1, max = 10 }) => {
   );
 };
 
+
 const ProductCard = ({ product }) => {
   const [isFavourite, setIsFavourite] = useState(false);
   const pathSegments = usePathSegments();
@@ -234,7 +224,7 @@ const ProductCard = ({ product }) => {
           <ProductColors colors={product.colors} />
           <ProductPrice product={product} />
         </CardContent>
-        <ProductActions key={product.id} item={product} setCart={setCart} />
+        <ProductActions key={product.id} item={product} cart={cart} setCart={setCart} />
       </Card>
     </motion.div>
   );

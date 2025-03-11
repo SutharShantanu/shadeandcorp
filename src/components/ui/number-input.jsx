@@ -10,7 +10,7 @@ import clsx from "clsx";
 const NumberInputRoot = ({ className, children }) => (
     <div
         className={clsx(
-            "group flex items-center border border-border rounded-xs text-subheading font-semibold transition-[box-shadow] w-fit divide-x h-9 divide-border",
+            "group flex items-center border border-border text-subheading font-semibold transition-[box-shadow] w-fit h-9 ",
             className
         )}
     >
@@ -23,7 +23,11 @@ const NumberInputButton = React.forwardRef(({ className, onClick, disabled, icon
         ref={ref}
         aria-hidden="true"
         tabIndex={-1}
-        className={clsx("flex items-center px-2 rounded-l-xs rounded-none w-8 h-9 text-primary-default", className)}
+        className={clsx(
+            "flex items-center px-2 rounded-l-xs rounded-none w-8 h-9 text-primary-default",
+            icon === "minus" ? "border-r border-border" : "border-l border-border",
+            className
+        )}
         disabled={disabled}
         onPointerDown={onClick}
     >
