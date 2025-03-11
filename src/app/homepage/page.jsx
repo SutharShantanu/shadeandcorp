@@ -483,7 +483,7 @@ const Products = () => {
       >
         <CarouselContent>
           {MenTopwear.map((product) => (
-            <CarouselItem className="basis-1 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5" key={product.id}>
+            <CarouselItem className="basis-full sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5" key={product.id}>
               <ProductCard product={product} />
             </CarouselItem>
           ))}

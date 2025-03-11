@@ -167,7 +167,7 @@ const ProductActions = ({ item, setCart, min = 1, max = 10 }) => {
   };
 
   return (
-    <CardFooter className="flex flex-col items-center p-0 sm:flex-row sm:justify-between divide-x divide-border">
+    <CardFooter className="flex items-center w-full p-0 flex-row sm:justify-between divide-x divide-border">
       {item?.quantity && item?.quantity > 0 ? (
         <NumberInputRoot className="">
           <NumberInputButton
