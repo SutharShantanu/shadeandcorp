@@ -31,7 +31,7 @@ const NumberInputButton = React.forwardRef(({ className, onClick, disabled, icon
         disabled={disabled}
         onPointerDown={onClick}
     >
-        {icon === "minus" ? <Minus className="size-4" absoluteStrokeWidth strokeWidth={2} /> : <Plus className="size-4" absoluteStrokeWidth strokeWidth={2} />}
+        {icon === "minus" ? <Minus className="size-4" strokeWidth={2} /> : <Plus className="size-4" strokeWidth={2} />}
     </Button>
 ));
 
@@ -89,7 +89,7 @@ export { NumberInputRoot, NumberInputButton, NumberInputField };
 
 const MotionNumberFlow = motion(NumberFlow);
 
-export default function AnimatedNumber ({ value, isPercentage = false }) {
+export default function AnimatedNumber({ value, isPercentage = false, className }) {
     const canAnimate = useCanAnimate();
 
     return (
@@ -102,7 +102,8 @@ export default function AnimatedNumber ({ value, isPercentage = false }) {
         >
             <motion.span
                 className={clsx(
-                    "inline-flex items-center px-1 text-description font-description transition-all ease-in-out"
+                    "inline-flex items-center px-1 text-description font-description transition-all ease-in-out",
+                    className
                 )}
                 layout
             >

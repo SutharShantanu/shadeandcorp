@@ -121,7 +121,7 @@ const ProductPage = () => {
                     <SizeStocks product={product} />
                     <EMI price={product.discounted_price} />
                     <CheckDelivery />
-                    <Offer timeLeft={timeLeft} />
+                    {Offer && <Offer timeLeft={timeLeft} />}
                     <AddToCartButton isLoading={isLoading} handleAddToCart={handleAddToCart} />
                 </motion.div>
             </motion.div>
@@ -267,7 +267,7 @@ const Offer = ({ timeLeft }) => {
             >
                 <Clock className="w-5 h-5 text-primary-default" />
                 <p className="text-description bg-linear-to-r from-accent-default to-destructive-default text-transparent bg-clip-text drop-shadow-md">
-                    {timeLeft.days}d : {timeLeft.hours}h : {timeLeft.minutes}m : {timeLeft.seconds}s
+                    {timeLeft?.days}d : {timeLeft?.hours}h : {timeLeft?.minutes}m : {timeLeft?.seconds}s
                 </p>
             </motion.div>
         </motion.div >

@@ -9,6 +9,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { Heart, Trash2 } from "lucide-react";
 import AnimatedNumber, { NumberInput, NumberInputButton, NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/components/ui/badge";
 
 const CartSummary = ({ total }) => (
     <motion.div className="p-4 border-t bg-white rounded-md">
@@ -54,24 +57,52 @@ const CartEmpty = () => (
 );
 
 const CartItem = ({ item }) => {
+    const [isInWishlist, setIsInWishlist] = useState(false);
+    const [loadingWishlist, setLoadingWishlist] = useState(false);
+    const [loadingDelete, setLoadingDelete] = useState(false);
+
+    const handleMoveToWishlist = async (itemName) => {
+        setLoadingWishlist(true);
+        setIsInWishlist((prev) => !prev);
+        setTimeout(() => {
+            if (!isInWishlist) {
+                toast.success(`${itemName} has been moved to your wishlist.`);
+            } else {
+                toast.info(`${itemName} has been removed from your wishlist.`);
+            }
+            setLoadingWishlist(false);
+        }, 1000);
+    };
+
+    const handleRemoveFromCart = async (itemName) => {
+        setLoadingDelete(true);
+        setTimeout(() => {
+            toast.error(`${itemName} has been removed from your cart.`);
+            setLoadingDelete(false);
+        }, 5000);
+    };
+
     return (
         <motion.div className="flex items-center gap-4">
             <Image src="https://image.hm.com/assets/hm/a9/4c/a94cb6af4e37b45a9e618c70bba6c017773d9e01.jpg?imwidth=657" alt="Product Image" width={60} height={60} className="object-cover rounded-md border border-border" />
-            <div>
+            <motion.div>
                 <h2 className="text-description font-semibold">{item.name}</h2>
                 <p className="text-xs text-muted-foreground">Brand: XYZ</p>
                 <p className="text-xs text-muted-foreground">Size: Medium</p>
                 <p className="text-xs text-muted-foreground">Color: Black</p>
                 <motion.div className="flex items-center gap-2">
-                    <Button className="text-destructive-default font-normal border border-border h-7 text-xs rounded-xs px-2 cursor-pointer">
-                        Move to Wishlist
-                        <Heart />
+                    <Button onClick={() => handleMoveToWishlist(item.name)} className={`text-destructive-default font-normal border border-border h-7 text-xs rounded-xs px-2 cursor-pointer ${isInWishlist ? 'fill-destructive-default' : ''}`}>
+                        {isInWishlist ? 'Remove from Wishlist' : 'Move to Wishlist'}
+                        {loadingWishlist ? <Spinner />
+                            : <Heart size={14} className={`${isInWishlist && 'fill-destructive-default'}`} />}
                     </Button>
-                    <Button size="icon" className="text-destructive-default border border-border h-7 text-xs rounded-xs px-2 cursor-pointer">
-                        <Trash2 />
+                    <Button onClick={() => handleRemoveFromCart(item.name)} size="icon" className="text-destructive-default border border-border h-7 w-7 text-xs rounded-xs px-2 cursor-pointer">
+                        {loadingDelete ?
+                            <Spinner />
+                            : <Trash2 size={14} />}
                     </Button>
                 </motion.div>
-            </div>
+            </motion.div>
         </motion.div>
     );
 };
@@ -133,12 +164,12 @@ const Cart = () => {
     const descriptionContent = (
         <motion.div>
             {selectedItems?.length > 0 ? (
-                <span>
-                    <span className="font-heading mx-1 text-subheading">
-                        {selectedItems?.length}
-                    </span>
+                <motion.div className="mx-1">
                     {selectedItems?.length === 1 ? "Item" : "Items"} Selected
-                </span>
+                    <Badge className="mx-1  bg-primary-default rounded-xs">
+                        <AnimatedNumber value={selectedItems?.length} canAnimate={true} className="text-subheading" />
+                    </Badge>
+                </motion.div>
             ) : (
                 "No Product Selected"
             )}
@@ -150,7 +181,7 @@ const Cart = () => {
             <motion.div className="flex items-center gap-2 justify-between">
                 <PageHeader
                     titlePrefix="Shopping Cart"
-                    containerClassName="my-2 w-[65%]"
+                    containerClassName="my-2 w-[66%]"
                     descriptionPosition="right"
                     description={descriptionContent}
                 />
@@ -202,7 +233,7 @@ const Cart = () => {
                                         </TableCell>
                                         <TableCell>
                                             $<AnimatedNumber value={item.price.toFixed(2)} canAnimate={true} /> x{" "}
-                                            <AnimatedNumber value={item.quantity} canAnimate={true}/>
+                                            <AnimatedNumber value={item.quantity} canAnimate={true} />
                                         </TableCell>
                                         <TableCell className="text-destructive-default line-through">
                                             <AnimatedNumber value={item.discount} canAnimate={true} isPercentage={true} />
