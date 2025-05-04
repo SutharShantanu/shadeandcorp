@@ -1,8 +1,11 @@
+// app/layout.js
 import { Forum, Work_Sans } from "next/font/google";
 import Head from "next/head";
 import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 import ClientLayout from "./clientLayout";
+import { useEffect } from 'react';
+import getLocationFromIP from '@/utils/getLocationFromIP';  // Assuming this is your memoized location function
 
 const forum = Forum({ weight: "400", subsets: ["latin"], display: "swap" });
 const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" });
@@ -13,6 +16,18 @@ export const metadata = {
 };
 
 export default function RootLayout ({ children }) {
+  useEffect(() => {
+    const fetchLocation = async () => {
+      const ip = await fetch('/api/get-ip')
+        .then((res) => res.json())
+        .then((data) => data.ip || 'Unknown IP');
+      const locationData = await getLocationFromIP(ip);  // Fetch the location
+      // Optionally store the location in context or global state if needed
+    };
+
+    fetchLocation();
+  }, []);
+
   return (
     <SessionProvider>
       <html lang="en">
