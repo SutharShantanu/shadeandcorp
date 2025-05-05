@@ -22,9 +22,11 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { motion } from "framer-motion";
+import useIPStackLocation from "@/hook/useIPStackLocation";
+import { useSignup } from "./hook/useSignup";
 
 const signupSchema = z
   .object({
@@ -50,6 +52,7 @@ const FormInput = ({
   placeholder,
   control,
   Component = Input,
+  defaultCountry,
 }) => (
   <FormField
     control={control}
@@ -63,7 +66,12 @@ const FormInput = ({
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.2 }}
           >
-            <Component type={type} placeholder={placeholder} {...field} />
+            <Component
+              type={type}
+              placeholder={placeholder}
+              {...field}
+              {...(defaultCountry ? { defaultCountry } : {})}
+            />
           </motion.div>
         </FormControl>
         <FormMessage />
@@ -97,39 +105,7 @@ const PasswordField = ({ name, label, control }) => {
 };
 
 const Signup = () => {
-  const [loading, setLoading] = useState(false);
-
-  const form = useForm({
-    resolver: zodResolver(signupSchema),
-    mode: "onChange",
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      password: "",
-      confirmPassword: "",
-      terms: false,
-    },
-  });
-
-  const onSubmit = async (data) => {
-    setLoading(true);
-    try {
-      const response = await axios.post("/api/signup", data);
-      if (response.status === 200) {
-        toast.success("Signup successful!");
-      } else {
-        toast.error(response.data.message || "Something went wrong");
-        console.log(response.data.message);
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { form, loading, countryCode, onSubmit } = useSignup();
 
   return (
     <motion.div
@@ -194,6 +170,7 @@ const Signup = () => {
                       label="Phone Number"
                       control={form.control}
                       Component={PhoneInput}
+                      defaultCountry={countryCode}
                     />
                   </div>
                   <div className="flex items-center gap-2 mb-8">

@@ -9,16 +9,14 @@ export const POST = async (req) => {
     const body = await req.json();
     const {
       firstName,
-      lastName,
+      lastName = "",
       email,
       phoneNumber,
       password,
-      confirmPassword,
       termsAccepted,
     } = body;
 
-    // 1. Validate required fields
-    if (!firstName || !email || !phoneNumber || !password || !confirmPassword) {
+    if (!firstName || !email || !phoneNumber || !password || !termsAccepted) {
       return NextResponse.json(
         { error: "Please fill all required fields." },
         { status: 400 }
@@ -47,13 +45,6 @@ export const POST = async (req) => {
       );
     }
 
-    if (password !== confirmPassword) {
-      return NextResponse.json(
-        { error: "Passwords do not match." },
-        { status: 400 }
-      );
-    }
-
     const phoneRegex = /^\+\d{1,3}\s\d{6,14}$/;
     if (!phoneRegex.test(phoneNumber)) {
       return NextResponse.json(
@@ -62,7 +53,6 @@ export const POST = async (req) => {
       );
     }
 
-    // 2. Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -71,16 +61,36 @@ export const POST = async (req) => {
       );
     }
 
-    // 3. Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. Create the user
     const newUser = new User({
       firstName,
       lastName,
       email,
       phoneNumber,
       password: hashedPassword,
+      address: {
+        address1: "",
+        address2: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "India",
+        countryCode: "91",
+      },
+      role: "user",
+      isVerified: false,
+      profile: {
+        profilePicture: "",
+        socialLinks: {
+          facebook: "",
+          twitter: "",
+          linkedin: "",
+          instagram: "",
+        },
+        bio: "",
+      },
+      sessions: [],
     });
 
     await newUser.save();

@@ -5,8 +5,7 @@ import Head from "next/head";
 import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 import ClientLayout from "./clientLayout";
-import { useEffect } from 'react';
-import getLocationFromIP from "@/utlis/getLocationFromIP";
+import useIPStackLocation from "../hook/useIPStackLocation";
 
 const forum = Forum({ weight: "400", subsets: ["latin"], display: "swap" });
 const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" });
@@ -17,24 +16,16 @@ const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" 
 // };
 
 export default function RootLayout ({ children }) {
-  useEffect(() => {
-    const fetchLocation = async () => {
-      const ip = await fetch('/api/get-ip')
-        .then((res) => res.json())
-        .then((data) => data.ip || 'Unknown IP');
-      const locationData = await getLocationFromIP(ip);  // Fetch the location
-      // Optionally store the location in context or global state if needed
-    };
-
-    fetchLocation();
-  }, []);
-
+  // const { loading, error, locationData } = useIPStackLocation();
+  // console.log("Location Data:", locationData);
+  // console.log("Loading:", loading);
+  // console.log("Error:", error);
   return (
     <SessionProvider>
       <html lang="en">
         <Head>
-          {/* <title>{metadata.title}</title> */}
-          {/* <meta name="description" content={metadata.description} /> */}
+          {/* <title>{metadata.title}</title>
+          <meta name="description" content={metadata.description} /> */}
           <link href="./globals.css" rel="stylesheet" />
         </Head>
         <body className={`${forum.className} ${workSans.className} antialiased`} suppressHydrationWarning>
