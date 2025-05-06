@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { User } from "@/app/models/Users";
 import connectDB from "@/lib/mongoDB";
+import axios from "axios";
+import { getDeviceInfo } from "@/lib/deviceUtils";
 
 export const POST = async (req) => {
   try {
@@ -60,6 +62,23 @@ export const POST = async (req) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    console.log("req", req);
+    let ip = req.ip;
+    if (!ip) {
+      const forwarded = req.headers["x-forwarded-for"];
+      if (forwarded) {
+        ip = forwarded.split(",")[0].trim();
+      } else if (req.headers["x-real-ip"]) {
+        ip = req.headers["x-real-ip"];
+      } else {
+        ip = "";
+      }
+    }
+    const geoResponse = await axios.get(`http://ipapi.co/${ip}/json/`);
+    const geoData = geoResponse.data;
+
+    const deviceInfo = getDeviceInfo(req.headers["user-agent"]);
+
     const newUser = new User({
       firstName,
       lastName,
@@ -87,13 +106,26 @@ export const POST = async (req) => {
         },
         bio: "",
       },
-      sessions: [],
+      sessions: [
+        {
+          ipAddress: geoData.ip || "",
+          city: geoData.city || "",
+          region: geoData.region_name || "",
+          country: geoData.country_name || "",
+          timezone: geoData.timezone || "",
+          org: geoData.org || "",
+          latitude: geoData.latitude || 0,
+          longitude: geoData.longitude || 0,
+          deviceInfo: deviceInfo || "",
+          loggedInAt: new Date(),
+        },
+      ],
     });
 
     await newUser.save();
 
     return NextResponse.json(
-      { message: "User registered successfully!" },
+      { message: "User registered and logged in successfully!" },
       { status: 201 }
     );
   } catch (error) {

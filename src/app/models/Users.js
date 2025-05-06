@@ -2,10 +2,20 @@ import mongoose from "mongoose";
 import { AccountStatusEnum, GenderEnum, RoleEnum } from "./enums/users.enum";
 
 const sessionSchema = new mongoose.Schema({
-  ipAddress: { type: String },
-  deviceInfo: { type: String },
-  location: { type: String },
-  loggedInAt: { type: Date, default: Date.now },
+  ipAddress: { type: String, required: true },
+  city: { type: String },
+  region: { type: String },
+  country: { type: String },
+  timezone: { type: String },
+  org: { type: String },
+  latitude: { type: Number },
+  longitude: { type: Number },
+  deviceInfo: {
+    type: Map,
+    of: String,
+    default: {},
+  },
+  loggedInAt: { type: Date, default: Date.now, required: true },
 });
 
 const addressSchema = new mongoose.Schema({
@@ -42,7 +52,7 @@ const userSchema = new mongoose.Schema(
     isVerified: { type: Boolean, default: false },
     role: {
       type: String,
-      enum: Object  .values(RoleEnum),
+      enum: Object.values(RoleEnum),
       default: "user",
     },
     accountStatus: {
