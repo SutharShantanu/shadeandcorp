@@ -65,7 +65,6 @@ const ProductPage = () => {
     const refinedName = useRefineUrl(productName);
     const [product, setProduct] = useState(null);
     const timeLeft = useCountdown(product?.offerEndTime);
-    console.log(timeLeft);
 
     const [isLoading, setIsLoading] = useState(false);
     const [activeImage, setActiveImage] = useState(product?.images[0]);

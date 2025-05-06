@@ -1,29 +1,24 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/mongodb";
-import { User } from "@/models/User";
 import bcrypt from "bcryptjs";
+import { User } from "@/app/models/Users";
+import connectDB from "@/lib/mongoDB";
 
 export const POST = async (req) => {
   try {
     await connectDB();
     const body = await req.json();
-    const {
-      firstName,
-      lastName = "",
-      email,
-      phoneNumber,
-      password,
-      termsAccepted,
-    } = body;
+    const { firstName, lastName = "", email, phone, password, terms } = body;
 
-    if (!firstName || !email || !phoneNumber || !password || !termsAccepted) {
+    if (!firstName || !email || !phone || !password || !terms) {
       return NextResponse.json(
-        { error: "Please fill all required fields." },
+        {
+          error: `Please fill all required fields. ${firstName}, ${email}, ${phone}, ${password}, ${terms}`,
+        },
         { status: 400 }
       );
     }
 
-    if (!termsAccepted) {
+    if (!terms) {
       return NextResponse.json(
         { error: "You must accept the terms and conditions." },
         { status: 400 }
@@ -45,10 +40,12 @@ export const POST = async (req) => {
       );
     }
 
-    const phoneRegex = /^\+\d{1,3}\s\d{6,14}$/;
-    if (!phoneRegex.test(phoneNumber)) {
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(phone)) {
       return NextResponse.json(
-        { error: "Invalid phone number format." },
+        {
+          error: "Invalid phone number.",
+        },
         { status: 400 }
       );
     }
@@ -67,7 +64,7 @@ export const POST = async (req) => {
       firstName,
       lastName,
       email,
-      phoneNumber,
+      phone,
       password: hashedPassword,
       address: {
         address1: "",

@@ -1,10 +1,5 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import axios from "axios";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,28 +17,9 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 import { motion } from "framer-motion";
-import useIPStackLocation from "@/hook/useIPStackLocation";
 import { useSignup } from "./hook/useSignup";
-
-const signupSchema = z
-  .object({
-    firstName: z.string().min(2, "First name is required"),
-    lastName: z.string().optional(),
-    email: z.string().email("Invalid email address"),
-    phone: z.string().min(10, "Phone number is required"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(6, "Password confirmation is required"),
-    terms: z.literal(true, {
-      errorMap: () => ({ message: "You must accept the terms and conditions" }),
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
 
 const FormInput = ({
   name,
@@ -53,6 +29,8 @@ const FormInput = ({
   control,
   Component = Input,
   defaultCountry,
+  countryCallingCodeEditable,
+  international,
 }) => (
   <FormField
     control={control}
@@ -70,7 +48,9 @@ const FormInput = ({
               type={type}
               placeholder={placeholder}
               {...field}
-              {...(defaultCountry ? { defaultCountry } : {})}
+              {...(defaultCountry && { defaultCountry })}
+              {...{ countryCallingCodeEditable }}
+              {...(international && { international })}
             />
           </motion.div>
         </FormControl>
@@ -171,6 +151,8 @@ const Signup = () => {
                       control={form.control}
                       Component={PhoneInput}
                       defaultCountry={countryCode}
+                      countryCallingCodeEditable={false}
+                      international={true}
                     />
                   </div>
                   <div className="flex items-center gap-2 mb-8">

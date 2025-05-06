@@ -5,7 +5,9 @@ import Head from "next/head";
 import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 import ClientLayout from "./clientLayout";
-import useIPStackLocation from "../hook/useIPStackLocation";
+// import { Provider } from "react-redux";
+// import { PersistGate } from "redux-persist/integration/react";
+// import { store, persistor } from "@/store/store";
 
 const forum = Forum({ weight: "400", subsets: ["latin"], display: "swap" });
 const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" });
@@ -16,12 +18,11 @@ const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" 
 // };
 
 export default function RootLayout ({ children }) {
-  // const { loading, error, locationData } = useIPStackLocation();
-  // console.log("Location Data:", locationData);
-  // console.log("Loading:", loading);
-  // console.log("Error:", error);
+
   return (
     <SessionProvider>
+      {/* <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}> */}
       <html lang="en">
         <Head>
           {/* <title>{metadata.title}</title>
@@ -32,6 +33,8 @@ export default function RootLayout ({ children }) {
           <ClientLayout>{children}</ClientLayout>
         </body>
       </html>
+      {/* </PersistGate>
+      </Provider> */}
     </SessionProvider>
   );
 }

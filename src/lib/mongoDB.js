@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export default async function connectDB() {
+const connectDB = async () => {
   if (mongoose.connection.readyState === 1) {
     console.log("MongoDB is already connected");
     return;
@@ -22,4 +22,6 @@ export default async function connectDB() {
     );
     process.exit(1);
   }
-}
+};
+
+export default connectDB;

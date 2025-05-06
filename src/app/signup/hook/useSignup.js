@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import axios from "axios";
 import { toast } from "sonner";
 import useIPStackLocation from "@/hook/useIPStackLocation";
+import { parsePhoneNumber } from "react-phone-number-input"; // Import the parsing function
 
 const signupSchema = z
   .object({
@@ -27,11 +28,12 @@ const signupSchema = z
 
 export const useSignup = () => {
   const [loading, setLoading] = useState(false);
-  const location = useIPStackLocation();
-  const { country_code, country_name } = location?.locationData || {
-    country_code: "IN",
-    country_name: "India",
-  };
+
+  const { locationData, locationLoading } = useIPStackLocation();
+
+  const detectedCountryCode = locationData?.country_code || "";
+  const country_name = locationData?.country_name || "";
+  const detectedCallingCode = locationData?.location?.calling_code || "";
 
   const form = useForm({
     resolver: zodResolver(signupSchema),
@@ -49,23 +51,46 @@ export const useSignup = () => {
 
   const onSubmit = async (data) => {
     setLoading(true);
-    try {
-      const { confirmPassword, ...payload } = data;
-      const finalPayload = {
-        ...payload,
-        country: country_name,
-        countryCode: country_code,
-      };
+    const { confirmPassword, phone, ...payload } = data;
 
+    let parsedPhoneNumber;
+    try {
+      parsedPhoneNumber = parsePhoneNumber(phone);
+    } catch (error) {
+      console.error("Error parsing phone number:", error);
+      toast.error("Invalid phone number format");
+      setLoading(false);
+      return;
+    }
+    let userProvidedCountryCode =
+      parsedPhoneNumber?.countryCallingCode || detectedCountryCode;
+    const nationalNumber = parsedPhoneNumber?.nationalNumber;
+
+    const finalPayload = {
+      ...payload,
+      phone: nationalNumber,
+      country: country_name,
+      countryCode: userProvidedCountryCode,
+    };
+
+    try {
       const response = await axios.post("/api/users/signup", finalPayload);
 
       if (response.status === 200 || response.status === 201) {
         toast.success("Signup successful!");
+      } else if (response.data?.error) {
+        toast.error(response.data.error);
       } else {
         toast.error(response.data.message || "Something went wrong");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      const apiError =
+        error.response?.data?.error || error.response?.data?.message;
+      if (apiError) {
+        toast.error(apiError);
+      } else {
+        toast.error("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -75,6 +100,6 @@ export const useSignup = () => {
     form,
     onSubmit,
     loading,
-    countryCode: country_code,
+    countryCode: detectedCountryCode,
   };
 };
