@@ -16,13 +16,13 @@ async function getPublicIP() {
 }
 
 export async function GET(request) {
-  // const ipAddress =
-  //   request.headers.get("x-forwarded-for") || request.ip || "check";
   const ipAddress =
-    (await getPublicIP()) ||
-    request.headers.get("x-forwarded-for") ||
-    request.ip ||
-    "check";
+    request.headers.get("x-forwarded-for") || request.ip || "check";
+  // const ipAddress =
+  //   (await getPublicIP()) ||
+  //   request.headers.get("x-forwarded-for") ||
+  //   request.ip ||
+  //   "check";
   const apiKey = IPSTACK_API_KEY;
   const apiUrl = IPSTACK_API_URL;
   const ipStackUrl = `${apiUrl}${ipAddress}?access_key=${apiKey}`;
