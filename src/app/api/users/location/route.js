@@ -25,6 +25,7 @@ export async function GET(request) {
   //   "check";
   const apiKey = IPSTACK_API_KEY;
   const apiUrl = IPSTACK_API_URL;
+  console.log("ipAddress", ipAddress)
   const ipStackUrl = `${apiUrl}${ipAddress}?access_key=${apiKey}`;
 
   try {

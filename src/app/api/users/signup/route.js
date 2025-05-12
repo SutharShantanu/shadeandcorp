@@ -79,6 +79,8 @@ export const POST = async (req) => {
 
     const deviceInfo = getDeviceInfo(req.headers["user-agent"]);
 
+    console.log(deviceInfo)
+
     const newUser = new User({
       firstName,
       lastName,
