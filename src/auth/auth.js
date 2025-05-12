@@ -2,8 +2,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import InstagramProvider from "next-auth/providers/instagram";
 import bcrypt from "bcryptjs";
-import connectDB from "@/app/lib/mongoDB";
 import { User } from "@/app/models/Users";
+import connectDB from "@/lib/mongoDB";
 
 export const authOptions = {
   providers: [
@@ -28,12 +28,22 @@ export const authOptions = {
           throw new Error("Email and password required!");
         }
 
+        console.log(
+          "email",
+          credentials.email,
+          "password",
+          credentials.password
+        );
+
         await connectDB();
         const user = await User.findOne({ email: credentials.email }).lean();
 
         if (!user) throw new Error("User not found");
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
         if (!isPasswordValid) throw new Error("Invalid credentials");
 
         const { password, sessions, paymentMethods, ...safeUser } = user;
@@ -45,7 +55,7 @@ export const authOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       await connectDB();
-
+      console.log("this is signin attempt");
       if (account.provider === "google" || account.provider === "instagram") {
         const existingUser = await User.findOne({ email: user.email });
 
@@ -64,10 +74,12 @@ export const authOptions = {
             password: `${account.provider}-oauth`,
           });
 
-          const { password, sessions, paymentMethods, ...safeUser } = newUser.toObject();
+          const { password, sessions, paymentMethods, ...safeUser } =
+            newUser.toObject();
           Object.assign(user, safeUser);
         } else {
-          const { password, sessions, paymentMethods, ...safeUser } = existingUser.toObject();
+          const { password, sessions, paymentMethods, ...safeUser } =
+            existingUser.toObject();
           Object.assign(user, safeUser);
         }
       }
@@ -96,7 +108,7 @@ export const authOptions = {
 
   pages: {
     signIn: "/auth/login",
-    error: "/auth/error",
+    // error: "/auth/error",
   },
 
   secret: process.env.NEXTAUTH_SECRET,
