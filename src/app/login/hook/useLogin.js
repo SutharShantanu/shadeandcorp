@@ -1,9 +1,9 @@
 "use client";
 
+import * as z from "zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { toast } from "sonner";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -24,20 +24,20 @@ export const useLogin = () => {
   });
 
   const onSubmit = async (data) => {
-    console.log("data", data);
     setLoading(true);
     try {
       const result = await signIn("credentials", {
         ...data,
         redirect: false,
       });
+      console.log("result", result);
 
-      if (result?.error) {
-        toast.error(result.error);
-      } else {
-        toast.success("Login successful!");
-        // router.push("/");
-      }
+      // if (result?.error) {
+      //   toast.error(result.error);
+      // } else {
+      //   toast.success("Login successful!");
+      //   // router.push("/");
+      // }
     } catch (error) {
       toast.error("Unexpected error. Please try again.");
     } finally {

@@ -1,4 +1,4 @@
-import CredentialsProvider from "next-auth/providers/credentials";
+import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google";
 import InstagramProvider from "next-auth/providers/instagram";
 import bcrypt from "bcryptjs";
@@ -6,16 +6,17 @@ import { User } from "@/app/models/Users";
 import connectDB from "@/lib/mongoDB";
 
 export const authOptions = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
 
-    InstagramProvider({
-      clientId: process.env.INSTAGRAM_CLIENT_ID,
-      clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
-    }),
+  providers: [
+    // GoogleProvider({
+    //   clientId: process.env.GOOGLE_CLIENT_ID,
+    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    // }),
+
+    // InstagramProvider({
+    //   clientId: process.env.INSTAGRAM_CLIENT_ID,
+    //   clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
+    // }),
 
     CredentialsProvider({
       name: "Credentials",
@@ -27,20 +28,12 @@ export const authOptions = {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email and password required!");
         }
-
-        console.log(
-          "email",
-          credentials.email,
-          "password",
-          credentials.password
-        );
-
+        console.log("credentials", credentials)
         await connectDB();
-        const user = await User.findOne({ email: credentials.email }).lean();
-
+        const user = await User.findOne({ email: credentials.email });
         if (!user) throw new Error("User not found");
 
-        const isPasswordValid = await bcrypt.compare(
+        const isPasswordValid = bcrypt.compare(
           credentials.password,
           user.password
         );
@@ -55,16 +48,20 @@ export const authOptions = {
   callbacks: {
     async signIn({ user, account, profile }) {
       await connectDB();
-      console.log("this is signin attempt");
+
+      console.log("Sign in attempt", account)
+
       if (account.provider === "google" || account.provider === "instagram") {
-        const existingUser = await User.findOne({ email: user.email });
+        const existingUser = await User.findOne({ email: user.email }).lean();
 
         if (!existingUser) {
-          const nameParts = profile.name?.split(" ") || [];
+          const fullName = profile.name || "";
+          const [firstName, ...lastNameParts] = fullName.split(" ");
+          const lastName = lastNameParts.join(" ");
 
           const newUser = await User.create({
-            firstName: profile.given_name || nameParts[0] || "User",
-            lastName: profile.family_name || nameParts.slice(1).join(" ") || "",
+            firstName: profile.given_name || firstName || "User",
+            lastName: profile.family_name || lastName || "",
             email: profile.email,
             phone: "",
             profilePicture: profile.picture || "",
@@ -74,12 +71,10 @@ export const authOptions = {
             password: `${account.provider}-oauth`,
           });
 
-          const { password, sessions, paymentMethods, ...safeUser } =
-            newUser.toObject();
+          const { password, sessions, paymentMethods, ...safeUser } = newUser.toObject();
           Object.assign(user, safeUser);
         } else {
-          const { password, sessions, paymentMethods, ...safeUser } =
-            existingUser.toObject();
+          const { password, sessions, paymentMethods, ...safeUser } = existingUser;
           Object.assign(user, safeUser);
         }
       }
@@ -88,10 +83,11 @@ export const authOptions = {
     },
 
     async jwt({ token, user }) {
-      if (user) {
-        Object.assign(token, user);
-      }
-      return token;
+      if(user){
+        token.id = user.id;
+    }
+    return token;
+
     },
 
     async session({ session, token }) {
@@ -102,13 +98,14 @@ export const authOptions = {
     },
   },
 
-  session: {
-    strategy: "jwt",
+  session:{
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   },
 
   pages: {
-    signIn: "/auth/login",
-    // error: "/auth/error",
+    signIn: "/login",
+    error: "/auth/error",
   },
 
   secret: process.env.NEXTAUTH_SECRET,

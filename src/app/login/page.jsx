@@ -68,7 +68,7 @@ const PasswordField = ({ name, label, control }) => (
 const Login = () => {
     const { form, loading, onSubmit } = useLogin();
 
-    // console.log("onSubmit", onSubmit)
+    // console.log("form", form)
 
     return (
         <motion.div

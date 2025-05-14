@@ -20,21 +20,22 @@ const workSans = Work_Sans({ weight: "400", subsets: ["latin"], display: "swap" 
 export default function RootLayout ({ children }) {
 
   return (
-    <SessionProvider>
-      {/* <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}> */}
-      <html lang="en">
-        <Head>
-          {/* <title>{metadata.title}</title>
+    <html lang="en">
+      <Head>
+        {/* <title>{metadata.title}</title>
           <meta name="description" content={metadata.description} /> */}
-          <link href="./globals.css" rel="stylesheet" />
-        </Head>
-        <body className={`${forum.className} ${workSans.className} antialiased`} suppressHydrationWarning>
+        <link href="./globals.css" rel="stylesheet" />
+      </Head>
+      <body className={`${forum.className} ${workSans.className} antialiased`} suppressHydrationWarning>
+        <SessionProvider>
+          {/* <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}> */}
           <ClientLayout>{children}</ClientLayout>
-        </body>
-      </html>
-      {/* </PersistGate>
-      </Provider> */}
-    </SessionProvider>
+          {/* </PersistGate>
+        </Provider> */}
+        </SessionProvider>
+
+      </body>
+    </html>
   );
 }

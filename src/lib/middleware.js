@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
+import { withAuth } from "next-auth/middleware";
 
-export function middleware(request) {
-  return NextResponse.redirect(new URL("/", request.url));
-}
+export default withAuth({
+  pages: {
+    signIn: "/auth/login",
+  },
+});
 
 export const config = {
-  matcher: "/about/:path*",
+  matcher: ["/profile/:path*"],
 };
