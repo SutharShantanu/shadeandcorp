@@ -5,6 +5,8 @@ import bcrypt from "bcryptjs";
 import { User } from "@/app/models/Users";
 import connectDB from "@/lib/mongoDB";
 import NextAuth from "next-auth";
+import axios from "axios";
+import { getDeviceInfo } from "@/lib/deviceUtils";
 
 export const {
   handlers: { GET, POST },
@@ -13,11 +15,11 @@ export const {
   signOut,
 } = NextAuth({
   providers: [
+    // Uncomment if needed
     // GoogleProvider({
     //   clientId: process.env.GOOGLE_CLIENT_ID,
     //   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     // }),
-
     // InstagramProvider({
     //   clientId: process.env.INSTAGRAM_CLIENT_ID,
     //   clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
@@ -29,7 +31,7 @@ export const {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         try {
           if (!credentials?.email || !credentials?.password) {
             throw new Error("Email and password are required!");
@@ -37,17 +39,48 @@ export const {
 
           await connectDB();
           const user = await User.findOne({ email: credentials.email });
+
           if (!user) throw new Error("User not found");
 
-          const isPasswordValid = await bcrypt.compare(
+          const isPasswordValid = bcrypt.compareSync(
             credentials.password,
             user.password
           );
           if (!isPasswordValid) throw new Error("Invalid credentials");
 
+          let ip = req?.headers?.["x-forwarded-for"]?.split(",")[0] || req?.headers?.["x-real-ip"];
+
+          let geoData = {};
+          try {
+            const geoResponse = await axios.get(`http://ipapi.co/${ip}/json/`);
+            geoData = geoResponse.data;
+          } catch (err) {
+            console.warn("Geo API error:", err.message);
+          }
+
+          const userAgent = req?.headers?.["user-agent"] || "";
+          const deviceInfo = getDeviceInfo(userAgent);
+
+          user.sessions.push({
+            ipAddress: geoData.ip || ip,
+            city: geoData.city,
+            region: geoData.region,
+            country: geoData.country_name,
+            timezone: geoData.timezone,
+            org: geoData.org,
+            latitude: geoData.latitude,
+            longitude: geoData.longitude,
+            deviceInfo: deviceInfo || userAgent,
+            loggedInAt: new Date(),
+          });
+
+          await user.save();
+
           const userObj = user.toObject();
-          const { password, sessions, paymentMethods, address, ...safeUser } =
-            userObj;
+          const {
+            password,
+            ...safeUser
+          } = userObj;
           return safeUser;
         } catch (error) {
           console.error("Authorization error:", error);
@@ -64,9 +97,10 @@ export const {
       try {
         await connectDB();
 
-        console.log("Sign in attempt", account);
-
-        if (account.provider === "google" || account.provider === "instagram") {
+        if (
+          account?.provider === "google" ||
+          account?.provider === "instagram"
+        ) {
           const existingUser = await User.findOne({ email: user.email }).lean();
 
           if (!existingUser) {
@@ -77,20 +111,24 @@ export const {
             const newUser = await User.create({
               firstName: profile.given_name || firstName || "User",
               lastName: profile.family_name || lastName || "",
+              gender: profile.gender || "",
+              birthday: profile.birthday || "",
               email: profile.email,
               phone: "",
+              address: [],
               profilePicture: profile.picture || "",
+              password: `${account.provider}-oauth`,
               isVerified: true,
               role: "user",
               accountStatus: "active",
-              password: `${account.provider}-oauth`,
+              sessions: [],
             });
 
-            const { password, sessions, paymentMethods, ...safeUser } =
+            const { password, ...safeUser } =
               newUser.toObject();
             Object.assign(user, safeUser);
           } else {
-            const { password, sessions, paymentMethods, ...safeUser } =
+            const { password, ...safeUser } =
               existingUser;
             Object.assign(user, safeUser);
           }
@@ -105,44 +143,53 @@ export const {
 
     async jwt({ token, user }) {
       if (user) {
-        token.id = user._id || user.id || null;
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
-        token.email = user.email;
-        token.role = user.role;
-        token.isVerified = user.isVerified;
-        token.profilePicture = user.profilePicture;
-        token.accountStatus = user.accountStatus;
+      token.id = user._id || user.id || null;
+      token.firstName = user.firstName;
+      token.lastName = user.lastName;
+      token.gender = user.gender;
+      token.birthday = user.birthday;
+      token.email = user.email;
+      token.phone = user.phone;
+      token.role = user.role;
+      token.isVerified = user.isVerified;
+      token.profilePicture = user.profilePicture;
+      token.accountStatus = user.accountStatus;
+      token.joinDate = user.joinDate;
 
-        if (user.address) {
-          token.address = {
-            address1: user.address.address1,
-            address2: user.address.address2,
-            city: user.address.city,
-            state: user.address.state,
-            zipCode: user.address.zipCode,
-            country: user.address.country,
-            countryCode: user.address.countryCode,
-          };
-        }
+      if (Array.isArray(user.address)) {
+        token.address = user.address.map((addr) => ({
+        address1: addr.address1,
+        address2: addr.address2,
+        city: addr.city,
+        state: addr.state,
+        zipCode: addr.zipCode,
+        country: addr.country,
+        countryCode: addr.countryCode,
+        }));
+      }
 
-        if (user.sessions && Array.isArray(user.sessions)) {
-          token.sessions = user.sessions.map((s) => ({
-            device: s.device,
-            location: s.location,
-            ip: s.ip,
-            lastActive: s.lastActive,
-          }));
-        }
+      if (Array.isArray(user.paymentMethods)) {
+        token.paymentMethods = user.paymentMethods.map((p) => ({
+        cardNumber: p.cardNumber,
+        expiryDate: p.expiryDate,
+        cardHolderName: p.cardHolderName,
+        }));
+      }
 
-        if (user.paymentMethods && Array.isArray(user.paymentMethods)) {
-          token.paymentMethods = user.paymentMethods.map((p) => ({
-            cardType: p.cardType,
-            last4Digits: p.last4Digits,
-            expiryDate: p.expiryDate,
-            isDefault: p.isDefault,
-          }));
-        }
+      if (Array.isArray(user.sessions)) {
+        token.sessions = user.sessions.map((s) => ({
+        ipAddress: s.ipAddress,
+        city: s.city,
+        region: s.region,
+        country: s.country,
+        timezone: s.timezone,
+        org: s.org,
+        latitude: s.latitude,
+        longitude: s.longitude,
+        deviceInfo: s.deviceInfo,
+        loggedInAt: s.loggedInAt,
+        }));
+      }
       }
       return token;
     },
@@ -153,14 +200,18 @@ export const {
           id: token.id,
           firstName: token.firstName,
           lastName: token.lastName,
+          gender: token.gender,
+          birthday: token.birthday,
           email: token.email,
-          role: token.role,
-          isVerified: token.isVerified,
+          phone: token.phone,
+          address: token.address || [],
           profilePicture: token.profilePicture,
+          isVerified: token.isVerified,
+          role: token.role,
           accountStatus: token.accountStatus,
-          address: token.address || null,
           sessions: token.sessions || [],
           paymentMethods: token.paymentMethods || [],
+          joinDate: token.joinDate,
         };
       }
       return session;
@@ -169,7 +220,7 @@ export const {
 
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60 * 1000,
+    // maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
   pages: {

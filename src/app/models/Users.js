@@ -26,6 +26,8 @@ const addressSchema = new mongoose.Schema({
   zipCode: { type: String, default: "" },
   country: { type: String, default: "India" },
   countryCode: { type: String, default: "91" },
+  type: { type: String, enum: ["home", "work", "other"], default: "home" },
+  isDefault: { type: Boolean, default: false },
 });
 
 const paymentMethodSchema = new mongoose.Schema({
@@ -46,7 +48,7 @@ const userSchema = new mongoose.Schema(
     birthday: { type: Date },
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true },
-    address: addressSchema,
+    address: [addressSchema],
     profilePicture: { type: String, default: "" },
     password: { type: String, required: true },
     isVerified: { type: Boolean, default: false },

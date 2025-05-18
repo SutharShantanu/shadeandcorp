@@ -4,7 +4,6 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "./ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "./ui/input";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -64,8 +63,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { usePathSegments } from "@/app/functions/pathname";
+import { useAuthInfo } from "@/hook/useAuthInfo";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const menuLinks = [
   {
@@ -678,46 +680,68 @@ const menuItems = [
 ];
 
 const ProfileDropdown = () => {
+  const { user } = useAuthInfo();
+  const router = useRouter();
+
+  if (!user) {
+    return (
+      <div className="flex gap-2 items-center">
+        <Button
+          size="sm"
+          className="w-full bg-primary-default text-primary-foreground rounded-xs hover:bg-primary-default/80 focus:bg-primary-default/90 focus-visible:ring-2 focus-visible:ring-primary-default focus-visible:outline-none cursor-pointer"
+          aria-label="Login"
+          onClick={() => router.push("/login")}
+        >
+          Login
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="w-full border-primary-default text-primary-default rounded-xs hover:bg-primary-foreground/80 hover:text-primary-default/80  hover:border-primary-default/80 focus:bg-primary-default/90 focus:text-primary-foreground focus-visible:ring-2 focus-visible:ring-primary-default focus-visible:outline-none transition-colors cursor-pointer"
+          aria-label="Sign Up"
+          onClick={() => router.push("/signup")}
+        >
+          Sign Up
+        </Button>
+      </div>
+    );
+  }
+
+  const displayName =
+    user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user?.firstName;
+  const displayEmail = user?.email;
+  const avatarUrl = user?.profilePicture;
+  const avatarInitial = displayName && displayName[0]?.toUpperCase();
+
   return (
     <DropdownMenu className="bg-primary-foreground relative z-10">
       <DropdownMenuTrigger asChild>
-        <Avatar className="h-8 w-8 select-none bg-primary-foreground border-muted-foreground cursor-pointer">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <AvatarImage
-                  src="https://picsum.photos/150/150"
-                  alt="User Avatar"
-                />
-                <AvatarFallback className="text-primary-default text-subheading">
-                  U
-                </AvatarFallback>
-              </TooltipTrigger>
-              <TooltipContent>User Name</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+        <Avatar className="h-8 w-8 select-none bg-primary-foreground border cursor-pointer">
+          <AvatarImage src={avatarUrl} alt="User Avatar" />
+          <AvatarFallback className="text-primary-default text-subheading w-full mx-auto">
+            {avatarInitial}
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-56 bg-primary-foreground p-0 z-999"
+        className="w-fit bg-primary-foreground p-0 z-999"
         align="end"
         forceMount
       >
         <DropdownMenuLabel className="font-normal rounded-xs select-none mb-0">
           <div className="flex flex-row">
-            <Avatar className="select-none bg-primary-foreground mr-3">
-              <AvatarImage
-                src="https://picsum.photos/150/150"
-                alt="User Avatar"
-              />
+            <Avatar className="select-none bg-primary-foreground mr-3 border">
+              <AvatarImage src={avatarUrl} alt="User Avatar" />
               <AvatarFallback className="text-primary-default text-subheading">
-                U
+                {avatarInitial}
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col justify-around">
-              <p className="text-sm font-medium leading-none">John Doe</p>
+              <p className="text-sm font-medium leading-none">{displayName}</p>
               <p className="text-xs leading-none text-muted-foreground">
-                john.doe@example.com
+                {displayEmail}
               </p>
             </div>
           </div>
@@ -733,7 +757,7 @@ const ProfileDropdown = () => {
             </DropdownMenuItem>
           </Link>
         ))}
-        <DropdownMenuItem className="text-destructive-default m-1 cursor-pointer hover:bg-destructive-default group transition-all ease-in-out">
+        <DropdownMenuItem className="text-destructive-default m-1 cursor-pointer hover:bg-destructive-default group transition-all ease-in-out" onClick={() => signOut()}>
           <LogOut className="mr-2 h-4 w-4 group-hover:text-primary-foreground" />
           <span className="group-hover:text-primary-foreground">Log out</span>
         </DropdownMenuItem>

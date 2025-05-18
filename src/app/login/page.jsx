@@ -16,6 +16,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useLogin } from "./hook/useLogin";
+import { useAuthInfo } from "@/hook/useAuthInfo";
+import { useRouter } from "next/navigation";
+import Loading from "@/components/loading";
+import { useEffect } from "react";
 
 const FormInput = ({ name, label, type, placeholder, control, Component = Input }) => (
     <FormField
@@ -67,9 +71,18 @@ const PasswordField = ({ name, label, control }) => (
 
 const Login = () => {
     const { form, loading, onSubmit } = useLogin();
+    const { isReady, session } = useAuthInfo();
+    const router = useRouter();
 
-    // console.log("form", form)
+    useEffect(() => {
+        if (isReady && session) {
+            router.push("/");
+        }
+    }, [isReady, session, router]);
 
+    if (!isReady) {
+        return <Loading />;
+    }
     return (
         <motion.div
             className="flex min-h-svh flex-col items-center justify-center"

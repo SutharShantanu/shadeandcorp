@@ -30,14 +30,13 @@ export const useLogin = () => {
         ...data,
         redirect: false,
       });
-      console.log("result", result);
 
-      // if (result?.error) {
-      //   toast.error(result.error);
-      // } else {
-      //   toast.success("Login successful!");
-      //   // router.push("/");
-      // }
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Login successful!");
+        router.push("/");
+      }
     } catch (error) {
       toast.error("Unexpected error. Please try again.");
     } finally {
