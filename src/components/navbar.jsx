@@ -718,7 +718,7 @@ const ProfileDropdown = () => {
   return (
     <DropdownMenu className="bg-primary-foreground relative z-10">
       <DropdownMenuTrigger asChild>
-        <Avatar className="h-8 w-8 select-none bg-primary-foreground border cursor-pointer">
+        <Avatar className="h-8 w-8 select-none bg-transparent border cursor-pointer">
           <AvatarImage src={avatarUrl} alt="User Avatar" />
           <AvatarFallback className="text-primary-default text-subheading w-full mx-auto">
             {avatarInitial}
