@@ -392,9 +392,9 @@ const EMI = ({ price, interestRate = 16 }) => {
                         <Image
                             src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/2560px-UPI-Logo-vector.svg.png"
                             alt="UPI Logo"
-                            className="max-w-10 w-10"
-                            width={50}
-                            height={50}
+                            className="max-w-12 w-12"
+                            width={500}
+                            height={500}
                         />
                     </span>
                 </AccordionTrigger>

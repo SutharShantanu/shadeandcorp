@@ -13,44 +13,44 @@ import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 
-const CartSummary = ({ total }) => (
-    <motion.div className="p-4 border-t bg-white rounded-md">
-        <h2 className="text-lg font-semibold">Total: ${total}</h2>
-        <Button className="mt-4 w-full">Checkout</Button>
-    </motion.div>
-);
+// const CartSummary = ({ total }) => (
+//     <motion.div className="p-4 border-t bg-white rounded-md">
+//         <h2 className="text-lg font-semibold">Total: ${total}</h2>
+//         <Button className="mt-4 w-full">Checkout</Button>
+//     </motion.div>
+// );
 
-const CouponSection = () => (
-    <motion.div className="p-4 border bg-white rounded-md">
-        <h2 className="text-lg font-semibold">Apply Coupon</h2>
-        <input type="text" placeholder="Enter coupon code" className="border p-2 w-full mt-2" />
-        <Button className="mt-2 w-full">Apply</Button>
-    </motion.div>
-);
+// const CouponSection = () => (
+//     <motion.div className="p-4 border bg-white rounded-md">
+//         <h2 className="text-lg font-semibold">Apply Coupon</h2>
+//         <input type="text" placeholder="Enter coupon code" className="border p-2 w-full mt-2" />
+//         <Button className="mt-2 w-full">Apply</Button>
+//     </motion.div>
+// );
 
-const OffersSection = () => (
-    <motion.div className="p-4 border bg-white rounded-md">
-        <h2 className="text-lg font-semibold">Available Offers</h2>
-        <p className="text-sm text-muted-foreground">Use code SAVE10 to get 10% off!</p>
-    </motion.div>
-);
+// const OffersSection = () => (
+//     <motion.div className="p-4 border bg-white rounded-md">
+//         <h2 className="text-lg font-semibold">Available Offers</h2>
+//         <p className="text-sm text-muted-foreground">Use code SAVE10 to get 10% off!</p>
+//     </motion.div>
+// );
 
-const TermsAndConditions = () => (
-    <motion.div className="p-4 border bg-white rounded-md">
-        <h2 className="text-lg font-semibold">Terms & Conditions</h2>
-        <p className="text-sm text-muted-foreground">By proceeding, you agree to our terms and conditions.</p>
-    </motion.div>
-);
+// const TermsAndConditions = () => (
+//     <motion.div className="p-4 border bg-white rounded-md">
+//         <h2 className="text-lg font-semibold">Terms & Conditions</h2>
+//         <p className="text-sm text-muted-foreground">By proceeding, you agree to our terms and conditions.</p>
+//     </motion.div>
+// );
 
-const CheckoutSection = () => (
-    <motion.div className="p-4 border bg-white rounded-md">
-        <h2 className="text-lg font-semibold">Billing Details</h2>
-        <input type="text" placeholder="Full Name" className="border p-2 w-full mt-2" />
-        <input type="text" placeholder="Address" className="border p-2 w-full mt-2" />
-        <input type="text" placeholder="City" className="border p-2 w-full mt-2" />
-        <Button className="mt-4 w-full">Proceed to Payment</Button>
-    </motion.div>
-);
+// const CheckoutSection = () => (
+//     <motion.div className="p-4 border bg-white rounded-md">
+//         <h2 className="text-lg font-semibold">Billing Details</h2>
+//         <input type="text" placeholder="Full Name" className="border p-2 w-full mt-2" />
+//         <input type="text" placeholder="Address" className="border p-2 w-full mt-2" />
+//         <input type="text" placeholder="City" className="border p-2 w-full mt-2" />
+//         <Button className="mt-4 w-full">Proceed to Payment</Button>
+//     </motion.div>
+// );
 
 const CartEmpty = () => (
     <motion.div className="text-center text-muted-foreground p-6">Your cart is empty</motion.div>
@@ -248,7 +248,12 @@ const Cart = () => {
                     </div>
                     <div className="space-y-4">
                         <motion.div className="p-4 border bg-white rounded-md">
-                            <h2 className="text-lg font-semibold">Total: ${cart.reduce((acc, item) => acc + (item.price - (item.price * item.discount) / 100) * item.quantity, 0).toFixed(2)}</h2>
+                            {/* <h2 className="text-lg font-semibold">Total: ${cart.reduce((acc, item) => acc + (item.price - (item.price * item.discount) / 100) * item.quantity, 0).toFixed(2)}</h2> */}
+                            {totalPrice ?
+                                <motion.div>
+                                    $ < AnimatedNumber value={totalPrice} canAnimate={true} />
+                                </motion.div>
+                                : "No Item Selected for Checkout"}
                             <Button className="mt-4 w-full">Checkout</Button>
                         </motion.div>
                     </div>
