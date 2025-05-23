@@ -76,11 +76,10 @@ export const {
 
           await user.save();
 
-          const userObj = user.toObject();
-          const {
-            password,
-            ...safeUser
-          } = userObj;
+          const { password, ...safeUser } = user.toObject();
+          safeUser.id = user._id.toString();
+          return safeUser;
+
           return safeUser;
         } catch (error) {
           console.error("Authorization error:", error);
@@ -143,7 +142,7 @@ export const {
 
     async jwt({ token, user }) {
       if (user) {
-      token.id = user._id || user.id || null;
+      token.id = (user._id || user.id || "").toString();
       token.firstName = user.firstName;
       token.lastName = user.lastName;
       token.gender = user.gender;
@@ -194,7 +193,7 @@ export const {
       return token;
     },
 
-    async session({ session, token }) {
+    async session ({ session, token }) {
       if (token) {
         session.user = {
           id: token.id,
