@@ -5,6 +5,7 @@ import Head from "next/head";
 import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 import ClientLayout from "./clientLayout";
+import LenisProvider from "@/providers/lenisProvider";
 // import { Provider } from "react-redux";
 // import { PersistGate } from "redux-persist/integration/react";
 // import { store, persistor } from "@/store/store";
@@ -27,14 +28,15 @@ export default function RootLayout ({ children }) {
         <link href="./globals.css" rel="stylesheet" />
       </Head>
       <body className={`${forum.className} ${workSans.className} antialiased`} suppressHydrationWarning>
-        <SessionProvider>
-          {/* <Provider store={store}>
+        <LenisProvider>
+          <SessionProvider>
+            {/* <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}> */}
-          <ClientLayout>{children}</ClientLayout>
-          {/* </PersistGate>
+            <ClientLayout>{children}</ClientLayout>
+            {/* </PersistGate>
         </Provider> */}
-        </SessionProvider>
-
+          </SessionProvider>
+        </LenisProvider>
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Toaster } from "@/components/ui/sonner";
 import { motion } from "framer-motion";
+import ScrollProgressBar from "@/components/ui/scrollTop";
 
 export default function ClientLayout ({ children }) {
     const pathname = usePathname();
@@ -20,6 +21,7 @@ export default function ClientLayout ({ children }) {
                 <Toaster richColors position="bottom-right" />
                 <Footer />
             </motion.div>
+            <ScrollProgressBar showPercentage />
         </Suspense>
     );
 }
