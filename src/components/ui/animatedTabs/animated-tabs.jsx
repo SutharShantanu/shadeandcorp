@@ -120,7 +120,7 @@ const TabContent = ({ tab }) => {
                     </div>
                 </div>
             )}
-            {tab.value === 'payment-info' && (
+            {tab.value === 'danger-zone' && (
                 <div className="max-w-2xl mx-auto">
                     <h2 className="text-2xl font-bold mb-6 text-red-500">Caution!</h2>
                     <div className="space-y-6">
@@ -158,9 +158,8 @@ const Tabs = ({
     const selectedRect = buttonRefs[selectedTabIndex]?.getBoundingClientRect();
 
     const [hoveredTabIndex, setHoveredTabIndex] = React.useState(null);
-    const hoveredRect = hoveredTabIndex !== null
-        ? buttonRefs[hoveredTabIndex]?.getBoundingClientRect()
-        : null;
+    const hoveredRect = buttonRefs[hoveredTabIndex ?? -1]?.getBoundingClientRect();
+
     return (
         <nav
             ref={navRef}
@@ -168,23 +167,22 @@ const Tabs = ({
             onPointerLeave={() => setHoveredTabIndex(null)}>
             {tabs.map((item, i) => {
                 const isActive = selectedTabIndex === i;
-
                 return (
                     <button
                         key={item.value}
                         className="text-sm relative rounded-md flex items-center h-8 px-4 z-20 bg-transparent cursor-pointer select-none transition-colors"
                         onPointerEnter={() => setHoveredTabIndex(i)}
                         onFocus={() => setHoveredTabIndex(i)}
-                        onClick={() => setSelectedTab([i, 0])}>
+                        onClick={() => setSelectedTab([i, i > selectedTabIndex ? 1 : -1])}>
                         <motion.span
                             ref={(el) => {
                                 buttonRefs[i] = el;
                             }}
                             className={cn('block', {
-                                'text-zinc-500': !isActive,
-                                'text-primary-default dark:text-primary-foreground font-semibold': isActive
+                                'text-muted-foreground': !isActive,
+                                'text-primary-default font-semibold': isActive
                             })}>
-                            <small className={item.value === 'danger-zone' ? 'text-red-500' : ''}>{item.label}</small>
+                            <small className={item.value === 'danger-zone' ? 'text-destructive-default' : ''}>{item.label}</small>
                         </motion.span>
                     </button>
                 );
@@ -194,9 +192,9 @@ const Tabs = ({
                 {hoveredRect && navRect && (
                     <motion.div
                         key="hover"
-                        className={`absolute z-10 top-0 left-0 rounded-md ${hoveredTabIndex === tabs.findIndex(({ value }) => value === 'danger-zone')
-                            ? 'bg-red-100 dark:bg-red-500/30'
-                            : 'bg-zinc-100 dark:bg-zinc-800'
+                        className={`absolute z-10 top-0 left-0 rounded-md border ${hoveredTabIndex === tabs.findIndex(({ value }) => value === 'danger-zone')
+                            ? 'bg-destructive-default/50 border-destructive-default'
+                            : 'bg-primary-foreground border-muted-default'
                             }`}
                         initial={{ ...getHoverAnimationProps(hoveredRect, navRect), opacity: 0 }}
                         animate={{ ...getHoverAnimationProps(hoveredRect, navRect), opacity: 1 }}
@@ -209,9 +207,9 @@ const Tabs = ({
             <AnimatePresence>
                 {selectedRect && navRect && (
                     <motion.div
-                        className={`absolute z-10 bottom-0 left-0 h-[2px] ${selectedTabIndex === tabs.findIndex(({ value }) => value === 'danger-zone')
-                            ? 'bg-red-500'
-                            : 'bg-black dark:bg-white'
+                        className={`absolute z-10 bottom-0 left-0 h-[2px] rounded-md ${selectedTabIndex === tabs.findIndex(({ value }) => value === 'danger-zone')
+                            ? 'bg-destructive-default'
+                            : 'bg-primary-default'
                             }`}
                         initial={false}
                         animate={{
@@ -248,7 +246,7 @@ export function AnimatedTabs ({ tabs }) {
 
     return (
         <div className="w-full">
-            <div className="relative flex w-full items-center justify-between border-b dark:border-dark-4 overflow-x-auto overflow-y-hidden">
+            <div className="relative border-b border-border flex w-full items-center justify-between overflow-x-auto overflow-y-hidden">
                 <Tabs {...framer.tabProps} />
             </div>
             <AnimatePresence mode="wait">

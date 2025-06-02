@@ -11,31 +11,92 @@ import { useProfile } from "./hook/useProfile";
 import Error from "../error";
 import UserNotFound from "../userNotFound";
 import { useAuthInfo } from "@/hook/useAuthInfo";
-import { AnimatedTabs } from "@/components/ui/animatedTabs/animated-tabs";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { AnimatedTabs } from "@/components/ui/animatedTabs/animated-tabs";
+
+const tabItems = [
+  { label: "Profile Overview", value: "overview" },
+  { label: "Personal Information", value: "personal-info" },
+  { label: "Saved Addresses", value: "addresses" },
+  { label: "Payment Information", value: "payment-info" },
+  { label: "Login Activity", value: "login-activity" },
+  { label: "Account Settings", value: "account-settings" }
+];
+
+const contentVariants = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
+}
+
+// const renderContent = (value) => {
+//   let content
+//   switch (value) {
+//     case 'overview':
+//       content = '👤 This is your profile overview.'
+//       break
+//     case 'personal-info':
+//       content = '📋 Here is your personal information.'
+//       break
+//     case 'addresses':
+//       content = '🏠 These are your saved addresses.'
+//       break
+//     case 'payment-info':
+//       content = '💳 Your payment information is shown here.'
+//       break
+//     case 'login-activity':
+//       content = '🕒 Review your login activity here.'
+//       break
+//     case 'account-settings':
+//       content = '⚙️ Manage your account settings here.'
+//       break
+//     default:
+//       content = null
+//   }
+
+//   const isDanger = value === 'danger-zone'
+//   const baseClass = 'p-4 rounded-md'
+//   const bgClass = isDanger ? 'bg-red-100 dark:bg-red-900 text-red-600' : 'bg-muted'
+
+//   return (
+//     <AnimatePresence mode="wait">
+//       <motion.div
+//         key={value}
+//         variants={contentVariants}
+//         initial="initial"
+//         animate="animate"
+//         exit="exit"
+//         className={`${baseClass} ${bgClass}`}
+//       >
+//         {content}
+//       </motion.div>
+//     </AnimatePresence>
+//   )
+// }
 
 const ProfilePage = () => {
   const { user: authUser } = useAuthInfo();
   const userId = authUser?.id;
   const { user, error, isLoading } = useProfile(userId);
+  const [selectedTab, setSelectedTab] = useState(tabItems[0]);
 
   if (!authUser) return <UserNotFound />;
   if (isLoading) return <Loading />;
   if (error) return <Error error={error} />;
 
-  const tabs = [
-    { label: "Profile Overview", value: "overview" },
-    { label: "Personal Information", value: "personal-info" },
-    { label: "Saved Addresses", value: "addresses" },
-    { label: "Payment Information", value: "payment-info" },
-    { label: "Login Activity", value: "login-activity" },
-    { label: "Account Settings", value: "account-settings" }
-  ];
-
   return (
     <motion.div className="py-6 container mx-auto">
-
-      <AnimatedTabs tabs={tabs} />
+      {/* <AnimatedTabs
+        tabs={tabItems}
+        selected={selectedTab}
+        onChange={setSelectedTab}
+        orientation="vertical"
+        renderContent={renderContent}
+      /> */}
+      <AnimatedTabs
+        tabs={tabItems}
+      />
       <ScrollArea >
         <Card className="mb-8">
           <CardContent className="p-6">
