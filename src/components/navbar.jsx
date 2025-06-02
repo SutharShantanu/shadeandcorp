@@ -783,7 +783,7 @@ const BreadCrumbs = () => {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="transition-all ease-in-out absolute -bottom-13 left-0 right-0 -z-1 border-border/20 border-b shadow-xs w-full backdrop-blur-lg"
+          className="transition-all ease-in-out absolute left-0 right-0 -z-1 border-border/20 border-b shadow-xs w-full backdrop-blur-lg"
         >
           <ul className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0 space-x-2 text-sm text-muted-foreground">
             <Breadcrumb className="flex items-center">

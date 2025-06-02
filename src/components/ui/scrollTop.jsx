@@ -79,8 +79,12 @@ export default function ScrollProgressBar ({
                 }
             )}
             onClick={scrollToTop}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            role="button"
+            aria-label="Scroll to top"
+            aria-live="polite"
+            aria-atomic="true"
+            aria-describedby="scroll-top-tooltip"
+            tabIndex={0}
         >
             <TooltipProvider>
                 <Tooltip>
