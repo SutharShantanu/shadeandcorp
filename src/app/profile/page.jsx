@@ -12,10 +12,10 @@ import Error from "../error";
 import UserNotFound from "../userNotFound";
 import { useAuthInfo } from "@/hook/useAuthInfo";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { AnimatedTabs } from "@/components/ui/animatedTabs/animated-tabs";
+import React, { useState } from "react";
+import AnimatedTabs from "@/components/ui/animatedTabs/animated-tabs";
 
-const tabItems = [
+const tabs = [
   { label: "Profile Overview", value: "overview" },
   { label: "Personal Information", value: "personal-info" },
   { label: "Saved Addresses", value: "addresses" },
@@ -79,7 +79,10 @@ const ProfilePage = () => {
   const { user: authUser } = useAuthInfo();
   const userId = authUser?.id;
   const { user, error, isLoading } = useProfile(userId);
-  const [selectedTab, setSelectedTab] = useState(tabItems[0]);
+  const [selectedTabState, setSelectedTabState] = React.useState([0, 1]);
+  const selectedTabIndex = selectedTabState[0];
+  const selectedTab = tabs[selectedTabIndex];
+
 
   if (!authUser) return <UserNotFound />;
   if (isLoading) return <Loading />;
@@ -87,16 +90,26 @@ const ProfilePage = () => {
 
   return (
     <motion.div className="py-6 container mx-auto">
-      {/* <AnimatedTabs
-        tabs={tabItems}
-        selected={selectedTab}
-        onChange={setSelectedTab}
-        orientation="vertical"
-        renderContent={renderContent}
-      /> */}
       <AnimatedTabs
-        tabs={tabItems}
+        tabs={tabs}
+        selectedTabIndex={selectedTabIndex}
+        setSelectedTab={setSelectedTabState}
+        orientation="horizontal" // or "horizontal"
       />
+
+      <motion.div
+        key={selectedTab.value}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ type: 'tween', ease: 'easeOut', duration: 0.15 }}
+        className="mt-6"
+      >
+        {selectedTab.value === 'overview' && <div>Overview Content</div>}
+        {selectedTab.value === 'personal-info' && <div>Personal Info Content</div>}
+        {selectedTab.value === 'addresses' && <div>Addresses Content</div>}
+        {selectedTab.value === 'danger-zone' && <div className="text-red-600">Danger Zone Content</div>}
+      </motion.div>
       <ScrollArea >
         <Card className="mb-8">
           <CardContent className="p-6">
