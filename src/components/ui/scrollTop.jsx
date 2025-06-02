@@ -4,6 +4,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ChevronUp } from "lucide-react";
 import { useCallback, useEffect } from "react";
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
 export default function ScrollProgressBar ({
     position = "bottom-right",
@@ -58,6 +59,7 @@ export default function ScrollProgressBar ({
     }, []);
 
     return (
+
         <motion.div
             style={{
                 opacity: containerOpacity,
@@ -80,46 +82,55 @@ export default function ScrollProgressBar ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
         >
-            <svg
-                width="60"
-                height="60"
-                viewBox="0 0 100 100"
-            >
-                <circle
-                    cx="50"
-                    cy="50"
-                    r="49"
-                    fill="none"
-                    stroke="var(--color-border)"
-                    strokeWidth={strokeSize}
-                    strokeOpacity={0.2}
-                />
-                <motion.circle
-                    cx="50"
-                    cy="50"
-                    r="49"
-                    pathLength="1"
-                    stroke="var(--color-primary-default)"
-                    fill="none"
-                    strokeDashoffset="0"
-                    strokeWidth={strokeSize}
-                    strokeLinecap="round"
-                    style={{
-                        pathLength: scrollYProgress,
-                        transition: {
-                            pathLength: {
-                                duration: 0.1,
-                                ease: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-                            }
-                        }
-                    }}
-                />
-                <foreignObject x="0" y="0" width="100" height="100">
-                    <div className="flex items-center justify-center w-full h-full">
-                        <ChevronUp className="text-primary-default h-9 w-9" />
-                    </div>
-                </foreignObject>
-            </svg>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger>
+                        <svg
+                            width="60"
+                            height="60"
+                            viewBox="0 0 100 100"
+                        >
+                            <circle
+                                cx="50"
+                                cy="50"
+                                r="49"
+                                fill="none"
+                                stroke="var(--color-border)"
+                                strokeWidth={strokeSize}
+                                strokeOpacity={0.2}
+                            />
+                            <motion.circle
+                                cx="50"
+                                cy="50"
+                                r="49"
+                                pathLength="1"
+                                stroke="var(--color-primary-default)"
+                                fill="none"
+                                strokeDashoffset="0"
+                                strokeWidth={strokeSize}
+                                strokeLinecap="round"
+                                style={{
+                                    pathLength: scrollYProgress,
+                                    transition: {
+                                        pathLength: {
+                                            duration: 0.1,
+                                            ease: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+                                        }
+                                    }
+                                }}
+                            />
+                            <foreignObject x="0" y="0" width="100" height="100">
+                                <div className="flex items-center justify-center w-full h-full">
+                                    <ChevronUp className="text-primary-default h-9 w-9" />
+                                </div>
+                            </foreignObject>
+                        </svg>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p className="text-xs">Elevator up!</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
         </motion.div>
     );
 }
