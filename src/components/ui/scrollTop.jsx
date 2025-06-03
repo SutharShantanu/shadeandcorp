@@ -66,11 +66,11 @@ export default function ScrollProgressBar ({
                 scale: containerScale,
                 transition: {
                     opacity: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
-                    scale: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                    // scale: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                 }
             }}
             className={cn(
-                "fixed flex z-20 bg-primary-foreground items-center justify-center cursor-pointer hover:scale-105 active:scale-95 rounded-full shadow-lg",
+                "fixed flex z-20 bg-primary-foreground cursor-pointer items-center justify-center rounded-full shadow-lg",
                 {
                     "top-0 end-0": position === "top-right",
                     "bottom-5 end-5": position === "bottom-right",
@@ -132,6 +132,7 @@ export default function ScrollProgressBar ({
                     </TooltipTrigger>
                     <TooltipContent>
                         <p className="text-xs">Elevator up!</p>
+                        <TooltipArrow />
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>

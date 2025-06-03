@@ -25,7 +25,7 @@ export const MenTopwear = [
       "A classic cotton t-shirt perfect for everyday wear. Made from high-quality cotton, it offers unmatched comfort and durability. The fabric is soft, breathable, and ideal for all seasons. Available in multiple colors to suit your style, this t-shirt is a must-have in your wardrobe.",
     colors: ["Red", "Blue", "Black"],
     emiOptions: ["3 Months", "6 Months", "12 Months"],
-    offerEndTime: "2025-03-31T23:59:59",
+    offerEndTime: "2025-06-31T23:59:59",
     totalBuyers: 1234,
   },
   {

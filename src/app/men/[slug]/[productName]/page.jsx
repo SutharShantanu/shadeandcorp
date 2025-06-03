@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useCountdown } from "@/app/functions/timer";
 import { MenTopwear } from "@/dummy/clothes";
 import { useParams, useRouter } from "next/navigation";
@@ -19,13 +19,13 @@ import {
 } from "@/components/ui/tabs"
 import {
     Heart,
-    Clock,
     Users,
     Ruler,
     ShoppingCart,
     MoveHorizontal,
     MoveVertical,
-    Truck
+    Truck,
+    Timer,
 } from "lucide-react";
 import {
     Dialog,
@@ -58,6 +58,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { z } from "zod";
 import axios from "axios";
 import { Spinner } from "@/components/ui/spinner";
+import AnimatedGradientText from "@/components/ui/animated-text";
 
 
 const ProductPage = () => {
@@ -110,17 +111,26 @@ const ProductPage = () => {
 
 
     return (
-        <motion.div className="container mx-auto py-6">
-            <motion.div className="flex items-start justify-between gap-6">
-                <ProductImageGrid product={product} setActiveImage={setActiveImage} />
-                <motion.div className="flex flex-col gap-7 w-1/3">
+        <motion.div className="container mx-auto py-6 px-2 sm:px-4">
+            <motion.div className="flex flex-col lg:flex-row items-start justify-between gap-6">
+                {/* Images: full width on mobile, 2/3 on lg+ */}
+                <div className="w-full lg:w-2/3 mb-6 lg:mb-0">
+                    <ProductImageGrid product={product} setActiveImage={setActiveImage} />
+                </div>
+                {/* Details: full width on mobile, 1/3 on lg+ */}
+                <motion.div className="flex flex-col gap-4 w-full lg:w-1/3">
                     <ProductHeader product={product} />
                     <PriceDisplay product={product} />
-                    <ColorSelection imageColorMap={imageColorMap} activeImage={activeImage} handleImageClick={handleImageClick} selectedColor={selectedColor} />
+                    {timeLeft && <Offer timeLeft={timeLeft} />}
+                    <ColorSelection
+                        imageColorMap={imageColorMap}
+                        activeImage={activeImage}
+                        handleImageClick={handleImageClick}
+                        selectedColor={selectedColor}
+                    />
                     <SizeStocks product={product} />
                     <EMI price={product.discounted_price} />
                     <CheckDelivery />
-                    {Offer && <Offer timeLeft={timeLeft} />}
                     <AddToCartButton isLoading={isLoading} handleAddToCart={handleAddToCart} />
                 </motion.div>
             </motion.div>
@@ -134,11 +144,23 @@ export default ProductPage;
 
 const ProductImageGrid = ({ product, setActiveImage }) => {
     return (
-        <motion.div className="grid grid-cols-2 grid-rows-2 h-fit w-2/3">
+        <motion.div
+            className="
+                grid
+                grid-cols-2 grid-rows-2
+                gap-2
+                w-full
+                sm:grid-cols-2 sm:grid-rows-2 sm:w-2/3
+                md:grid-cols-2 md:grid-rows-2 md:w-2/3
+                lg:grid-cols-2 lg:grid-rows-2 lg:w-2/3
+                xl:grid-cols-2 xl:grid-rows-2 xl:w-2/3
+                max-w-full
+            "
+        >
             {product?.images?.map((item, index) => (
                 <motion.div
                     key={index}
-                    className="border border-border -m-[.5px] rounded-none"
+                    className="border border-border rounded-none cursor-pointer aspect-square"
                     onClick={() => setActiveImage(item)}
                 >
                     <Image
@@ -154,28 +176,27 @@ const ProductImageGrid = ({ product, setActiveImage }) => {
     );
 };
 
-
 const ProductHeader = ({ product }) => {
     const [isWishlisted, setIsWishlisted] = useState(false);
 
     return (
         <motion.div>
-            <motion.div className="flex items-center gap-2 justify-between">
-                <h1 className="text-subheading font-subheading">{product.name}</h1>
+            <motion.div className="flex flex-row items-center gap-2 sm:gap-4 justify-between w-full">
+                <h1 className="text-subheading font-subheading text-base sm:text-lg md:text-xl lg:text-2xl break-words max-w-full">{product.name}</h1>
                 <Button
                     size="icon"
                     onClick={() => setIsWishlisted(!isWishlisted)}
-                    className="border border-border rounded-full w-fit h-fit p-2 hover:bg-primary-default/10"
+                    className="border border-border rounded-full w-9 h-9 p-2 hover:bg-primary-default/10 mt-2 sm:mt-0"
                 >
                     <Heart
                         size={18}
-                        className={` ${isWishlisted ? "text-destructive-default fill-destructive-default" : "text-primary-default"}`}
+                        className={`${isWishlisted ? "text-destructive-default fill-destructive-default" : "text-primary-default"}`}
                     />
                 </Button>
             </motion.div>
-            <motion.div className="flex items-center gap-2">
+            <motion.div className="flex items-center gap-2 mt-1 sm:mt-0">
                 <Users className="w-3 h-3" />
-                <p className="text-xs">{product.totalBuyers} people bought this</p>
+                <p className="text-xs sm:text-sm">{product.totalBuyers} people bought this</p>
             </motion.div>
         </motion.div>
     );
@@ -184,10 +205,10 @@ const ProductHeader = ({ product }) => {
 const PriceDisplay = ({ product }) => {
     return (
         <motion.div className="flex flex-col gap-2">
-            <motion.div className="flex flex-wrap gap-2 items-baseline">
-                <p className="text-primary-default text-small">Price:</p>
-                <p className="text-small text-muted-foreground line-through font-description">${product.original_price}</p>
-                <p className="text-subheading font-description px-2 py-1 -skew-x-12 text-primary-foreground bg-accent-default">
+            <motion.div className="flex flex-wrap gap-1 sm:gap-2 items-baseline">
+                <p className="text-primary-default text-xs sm:text-sm">Price:</p>
+                <p className="text-xs sm:text-sm text-muted-foreground line-through font-description">${product.original_price}</p>
+                <p className="text-base sm:text-lg md:text-xl font-description px-1 sm:px-2 py-0.5 sm:py-1 -skew-x-12 text-primary-foreground bg-accent-default">
                     ${product.discounted_price}
                 </p>
             </motion.div>
@@ -198,7 +219,7 @@ const PriceDisplay = ({ product }) => {
 const ColorSelection = ({ imageColorMap, activeImage, handleImageClick, selectedColor }) => {
     return (
         <motion.div className="gap-2 flex flex-col">
-            <motion.div className="flex gap-2 w-fit">
+            <motion.div className="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-fit">
                 <h3 className="text-small font-description">Color:</h3>
                 {imageColorMap?.slice(0, 3).map((item) => (
                     <TooltipProvider key={item.image}>
@@ -214,7 +235,7 @@ const ColorSelection = ({ imageColorMap, activeImage, handleImageClick, selected
                                         width={100}
                                         height={100}
                                         alt={`Thumbnail ${item.image}`}
-                                        className="w-[80px] object-cover rounded-lg"
+                                        className="w-16 h-16 sm:w-[80px] sm:h-[80px] object-cover rounded-lg"
                                     />
                                 </motion.div>
                             </TooltipTrigger>
@@ -234,17 +255,28 @@ const AddToCartButton = ({ isLoading, handleAddToCart }) => {
     return (
         <Button
             onClick={handleAddToCart}
-            className="w-full h-12 bg-primary-default text-primary-foreground rounded-xs hover:bg-primary-default/80"
+            className="
+                w-full
+                h-10 sm:h-12
+                bg-primary-default
+                text-primary-foreground
+                rounded-xs
+                hover:bg-primary-default/80
+                flex items-center justify-center
+                text-sm sm:text-base
+                px-2 sm:px-4
+                gap-1 sm:gap-2
+            "
         >
             {isLoading ? (
-                <motion.div className="flex items-center gap-2 w-fit">
-                    <span>loading ...</span>
-                    <Spinner className="w-5 h-5" />
+                <motion.div className="flex items-center gap-1 sm:gap-2 w-fit">
+                    <span className="text-xs sm:text-base">loading ...</span>
+                    <Spinner className="w-4 h-4 sm:w-5 sm:h-5" />
                 </motion.div>
             ) : (
-                <motion.div className="flex items-center gap-2 w-fit">
-                    Add To Cart
-                    <ShoppingCart className="w-5 h-5" />
+                <motion.div className="flex items-center gap-1 sm:gap-2 w-fit">
+                    <span className="text-xs sm:text-base">Add To Cart</span>
+                    <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                 </motion.div>
             )}
         </Button>
@@ -252,39 +284,42 @@ const AddToCartButton = ({ isLoading, handleAddToCart }) => {
 };
 
 const Offer = ({ timeLeft }) => {
-
     return (
-        <motion.div >
-            <h3 className="text-small flex items-center gap-2">
-                Offer Ends In
-            </h3>
+        <motion.div className="flex flex-row gap-2 sm:gap-4 items-center">
+            <div className="flex items-center gap-2">
+                <Timer className="w-4 h-4" />
+                <h3 className="text-small">Limited Time Offer:</h3>
+            </div>
             <motion.div
-                className="flex items-center gap-2 my-2"
+                className="flex justify-end items-center gap-2 sm:gap-3 my-2 sm:my-3"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-                <Clock className="w-5 h-5 text-primary-default" />
-                <p className="text-description bg-linear-to-r from-accent-default to-destructive-default text-transparent bg-clip-text drop-shadow-md">
-                    {timeLeft?.days}d : {timeLeft?.hours}h : {timeLeft?.minutes}m : {timeLeft?.seconds}s
-                </p>
+                <AnimatedGradientText
+                    text={`${timeLeft?.days}D :${timeLeft?.hours}H :${timeLeft?.minutes}M :${timeLeft?.seconds}S`}
+                    className="text-lg sm:text-2xl font-semibold"
+                />
             </motion.div>
-        </motion.div >
+        </motion.div>
     )
 }
 
 const SizeStocks = ({ product }) => {
-
     const [selectedSize, setSelectedSize] = useState("");
 
     return (
         <motion.div className="gap-2 flex flex-col">
-            <motion.div className="flex gap-4">
+            <motion.div className="flex flex-wrap gap-2 sm:gap-4 w-full">
                 {product?.stock?.map(({ size, quantity }) => (
-                    <motion.div className="flex flex-col items-start gap-2" key={size}>
+                    <motion.div
+                        className="flex flex-col items-start gap-1 w-fit sm:w-auto min-w-[80px] max-w-[120px] sm:min-w-20"
+                        key={size}
+                    >
                         <Button
-                            className={`rounded-xs outline ${selectedSize === size ? "bg-accent-default outline-accent-default" : "outline-border text-primary-default"} min-w-20 w-full hover:bg-primary-default/10 transition-all font-heading ease-in-out select-none`}
-                            onClick={() => setSelectedSize(size)}>
+                            className={`rounded-xs outline ${selectedSize === size ? "bg-accent-default outline-accent-default" : "outline-border text-primary-default"} w-full min-w-[60px] sm:min-w-20 hover:bg-primary-default/10 transition-all font-heading ease-in-out select-none text-xs sm:text-base py-2 sm:py-2.5`}
+                            onClick={() => setSelectedSize(size)}
+                        >
                             {size}
                         </Button>
                         <span className="text-muted-foreground/70 text-xs">
@@ -293,17 +328,20 @@ const SizeStocks = ({ product }) => {
                     </motion.div>
                 ))}
             </motion.div>
-            <motion.div className="flex items-center gap-2 justify-between">
-                <h3 className="text-small">Sizes:
-                    {selectedSize && <Badge className="mx-2 text-xs bg-primary-default">
-                        {selectedSize}
-                    </Badge>}
+            <motion.div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 justify-between w-full">
+                <h3 className="text-small flex items-center">
+                    Sizes:
+                    {selectedSize && (
+                        <Badge className="mx-2 text-xs bg-primary-default">
+                            {selectedSize}
+                        </Badge>
+                    )}
                 </h3>
                 <SizeGuide />
             </motion.div>
         </motion.div>
-    )
-}
+    );
+};
 
 const CheckDelivery = () => {
     const pincodeSchema = z.string().regex(/^\d{6}$/, "Pincode must be a 6-digit number");
@@ -353,29 +391,34 @@ const CheckDelivery = () => {
     };
 
     return (
-        <motion.div className="gap-2 flex flex-col">
-            <h3 className="text-small flex items-center gap-2">
-                Check Delivery
-            </h3>
-            <motion.div className="flex gap-2">
+        <motion.div className="flex flex-col gap-2 w-full">
+            <h3 className="text-small flex items-center gap-2">Check Delivery</h3>
+            <motion.div className="flex flex-col sm:flex-row gap-2 w-full">
                 <Input
                     placeholder="Enter Pincode"
                     value={pincode}
                     onChange={handleInputChange}
-                    className={`${error ? "border-destructive-default" : "border-border outline-hidden focus-visible:bg-transparent"} rounded-xs focus:border-accent-default`}
+                    className={`
+                        ${error ? "border-destructive-default" : "border-border outline-hidden focus-visible:bg-transparent"}
+                        rounded-xs focus:border-accent-default
+                        w-full sm:w-1/2 md:w-1/3 lg:w-1/2 xl:w-1/3
+                        text-sm sm:text-base
+                    `}
                     maxLength={6}
                     disabled={isLoading}
                 />
             </motion.div>
-            {isLoading && <p className="text-muted-foreground text-sm">Checking...</p>}
-            {error && <p className="text-destructive-default text-sm">{error}</p>}
-            {deliveryEstimate && !isLoading && (
-                <p className="text-sm text-muted-foreground flex items-center w-fit gap-2">
-                    Estimated delivery:
-                    <Truck className="w-4 h-4" />
-                    {deliveryEstimate} business days
-                </p>
-            )}
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
+                {isLoading && <p className="text-muted-foreground text-sm">Checking...</p>}
+                {error && <p className="text-destructive-default text-sm">{error}</p>}
+                {deliveryEstimate && !isLoading && (
+                    <p className="text-sm text-muted-foreground flex items-center w-fit gap-2">
+                        Estimated delivery:
+                        <Truck className="w-4 h-4" />
+                        {deliveryEstimate} business days
+                    </p>
+                )}
+            </div>
         </motion.div>
     );
 };
@@ -387,52 +430,54 @@ const EMI = ({ price, interestRate = 16 }) => {
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="emi">
                 <AccordionTrigger className="hover:no-underline text-small">
-                    <span className="flex items-center gap-2 ">
+                    <span className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                         EMI & Pay Later Options
                         <Image
                             src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo-vector.svg/2560px-UPI-Logo-vector.svg.png"
                             alt="UPI Logo"
-                            className="max-w-12 w-12"
+                            className="max-w-10 w-10 sm:max-w-12 sm:w-12"
                             width={500}
                             height={500}
                         />
                     </span>
                 </AccordionTrigger>
                 <AccordionContent>
-                    <p className="mb-2 text-sm text-muted-foreground">
+                    <p className="mb-2 text-xs sm:text-sm text-muted-foreground">
                         Pay in easy installments with <strong>{interestRate}%</strong> interest.
                     </p>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>EMI Plan</TableHead>
-                                <TableHead>Interest (pa)</TableHead>
-                                <TableHead>Discount</TableHead>
-                                <TableHead>Total Cost</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {Object.entries(emiOptions).map(([months, emiData]) => {
-                                const totalAfterInterest = emiData.emi * months;
-                                const discount = emiData.interest;
+                    <div className="overflow-x-auto w-full">
+                        <Table className="min-w-[400px] sm:min-w-0 w-full text-xs sm:text-sm">
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="whitespace-nowrap">EMI Plan</TableHead>
+                                    <TableHead className="whitespace-nowrap">Interest (pa)</TableHead>
+                                    <TableHead className="whitespace-nowrap">Discount</TableHead>
+                                    <TableHead className="whitespace-nowrap">Total Cost</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {Object.entries(emiOptions).map(([months, emiData]) => {
+                                    const totalAfterInterest = emiData.emi * months;
+                                    const discount = emiData.interest;
 
-                                return (
-                                    <TableRow key={months}>
-                                        <TableCell>
-                                            <strong>₹{emiData.emi}</strong> × {months}m
-                                        </TableCell>
-                                        <TableCell>
-                                            ₹{emiData.interest} ({interestRate}%)
-                                        </TableCell>
-                                        <TableCell className="text-destructive-default">
-                                            - ₹{discount}
-                                        </TableCell>
-                                        <TableCell>₹{price}</TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
+                                    return (
+                                        <TableRow key={months}>
+                                            <TableCell className="whitespace-nowrap">
+                                                <strong>₹{emiData.emi}</strong> × {months}m
+                                            </TableCell>
+                                            <TableCell className="whitespace-nowrap">
+                                                ₹{emiData.interest} ({interestRate}%)
+                                            </TableCell>
+                                            <TableCell className="text-destructive-default whitespace-nowrap">
+                                                - ₹{discount}
+                                            </TableCell>
+                                            <TableCell className="whitespace-nowrap">₹{price}</TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
@@ -485,7 +530,7 @@ const SizeGuide = () => {
     };
 
     return (
-        <motion.div className="flex items-center gap-2 text-xs">
+        <motion.div className="flex items-center gap-2 text-xs flex-wrap">
             Need Help? Check our size guide
             <Dialog>
                 <DialogTrigger>
@@ -498,7 +543,7 @@ const SizeGuide = () => {
                         Size Guide
                     </motion.span>
                 </DialogTrigger>
-                <DialogContent className=" max-h-[70vh] overflow-y-auto">
+                <DialogContent className="max-h-[80vh] overflow-y-auto w-full sm:w-[90vw] md:w-[700px]">
                     <DialogHeader>
                         <DialogTitle>Size Guide</DialogTitle>
                         <DialogDescription>
@@ -506,10 +551,10 @@ const SizeGuide = () => {
                         </DialogDescription>
                     </DialogHeader>
                     <Separator />
-                    <motion.div className="flex items-start gap-4">
-                        <Tabs defaultValue="us" className="w-full">
+                    <motion.div className="flex flex-col gap-6 sm:flex-row sm:gap-8 w-full">
+                        <Tabs defaultValue="us" className="w-full sm:w-2/3">
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { duration: 0.5 } }}>
-                                <TabsList className="flex justify-between gap-2">
+                                <TabsList className="flex flex-wrap sm:flex-nowrap justify-between gap-2">
                                     {Object.keys(sizeCharts).map(region => (
                                         <TabsTrigger key={region} value={region} className="uppercase">
                                             {region}
@@ -521,38 +566,40 @@ const SizeGuide = () => {
                             {Object.entries(sizeCharts).map(([region, sizes]) => (
                                 <TabsContent key={region} value={region}>
                                     <motion.div {...fadeInOut}>
-                                        <Table>
-                                            <TableCaption className="bg-primary-foreground text-xs">
-                                                Reference this chart to select the perfect fit.
-                                            </TableCaption>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Size</TableHead>
-                                                    <TableHead>Chest (in)</TableHead>
-                                                    <TableHead>Waist (in)</TableHead>
-                                                    <TableHead>Hip (in)</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {sizes.map(({ size, chest, waist, hip }) => (
-                                                    <TableRow key={size}>
-                                                        <TableCell>{size}</TableCell>
-                                                        <TableCell>{chest}</TableCell>
-                                                        <TableCell>{waist}</TableCell>
-                                                        <TableCell>{hip}</TableCell>
+                                        <div className="overflow-x-auto">
+                                            <Table className="min-w-[350px] w-full text-xs sm:text-sm">
+                                                <TableCaption className="bg-primary-foreground text-xs">
+                                                    Reference this chart to select the perfect fit.
+                                                </TableCaption>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead>Size</TableHead>
+                                                        <TableHead>Chest (in)</TableHead>
+                                                        <TableHead>Waist (in)</TableHead>
+                                                        <TableHead>Hip (in)</TableHead>
                                                     </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {sizes.map(({ size, chest, waist, hip }) => (
+                                                        <TableRow key={size}>
+                                                            <TableCell>{size}</TableCell>
+                                                            <TableCell>{chest}</TableCell>
+                                                            <TableCell>{waist}</TableCell>
+                                                            <TableCell>{hip}</TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
                                     </motion.div>
                                 </TabsContent>
                             ))}
                         </Tabs>
-                        <motion.div>
-                            <motion.div {...fadeInOut} className="">
+                        <motion.div className="w-full sm:w-1/3 flex flex-col items-center sm:items-start">
+                            <motion.div {...fadeInOut} className="w-full">
                                 <h3 className="text-description font-semibold">How to Measure</h3>
-                                <p className="text-xs text-gray-600 text-nowrap">Use a measuring tape and follow these simple steps:</p>
-                                <ul className="list-none space-y-2 text-xs my-4 text-gray-600 text-nowrap">
+                                <p className="text-xs text-gray-600">Use a measuring tape and follow these simple steps:</p>
+                                <ul className="list-none space-y-2 text-xs my-4 text-gray-600">
                                     {measurements.map(({ label, icon, description }) => (
                                         <li key={label} className="flex items-center gap-2">
                                             <span className="shrink-0">{icon}</span>
@@ -562,19 +609,18 @@ const SizeGuide = () => {
                                     ))}
                                 </ul>
                             </motion.div>
-                            <motion.div {...fadeInOut} className="text-center mt-4">
+                            <motion.div {...fadeInOut} className="text-center mt-4 w-full">
                                 <Image
                                     src="https://img.freepik.com/free-vector/women-waist-with-measuring-tape-weight-loss-diet-waistline-icon-line-art-graphic-elements_460848-11528.jpg?t=st=1740129812~exp=1740133412~hmac=047cbdfaecf09cc0da66bb0ef1b85aa1bbcb5279f7c294cf0ad7076c8a58ee88&w=826"
                                     alt="Size Guide"
                                     width={500}
                                     height={500}
-                                    className="mx-auto w-full object-cover max-h-[250px] rounded-xs border border-gray-300"
+                                    className="mx-auto w-full max-w-[250px] object-cover max-h-[200px] sm:max-h-[250px] rounded-xs border border-gray-300"
                                 />
                                 <p className="text-xs text-gray-500 mt-2">Reference this guide for accurate sizing.</p>
                             </motion.div>
                         </motion.div>
                     </motion.div>
-
                 </DialogContent>
             </Dialog>
         </motion.div>

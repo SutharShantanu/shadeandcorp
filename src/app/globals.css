@@ -93,6 +93,13 @@
       height: 0;
     }
   }
+  --animate-text-gradient: text-gradient 1.3s linear infinite;
+
+    @keyframes text-gradient {
+        to {
+            background-position: -200% center;
+        }
+    }
 }
 
 /*
