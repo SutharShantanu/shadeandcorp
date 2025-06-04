@@ -1,19 +1,18 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
 import Loading from "@/components/loading";
 import { useProfile } from "./hook/useProfile";
 import Error from "../error";
 import UserNotFound from "../userNotFound";
 import { useAuthInfo } from "@/hook/useAuthInfo";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
-import AnimatedTabs from "@/components/ui/animatedTabs/animated-tabs";
+import React from "react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import AnimatedTabs from "@/components/ui/animated-tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const tabs = [
   { label: "Profile Overview", value: "overview" },
@@ -23,57 +22,6 @@ const tabs = [
   { label: "Login Activity", value: "login-activity" },
   { label: "Account Settings", value: "account-settings" }
 ];
-
-const contentVariants = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-}
-
-// const renderContent = (value) => {
-//   let content
-//   switch (value) {
-//     case 'overview':
-//       content = '👤 This is your profile overview.'
-//       break
-//     case 'personal-info':
-//       content = '📋 Here is your personal information.'
-//       break
-//     case 'addresses':
-//       content = '🏠 These are your saved addresses.'
-//       break
-//     case 'payment-info':
-//       content = '💳 Your payment information is shown here.'
-//       break
-//     case 'login-activity':
-//       content = '🕒 Review your login activity here.'
-//       break
-//     case 'account-settings':
-//       content = '⚙️ Manage your account settings here.'
-//       break
-//     default:
-//       content = null
-//   }
-
-//   const isDanger = value === 'danger-zone'
-//   const baseClass = 'p-4 rounded-md'
-//   const bgClass = isDanger ? 'bg-red-100 dark:bg-red-900 text-red-600' : 'bg-muted'
-
-//   return (
-//     <AnimatePresence mode="wait">
-//       <motion.div
-//         key={value}
-//         variants={contentVariants}
-//         initial="initial"
-//         animate="animate"
-//         exit="exit"
-//         className={`${baseClass} ${bgClass}`}
-//       >
-//         {content}
-//       </motion.div>
-//     </AnimatePresence>
-//   )
-// }
 
 const ProfilePage = () => {
   const { user: authUser } = useAuthInfo();
@@ -94,7 +42,12 @@ const ProfilePage = () => {
         tabs={tabs}
         selectedTabIndex={selectedTabIndex}
         setSelectedTab={setSelectedTabState}
-        orientation="horizontal" // or "horizontal"
+        // orientation="horizontal" // or "horizontal"
+        tabContent={{
+          overview: () => <div>This is the Overview content</div>,
+          settings: () => <div>Settings go here</div>,
+          'danger-zone': () => <div className="text-red-600">⚠️ Danger Zone ⚠️</div>
+      }}
       />
 
       <motion.div
@@ -132,7 +85,7 @@ const ProfilePage = () => {
                   </div>
 
                   {/* Edit Button */}
-                  <Button variant="outline" className="mt-4 md:mt-0">
+                  <Button as="a" href="/edit-profile" variant="outline" className="mt-4 md:mt-0">
                     Edit Profile
                   </Button>
                 </div>

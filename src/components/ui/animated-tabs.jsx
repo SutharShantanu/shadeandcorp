@@ -1,9 +1,34 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { useTabs } from './useTabs';
+
+const useTabs = ({
+    tabs,
+    initialTabId,
+    onChange
+}) => {
+    const [state, setSelectedTab] = useState(() => {
+        const indexOfInitialTab = tabs.findIndex((tab) => tab.value === initialTabId);
+        return [indexOfInitialTab === -1 ? 0 : indexOfInitialTab, 0];
+    });
+    const [selectedTabIndex, direction] = state;
+
+    return {
+        tabProps: {
+            tabs,
+            selectedTabIndex,
+            onChange,
+            setSelectedTab
+        },
+        selectedTab: tabs[selectedTabIndex],
+        contentProps: {
+            direction,
+            selectedTabIndex
+        }
+    };
+}
 
 const transition = {
     type: 'tween',
@@ -102,7 +127,24 @@ const Tabs = ({
     );
 };
 
-const AnimatedTabs = ({ tabs }) => {
+const TabContent = ({ tab, tabContent }) => {
+    const Content = tabContent[tab.value];
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={transition}
+            className="p-6 bg-zinc-50 dark:bg-zinc-900 rounded-lg mt-4 h-[55vh]"
+        >
+            {Content ? <Content /> : <div>No content available for this tab.</div>}
+        </motion.div>
+    );
+};
+
+
+const AnimatedTabs = ({ tabs, tabContent }) => {
     const [hookProps] = React.useState(() => {
         const initialTabId =
             tabs.find(
@@ -127,7 +169,7 @@ const AnimatedTabs = ({ tabs }) => {
                 <Tabs {...framer.tabProps} />
             </div>
             <AnimatePresence mode="wait">
-                <TabContent tab={framer.selectedTab} />
+                <TabContent tab={framer.selectedTab} tabContent={tabContent} />
             </AnimatePresence>
         </div>
     );
