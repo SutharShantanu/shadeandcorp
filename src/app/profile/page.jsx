@@ -6,175 +6,201 @@ import Error from "../error";
 import UserNotFound from "../userNotFound";
 import { useAuthInfo } from "@/hook/useAuthInfo";
 import { motion } from "framer-motion";
-import React from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import React, { useEffect } from "react";
 import AnimatedTabs from "@/components/ui/animated-tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ProfileTabEnum, tabs } from "./enums/profile.enums";
 
-const tabs = [
-  { label: "Profile Overview", value: "overview" },
-  { label: "Personal Information", value: "personal-info" },
-  { label: "Saved Addresses", value: "addresses" },
-  { label: "Payment Information", value: "payment-info" },
-  { label: "Login Activity", value: "login-activity" },
-  { label: "Account Settings", value: "account-settings" }
-];
+const UserTabs = ({ selectedTab, user }) => {
+  const renderTabContent = () => {
+    switch (selectedTab.value) {
+      case ProfileTabEnum.OVERVIEW:
+        return (
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                <Avatar className="w-28 h-28 shadow-md">
+                  <AvatarImage src={user?.profilePicture} />
+                  <AvatarFallback>
+                    {user?.firstName?.[0]}
+                    {user?.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+                    <div>
+                      <h2 className="text-2xl font-semibold">
+                        {user?.firstName} {user?.lastName}
+                      </h2>
+                      <p className="text-muted-foreground">{user?.email}</p>
+                      <p>{user?.phone}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case ProfileTabEnum.PERSONAL_INFO:
+        return (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Basic Information</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-y-3">
+              <div><strong>Gender:</strong> {user?.gender}</div>
+              <div><strong>Birthday:</strong> {user?.birthday ? new Date(user.birthday).toLocaleDateString() : 'N/A'}</div>
+            </CardContent>
+          </Card>
+        );
+
+      case ProfileTabEnum.ADDRESSES:
+        return (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Addresses</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {user?.address?.map((addr, i) => (
+                <div key={i} className="p-4 border rounded-lg shadow-sm bg-muted/20">
+                  <div className="flex justify-between mb-2">
+                    <span className="font-medium">{addr.type}</span>
+                    {addr.isDefault && <Badge>Default</Badge>}
+                  </div>
+                  <div>{addr.address1}, {addr.address2}</div>
+                  <div>{addr.city}, {addr.state} - {addr.zipCode}</div>
+                  <div>{addr.country} (+{addr.countryCode})</div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        );
+
+      case ProfileTabEnum.PAYMENT_INFO:
+        return (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Saved Payment Methods</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {user?.paymentMethods?.map((pm, i) => (
+                <div key={i} className="p-4 border rounded shadow-sm bg-muted/20">
+                  <div><strong>Card:</strong> **** **** **** {pm.cardNumber.slice(-4)}</div>
+                  <div><strong>Name:</strong> {pm.cardHolderName}</div>
+                  <div><strong>Expires:</strong> {pm.expiryDate}</div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        );
+
+      case ProfileTabEnum.LOGIN_ACTIVITY:
+        return (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Session History</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {user?.sessions?.map((session, i) => (
+                <div key={i} className="p-4 border rounded shadow-sm bg-muted/20">
+                  <div><strong>IP:</strong> {session.ipAddress}</div>
+                  <div><strong>Location:</strong> {session.city}, {session.region}, {session.country}</div>
+                  <div><strong>Timezone:</strong> {session.timezone}</div>
+                  <div><strong>Logged In:</strong> {new Date(session.loggedInAt).toLocaleString()}</div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        );
+
+      case ProfileTabEnum.ACCOUNT_SETTINGS:
+        return (
+          <Card className="mb-12">
+            <CardHeader>
+              <CardTitle>Account Details</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-y-2">
+              <div><strong>Role:</strong> {user?.role}</div>
+              <div>
+                <strong>Status:</strong>{' '}
+                <Badge variant={user?.accountStatus === 'active' ? 'default' : 'destructive'}>
+                  {user?.accountStatus}
+                </Badge>
+              </div>
+              <div><strong>Joined:</strong> {new Date(user?.joinedDate).toLocaleDateString()}</div>
+            </CardContent>
+          </Card>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return renderTabContent();
+};
 
 const ProfilePage = () => {
   const { user: authUser } = useAuthInfo();
   const userId = authUser?.id;
   const { user, error, isLoading } = useProfile(userId);
-  const [selectedTabState, setSelectedTabState] = React.useState([0, 1]);
-  const selectedTabIndex = selectedTabState[0];
-  const selectedTab = tabs[selectedTabIndex];
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
+  const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    const index = tabs.findIndex(tab => tab.value === tabParam);
+
+    if (index >= 0) {
+      setSelectedTabIndex(index);
+    } else {
+      const current = new URLSearchParams(Array.from(searchParams.entries()));
+      current.set('tab', tabs[0].value);
+      router.push(`?${current.toString()}`, undefined, { scroll: false });
+      setSelectedTabIndex(0);
+    }
+  }, [searchParams, router]);
 
   if (!authUser) return <UserNotFound />;
   if (isLoading) return <Loading />;
   if (error) return <Error error={error} />;
 
+  const handleTabChange = (index) => {
+    if (!tabs[index]) return;
+
+    setSelectedTabIndex(index);
+    const newTabValue = tabs[index].value;
+
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.set('tab', newTabValue);
+    router.replace(`?${current.toString()}`, { scroll: false });
+  };
+
   return (
     <motion.div className="py-6 container mx-auto">
       <AnimatedTabs
         tabs={tabs}
+        renderTabContent={(tab) => <UserTabs selectedTab={tab} user={user} />}
         selectedTabIndex={selectedTabIndex}
-        setSelectedTab={setSelectedTabState}
-        // orientation="horizontal" // or "horizontal"
-        tabContent={{
-          overview: () => <div>This is the Overview content</div>,
-          settings: () => <div>Settings go here</div>,
-          'danger-zone': () => <div className="text-red-600">⚠️ Danger Zone ⚠️</div>
-      }}
+        setSelectedTab={handleTabChange}
+        rightEndSection={
+          <Button
+            as="a"
+            href="/edit-profile"
+            variant="outline"
+            className="cursor-pointer"
+          >
+            Edit Profile
+          </Button>
+        }
       />
-
-      <motion.div
-        key={selectedTab.value}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        transition={{ type: 'tween', ease: 'easeOut', duration: 0.15 }}
-        className="mt-6"
-      >
-        {selectedTab.value === 'overview' && <div>Overview Content</div>}
-        {selectedTab.value === 'personal-info' && <div>Personal Info Content</div>}
-        {selectedTab.value === 'addresses' && <div>Addresses Content</div>}
-        {selectedTab.value === 'danger-zone' && <div className="text-red-600">Danger Zone Content</div>}
-      </motion.div>
-      <ScrollArea >
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              {/* Profile Image */}
-              <Avatar className="w-28 h-28 shadow-md">
-                <AvatarImage src={user?.profilePicture} />
-                <AvatarFallback>{user?.firstName?.[0]}{user?.lastName?.[0]}</AvatarFallback>
-              </Avatar>
-
-              {/* Profile Details */}
-              <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-                  <div>
-                    <h2 className="text-2xl font-semibold">
-                      {user?.firstName} {user?.lastName}
-                    </h2>
-                    <p className="text-muted-foreground">{user?.email}</p>
-                    <p>{user?.phone}</p>
-                  </div>
-
-                  {/* Edit Button */}
-                  <Button as="a" href="/edit-profile" variant="outline" className="mt-4 md:mt-0">
-                    Edit Profile
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Basic Info */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-y-3">
-            <div><strong>Gender:</strong> {user?.gender}</div>
-            <div><strong>Birthday:</strong> {user?.birthday ? new Date(user.birthday).toLocaleDateString() : "N/A"}</div>
-          </CardContent>
-        </Card>
-
-        {/* Address List */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Addresses</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {user?.address?.map((addr, index) => (
-              <div key={index} className="p-4 border rounded-lg shadow-sm bg-muted/20">
-                <div className="flex justify-between mb-2">
-                  <span className="font-medium">{addr.type}</span>
-                  {addr.isDefault && <Badge>Default</Badge>}
-                </div>
-                <div>{addr.address1}, {addr.address2}</div>
-                <div>{addr.city}, {addr.state} - {addr.zipCode}</div>
-                <div>{addr.country} (+{addr.countryCode})</div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Payment Methods */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Saved Payment Methods</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {user?.paymentMethods?.map((pm, index) => (
-              <div key={index} className="p-4 border rounded shadow-sm bg-muted/20">
-                <div><strong>Card:</strong> **** **** **** {pm.cardNumber.slice(-4)}</div>
-                <div><strong>Name:</strong> {pm.cardHolderName}</div>
-                <div><strong>Expires:</strong> {pm.expiryDate}</div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Session History */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Session History</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {user?.sessions?.map((session, index) => (
-              <div key={index} className="p-4 border rounded shadow-sm bg-muted/20">
-                <div><strong>IP:</strong> {session.ipAddress}</div>
-                <div><strong>Location:</strong> {session.city}, {session.region}, {session.country}</div>
-                <div><strong>Timezone:</strong> {session.timezone}</div>
-                <div><strong>Logged In:</strong> {new Date(session.loggedInAt).toLocaleString()}</div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Account Details */}
-        <Card className="mb-12">
-          <CardHeader>
-            <CardTitle>Account Details</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-y-2">
-            <div><strong>Role:</strong> {user?.role}</div>
-            <div>
-              <strong>Status:</strong>{" "}
-              <Badge variant={user?.accountStatus === "active" ? "default" : "destructive"}>
-                {user?.accountStatus}
-              </Badge>
-            </div>
-            <div><strong>Joined:</strong> {new Date(user?.joinedDate).toLocaleDateString()}</div>
-          </CardContent>
-        </Card>
-      </ScrollArea>
     </motion.div>
   );
 };

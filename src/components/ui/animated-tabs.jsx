@@ -1,26 +1,29 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
-const useTabs = ({
-    tabs,
-    initialTabId,
-    onChange
-}) => {
-    const [state, setSelectedTab] = useState(() => {
+const useTabs = ({ tabs, initialTabId, onChange }) => {
+    if (!initialTabId) return null;
+
+    const [state, setSelectedTab] = React.useState(() => {
         const indexOfInitialTab = tabs.findIndex((tab) => tab.value === initialTabId);
         return [indexOfInitialTab === -1 ? 0 : indexOfInitialTab, 0];
     });
     const [selectedTabIndex, direction] = state;
 
+    const handleTabChange = (index) => {
+        const newDirection = index > selectedTabIndex ? 1 : -1;
+        setSelectedTab([index, newDirection]);
+        if (onChange) onChange(tabs[index]);
+    };
+
     return {
         tabProps: {
             tabs,
             selectedTabIndex,
-            onChange,
-            setSelectedTab
+            setSelectedTab: handleTabChange
         },
         selectedTab: tabs[selectedTabIndex],
         contentProps: {
@@ -28,7 +31,7 @@ const useTabs = ({
             selectedTabIndex
         }
     };
-}
+};
 
 const transition = {
     type: 'tween',
@@ -75,7 +78,8 @@ const Tabs = ({
                         className="text-sm relative rounded-md flex items-center h-8 px-4 z-20 bg-transparent cursor-pointer select-none transition-colors"
                         onPointerEnter={() => setHoveredTabIndex(i)}
                         onFocus={() => setHoveredTabIndex(i)}
-                        onClick={() => setSelectedTab([i, i > selectedTabIndex ? 1 : -1])}>
+                        onClick={() => setSelectedTab(i)}
+                    >
                         <motion.span
                             ref={(el) => {
                                 buttonRefs[i] = el;
@@ -83,7 +87,8 @@ const Tabs = ({
                             className={cn('block', {
                                 'text-muted-foreground': !isActive,
                                 'text-primary-default font-semibold': isActive
-                            })}>
+                            })}
+                        >
                             <small className={item.value === 'danger-zone' ? 'text-destructive-default' : ''}>{item.label}</small>
                         </motion.span>
                     </button>
@@ -128,8 +133,9 @@ const Tabs = ({
 };
 
 const TabContent = ({ tab, tabContent }) => {
+    console.log('Rendering TabContent for:', tab?.value);
+    if (!tab) return <div>No tab selected</div>;
     const Content = tabContent[tab.value];
-
     return (
         <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -143,36 +149,40 @@ const TabContent = ({ tab, tabContent }) => {
     );
 };
 
+const AnimatedTabs = ({ tabs, renderTabContent, rightEndSection, selectedTabIndex: externalIndex, setSelectedTab: setExternalTab, initialTabId, onChange }) => {
+    const internal = useTabs({ tabs, initialTabId, onChange });
 
-const AnimatedTabs = ({ tabs, tabContent }) => {
-    const [hookProps] = React.useState(() => {
-        const initialTabId =
-            tabs.find(
-                (tab) => tab.value === 'overview'
-            )?.value || tabs[0].value;
+    const selectedTabIndex = externalIndex ?? internal?.tabProps.selectedTabIndex ?? 0;
+    const setSelectedTab = setExternalTab ?? internal?.tabProps.setSelectedTab ?? (() => { });
 
-        return {
-            tabs: tabs.map(({ label, value, subRoutes }) => ({
-                label,
-                value,
-                subRoutes
-            })),
-            initialTabId
-        };
-    });
-
-    const framer = useTabs(hookProps);
+    const selectedTab = tabs[selectedTabIndex];
 
     return (
         <div className="w-full">
             <div className="relative border-b border-border flex w-full items-center justify-between overflow-x-auto overflow-y-hidden">
-                <Tabs {...framer.tabProps} />
+                <Tabs tabs={tabs} selectedTabIndex={selectedTabIndex} setSelectedTab={setSelectedTab} />
+                {rightEndSection && (
+                    <div className="flex justify-end items-center">
+                        {rightEndSection}
+                    </div>
+                )}
             </div>
             <AnimatePresence mode="wait">
-                <TabContent tab={framer.selectedTab} tabContent={tabContent} />
+                {selectedTab && (
+                    <motion.div
+                        key={selectedTab.value}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ type: "tween", ease: "easeOut", duration: 0.15 }}
+                        className="mt-6"
+                    >
+                        {renderTabContent(selectedTab)}
+                    </motion.div>
+                )}
             </AnimatePresence>
         </div>
     );
-}
+};
 
 export default AnimatedTabs;
