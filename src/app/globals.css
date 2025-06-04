@@ -134,14 +134,6 @@
   }
 }
 
-@layer utilities {
-  body {
-    color: var(--foreground);
-    background: var(--background);
-    font-family: "Work Sans", sans-serif;
-  }
-}
-
 @layer base {
   :root {
     --background: #f4f4f4;
@@ -228,9 +220,11 @@
       color 0.3s ease-in-out;
   }
 }
+
 @layer utilities {
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
+    height: 6px; /* Apply same width to horizontal scrollbar */
   }
 
   ::-webkit-scrollbar-track {
@@ -257,6 +251,12 @@
 
   .dark ::-webkit-scrollbar-thumb:hover {
     background: var(--foreground);
+  }
+
+  body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: "Work Sans", sans-serif;
   }
 }
 

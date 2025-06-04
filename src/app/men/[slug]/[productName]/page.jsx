@@ -32,6 +32,7 @@ import {
     DialogContent,
     DialogDescription,
     DialogHeader,
+    DialogHeaderWithClose,
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
