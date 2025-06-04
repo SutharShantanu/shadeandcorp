@@ -10,10 +10,12 @@ import React, { useEffect } from "react";
 import AnimatedTabs from "@/components/ui/animated-tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProfileTabEnum, tabs } from "./enums/profile.enums";
+import { PencilLine, UserRoundPen } from "lucide-react";
+import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { NextLink } from "@/components/ui/link";
 
 const UserTabs = ({ selectedTab, user }) => {
   const renderTabContent = () => {
@@ -191,14 +193,25 @@ const ProfilePage = () => {
         selectedTabIndex={selectedTabIndex}
         setSelectedTab={handleTabChange}
         rightEndSection={
-          <Button
-            as="a"
-            href="/edit-profile"
-            variant="outline"
-            className="cursor-pointer"
-          >
-            Edit Profile
-          </Button>
+          <>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <NextLink
+                    href="/edit-profile"
+                    variant="fadeSlide"
+                    className="border border-border rounded-full p-1.5 group hover:bg-primary-default transition-all ease-in-out"
+                  >
+                    <PencilLine className="w-4 h-4 group-hover:text-primary-foreground" />
+                  </NextLink>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Edit Profile</p>
+                  <TooltipArrow />
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </>
         }
       />
     </motion.div>

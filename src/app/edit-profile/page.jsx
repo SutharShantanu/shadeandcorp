@@ -6,17 +6,23 @@ import {
     Form, FormControl, FormDescription, FormField,
     FormItem, FormLabel, FormMessage
 } from "@/components/ui/form";
-import {
-    Input, Button, PhoneInput, Select,
-    SelectTrigger, SelectValue, SelectContent,
-    SelectItem, Popover, PopoverTrigger, PopoverContent,
-    Calendar
-} from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { useEditProfile } from "./hook/useEditProfille";
+import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { CalendarDatePicker } from "@/components/ui/calenderDatePicker";
+import { useState } from "react";
 
 export default function EditProfile () {
     const { form, onSubmit, loading } = useEditProfile();
+
+    const [selectedDateRange, setSelectedDateRange] = useState({
+        from: new Date(new Date().getFullYear(), 0, 1),
+        to: new Date(),
+    });
 
     return (
         <div className="max-w-3xl mx-auto py-10">
@@ -118,12 +124,17 @@ export default function EditProfile () {
                                         </FormControl>
                                     </PopoverTrigger>
                                     <PopoverContent align="start" className="w-auto p-0">
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value}
-                                            onSelect={field.onChange}
-                                            initialFocus
+                                        <CalendarDatePicker
+                                            date={selectedDateRange}
+                                            onDateSelect={setSelectedDateRange}
                                         />
+                                        <div className="mt-4">
+                                            <h2 className="text-md font-semibold">Selected Date Range:</h2>
+                                            <p className="text-sm">
+                                                {selectedDateRange.from.toDateString()} -{" "}
+                                                {selectedDateRange.to.toDateString()}
+                                            </p>
+                                        </div>
                                     </PopoverContent>
                                 </Popover>
                                 <FormDescription>Your birthdate helps us personalize your experience.</FormDescription>
