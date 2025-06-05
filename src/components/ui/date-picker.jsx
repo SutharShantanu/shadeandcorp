@@ -1,6 +1,8 @@
-import * as React from "react"
+"use client"
+
+import React, { useEffect, useMemo, useRef, useState } from "react"
 import { format, startOfYear, endOfYear, eachMonthOfInterval } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
+import { Calendar as CalendarIcon, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -17,17 +19,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { toast } from "sonner" // ✅ Make sure 'sonner' toast is installed and set up
+import { Badge } from "./badge"
+import AnimatedNumber from "./number-input"
 
 export function DatePicker ({ date, setDate }) {
-    const [month, setMonth] = React.useState(date ? date.getMonth() : new Date().getMonth())
-    const [year, setYear] = React.useState(date ? date.getFullYear() : new Date().getFullYear())
+    const [month, setMonth] = useState(new Date().getMonth())
+    const [year, setYear] = useState(new Date().getFullYear())
+    const popoverRef = useRef(null)
 
-    const years = React.useMemo(() => {
+    const years = useMemo(() => {
         const currentYear = new Date().getFullYear()
         return Array.from({ length: currentYear - 1900 + 1 }, (_, i) => currentYear - i)
     }, [])
 
-    const months = React.useMemo(() => {
+    const months = useMemo(() => {
         if (year) {
             return eachMonthOfInterval({
                 start: startOfYear(new Date(year, 0, 1)),
@@ -37,7 +43,7 @@ export function DatePicker ({ date, setDate }) {
         return []
     }, [year])
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (date) {
             setMonth(date.getMonth())
             setYear(date.getFullYear())
@@ -66,8 +72,16 @@ export function DatePicker ({ date, setDate }) {
         }
     }
 
+    const handleClear = () => {
+        setDate(null)
+        popoverRef.current?.close?.() // ✅ Close the popover
+        toast.info("Date selection cleared.") // ✅ Show toast
+    }
+
+    const selectedDate = format(date, "PPP");
+
     return (
-        <Popover>
+        <Popover ref={popoverRef}>
             <PopoverTrigger asChild>
                 <Button
                     className={cn(
@@ -75,12 +89,16 @@ export function DatePicker ({ date, setDate }) {
                     )}
                 >
                     <CalendarIcon className="mr-2 h-4 w-4 text-primary-default" />
-                    {date ? format(date, "PPP") : <span className="text-primary-default">Pick a date</span>}
+                    {date ? (
+                        <span className="text-primary-default">Selected a date</span>
+                    ) : (
+                        <span className="text-primary-default">Pick a date</span>
+                    )}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-                <div className="flex justify-between p-2 gap-x-1 w-full">
-                    <Select onValueChange={handleYearChange} value={year.toString()} className="w-1/2">
+            <PopoverContent className="w-fit p-0" align="start">
+                <div className="flex justify-between p-4 gap-x-1 w-full">
+                    <Select onValueChange={handleYearChange} value={year.toString()} className="w-1/2 max-w-fit">
                         <SelectTrigger className="w-[120px]">
                             <SelectValue placeholder="Year" />
                         </SelectTrigger>
@@ -92,7 +110,7 @@ export function DatePicker ({ date, setDate }) {
                             ))}
                         </SelectContent>
                     </Select>
-                    <Select onValueChange={handleMonthChange} value={month.toString()} className="w-1/2">
+                    <Select onValueChange={handleMonthChange} value={month.toString()} className="w-1/2 max-w-fit">
                         <SelectTrigger className="w-[120px]">
                             <SelectValue placeholder="Month" />
                         </SelectTrigger>
@@ -107,7 +125,7 @@ export function DatePicker ({ date, setDate }) {
                 </div>
                 <Calendar
                     mode="single"
-                    selected={date}
+                    selected={date || undefined}
                     onSelect={setDate}
                     month={new Date(year, month)}
                     onMonthChange={(newMonth) => {
@@ -116,6 +134,21 @@ export function DatePicker ({ date, setDate }) {
                     }}
                     initialFocus
                 />
+                {date && (
+                    <div className="flex items-center w-full justify-between p-2">
+                        <Badge className="bg-primary-default rounded-xs">
+                            <AnimatedNumber value={selectedDate} canAnimate={true} />
+                        </Badge>
+                        <Button
+                            variant="ghost"
+                            onClick={handleClear}
+                            className="text-sm text-destructive hover:underline flex items-center gap-1"
+                        >
+                            <X className="w-4 h-4" />
+                            Clear
+                        </Button>
+                    </div>
+                )}
             </PopoverContent>
         </Popover>
     )
