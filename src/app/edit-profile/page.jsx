@@ -1,28 +1,21 @@
 "use client";
 
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
 import {
     Form, FormControl, FormDescription, FormField,
     FormItem, FormLabel, FormMessage
 } from "@/components/ui/form";
-import { cn } from "@/lib/utils";
 import { useEditProfile } from "./hook/useEditProfille";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { CalendarDatePicker } from "@/components/ui/calenderDatePicker";
 import { useState } from "react";
+import { DatePicker } from "@/components/ui/date-picker";
 
 export default function EditProfile () {
     const { form, onSubmit, loading } = useEditProfile();
 
-    const [selectedDateRange, setSelectedDateRange] = useState({
-        from: new Date(new Date().getFullYear(), 0, 1),
-        to: new Date(),
-    });
+    const currentYear = new Date().getFullYear()
 
     return (
         <div className="max-w-3xl mx-auto py-10">
@@ -111,14 +104,14 @@ export default function EditProfile () {
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
                                 <FormLabel>Birthday</FormLabel>
-                                <CalendarDatePicker
-                                    date={field.value}
-                                    onDateSelect={({ from, to }) => {
-                                        form.setValue("datePicker", { from, to });
+                                <DatePicker
+                                    date={field.value ? new Date(field.value) : undefined}
+                                    setDate={(date) => {
+                                        if (date) {
+                                            field.onChange(date);
+                                        }
                                     }}
-                                    variant="outline"
-                                    numberOfMonths={1}
-                                    className="w-fit"
+                                    endYear={currentYear}
                                 />
                                 <FormDescription>Your birthdate helps us personalize your experience.</FormDescription>
                                 <FormMessage />
