@@ -144,13 +144,14 @@ const Login = () => {
                                     disabled={loading}
                                     aria-busy={loading}
                                     aria-label="Login"
+                                    variant="gooeyRight"
                                     className="w-full bg-primary-default text-primary-foreground rounded-xs hover:bg-primary-default/80"
                                 >
                                     {loading ? (
-                                        <>
+                                        <motion.div className="flex items-center gap-1">
+                                            <Spinner className="h-4 w-4" />
                                             <span>Logging in...</span>
-                                            <Spinner />
-                                        </>
+                                        </motion.div>
                                     ) : (
                                         "Login"
                                     )}

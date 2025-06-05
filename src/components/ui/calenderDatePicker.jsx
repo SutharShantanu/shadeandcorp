@@ -50,37 +50,15 @@ const months = [
     "December",
 ];
 
-const multiSelectVariants = cva(
-    "flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium text-foreground ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-    {
-        variants: {
-            variant: {
-                default: "bg-primary text-primary-foreground hover:bg-primary/90",
-                destructive:
-                    "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-                outline:
-                    "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-                secondary:
-                    "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-                ghost: "hover:bg-accent hover:text-accent-foreground text-background",
-                link: "text-primary underline-offset-4 hover:underline text-background",
-            },
-        },
-        defaultVariants: {
-            variant: "default",
-        },
-    }
-);
-
 export const CalendarDatePicker = (
     (
         {
             id = "calendar-date-picker",
             className,
             date,
-            closeOnSelect = false,
+            closeOnSelect = true,
             numberOfMonths = 2,
-            yearsRange = 10,
+            yearsRange = 50,
             onDateSelect,
             variant,
             ...props
@@ -393,18 +371,15 @@ export const CalendarDatePicker = (
                             id="date"
                             ref={ref}
                             {...props}
-                            className={cn(
-                                "w-auto",
-                                multiSelectVariants({ variant, className })
-                            )}
+                            className="w-fit border-border border bg-primary-foreground"
                             onClick={handleTogglePopover}
                             suppressHydrationWarning
                         >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            <CalendarIcon className="mr-2 h-4 w-4 text-primary-default" />
                             <span>
                                 {date?.from ? (
                                     date.to ? (
-                                        <>
+                                        <motion.div>
                                             <span
                                                 id={`firstDay-${id}`}
                                                 className={cn(
@@ -443,7 +418,7 @@ export const CalendarDatePicker = (
                                                 {formatWithTz(date.from, "y")}
                                             </span>
                                             {numberOfMonths === 2 && (
-                                                <>
+                                                <motion.div>
                                                     {" - "}
                                                     <span
                                                         id={`secondDay-${id}`}
@@ -482,11 +457,11 @@ export const CalendarDatePicker = (
                                                     >
                                                         {formatWithTz(date.to, "y")}
                                                     </span>
-                                                </>
+                                                </motion.div>
                                             )}
-                                        </>
+                                        </motion.div>
                                     ) : (
-                                        <>
+                                        <motion.div>
                                             <span
                                                 id="day"
                                                 className={cn(
@@ -521,17 +496,17 @@ export const CalendarDatePicker = (
                                             >
                                                 {formatWithTz(date.from, "y")}
                                             </span>
-                                        </>
+                                        </motion.div>
                                     )
                                 ) : (
-                                    <span>Pick a date</span>
+                                    <span className="text-primary-default">Pick a date</span>
                                 )}
                             </span>
                         </Button>
                     </PopoverTrigger>
                     {isPopoverOpen && (
                         <PopoverContent
-                            className="w-auto"
+                            className="w-auto bg-primary-foreground shadow-sm"
                             align="center"
                             avoidCollisions={false}
                             onInteractOutside={handleClose}
@@ -550,7 +525,7 @@ export const CalendarDatePicker = (
                                                 variant="ghost"
                                                 size="sm"
                                                 className={cn(
-                                                    "justify-start hover:bg-primary/90 hover:text-background",
+                                                    "justify-start hover:bg-primary-default/90 hover:text-background",
                                                     selectedRange === label &&
                                                     "bg-primary text-background hover:bg-primary/90 hover:text-background"
                                                 )}

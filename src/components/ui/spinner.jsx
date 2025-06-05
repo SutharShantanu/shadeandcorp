@@ -1,19 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { cva } from 'class-variance-authority';
-import { Loader2 } from 'lucide-react';
-
-const spinnerVariants = cva('flex-col items-center justify-center', {
-    variants: {
-        show: {
-            true: 'flex',
-            false: 'hidden',
-        },
-    },
-    defaultVariants: {
-        show: true,
-    },
-});
+import { Loader } from 'lucide-react';
 
 const loaderVariants = cva('animate-spin text-primary', {
     variants: {
@@ -24,14 +12,14 @@ const loaderVariants = cva('animate-spin text-primary', {
         },
     },
     defaultVariants: {
-        size: 'medium',
+        size: 'small',
     },
 });
 
-export function Spinner ({ size, show, children, className }) {
+export function Spinner({ size = 'medium', children, className }) {
     return (
-        <span className={spinnerVariants({ show })}>
-            <Loader2 className={cn(loaderVariants({ size }), className)} />
+        <span className="flex flex-col items-center justify-center">
+            <Loader className={cn(loaderVariants({ size }), className)} />
             {children}
         </span>
     );

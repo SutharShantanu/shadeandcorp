@@ -111,32 +111,15 @@ export default function EditProfile () {
                         render={({ field }) => (
                             <FormItem className="flex flex-col">
                                 <FormLabel>Birthday</FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <FormControl>
-                                            <Button
-                                                variant="outline"
-                                                className={cn("w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
-                                            >
-                                                {field.value ? format(field.value, "PPP") : <span>Select date</span>}
-                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                            </Button>
-                                        </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent align="start" className="w-auto p-0">
-                                        <CalendarDatePicker
-                                            date={selectedDateRange}
-                                            onDateSelect={setSelectedDateRange}
-                                        />
-                                        <div className="mt-4">
-                                            <h2 className="text-md font-semibold">Selected Date Range:</h2>
-                                            <p className="text-sm">
-                                                {selectedDateRange.from.toDateString()} -{" "}
-                                                {selectedDateRange.to.toDateString()}
-                                            </p>
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
+                                <CalendarDatePicker
+                                    date={field.value}
+                                    onDateSelect={({ from, to }) => {
+                                        form.setValue("datePicker", { from, to });
+                                    }}
+                                    variant="outline"
+                                    numberOfMonths={1}
+                                    className="w-fit"
+                                />
                                 <FormDescription>Your birthdate helps us personalize your experience.</FormDescription>
                                 <FormMessage />
                             </FormItem>
