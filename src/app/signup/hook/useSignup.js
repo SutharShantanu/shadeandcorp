@@ -29,7 +29,7 @@ const signupSchema = z
 export const useSignup = () => {
   const [loading, setLoading] = useState(false);
 
-  const { locationData, locationLoading } = useIPStackLocation();
+  const { locationData } = useIPStackLocation();
 
   const detectedCountryCode = locationData?.country_code || "";
   const country_name = locationData?.country_name || "";

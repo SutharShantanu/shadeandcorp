@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProfileTabEnum, tabs } from "./enums/profile.enums";
-import { PencilLine, UserRoundPen } from "lucide-react";
+import { PencilLine } from "lucide-react";
 import { Tooltip, TooltipArrow, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { NextLink } from "@/components/ui/link";
 
@@ -186,7 +186,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <motion.div className="py-6 container mx-auto">
+    <motion.div className="py-4 sm:py-6 px-4 sm:px-0 container max-w-[95%] 2xl:max-w-[96rem] mx-auto">
       <AnimatedTabs
         tabs={tabs}
         renderTabContent={(tab) => <UserTabs selectedTab={tab} user={user} />}
@@ -216,6 +216,7 @@ const ProfilePage = () => {
       />
     </motion.div>
   );
+
 };
 
 export default ProfilePage;

@@ -460,7 +460,7 @@ const Navbar = () => {
         className="transition-all z-998 ease-in-out border-b border-border/20 bg-transparent backdrop-blur-lg"
         role="navigation"
       >
-        <motion.div className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0">
+        <motion.div className="container max-w-[95%] 2xl:max-w-[96rem] mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0">
           <Link href="/">
             <motion.div className="text-title text-primary-default font-forum whitespace-nowrap">
               Shade & Co.
@@ -598,10 +598,11 @@ const Navbar = () => {
                             className="p-1 rounded-xs hover:bg-gray-200 transition"
                           >
                             <ChevronDown
-                              className={`w-5 h-5 transition-all ease-in-out ${openCategory === item.name
-                                ? "rotate-180"
-                                : "rotate-0"
-                                }`}
+                              className={`w-5 h-5 transition-all ease-in-out ${
+                                openCategory === item.name
+                                  ? "rotate-180"
+                                  : "rotate-0"
+                              }`}
                             />
                           </button>
                         )}
@@ -785,7 +786,7 @@ const BreadCrumbs = () => {
           transition={{ duration: 0.3 }}
           className="transition-all ease-in-out absolute left-0 right-0 -z-1 border-border/20 border-b shadow-xs w-full backdrop-blur-lg"
         >
-          <ul className="container mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0 space-x-2 text-sm text-muted-foreground">
+          <ul className="container max-w-[95%] 2xl:max-w-[96rem] mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0 space-x-2 text-sm text-muted-foreground">
             <Breadcrumb className="flex items-center">
               <BreadcrumbList>
                 <BreadcrumbItem key="home">
@@ -809,10 +810,11 @@ const BreadCrumbs = () => {
                       <BreadcrumbItem>
                         <BreadcrumbLink
                           href={path}
-                          className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-xs ${isLast
-                            ? "bg-primary-default text-primary-foreground hover:text-primary-foreground"
-                            : " text-primary-default"
-                            }`}
+                          className={`hover:underline px-1 py-[2px] text-xs underline-offset-2 rounded-xs ${
+                            isLast
+                              ? "bg-primary-default text-primary-foreground hover:text-primary-foreground"
+                              : " text-primary-default"
+                          }`}
                         >
                           {capitalize(segment)}
                         </BreadcrumbLink>

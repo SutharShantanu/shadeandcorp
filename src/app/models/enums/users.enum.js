@@ -2,7 +2,7 @@ export const GenderEnum = {
   MALE: "male",
   FEMALE: "female",
   OTHER: "other",
-  UNKNOWN: "don't know",
+  UNKNOWN: "",
 };
 
 export const RoleEnum = {

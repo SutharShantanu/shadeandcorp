@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema(
     gender: {
       type: String,
       enum: Object.values(GenderEnum),
-      default: "don't know",
+      default: "",
     },
     birthday: { type: Date },
     email: { type: String, required: true, unique: true },

@@ -1,150 +1,343 @@
 "use client";
 
 import {
-    Form, FormControl, FormDescription, FormField,
-    FormItem, FormLabel, FormMessage
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { useEditProfile } from "./hook/useEditProfille";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DatePicker } from "@/components/ui/date-picker";
+import { useAuthInfo } from "@/hook/useAuthInfo";
+import { useRouter, useSearchParams } from "next/navigation";
+import UserNotFound from "../userNotFound";
+import Loading from "@/components/loading";
+import Error from "../error";
+import AnimatedTabs from "@/components/ui/animated-tabs";
+import { motion } from "framer-motion";
+import {
+  EditProfileTabEnum,
+  personalFields,
+  addressFields,
+  FieldInputState,
+  editProfileTabs,
+  personalFieldInputTypes,
+  addressFieldInputTypes,
+} from "./enums/profile.enums";
+import { useProfile } from "../profile/hook/useProfile";
+import { Spinner } from "@/components/ui/spinner";
+import { PasswordField } from "@/components/common/password";
+import { cn } from "@/lib/utils";
 
-export default function EditProfile () {
-    const { form, onSubmit, loading } = useEditProfile();
+const RenderInputField = ({
+  form,
+  name,
+  label,
+  placeholder,
+  type = "text",
+  componentProps = {},
+  state = "default",
+}) => {
+  const isReadOnly = state === "readonly";
+  const isDisabled = state === "disabled";
 
-    const currentYear = new Date().getFullYear()
+  let Component;
+  switch (type) {
+    case "phone":
+      Component = PhoneInput;
+      break;
+    case "password":
+      Component = PasswordField;
+      break;
+    default:
+      Component = Input;
+  }
 
-    return (
-        <div className="max-w-3xl mx-auto py-10">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>
+            {label ??
+              name
+                .replace(/([A-Z])/g, " $1")
+                .replace(/^./, (str) => str.toUpperCase())}
+          </FormLabel>
+          <FormControl>
+            <motion.div
+              whileFocus={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Component
+                {...field}
+                type={type !== "phone" && type}
+                placeholder={placeholder || `Enter ${name}`}
+                readOnly={isReadOnly}
+                disabled={isDisabled}
+                className={cn(
+                  "bg-primary-foreground",
+                  isReadOnly && "bg-gray-100 cursor-not-allowed text-gray-600",
+                  isDisabled && "opacity-50 cursor-not-allowed",
+                  componentProps.className
+                )}
+                {...componentProps}
+              />
+            </motion.div>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+};
 
-                    {/* First Name */}
-                    <FormField
-                        control={form.control}
-                        name="firstName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>First Name</FormLabel>
-                                <FormControl><Input placeholder="John" {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+export default function EditProfile() {
+  const { user: authUser } = useAuthInfo();
+  const userId = authUser?.id;
+  const {
+    user: profileData,
+    isLoading,
+    error: profileError,
+  } = useProfile(userId);
+  const { form, onSubmit, loading, error, countryCode } = useEditProfile(profileData);
 
-                    {/* Last Name */}
-                    <FormField
-                        control={form.control}
-                        name="lastName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Last Name</FormLabel>
-                                <FormControl><Input placeholder="Doe" {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-                    {/* Email */}
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl><Input type="email" {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
-                    {/* Phone */}
-                    <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Phone</FormLabel>
-                                <FormControl><PhoneInput defaultCountry="IN" {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    const index = editProfileTabs.findIndex((tab) => tab.value === tabParam);
 
-                    {/* Gender */}
-                    <FormField
-                        control={form.control}
-                        name="gender"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Gender</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="male">Male</SelectItem>
-                                        <SelectItem value="female">Female</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
-                                        <SelectItem value="don't know">Don't Know</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+    if (index >= 0) {
+      setSelectedTabIndex(index);
+    } else {
+      const current = new URLSearchParams(Array.from(searchParams.entries()));
+      current.set("tab", editProfileTabs[0].value);
+      router.push(`?${current.toString()}`, undefined, { scroll: false });
+      setSelectedTabIndex(0);
+    }
+  }, [searchParams, router]);
 
-                    {/* Birthday */}
-                    <FormField
-                        control={form.control}
-                        name="birthday"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                <FormLabel>Birthday</FormLabel>
-                                <DatePicker
-                                    date={field.value ? new Date(field.value) : undefined}
-                                    setDate={(date) => {
-                                        if (date) {
-                                            field.onChange(date);
-                                        }
-                                    }}
-                                    endYear={currentYear}
-                                />
-                                <FormDescription>Your birthdate helps us personalize your experience.</FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+  if (!authUser) return <UserNotFound />;
+  if (loading || isLoading) return <Loading />;
+  if (error || profileError) return <Error error={error} />;
 
-                    {/* Address Fields */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {["address1", "address2", "city", "state", "zipCode", "country"].map((fieldName, idx) => (
-                            <FormField
-                                key={idx}
-                                control={form.control}
-                                name={fieldName}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{fieldName.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase())}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={`Enter ${fieldName}`} {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        ))}
-                    </div>
+  const handleTabChange = (index) => {
+    if (!editProfileTabs[index]) return;
 
-                    {/* Submit */}
-                    <Button type="submit" disabled={loading}>
-                        {loading ? "Saving..." : "Save Changes"}
-                    </Button>
-                </form>
-            </Form>
-        </div>
-    );
+    setSelectedTabIndex(index);
+    const newTabValue = editProfileTabs[index].value;
+
+    const current = new URLSearchParams(Array.from(searchParams.entries()));
+    current.set("tab", newTabValue);
+    router.replace(`?${current.toString()}`, { scroll: false });
+  };
+
+  const renderTabContent = (tab) => {
+    switch (tab.value) {
+      case EditProfileTabEnum.PERSONAL_INFO:
+        return (
+          <Form
+            {...form}
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {personalFields.map((field) => (
+                <RenderInputField
+                  key={field}
+                  form={form}
+                  name={field}
+                  type={personalFieldInputTypes[field] || "text"}
+                  state={FieldInputState[field]}
+                  defaultCountry={countryCode}
+                  countryCallingCodeEditable={false}
+                  international={true}
+                />
+              ))}
+
+              <div className="sm:grid sm:grid-cols-2 col-span-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Gender</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select gender" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="birthday"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Birthday</FormLabel>
+                      <DatePicker
+                        date={field.value}
+                        setDate={field.onChange}
+                        btnClassName="w-full justify-normal"
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              className="border border-border bg-primary-default flex items-center gap-2 w-fit"
+              disabled={loading}
+            >
+              {loading ? (
+                <motion.div className="flex items-center gap-1">
+                  <Spinner className="h-4 w-4" />
+                  <span>Saving...</span>
+                </motion.div>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </Form>
+        );
+
+      case EditProfileTabEnum.ADDRESSES:
+        return (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {addressFields.map((field) => (
+                  <RenderInputField
+                    key={field}
+                    form={form}
+                    name={field}
+                    type={addressFieldInputTypes[field] || "text"}
+                    state={FieldInputState[field]}
+                  />
+                ))}
+              </div>
+
+              <Button type="submit" disabled={loading}>
+                {loading ? "Saving..." : "Save Changes"}
+              </Button>
+            </form>
+          </Form>
+        );
+
+      case EditProfileTabEnum.PAYMENT_METHODS:
+        return (
+          <div className="space-y-4">
+            <p className="text-lg font-medium">Manage your Payment Methods.</p>
+            {/* You can add list of saved payment methods and add new one here */}
+          </div>
+        );
+
+      case EditProfileTabEnum.LOGIN_ACTIVITY:
+        return (
+          <div className="space-y-4">
+            <p className="text-lg font-medium">Your Login Activity:</p>
+            {/* List devices + Add map here */}
+          </div>
+        );
+
+      case EditProfileTabEnum.NOTIFICATIONS:
+        return (
+          <div className="space-y-4">
+            <p className="text-lg font-medium">Notification Preferences:</p>
+            {/* Notification toggles here */}
+          </div>
+        );
+
+      case EditProfileTabEnum.ACCOUNT_SETTINGS:
+        return (
+          <Form {...form} onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="space-y-4">
+              <p className="text-lg font-medium">Account Settings:</p>
+              <div className="space-y-4">
+                <p className="text-lg font-medium">Change Password</p>
+                <PasswordField
+                  name="newPassword"
+                  label="New Password"
+                  control={form.control}
+                  description="Use at least 8 characters with numbers and letters."
+                  placeholder="Enter new password"
+                  required
+                />
+                <PasswordField
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  control={form.control}
+                  placeholder="Confirm new password"
+                  required
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="border border-border bg-primary-default flex items-center gap-2 w-fit"
+                disabled={loading}
+              >
+                {loading ? (
+                  <motion.div className="flex items-center gap-1">
+                    <Spinner className="h-4 w-4" />
+                    <span>Saving...</span>
+                  </motion.div>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </div>
+          </Form>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <motion.div className="py-4 sm:py-6 px-4 sm:px-0 container max-w-[95%] 2xl:max-w-[96rem] mx-auto">
+      <AnimatedTabs
+        tabs={editProfileTabs}
+        renderTabContent={renderTabContent}
+        selectedTabIndex={selectedTabIndex}
+        setSelectedTab={handleTabChange}
+      />
+    </motion.div>
+  );
 }
