@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import axios from "axios";
 import { toast } from "sonner";
 import useIPStackLocation from "@/hook/useIPStackLocation";
-import { parsePhoneNumber } from "react-phone-number-input"; // Import the parsing function
+import { parsePhoneNumber } from "react-phone-number-input";
 
 const signupSchema = z
   .object({
@@ -31,9 +31,8 @@ export const useSignup = () => {
 
   const { locationData } = useIPStackLocation();
 
-  const detectedCountryCode = locationData?.country_code || "";
+  const detectedCountryCode = locationData?.country_code || "IN";
   const country_name = locationData?.country_name || "";
-  const detectedCallingCode = locationData?.location?.calling_code || "";
 
   const form = useForm({
     resolver: zodResolver(signupSchema),

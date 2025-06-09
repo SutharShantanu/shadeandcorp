@@ -1,10 +1,69 @@
+import { accountSettingsSchema, addressSchema, personalInfoSchema } from "@/app/edit-profile/schema/edit-profile.schema";
+
+export const PersonalFieldsEnum = Object.freeze({
+  FIRST_NAME: "firstName",
+  LAST_NAME: "lastName",
+  EMAIL: "email",
+  PHONE: "phone",
+});
+
+export const AddressFieldsEnum = Object.freeze({
+  ADDRESS1: "address1",
+  ADDRESS2: "address2",
+  CITY: "city",
+  STATE: "state",
+  ZIP_CODE: "zipCode",
+  COUNTRY: "country",
+});
+
 export const editProfileTabs = [
-  { id: 1, label: "Personal Information", value: "personal-info" },
-  { id: 2, label: "Saved Addresses", value: "addresses" },
-  { id: 3, label: "Payment Methods", value: "payment-methods" },
-  { id: 4, label: "Login Activity", value: "login-activity" },
-  { id: 5, label: "Notifications", value: "notifications" },
-  { id: 6, label: "Account Settings", value: "account-settings" },
+  {
+    id: 1,
+    label: "Personal Information",
+    value: "personal-info",
+    requiredFields: [
+      PersonalFieldsEnum.FIRST_NAME,
+      PersonalFieldsEnum.EMAIL,
+      PersonalFieldsEnum.PHONE,
+      "gender",
+      "birthday",
+    ],
+  },
+  {
+    id: 2,
+    label: "Saved Addresses",
+    value: "addresses",
+    requiredFields: [
+      AddressFieldsEnum.ADDRESS1,
+      AddressFieldsEnum.CITY,
+      AddressFieldsEnum.STATE,
+      AddressFieldsEnum.ZIP_CODE,
+    ],
+  },
+  {
+    id: 3,
+    label: "Payment Methods",
+    value: "payment-methods",
+    // no requiredFields → optional
+  },
+  {
+    id: 4,
+    label: "Login Activity",
+    value: "login-activity",
+    // no requiredFields → optional
+  },
+  {
+    id: 5,
+    label: "Notifications",
+    value: "notifications",
+    // no requiredFields → optional
+  },
+  {
+    id: 6,
+    label: "Account Settings",
+    value: "account-settings",
+    requiredFields: ["newPassword", "confirmPassword"],
+  },
 ];
 
 export const EditProfileTabEnum = Object.freeze({
@@ -22,13 +81,6 @@ export const InputState = Object.freeze({
   DISABLED: "disabled",
 });
 
-export const PersonalFieldsEnum = Object.freeze({
-  FIRST_NAME: "firstName",
-  LAST_NAME: "lastName",
-  EMAIL: "email",
-  PHONE: "phone",
-});
-
 export const personalFieldInputTypes = {
   firstName: "text",
   lastName: "text",
@@ -44,19 +96,16 @@ export const addressFieldInputTypes = {
   zipCode: "number",
 };
 
-export const AddressFieldsEnum = Object.freeze({
-  ADDRESS1: "address1",
-  ADDRESS2: "address2",
-  CITY: "city",
-  STATE: "state",
-  ZIP_CODE: "zipCode",
-  COUNTRY: "country",
-});
-
 export const personalFields = Object.values(PersonalFieldsEnum);
 export const addressFields = Object.values(AddressFieldsEnum);
 
 const allFields = [...personalFields, ...addressFields];
+
+export const tabSchemas = {
+  [EditProfileTabEnum.PERSONAL_INFO]: personalInfoSchema,
+  [EditProfileTabEnum.ADDRESSES]: addressSchema,
+  [EditProfileTabEnum.ACCOUNT_SETTINGS]: accountSettingsSchema,
+};
 
 export const FieldInputState = Object.freeze(
   allFields.reduce((acc, field) => {
