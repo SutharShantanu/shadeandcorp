@@ -11,16 +11,16 @@ import { fullSchema } from "../schema/edit-profile.schema";
 export const useEditProfile = (initialValues, userId, activeTab) => {
   const [loading, setLoading] = useState(false);
   const { locationData } = useIPStackLocation();
-  const detectedCountryCode = locationData?.country_code || "IN";
-  const detectedCountryName = locationData?.country_name || "India";
+  const detectedCountryCode = locationData?.country_code;
+  const detectedCountryName = locationData?.country_name;
 
   const [error, setError] = useState(null);
   const activeSchema = tabSchemas[activeTab] || fullSchema;
 
   const form = useForm({
     resolver: zodResolver(activeSchema),
-    mode: "onTouched",
-    reValidateMode: "onChange",
+    mode: "onChange",
+    // reValidateMode: "onChange",
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -43,7 +43,6 @@ export const useEditProfile = (initialValues, userId, activeTab) => {
 
   useEffect(() => {
     if (initialValues) {
-      console.log("initialValues.phone", `+${initialValues.countryCode}${initialValues.phone}`);
       form.reset({
         firstName: initialValues.firstName || "",
         lastName: initialValues.lastName || "",
@@ -69,6 +68,10 @@ export const useEditProfile = (initialValues, userId, activeTab) => {
 
     }
   }, [initialValues, form]);
+
+  useEffect(() => {
+    form.reset(form.getValues(), { keepValues: true, keepDirty: true });
+  }, [activeSchema, form]);
 
   const onSubmit = async (values) => {
     setLoading(true);

@@ -2,15 +2,15 @@ import mongoose from "mongoose";
 import {
   AccountStatusEnum,
   AddressTypeEnum,
+  DefaultValues,
   FALSE,
   GenderEnum,
-  REQUIRED,
   RoleEnum,
   TRUE,
 } from "./enums/users.enum";
 
 const sessionSchema = new mongoose.Schema({
-  ipAddress: { type: String, required: REQUIRED },
+  ipAddress: { type: String, required: TRUE },
   city: { type: String },
   region: { type: String },
   country: { type: String },
@@ -59,7 +59,11 @@ const userSchema = new mongoose.Schema(
     birthday: { type: Date },
     email: { type: String, required: TRUE, unique: TRUE },
     phone: { type: String, required: TRUE },
-    countryCode: { type: String, required: TRUE },
+    countryCode: {
+      type: String,
+      required: TRUE,
+      default: DefaultValues.COUNTRYCODE,
+    },
     address: [addressSchema],
     profilePicture: { type: String, default: "" },
     password: { type: String, required: TRUE },

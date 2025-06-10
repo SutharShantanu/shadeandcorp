@@ -31,7 +31,6 @@ const FormInput = ({
   defaultCountry,
   countryCallingCodeEditable,
   international,
-<<<<<<< HEAD
 }) => {
   return (
     <FormField
@@ -71,30 +70,6 @@ const FormInput = ({
     />
   );
 };
-=======
-}) => (
-  <FormField
-    control={control}
-    name={name}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>{label}</FormLabel>
-        <FormControl>
-          <Component
-            type={type}
-            placeholder={placeholder}
-            {...field}
-            {...(defaultCountry && { defaultCountry })}
-            {...{ countryCallingCodeEditable }}
-            {...(international && { international })}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-);
->>>>>>> origin/master
 
 const PasswordField = ({ name, label, control }) => {
   return (

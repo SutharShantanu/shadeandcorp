@@ -73,35 +73,33 @@ const RenderInputField = ({
     .replace(/([A-Z])/g, " $1")
     .replace(/^./, (str) => str.toUpperCase());
 
-  const phoneProps =
-    type === DefaultInputTypes.PHONE
-      ? {
-          ...(componentProps.defaultCountry && {
-            defaultCountry: componentProps.defaultCountry,
-          }),
-          ...(typeof componentProps.countryCallingCodeEditable !==
-            "undefined" && {
-            countryCallingCodeEditable:
-              componentProps.countryCallingCodeEditable,
-          }),
-          ...(componentProps.international && {
-            international: componentProps.international,
-          }),
-        }
-      : {};
-
   return (
     <FormField
       control={form.control}
       name={name}
       render={({ field }) => {
-        let value = field.value || "";
-        if (type === DefaultInputTypes.PHONE) {
-          const countryCode = componentProps.defaultCountry;
-          if (value && !value.startsWith("+")) {
-            value = `+${countryCode}${value}`;
-          }
-        }
+        const commonProps = {
+          ...field,
+          placeholder: placeholder || `Enter ${name}`,
+          readOnly: isReadOnly,
+          disabled: isDisabled,
+          className: cn(
+            "bg-primary-foreground",
+            isReadOnly && "bg-gray-100 cursor-not-allowed text-gray-600",
+            isDisabled && "opacity-50 cursor-not-allowed",
+            componentProps.className
+          ),
+        };
+
+        const phoneProps =
+          type === DefaultInputTypes.PHONE
+            ? {
+                defaultCountry: componentProps.defaultCountry,
+                countryCallingCodeEditable:
+                  componentProps.countryCallingCodeEditable,
+                international: componentProps.international,
+              }
+            : {};
 
         return (
           <FormItem>
@@ -112,23 +110,11 @@ const RenderInputField = ({
                 whileTap={{ scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
-                <Component
-                  {...field}
-                  value={value}
-                  {...(type !== DefaultInputTypes.PHONE ? { type } : {})}
-                  placeholder={placeholder || `Enter ${name}`}
-                  readOnly={isReadOnly}
-                  disabled={isDisabled}
-                  className={cn(
-                    "bg-primary-foreground",
-                    isReadOnly &&
-                      "bg-gray-100 cursor-not-allowed text-gray-600",
-                    isDisabled && "opacity-50 cursor-not-allowed",
-                    componentProps.className
-                  )}
-                  {...(type !== DefaultInputTypes.PHONE && componentProps)}
-                  {...phoneProps}
-                />
+                {type === DefaultInputTypes.PHONE ? (
+                  <Component {...commonProps} {...phoneProps} />
+                ) : (
+                  <Component {...commonProps} />
+                )}
               </motion.div>
             </FormControl>
             <FormMessage />
@@ -141,19 +127,22 @@ const RenderInputField = ({
 
 export default function EditProfile() {
   const { user: authUser } = useAuthInfo();
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const userId = authUser?.id;
   const {
     user: profileData,
     isLoading,
     error: profileError,
   } = useProfile(userId);
-  const { form, onSubmit, loading, error, countryCode } =
-    useEditProfile(profileData);
+  const activeTabValue = editProfileTabs[selectedTabIndex]?.value;
+  const { form, onSubmit, loading, error, countryCode } = useEditProfile(
+    profileData,
+    userId,
+    activeTabValue
+  );
 
   const searchParams = useSearchParams();
   const router = useRouter();
-
-  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
@@ -184,13 +173,40 @@ export default function EditProfile() {
     router.replace(`?${current.toString()}`, { scroll: false });
   };
 
+  const handleSubmitWithVisibleFields = (data) => {
+    let fieldsToValidate = [];
+
+    console.log("function triggerd", data);
+
+    switch (editProfileTabs[selectedTabIndex]?.value) {
+      case EditProfileTabEnum.PERSONAL_INFO:
+        fieldsToValidate = personalFields.concat(["gender", "birthday"]);
+        break;
+      case EditProfileTabEnum.ADDRESSES:
+        fieldsToValidate = addressFields;
+        break;
+      case EditProfileTabEnum.ACCOUNT_SETTINGS:
+        fieldsToValidate = ["newPassword", "confirmPassword"];
+        break;
+      default:
+        fieldsToValidate = [];
+    }
+
+    const filteredData = fieldsToValidate.reduce((acc, key) => {
+      if (data[key] !== undefined) acc[key] = data[key];
+      return acc;
+    }, {});
+
+    return onSubmit(filteredData);
+  };
+
   const renderTabContent = (tab) => {
     switch (tab.value) {
       case EditProfileTabEnum.PERSONAL_INFO:
         return (
           <Form
             {...form}
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(handleSubmitWithVisibleFields)}
             className="flex flex-col gap-4"
           >
             <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -252,11 +268,9 @@ export default function EditProfile() {
                 />
               </div>
             </div>
-
             <Button
               type="submit"
               className="border border-border bg-primary-default flex items-center gap-2 w-fit"
-              disabled={loading}
             >
               {loading ? (
                 <motion.div className="flex items-center gap-1">
@@ -272,24 +286,25 @@ export default function EditProfile() {
 
       case EditProfileTabEnum.ADDRESSES:
         return (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {addressFields.map((field) => (
-                  <RenderInputField
-                    key={field}
-                    form={form}
-                    name={field}
-                    type={addressFieldInputTypes[field] || "text"}
-                    state={FieldInputState[field]}
-                  />
-                ))}
-              </div>
+          <Form
+            {...form}
+            onSubmit={form.handleSubmit(handleSubmitWithVisibleFields)}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {addressFields.map((field) => (
+                <RenderInputField
+                  key={field}
+                  form={form}
+                  name={field}
+                  type={addressFieldInputTypes[field] || "text"}
+                  state={FieldInputState[field]}
+                />
+              ))}
+            </div>
 
-              <Button type="submit" disabled={loading}>
-                {loading ? "Saving..." : "Save Changes"}
-              </Button>
-            </form>
+            <Button type="submit">
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
           </Form>
         );
 
@@ -297,7 +312,6 @@ export default function EditProfile() {
         return (
           <div className="space-y-4">
             <p className="text-lg font-medium">Manage your Payment Methods.</p>
-            {/* You can add list of saved payment methods and add new one here */}
           </div>
         );
 
@@ -319,7 +333,10 @@ export default function EditProfile() {
 
       case EditProfileTabEnum.ACCOUNT_SETTINGS:
         return (
-          <Form {...form} onSubmit={form.handleSubmit(onSubmit)}>
+          <Form
+            {...form}
+            onSubmit={form.handleSubmit(handleSubmitWithVisibleFields)}
+          >
             <div className="space-y-4">
               <p className="text-lg font-medium">Account Settings:</p>
               <div className="space-y-4">
@@ -341,19 +358,8 @@ export default function EditProfile() {
                 />
               </div>
 
-              <Button
-                type="submit"
-                className="border border-border bg-primary-default flex items-center gap-2 w-fit"
-                disabled={loading}
-              >
-                {loading ? (
-                  <motion.div className="flex items-center gap-1">
-                    <Spinner className="h-4 w-4" />
-                    <span>Saving...</span>
-                  </motion.div>
-                ) : (
-                  "Save Changes"
-                )}
+              <Button type="submit">
+                {loading ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </Form>

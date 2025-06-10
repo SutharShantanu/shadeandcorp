@@ -33,7 +33,7 @@ export const useSignup = () => {
   const router = useRouter();
   const { locationData } = useIPStackLocation();
 
-  const detectedCountryCode = locationData?.country_code || "IN";
+  const detectedCountryCode = locationData?.country_code;
   const country_name = locationData?.country_name || "India";
 
   const form = useForm({
