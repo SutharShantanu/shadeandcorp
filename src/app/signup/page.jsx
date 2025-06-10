@@ -39,20 +39,14 @@ const FormInput = ({
       <FormItem>
         <FormLabel>{label}</FormLabel>
         <FormControl>
-          <motion.div
-            whileFocus={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Component
-              type={type}
-              placeholder={placeholder}
-              {...field}
-              {...(defaultCountry && { defaultCountry })}
-              {...{ countryCallingCodeEditable }}
-              {...(international && { international })}
-            />
-          </motion.div>
+          <Component
+            type={type}
+            placeholder={placeholder}
+            {...field}
+            {...(defaultCountry && { defaultCountry })}
+            {...{ countryCallingCodeEditable }}
+            {...(international && { international })}
+          />
         </FormControl>
         <FormMessage />
       </FormItem>
@@ -69,13 +63,7 @@ const PasswordField = ({ name, label, control }) => {
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <motion.div
-              whileFocus={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              <PasswordInput {...field} />
-            </motion.div>
+            <PasswordInput {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>

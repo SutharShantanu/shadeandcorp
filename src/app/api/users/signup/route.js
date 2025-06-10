@@ -62,7 +62,6 @@ export const POST = async (req) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log("req", req);
     let ip = req.ip;
     if (!ip) {
       const forwarded = req.headers["x-forwarded-for"];
