@@ -31,6 +31,7 @@ const FormInput = ({
   defaultCountry,
   countryCallingCodeEditable,
   international,
+<<<<<<< HEAD
 }) => {
   return (
     <FormField
@@ -70,6 +71,30 @@ const FormInput = ({
     />
   );
 };
+=======
+}) => (
+  <FormField
+    control={control}
+    name={name}
+    render={({ field }) => (
+      <FormItem>
+        <FormLabel>{label}</FormLabel>
+        <FormControl>
+          <Component
+            type={type}
+            placeholder={placeholder}
+            {...field}
+            {...(defaultCountry && { defaultCountry })}
+            {...{ countryCallingCodeEditable }}
+            {...(international && { international })}
+          />
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    )}
+  />
+);
+>>>>>>> origin/master
 
 const PasswordField = ({ name, label, control }) => {
   return (
@@ -80,13 +105,7 @@ const PasswordField = ({ name, label, control }) => {
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <motion.div
-              whileFocus={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              <PasswordInput {...field} />
-            </motion.div>
+            <PasswordInput {...field} />
           </FormControl>
           <FormMessage />
         </FormItem>

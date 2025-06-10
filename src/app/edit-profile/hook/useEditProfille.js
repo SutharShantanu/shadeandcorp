@@ -2,37 +2,25 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import * as z from "zod";
 import { toast } from "sonner";
-import { useProfile } from "@/app/profile/hook/useProfile";
 import useIPStackLocation from "@/hook/useIPStackLocation";
+import { parsePhoneNumber } from "react-phone-number-input";
+import { tabSchemas } from "../enums/profile.enums";
+import { fullSchema } from "../schema/edit-profile.schema";
 
-const formSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().optional(),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().min(10, "Phone number is required"),
-  gender: z.enum(["male", "female", "other", ""]),
-  birthday: z.coerce.date(),
-  address1: z.string().optional(),
-  address2: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  zipCode: z.string().optional(),
-  country: z.string().default("India"),
-  role: z.string().optional(),
-  accountStatus: z.string().optional(),
-});
-
-export const useEditProfile =(initialValues) => {
-  const { locationData } = useIPStackLocation();
-
-  const detectedCountryCode = locationData?.country_code || "IN";
+export const useEditProfile = (initialValues, userId, activeTab) => {
   const [loading, setLoading] = useState(false);
+  const { locationData } = useIPStackLocation();
+  const detectedCountryCode = locationData?.country_code || "IN";
+  const detectedCountryName = locationData?.country_name || "India";
+
   const [error, setError] = useState(null);
+  const activeSchema = tabSchemas[activeTab] || fullSchema;
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(activeSchema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -46,19 +34,24 @@ export const useEditProfile =(initialValues) => {
       state: "",
       zipCode: "",
       country: "India",
-      role: "",
       accountStatus: "active",
+      newPassword: "",
+      confirmPassword: "",
       ...initialValues,
     },
   });
 
   useEffect(() => {
     if (initialValues) {
+      console.log("initialValues.phone", `+${initialValues.countryCode}${initialValues.phone}`);
       form.reset({
         firstName: initialValues.firstName || "",
         lastName: initialValues.lastName || "",
         email: initialValues.email || "",
-        phone: initialValues.phone || "",
+        phone:
+          initialValues.phone && initialValues.countryCode
+            ? `+${initialValues.countryCode}${initialValues.phone}`
+            : "",
         gender: initialValues.gender || "",
         birthday: initialValues.birthday
           ? new Date(initialValues.birthday)
@@ -69,24 +62,63 @@ export const useEditProfile =(initialValues) => {
         state: initialValues.state || "",
         zipCode: initialValues.zipCode || "",
         country: initialValues.country || "India",
-        role: initialValues.role || "",
         accountStatus: initialValues.accountStatus || "active",
+        newPassword: "",
+        confirmPassword: "",
       });
+
     }
   }, [initialValues, form]);
 
   const onSubmit = async (values) => {
+    setLoading(true);
+    setError(null);
+
+    const { confirmPassword, newPassword, phone, country, ...restPayload } =
+      values;
+
+    console.log("phone", phone);
+    let parsedPhoneNumber;
     try {
-      setLoading(true);
-      setError(null);
-      await axios.put("/api/user/edit-profile", values);
-      toast.success("Profile updated successfully!");
-      // const { refetch } = useProfile(userId);
-      // await refetch();
+      parsedPhoneNumber = parsePhoneNumber(phone);
+    } catch (error) {
+      console.error("Error parsing phone number:", error);
+      toast.error("Invalid phone number format");
+      setLoading(false);
+      return;
+    }
+
+    const userProvidedCountryCode =
+      parsedPhoneNumber?.countryCallingCode || detectedCountryCode;
+    const nationalNumber = parsedPhoneNumber?.nationalNumber;
+
+    // Final payload to API
+    const finalPayload = {
+      ...restPayload,
+      phone: nationalNumber,
+      country, // user's selected country, not from IP
+      countryCode: userProvidedCountryCode,
+      ...(newPassword && { newPassword }),
+    };
+
+    try {
+      const response = await axios.put(
+        `/api/users/profile?id=${userId}`,
+        finalPayload
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Profile updated successfully!");
+      } else if (response.data?.error) {
+        toast.error(response.data.error);
+      } else {
+        toast.error(response.data.message || "Something went wrong");
+      }
     } catch (err) {
       console.error(err);
-      setError("Failed to update profile.");
-      toast.error("Failed to update profile.");
+      const apiError = err.response?.data?.error || err.response?.data?.message;
+      setError(apiError || "Failed to update profile.");
+      toast.error(apiError || "Failed to update profile.");
     } finally {
       setLoading(false);
     }
@@ -97,6 +129,7 @@ export const useEditProfile =(initialValues) => {
     onSubmit,
     loading,
     error,
-    country_code: detectedCountryCode,
+    countryCode: detectedCountryCode,
+    countryName: detectedCountryName,
   };
-}
+};
