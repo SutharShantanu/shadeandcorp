@@ -37,6 +37,8 @@ import {
   editProfileTabs,
   personalFieldInputTypes,
   addressFieldInputTypes,
+  DefaultInputTypes,
+  InputState,
 } from "./enums/profile.enums";
 import { useProfile } from "../profile/hook/useProfile";
 import { Spinner } from "@/components/ui/spinner";
@@ -48,62 +50,91 @@ const RenderInputField = ({
   name,
   label,
   placeholder,
-  type = "text",
+  type = DefaultInputTypes.TEXT,
   componentProps = {},
-  state = "default",
+  state = InputState.DEFAULT,
 }) => {
-  const isReadOnly = state === "readonly";
-  const isDisabled = state === "disabled";
+  const isReadOnly = state === InputState.READONLY;
+  const isDisabled = state === InputState.DISABLED;
 
   let Component;
   switch (type) {
-    case "phone":
+    case DefaultInputTypes.PHONE:
       Component = PhoneInput;
       break;
-    case "password":
+    case DefaultInputTypes.PASSWORD:
       Component = PasswordField;
       break;
     default:
       Component = Input;
   }
 
+  label = name
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (str) => str.toUpperCase());
+
+  const phoneProps =
+    type === DefaultInputTypes.PHONE
+      ? {
+          ...(componentProps.defaultCountry && {
+            defaultCountry: componentProps.defaultCountry,
+          }),
+          ...(typeof componentProps.countryCallingCodeEditable !==
+            "undefined" && {
+            countryCallingCodeEditable:
+              componentProps.countryCallingCodeEditable,
+          }),
+          ...(componentProps.international && {
+            international: componentProps.international,
+          }),
+        }
+      : {};
+
   return (
     <FormField
       control={form.control}
       name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>
-            {label ??
-              name
-                .replace(/([A-Z])/g, " $1")
-                .replace(/^./, (str) => str.toUpperCase())}
-          </FormLabel>
-          <FormControl>
-            <motion.div
-              whileFocus={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Component
-                {...field}
-                type={type !== "phone" && type}
-                placeholder={placeholder || `Enter ${name}`}
-                readOnly={isReadOnly}
-                disabled={isDisabled}
-                className={cn(
-                  "bg-primary-foreground",
-                  isReadOnly && "bg-gray-100 cursor-not-allowed text-gray-600",
-                  isDisabled && "opacity-50 cursor-not-allowed",
-                  componentProps.className
-                )}
-                {...componentProps}
-              />
-            </motion.div>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
+      render={({ field }) => {
+        let value = field.value || "";
+        if (type === DefaultInputTypes.PHONE) {
+          const countryCode = componentProps.defaultCountry;
+          if (value && !value.startsWith("+")) {
+            value = `+${countryCode}${value}`;
+          }
+        }
+
+        return (
+          <FormItem>
+            <FormLabel>{label}</FormLabel>
+            <FormControl>
+              <motion.div
+                whileFocus={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Component
+                  {...field}
+                  value={value}
+                  {...(type !== DefaultInputTypes.PHONE ? { type } : {})}
+                  placeholder={placeholder || `Enter ${name}`}
+                  readOnly={isReadOnly}
+                  disabled={isDisabled}
+                  className={cn(
+                    "bg-primary-foreground",
+                    isReadOnly &&
+                      "bg-gray-100 cursor-not-allowed text-gray-600",
+                    isDisabled && "opacity-50 cursor-not-allowed",
+                    componentProps.className
+                  )}
+                  {...(type !== DefaultInputTypes.PHONE && componentProps)}
+                  {...phoneProps}
+                />
+              </motion.div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 };
@@ -116,7 +147,8 @@ export default function EditProfile() {
     isLoading,
     error: profileError,
   } = useProfile(userId);
-  const { form, onSubmit, loading, error, countryCode } = useEditProfile(profileData);
+  const { form, onSubmit, loading, error, countryCode } =
+    useEditProfile(profileData);
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -167,11 +199,13 @@ export default function EditProfile() {
                   key={field}
                   form={form}
                   name={field}
-                  type={personalFieldInputTypes[field] || "text"}
+                  type={personalFieldInputTypes[field]}
                   state={FieldInputState[field]}
-                  defaultCountry={countryCode}
-                  countryCallingCodeEditable={false}
-                  international={true}
+                  componentProps={{
+                    defaultCountry: countryCode,
+                    countryCallingCodeEditable: false,
+                    international: true,
+                  }}
                 />
               ))}
 

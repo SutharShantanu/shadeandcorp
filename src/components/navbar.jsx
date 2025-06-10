@@ -68,6 +68,7 @@ import { usePathSegments } from "@/app/functions/pathname";
 import { useAuthInfo } from "@/hook/useAuthInfo";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { MenuToggleButton } from "./ui/menu-toggle-button";
 
 const menuLinks = [
   {
@@ -423,6 +424,7 @@ const menuLinks = [
 ];
 
 const Navbar = () => {
+  const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [openCategory, setOpenCategory] = useState(null);
@@ -562,9 +564,14 @@ const Navbar = () => {
 
             <Drawer direction="bottom">
               <DrawerTrigger>
-                <Menu
+                {/* <Menu
                   className="w-6 h-6 text-accent-foreground cursor-pointer"
                   aria-label="Open menu"
+                /> */}
+
+                <MenuToggleButton
+                  open={open}
+                  onClick={() => setOpen((prev) => !prev)}
                 />
               </DrawerTrigger>
               <DrawerContent

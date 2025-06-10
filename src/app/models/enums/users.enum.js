@@ -17,3 +17,18 @@ export const AccountStatusEnum = {
   SUSPENDED: "suspended",
   DELETED: "deleted",
 };
+
+
+export const AddressTypeEnum = {
+  HOME: "home",
+  WORK: "work",
+  OTHER: "other",
+};
+
+export const DefaultValues = {
+  COUNTRYCODE: "91",
+  COUNTRY: "India",
+};
+
+export const TRUE = true;
+export const FALSE = false;

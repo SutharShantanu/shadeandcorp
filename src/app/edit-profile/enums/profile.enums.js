@@ -29,6 +29,14 @@ export const PersonalFieldsEnum = Object.freeze({
   PHONE: "phone",
 });
 
+export const DefaultInputTypes = {
+  TEXT: "text",
+  EMAIL: "email",
+  PHONE: "phone",
+  PASSWORD: "password",
+  NUMBER: "number",
+};
+
 export const personalFieldInputTypes = {
   firstName: "text",
   lastName: "text",

@@ -10,7 +10,7 @@ const Error = ({ error, reset, originPath }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(error.message || "Something went wrong!");
+    navigator.clipboard.writeText(error?.message || "Something went wrong!");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -39,7 +39,7 @@ const Error = ({ error, reset, originPath }) => {
           className="flex flex-col items-center gap-2 bg-primary-foreground border- shadow-md px-4 py-3 rounded-xs my-2 max-w-[80vw]"
         >
           <span className="text-destructive-default text-title p-3">
-            {error.message || "Something went wrong!"}
+            {error?.message || error || "Something went wrong!"}
           </span>
           {originPath && (
             <span className="text-xs text-muted-foreground">
