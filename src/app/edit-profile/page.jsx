@@ -176,8 +176,6 @@ export default function EditProfile() {
   const handleSubmitWithVisibleFields = (data) => {
     let fieldsToValidate = [];
 
-    console.log("function triggerd", data);
-
     switch (editProfileTabs[selectedTabIndex]?.value) {
       case EditProfileTabEnum.PERSONAL_INFO:
         fieldsToValidate = personalFields.concat(["gender", "birthday"]);
@@ -196,6 +194,7 @@ export default function EditProfile() {
       if (data[key] !== undefined) acc[key] = data[key];
       return acc;
     }, {});
+
 
     return onSubmit(filteredData);
   };
@@ -258,7 +257,7 @@ export default function EditProfile() {
                     <FormItem>
                       <FormLabel>Birthday</FormLabel>
                       <DatePicker
-                        date={field.value}
+                        date={""}
                         setDate={field.onChange}
                         btnClassName="w-full justify-normal"
                       />
@@ -302,7 +301,7 @@ export default function EditProfile() {
               ))}
             </div>
 
-            <Button type="submit">
+            <Button type="submit" >
               {loading ? "Saving..." : "Save Changes"}
             </Button>
           </Form>
@@ -358,7 +357,7 @@ export default function EditProfile() {
                 />
               </div>
 
-              <Button type="submit">
+              <Button type="submit" >
                 {loading ? "Saving..." : "Save Changes"}
               </Button>
             </div>

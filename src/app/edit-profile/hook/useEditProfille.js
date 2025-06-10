@@ -7,15 +7,16 @@ import useIPStackLocation from "@/hook/useIPStackLocation";
 import { parsePhoneNumber } from "react-phone-number-input";
 import { tabSchemas } from "../enums/profile.enums";
 import { fullSchema } from "../schema/edit-profile.schema";
+import { AccountStatusEnum, DefaultValues } from "@/app/models/enums/users.enum";
 
-export const useEditProfile = (initialValues, userId, activeTab) => {
+export const useEditProfile = (profileData, userId, activeTabValue) => {
   const [loading, setLoading] = useState(false);
   const { locationData } = useIPStackLocation();
   const detectedCountryCode = locationData?.country_code;
   const detectedCountryName = locationData?.country_name;
 
   const [error, setError] = useState(null);
-  const activeSchema = tabSchemas[activeTab] || fullSchema;
+  const activeSchema = tabSchemas[activeTabValue] || fullSchema;
 
   const form = useForm({
     resolver: zodResolver(activeSchema),
@@ -33,45 +34,39 @@ export const useEditProfile = (initialValues, userId, activeTab) => {
       city: "",
       state: "",
       zipCode: "",
-      country: "India",
-      accountStatus: "active",
+      country: DefaultValues.COUNTRY,
+      accountStatus: AccountStatusEnum.ACTIVE,
       newPassword: "",
       confirmPassword: "",
-      ...initialValues,
+      ...profileData,
     },
   });
 
   useEffect(() => {
-    if (initialValues) {
+    if (profileData) {
       form.reset({
-        firstName: initialValues.firstName || "",
-        lastName: initialValues.lastName || "",
-        email: initialValues.email || "",
+        firstName: profileData.firstName || "",
+        lastName: profileData.lastName || "",
+        email: profileData.email || "",
         phone:
-          initialValues.phone && initialValues.countryCode
-            ? `+${initialValues.countryCode}${initialValues.phone}`
+          profileData.phone && profileData.countryCode
+            ? `+${profileData.countryCode}${profileData.phone}`
             : "",
-        gender: initialValues.gender || "",
-        birthday: initialValues.birthday
-          ? new Date(initialValues.birthday)
-          : new Date(),
-        address1: initialValues.address1 || "",
-        address2: initialValues.address2 || "",
-        city: initialValues.city || "",
-        state: initialValues.state || "",
-        zipCode: initialValues.zipCode || "",
-        country: initialValues.country || "India",
-        accountStatus: initialValues.accountStatus || "active",
+        gender: profileData.gender || "",
+        birthday: profileData.birthday
+          && new Date(profileData.birthday),
+        address1: profileData.address1 || "",
+        address2: profileData.address2 || "",
+        city: profileData.city || "",
+        state: profileData.state || "",
+        zipCode: profileData.zipCode || "",
+        country: profileData.country || "India",
+        accountStatus: profileData.accountStatus || "active",
         newPassword: "",
         confirmPassword: "",
       });
-
     }
-  }, [initialValues, form]);
-
-  useEffect(() => {
-    form.reset(form.getValues(), { keepValues: true, keepDirty: true });
-  }, [activeSchema, form]);
+  }, [form, profileData]);
 
   const onSubmit = async (values) => {
     setLoading(true);
