@@ -12,7 +12,6 @@ const formSchema = z.object({
   lastName: z.string().optional(),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number is required"),
-  countryCode: z.string().min(1, "Country code is required"),
   gender: z.enum(["male", "female", "other", ""]),
   birthday: z.coerce.date(),
   address1: z.string().optional(),

@@ -116,7 +116,7 @@ export const {
               birthday: profile.birthday || "",
               email: profile.email,
               phone: "",
-              countryCode: profile.countryCode || "",
+              countryCode: profile.countryCode,
               address: [],
               profilePicture: profile.picture || "",
               password: `${account.provider}-oauth`,
