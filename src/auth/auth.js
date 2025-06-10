@@ -48,7 +48,9 @@ export const {
           );
           if (!isPasswordValid) throw new Error("Invalid credentials");
 
-          let ip = req?.headers?.["x-forwarded-for"]?.split(",")[0] || req?.headers?.["x-real-ip"];
+          let ip =
+            req?.headers?.["x-forwarded-for"]?.split(",")[0] ||
+            req?.headers?.["x-real-ip"];
 
           let geoData = {};
           try {
@@ -114,6 +116,7 @@ export const {
               birthday: profile.birthday || "",
               email: profile.email,
               phone: "",
+              countryCode: profile.countryCode,
               address: [],
               profilePicture: profile.picture || "",
               password: `${account.provider}-oauth`,
@@ -123,12 +126,10 @@ export const {
               sessions: [],
             });
 
-            const { password, ...safeUser } =
-              newUser.toObject();
+            const { password, ...safeUser } = newUser.toObject();
             Object.assign(user, safeUser);
           } else {
-            const { password, ...safeUser } =
-              existingUser;
+            const { password, ...safeUser } = existingUser;
             Object.assign(user, safeUser);
           }
         }
@@ -142,58 +143,58 @@ export const {
 
     async jwt({ token, user }) {
       if (user) {
-      token.id = (user._id || user.id || "").toString();
-      token.firstName = user.firstName;
-      token.lastName = user.lastName;
-      token.gender = user.gender;
-      token.birthday = user.birthday;
-      token.email = user.email;
-      token.phone = user.phone;
-      token.role = user.role;
-      token.isVerified = user.isVerified;
-      token.profilePicture = user.profilePicture;
-      token.accountStatus = user.accountStatus;
-      token.joinDate = user.joinDate;
+        token.id = (user._id || user.id || "").toString();
+        token.firstName = user.firstName;
+        token.lastName = user.lastName;
+        token.gender = user.gender;
+        token.birthday = user.birthday;
+        token.email = user.email;
+        token.phone = user.phone;
+        token.countryCode = user.countryCode;
+        token.role = user.role;
+        token.isVerified = user.isVerified;
+        token.profilePicture = user.profilePicture;
+        token.accountStatus = user.accountStatus;
+        token.joinDate = user.joinDate;
 
-      if (Array.isArray(user.address)) {
-        token.address = user.address.map((addr) => ({
-        address1: addr.address1,
-        address2: addr.address2,
-        city: addr.city,
-        state: addr.state,
-        zipCode: addr.zipCode,
-        country: addr.country,
-        countryCode: addr.countryCode,
-        }));
-      }
+        if (Array.isArray(user.address)) {
+          token.address = user.address.map((addr) => ({
+            address1: addr.address1,
+            address2: addr.address2,
+            city: addr.city,
+            state: addr.state,
+            zipCode: addr.zipCode,
+            country: addr.country,
+          }));
+        }
 
-      if (Array.isArray(user.paymentMethods)) {
-        token.paymentMethods = user.paymentMethods.map((p) => ({
-        cardNumber: p.cardNumber,
-        expiryDate: p.expiryDate,
-        cardHolderName: p.cardHolderName,
-        }));
-      }
+        if (Array.isArray(user.paymentMethods)) {
+          token.paymentMethods = user.paymentMethods.map((p) => ({
+            cardNumber: p.cardNumber,
+            expiryDate: p.expiryDate,
+            cardHolderName: p.cardHolderName,
+          }));
+        }
 
-      if (Array.isArray(user.sessions)) {
-        token.sessions = user.sessions.map((s) => ({
-        ipAddress: s.ipAddress,
-        city: s.city,
-        region: s.region,
-        country: s.country,
-        timezone: s.timezone,
-        org: s.org,
-        latitude: s.latitude,
-        longitude: s.longitude,
-        deviceInfo: s.deviceInfo,
-        loggedInAt: s.loggedInAt,
-        }));
-      }
+        if (Array.isArray(user.sessions)) {
+          token.sessions = user.sessions.map((s) => ({
+            ipAddress: s.ipAddress,
+            city: s.city,
+            region: s.region,
+            country: s.country,
+            timezone: s.timezone,
+            org: s.org,
+            latitude: s.latitude,
+            longitude: s.longitude,
+            deviceInfo: s.deviceInfo,
+            loggedInAt: s.loggedInAt,
+          }));
+        }
       }
       return token;
     },
 
-    async session ({ session, token }) {
+    async session({ session, token }) {
       if (token) {
         session.user = {
           id: token.id,
@@ -203,6 +204,7 @@ export const {
           birthday: token.birthday,
           email: token.email,
           phone: token.phone,
+          countryCode: token.countryCode,
           address: token.address || [],
           profilePicture: token.profilePicture,
           isVerified: token.isVerified,

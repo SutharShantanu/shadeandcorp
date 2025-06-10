@@ -81,6 +81,21 @@ export const InputState = Object.freeze({
   DISABLED: "disabled",
 });
 
+export const PersonalFieldsEnum = Object.freeze({
+  FIRST_NAME: "firstName",
+  LAST_NAME: "lastName",
+  EMAIL: "email",
+  PHONE: "phone",
+});
+
+export const DefaultInputTypes = {
+  TEXT: "text",
+  EMAIL: "email",
+  PHONE: "phone",
+  PASSWORD: "password",
+  NUMBER: "number",
+};
+
 export const personalFieldInputTypes = {
   firstName: "text",
   lastName: "text",

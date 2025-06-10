@@ -8,10 +8,20 @@ import { getDeviceInfo } from "@/lib/deviceUtils";
 export const POST = async (req) => {
   try {
     await connectDB();
-    const body = await req.json();
-    const { firstName, lastName = "", email, phone, password, terms } = body;
 
-    if (!firstName || !email || !phone || !password || !terms) {
+    const body = await req.json();
+    console.log("body", body);
+    const {
+      firstName,
+      lastName = "",
+      email,
+      phone,
+      password,
+      terms,
+      countryCode,
+    } = body;
+
+    if (!firstName || !email || !phone || !countryCode || !password || !terms) {
       return NextResponse.json(
         {
           error: `Please fill all required fields. ${firstName}, ${email}, ${phone}, ${password}, ${terms}`,
@@ -45,11 +55,14 @@ export const POST = async (req) => {
     const phoneRegex = /^\d{10}$/;
     if (!phoneRegex.test(phone)) {
       return NextResponse.json(
-        {
-          error: "Invalid phone number.",
-        },
+        { error: "Invalid phone number." },
         { status: 400 }
       );
+    }
+    if (!countryCode) {
+      return NextResponse.json({
+        error: "Please select a country code along with phone.",
+      });
     }
 
     const existingUser = await User.findOne({ email });
@@ -62,39 +75,36 @@ export const POST = async (req) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let ip = req.ip;
-    if (!ip) {
-      const forwarded = req.headers["x-forwarded-for"];
-      if (forwarded) {
-        ip = forwarded.split(",")[0].trim();
-      } else if (req.headers["x-real-ip"]) {
-        ip = req.headers["x-real-ip"];
-      } else {
-        ip = "";
-      }
-    }
+    // Extract IP address from headers
+    const forwarded = req.headers.get("x-forwarded-for");
+    const realIp = req.headers.get("x-real-ip");
+    const ip = forwarded ? forwarded.split(",")[0].trim() : realIp || "";
+
+    // Get geo info from IP API
     const geoResponse = await axios.get(`http://ipapi.co/${ip}/json/`);
     const geoData = geoResponse.data;
 
-    const deviceInfo = getDeviceInfo(req.headers["user-agent"]);
-
-    console.log(deviceInfo)
+    const deviceInfo = getDeviceInfo(req.headers.get("user-agent"));
 
     const newUser = new User({
       firstName,
       lastName,
       email,
       phone,
+      countryCode,
       password: hashedPassword,
-      address: {
-        address1: "",
-        address2: "",
-        city: "",
-        state: "",
-        zipCode: "",
-        country: "India",
-        countryCode: "91",
-      },
+      address: [
+        {
+          address1: "",
+          address2: "",
+          city: "",
+          state: "",
+          zipCode: "",
+          country: "India",
+          type: "home",
+          isDefault: false,
+        },
+      ],
       role: "user",
       isVerified: false,
       profile: {
@@ -109,18 +119,20 @@ export const POST = async (req) => {
       },
       sessions: [
         {
-          ipAddress: geoData.ip || "",
+          ipAddress: geoData.ip || ip || "",
           city: geoData.city || "",
-          region: geoData.region_name || "",
+          region: geoData.region_name || geoData.region || "",
           country: geoData.country_name || "",
           timezone: geoData.timezone || "",
           org: geoData.org || "",
           latitude: geoData.latitude || 0,
           longitude: geoData.longitude || 0,
-          deviceInfo: deviceInfo || "",
+          deviceInfo: deviceInfo || {},
           loggedInAt: new Date(),
         },
       ],
+      paymentMethods: [],
+      joinedDate: new Date(),
     });
 
     await newUser.save();

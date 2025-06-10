@@ -87,7 +87,7 @@ const NumberInputField = React.forwardRef(({ className, value, onInput, min, max
 
 export { NumberInputRoot, NumberInputButton, NumberInputField };
 
-const MotionNumberFlow = motion(NumberFlow);
+const MotionNumberFlow = motion.create(NumberFlow);
 
 export default function AnimatedNumber({ value, isPercentage = false, className }) {
     const canAnimate = useCanAnimate();

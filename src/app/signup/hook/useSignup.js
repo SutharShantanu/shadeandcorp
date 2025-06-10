@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import axios from "axios";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import useIPStackLocation from "@/hook/useIPStackLocation";
 import { parsePhoneNumber } from "react-phone-number-input";
 
@@ -28,11 +30,11 @@ const signupSchema = z
 
 export const useSignup = () => {
   const [loading, setLoading] = useState(false);
-
+  const router = useRouter();
   const { locationData } = useIPStackLocation();
 
   const detectedCountryCode = locationData?.country_code || "IN";
-  const country_name = locationData?.country_name || "";
+  const country_name = locationData?.country_name || "India";
 
   const form = useForm({
     resolver: zodResolver(signupSchema),
@@ -51,19 +53,29 @@ export const useSignup = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     const { confirmPassword, phone, ...payload } = data;
+    console.log("phone", phone);
 
     let parsedPhoneNumber;
+
     try {
-      parsedPhoneNumber = parsePhoneNumber(phone);
+      let phoneToParse = phone;
+      if (!phone.startsWith("+")) {
+        phoneToParse = `+${detectedCountryCode}${phone}`;
+      }
+      parsedPhoneNumber = parsePhoneNumber(phoneToParse);
+      console.log("parsedPhoneNumber", parsedPhoneNumber);
     } catch (error) {
       console.error("Error parsing phone number:", error);
       toast.error("Invalid phone number format");
       setLoading(false);
       return;
     }
-    let userProvidedCountryCode =
+
+    const userProvidedCountryCode =
       parsedPhoneNumber?.countryCallingCode || detectedCountryCode;
     const nationalNumber = parsedPhoneNumber?.nationalNumber;
+
+    console.log("userProvidedCountryCode", userProvidedCountryCode);
 
     const finalPayload = {
       ...payload,
@@ -76,7 +88,20 @@ export const useSignup = () => {
       const response = await axios.post("/api/users/signup", finalPayload);
 
       if (response.status === 200 || response.status === 201) {
-        toast.success("Signup successful!");
+        toast.promise(
+          signIn("credentials", {
+            email: finalPayload.email,
+            password: finalPayload.password,
+            redirect: false,
+          }),
+          {
+            loading: "Signing you in...",
+            success: "Signed in! Redirecting...",
+            error: "Auto sign-in failed. Please try logging in manually.",
+          }
+        );
+
+        router.push("/");
       } else if (response.data?.error) {
         toast.error(response.data.error);
       } else {

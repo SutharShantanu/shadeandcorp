@@ -31,6 +31,47 @@ const FormInput = ({
   defaultCountry,
   countryCallingCodeEditable,
   international,
+<<<<<<< HEAD
+}) => {
+  return (
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => {
+        const inputProps = {
+          type,
+          placeholder,
+          ...field,
+        };
+
+        if (Component === PhoneInput) {
+          inputProps.defaultCountry = defaultCountry;
+          inputProps.countryCallingCodeEditable = countryCallingCodeEditable;
+          inputProps.international = international;
+        } else {
+          inputProps.type = type;
+        }
+
+        return (
+          <FormItem>
+            <FormLabel>{label}</FormLabel>
+            <FormControl>
+              <motion.div
+                whileFocus={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Component {...inputProps} />
+              </motion.div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
+    />
+  );
+};
+=======
 }) => (
   <FormField
     control={control}
@@ -53,6 +94,7 @@ const FormInput = ({
     )}
   />
 );
+>>>>>>> origin/master
 
 const PasswordField = ({ name, label, control }) => {
   return (
