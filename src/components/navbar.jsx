@@ -456,10 +456,10 @@ const Navbar = () => {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="fixed top-0 left-0 w-full z-999"
+      className="fixed top-0 left-0 w-full z-50"
     >
       <motion.div
-        className="transition-all z-998 ease-in-out border-b border-border/20 bg-transparent backdrop-blur-lg"
+        className="transition-all z-50 ease-in-out border-b border-border/20 bg-transparent backdrop-blur-lg"
         role="navigation"
       >
         <motion.div className="container max-w-[95%] 2xl:max-w-[96rem] mx-auto flex items-center justify-between py-2 px-4 md:px-2 lg:px-0">

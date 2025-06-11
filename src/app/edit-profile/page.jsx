@@ -3,7 +3,6 @@
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -174,8 +173,15 @@ export default function EditProfile() {
                     <FormItem>
                       <FormLabel>Birthday</FormLabel>
                       <DatePicker
-                        date={""}
+                        date={field.value}
                         setDate={field.onChange}
+                        maxDate={
+                          new Date(
+                            new Date().setFullYear(
+                              new Date().getFullYear() - 18
+                            )
+                          )
+                        }
                         btnClassName="w-full justify-normal"
                       />
                       <FormMessage />
