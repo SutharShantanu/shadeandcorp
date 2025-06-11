@@ -5,6 +5,13 @@ import { Controller, FormProvider, useFormContext } from "react-hook-form";
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./tooltip";
 
 const Form = FormProvider;
 
@@ -54,18 +61,66 @@ const FormItem = React.forwardRef(({ className, ...props }, ref) => {
 });
 FormItem.displayName = "FormItem";
 
-const FormLabel = React.forwardRef(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField();
+const FormLabel = React.forwardRef(
+  ({ className, children, required, ...props }, ref) => {
+    const { error, formItemId } = useFormField();
 
-  return (
-    <Label
-      ref={ref}
-      className={cn(error && "text-destructive", className)}
-      htmlFor={formItemId}
-      {...props}
-    />
-  );
-});
+    let labelSuffix = null;
+
+    if (required !== undefined) {
+      const tooltipText =
+        required ? "This field is required" : "This field is optional";
+
+      labelSuffix =
+        required ?
+          <span className="text-muted-foreground text-xs select-none">*</span>
+        : <span className="text-muted-foreground ml-1 text-xs select-none">
+            (optional)
+          </span>;
+
+      return (
+        <TooltipProvider delay={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Label
+                ref={ref}
+                className={cn(
+                  "flex items-center gap-1 w-fit",
+                  error && "text-destructive",
+                  props.className
+                )}
+                htmlFor={formItemId}
+                {...props}
+              >
+                {children}
+                {labelSuffix}
+              </Label>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xxs">{tooltipText}</p>
+              <TooltipArrow />
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
+
+    return (
+      <Label
+        ref={ref}
+        className={cn(
+          "flex items-center gap-1 w-fit",
+          error && "text-destructive",
+          props.className
+        )}
+        htmlFor={formItemId}
+        {...props}
+      >
+        {children}
+      </Label>
+    );
+  }
+);
 FormLabel.displayName = "FormLabel";
 
 const FormControl = React.forwardRef(({ ...props }, ref) => {
@@ -77,9 +132,9 @@ const FormControl = React.forwardRef(({ ...props }, ref) => {
       ref={ref}
       id={formItemId}
       aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
+        !error ?
+          `${formDescriptionId}`
+        : `${formDescriptionId} ${formMessageId}`
       }
       aria-invalid={!!error}
       {...props}
@@ -115,7 +170,10 @@ const FormMessage = React.forwardRef(
       <p
         ref={ref}
         id={formMessageId}
-        className={cn("text-xs text-destructive-default font-medium italic", className)}
+        className={cn(
+          "text-xs text-destructive-default font-medium italic",
+          className
+        )}
         {...props}
       >
         {body}

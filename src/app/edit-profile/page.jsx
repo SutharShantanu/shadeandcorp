@@ -10,8 +10,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useEditProfile } from "./hook/useEditProfille";
-import { Input } from "@/components/ui/input";
-import { PhoneInput } from "@/components/ui/phone-input";
 import {
   Select,
   SelectContent,
@@ -37,93 +35,12 @@ import {
   editProfileTabs,
   personalFieldInputTypes,
   addressFieldInputTypes,
-  DefaultInputTypes,
-  InputState,
 } from "./enums/profile.enums";
 import { useProfile } from "../profile/hook/useProfile";
 import { Spinner } from "@/components/ui/spinner";
 import { PasswordField } from "@/components/common/password";
-import { cn } from "@/lib/utils";
-
-const RenderInputField = ({
-  form,
-  name,
-  label,
-  placeholder,
-  type = DefaultInputTypes.TEXT,
-  componentProps = {},
-  state = InputState.DEFAULT,
-}) => {
-  const isReadOnly = state === InputState.READONLY;
-  const isDisabled = state === InputState.DISABLED;
-
-  let Component;
-  switch (type) {
-    case DefaultInputTypes.PHONE:
-      Component = PhoneInput;
-      break;
-    case DefaultInputTypes.PASSWORD:
-      Component = PasswordField;
-      break;
-    default:
-      Component = Input;
-  }
-
-  label = name
-    .replace(/([A-Z])/g, " $1")
-    .replace(/^./, (str) => str.toUpperCase());
-
-  return (
-    <FormField
-      control={form.control}
-      name={name}
-      render={({ field }) => {
-        const commonProps = {
-          ...field,
-          placeholder: placeholder || `Enter ${name}`,
-          readOnly: isReadOnly,
-          disabled: isDisabled,
-          className: cn(
-            "bg-primary-foreground",
-            isReadOnly && "bg-gray-100 cursor-not-allowed text-gray-600",
-            isDisabled && "opacity-50 cursor-not-allowed",
-            componentProps.className
-          ),
-        };
-
-        const phoneProps =
-          type === DefaultInputTypes.PHONE
-            ? {
-                defaultCountry: componentProps.defaultCountry,
-                countryCallingCodeEditable:
-                  componentProps.countryCallingCodeEditable,
-                international: componentProps.international,
-              }
-            : {};
-
-        return (
-          <FormItem>
-            <FormLabel>{label}</FormLabel>
-            <FormControl>
-              <motion.div
-                whileFocus={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-              >
-                {type === DefaultInputTypes.PHONE ? (
-                  <Component {...commonProps} {...phoneProps} />
-                ) : (
-                  <Component {...commonProps} />
-                )}
-              </motion.div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        );
-      }}
-    />
-  );
-};
+import InputField from "./components/inputsField";
+import { addressSchema, personalInfoSchema } from "./schema/edit-profile.schema";
 
 export default function EditProfile() {
   const { user: authUser } = useAuthInfo();
@@ -195,7 +112,6 @@ export default function EditProfile() {
       return acc;
     }, {});
 
-
     return onSubmit(filteredData);
   };
 
@@ -210,12 +126,13 @@ export default function EditProfile() {
           >
             <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {personalFields.map((field) => (
-                <RenderInputField
+                <InputField
                   key={field}
                   form={form}
                   name={field}
                   type={personalFieldInputTypes[field]}
                   state={FieldInputState[field]}
+                  schema={personalInfoSchema}
                   componentProps={{
                     defaultCountry: countryCode,
                     countryCallingCodeEditable: false,
@@ -271,14 +188,12 @@ export default function EditProfile() {
               type="submit"
               className="border border-border bg-primary-default flex items-center gap-2 w-fit"
             >
-              {loading ? (
+              {loading ?
                 <motion.div className="flex items-center gap-1">
                   <Spinner className="h-4 w-4" />
                   <span>Saving...</span>
                 </motion.div>
-              ) : (
-                "Save Changes"
-              )}
+              : "Save Changes"}
             </Button>
           </Form>
         );
@@ -291,17 +206,18 @@ export default function EditProfile() {
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {addressFields.map((field) => (
-                <RenderInputField
+                <InputField
                   key={field}
                   form={form}
                   name={field}
                   type={addressFieldInputTypes[field] || "text"}
                   state={FieldInputState[field]}
+                  schema={addressSchema}
                 />
               ))}
             </div>
 
-            <Button type="submit" >
+            <Button type="submit">
               {loading ? "Saving..." : "Save Changes"}
             </Button>
           </Form>
@@ -357,7 +273,7 @@ export default function EditProfile() {
                 />
               </div>
 
-              <Button type="submit" >
+              <Button type="submit">
                 {loading ? "Saving..." : "Save Changes"}
               </Button>
             </div>

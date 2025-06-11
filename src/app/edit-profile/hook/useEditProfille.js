@@ -7,7 +7,10 @@ import useIPStackLocation from "@/hook/useIPStackLocation";
 import { parsePhoneNumber } from "react-phone-number-input";
 import { tabSchemas } from "../enums/profile.enums";
 import { fullSchema } from "../schema/edit-profile.schema";
-import { AccountStatusEnum, DefaultValues } from "@/app/models/enums/users.enum";
+import {
+  AccountStatusEnum,
+  DefaultValues,
+} from "@/app/models/enums/users.enum";
 
 export const useEditProfile = (profileData, userId, activeTabValue) => {
   const [loading, setLoading] = useState(false);
@@ -49,12 +52,11 @@ export const useEditProfile = (profileData, userId, activeTabValue) => {
         lastName: profileData.lastName || "",
         email: profileData.email || "",
         phone:
-          profileData.phone && profileData.countryCode
-            ? `+${profileData.countryCode}${profileData.phone}`
-            : "",
+          profileData.phone && profileData.countryCode ?
+            `+${profileData.countryCode}${profileData.phone}`
+          : "",
         gender: profileData.gender || "",
-        birthday: profileData.birthday
-          && new Date(profileData.birthday),
+        birthday: profileData.birthday && new Date(profileData.birthday),
         address1: profileData.address1 || "",
         address2: profileData.address2 || "",
         city: profileData.city || "",
@@ -67,6 +69,16 @@ export const useEditProfile = (profileData, userId, activeTabValue) => {
       });
     }
   }, [form, profileData]);
+
+  useEffect(() => {
+    console.log("Current tab:", activeTabValue);
+    if (activeSchema?._def?.shape) {
+      console.log("Schema fields:", Object.keys(activeSchema._def.shape));
+    } else {
+      console.warn("No shape found on schema.");
+    }
+  }, [activeTabValue, activeSchema]);
+
 
   const onSubmit = async (values) => {
     setLoading(true);

@@ -63,6 +63,9 @@
   --text-small: 0.875rem;
   --text-small--line-height: 1.25rem;
   --text-small--font-weight: 400;
+  --text-xxs: 0.625rem;
+  --text-xxs--line-height: 1rem;
+  --text-xxs--font-weight: 300;
 
   --font-weight-title: 700;
   --font-weight-heading: 700;
