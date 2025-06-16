@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { DatePicker } from "@/components/ui/date-picker";
 import { useAuthInfo } from "@/hook/useAuthInfo";
 import { useRouter, useSearchParams } from "next/navigation";
 import UserNotFound from "../userNotFound";
@@ -40,6 +39,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { PasswordField } from "@/components/common/password";
 import InputField from "./components/inputsField";
 import { addressSchema, personalInfoSchema } from "./schema/edit-profile.schema";
+import { DatePicker } from "@/components/ui/date-picker";
 
 export default function EditProfile() {
   const { user: authUser } = useAuthInfo();

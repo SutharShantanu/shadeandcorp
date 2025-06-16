@@ -2,13 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import {  motion } from "framer-motion";
 import PageHeader from "@/components/header/sectionHeader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { Heart, Trash2 } from "lucide-react";
-import AnimatedNumber, { NumberInput, NumberInputButton, NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
+import AnimatedNumber, { NumberInputButton, NumberInputField, NumberInputRoot } from "@/components/ui/number-input";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";

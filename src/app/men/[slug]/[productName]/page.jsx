@@ -298,7 +298,7 @@ const Offer = ({ timeLeft }) => {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
             >
                 <AnimatedGradientText
-                    text={`${timeLeft?.days}D :${timeLeft?.hours}H :${timeLeft?.minutes}M :${timeLeft?.seconds}S`}
+                    text={timeLeft}
                     className="text-lg sm:text-2xl font-semibold"
                 />
             </motion.div>

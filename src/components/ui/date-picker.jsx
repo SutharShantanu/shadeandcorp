@@ -31,7 +31,7 @@ import AnimatedNumber from "./number-input";
 import { AnimatedButton } from "./animated-buttons";
 import { AnimatePresence, motion } from "framer-motion";
 
-export function DatePicker({
+export const DatePicker = ({
   date,
   setDate,
   minDate,
@@ -41,7 +41,8 @@ export function DatePicker({
   popoverClassName,
   selectClassName,
   calendarClassName,
-}) {
+}) => {
+  console.log("date", date);
   const popoverRef = useRef(null);
 
   const currentYear = useMemo(() => new Date().getFullYear(), []);

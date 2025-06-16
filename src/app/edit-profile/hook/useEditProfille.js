@@ -24,14 +24,13 @@ export const useEditProfile = (profileData, userId, activeTabValue) => {
   const form = useForm({
     resolver: zodResolver(activeSchema),
     mode: "onChange",
-    // reValidateMode: "onChange",
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
       phone: "",
       gender: "",
-      birthday: new Date(),
+      birthday: "",
       address1: "",
       address2: "",
       city: "",
@@ -78,7 +77,6 @@ export const useEditProfile = (profileData, userId, activeTabValue) => {
       console.warn("No shape found on schema.");
     }
   }, [activeTabValue, activeSchema]);
-
 
   const onSubmit = async (values) => {
     setLoading(true);
