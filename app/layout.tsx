@@ -3,6 +3,7 @@ import { Forum, Work_Sans } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 import { Metadata } from "next";
+import ClientLayout from "./clientLayout";
 // import LenisProvider from "@/providers/lenisProvider";
 // import { Provider } from "react-redux";
 // import { PersistGate } from "redux-persist/integration/react";

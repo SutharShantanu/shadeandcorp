@@ -1,0 +1,273 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-primary-default: #2d2d2d;
+  --color-primary-foreground: #fafafa;
+
+  --color-rating-default: #facc15;
+  --color-rating-foreground: #2d2d2d;
+
+  --color-secondary-default: #f9f9f9;
+  --color-secondary-foreground: #2d2d2d;
+
+  --color-background: #f4f4f4;
+  --color-border: #d1d1d1;
+  --color-separator: #d1d1d1;
+  --color-foreground: #333333;
+
+  --color-card-default: #ffffff;
+  --color-card-foreground: #333333;
+
+  --color-popover-default: #ffffff;
+  --color-popover-foreground: #333333;
+
+  --color-muted-default: #e1e1e1;
+  --color-muted-foreground: #666666;
+
+  --color-accent-default: #fb6900;
+  --color-accent-foreground: #2d2d2d;
+
+  --color-destructive-default: #ef4444;
+  --color-destructive-foreground: #333333;
+
+  --color-input: #ffffff;
+  --color-ring: #4b8e8d;
+
+  --color-chart-1: #f4a261;
+  --color-chart-2: #06d6a0;
+  --color-chart-3: #457b9d;
+  --color-chart-4: #f77f00;
+  --color-chart-5: #e63946;
+
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+
+  --font-forum: Forum, serif;
+  --font-worksans: Work Sans, sans-serif;
+
+  --text-title: 2.25rem;
+  --text-title--line-height: 2.75rem;
+  --text-title--font-weight: 700;
+  --text-heading: 1.875rem;
+  --text-heading--line-height: 2.25rem;
+  --text-heading--font-weight: 700;
+  --text-subheading: 1.5rem;
+  --text-subheading--line-height: 2rem;
+  --text-subheading--font-weight: 600;
+  --text-description: 1rem;
+  --text-description--line-height: 1.5rem;
+  --text-description--font-weight: 400;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.25rem;
+  --text-small--font-weight: 400;
+  --text-xxs: 0.625rem;
+  --text-xxs--line-height: 1rem;
+  --text-xxs--font-weight: 300;
+
+  --font-weight-title: 700;
+  --font-weight-heading: 700;
+  --font-weight-subheading: 600;
+  --font-weight-description: 400;
+
+  --leading-title: 2.75rem;
+  --leading-heading: 2.25rem;
+  --leading-subheading: 2rem;
+  --leading-description: 1.5rem;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  --animate-text-gradient: text-gradient 8s linear infinite;
+
+  @keyframes text-gradient {
+    to {
+      background-position: -200% center;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+* {
+  /* Hide number input arrows globally */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    appearance: textfield; /* Standard */
+    -moz-appearance: textfield; /* Firefox */
+  }
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@layer base {
+  :root {
+    --background: #f4f4f4;
+    --foreground: #333333;
+    --card: #ffffff;
+    --card-foreground: #333333;
+    --popover: #ffffff;
+    --popover-foreground: #333333;
+    --primary: #2d2d2d;
+    --primary-foreground: #fafafa;
+    --secondary: #f9f9f9;
+    --secondary-foreground: #2d2d2d;
+    --muted: #e1e1e1;
+    --muted-foreground: #666666;
+    --accent: #fb6900;
+    --accent-foreground: #2d2d2d;
+    --destructive: #ef4444;
+    --destructive-foreground: #333333;
+    --border: #d1d1d1;
+    --separator: #d1d1d1;
+    --input: #ffffff;
+    --color-rating-default: #facc15;
+    --color-rating-foreground: #2d2d2d;
+    --ring: #4b8e8d;
+    --chart-1: #f4a261;
+    --chart-2: #06d6a0;
+    --chart-3: #457b9d;
+    --chart-4: #f77f00;
+    --chart-5: #e63946;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: #2d2d2d;
+    --foreground: #fafafa;
+    --card: #333333;
+    --card-foreground: #fafafa;
+    --popover: #333333;
+    --popover-foreground: #fafafa;
+    --primary: #fafafa;
+    --primary-foreground: #2d2d2d;
+    --secondary: #444444;
+    --secondary-foreground: #fafafa;
+    --muted: #555555;
+    --muted-foreground: #a3a3a3;
+    --accent: #2d2d2d;
+    --accent-foreground: #fafafa;
+    --destructive: #d32f2f;
+    --destructive-foreground: #fafafa;
+    --color-rating-default: #fbbf24;
+    --color-rating-foreground: #fafafa;
+    --border: #555555;
+    --input: #444444;
+    --ring: #e1e1e1;
+    --chart-1: #3b82f6;
+    --chart-2: #10b981;
+    --chart-3: #f59e0b;
+    --chart-4: #9333ea;
+    --chart-5: #ec4899;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  ::selection {
+    background-color: #fb6900;
+    color: #fafafa;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease-in-out;
+  }
+
+  .dark ::selection {
+    background-color: #fafafa;
+    color: #2d2d2d;
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease-in-out;
+  }
+}
+
+@layer utilities {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px; /* Apply same width to horizontal scrollbar */
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--secondary);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background: var(--primary);
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: var(--muted-foreground);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background: var(--foreground);
+  }
+
+  body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: "Work Sans", sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
