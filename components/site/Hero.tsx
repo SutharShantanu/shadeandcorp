@@ -2,7 +2,7 @@ import Link from "next/link"
 
 export default function Hero() {
   return (
-    <section className="bg-gradient-to-r from-indigo-600 via-pink-600 to-amber-400 text-white">
+    <section className="bg-linear-to-r from-indigo-600 via-pink-600 to-amber-400 text-white">
       <div className="mx-auto max-w-7xl px-6 py-24">
         <div className="max-w-2xl">
           <h1 className="text-4xl font-bold">Discover curated products for your lifestyle</h1>
