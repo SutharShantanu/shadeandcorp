@@ -1,12 +1,16 @@
 import Navbar from "@/components/site/Navbar";
 import Announcement from "@/components/site/Announcement";
-import Hero from "@/components/site/Hero";
 import Features from "@/components/site/Features";
 import ProductCard from "@/components/site/ProductCard";
 import FAQ from "@/components/site/FAQ";
 import Team from "@/components/site/Team";
 import Footer from "@/components/site/Footer";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
+import Hero from "@/components/site/Hero";
 
 const sampleProducts = [
   { id: "1", title: "Classic Hoodie", price: "$49", image: "/product1.jpg" },
@@ -20,13 +24,15 @@ export default function Home() {
     <div className="min-h-screen bg-zinc-50 dark:bg-black">
       <Announcement />
       <Navbar />
-      <main>
+      <main className="flex flex-col gap-2">
         <Hero />
 
         <section className="mx-auto max-w-7xl px-6 py-12">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold">Trending now</h2>
-            <a href="/collections/trending" className="text-sm text-zinc-600">See all</a>
+            <a href="/collections/trending" className="text-sm text-zinc-600">
+              See all
+            </a>
           </div>
 
           <div className="mt-6">
@@ -47,7 +53,7 @@ export default function Home() {
         <section className="mx-auto max-w-7xl px-6 py-12">
           <h2 className="text-2xl font-semibold">On sale</h2>
           <div className="mt-6 grid gap-6 sm:grid-cols-3">
-            {sampleProducts.slice(0,3).map((p) => (
+            {sampleProducts.slice(0, 3).map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>

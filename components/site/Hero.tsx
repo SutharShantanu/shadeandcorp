@@ -1,18 +1,114 @@
-import Link from "next/link"
+"use client";
+
+import React from "react";
+import Image from "next/image";
+import useEmblaCarousel from "embla-carousel-react";
+import { EmblaOptionsType } from "embla-carousel";
+import AutoPlay from "embla-carousel-autoplay";
+import Fade from "embla-carousel-fade";
+import { motion } from "framer-motion";
+import { DotButton, useDotButton } from "../ui/embla-carousel-dot-button";
+import {
+  NextButton,
+  PrevButton,
+  usePrevNextButtons,
+} from "../ui/embla-carousel-arrow-button";
+
+type PropType = {
+  slides: { image: string; alt?: string }[];
+  options?: EmblaOptionsType;
+};
+
+const slides = [
+  { image: "https://picsum.photos/1200/600?1", alt: "Slide 1" },
+  { image: "https://picsum.photos/1200/600?2", alt: "Slide 2" },
+  { image: "https://picsum.photos/1200/600?3", alt: "Slide 3" },
+];
+
+const EmblaCarousel: React.FC<PropType> = ({
+  slides,
+  options = { loop: true },
+}) => {
+  const autoplayOptions = { delay: 5000, stopOnInteraction: false };
+  const [emblaRef, emblaApi] = useEmblaCarousel(options, [
+    Fade(),
+    AutoPlay(autoplayOptions),
+  ]);
+
+  const { selectedIndex, scrollSnaps, onDotButtonClick } =
+    useDotButton(emblaApi);
+  const {
+    prevBtnDisabled,
+    nextBtnDisabled,
+    onPrevButtonClick,
+    onNextButtonClick,
+  } = usePrevNextButtons(emblaApi);
+
+  return (
+    <div className="embla relative overflow-hidden w-full max-w-7xl mx-auto h-[60vh]">
+      <div className="embla__viewport h-full" ref={emblaRef}>
+        <div className="embla__container flex h-full">
+          {slides.map((slide, index) => (
+            <div
+              key={index}
+              className="embla__slide relative flex-[0_0_100%] h-full"
+            >
+              <Image
+                src={slide.image}
+                alt={slide.alt || `slide-${index}`}
+                fill
+                className="object-cover rounded-2xl"
+                priority
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className="embla__controls absolute bottom-6 left-0 right-0 flex flex-col items-center gap-4">
+        <div className="flex justify-between w-full px-6">
+          <PrevButton
+            onClick={onPrevButtonClick}
+            disabled={prevBtnDisabled}
+            enabled={!prevBtnDisabled}
+          />
+          <NextButton
+            onClick={onNextButtonClick}
+            disabled={nextBtnDisabled}
+            enabled={!nextBtnDisabled}
+          />
+        </div>
+
+        <div className="embla__dots flex gap-3">
+          {scrollSnaps.map((_, index) => (
+            <DotButton
+              key={index}
+              selected={index === selectedIndex}
+              onClick={() => onDotButtonClick(index)}
+              // className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              //   index === selectedIndex ? "bg-white scale-125" : "bg-white/40"
+              // }`}
+              className={'embla__dot'.concat(
+                index === selectedIndex ? ' embla__dot--selected' : ''
+              )}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function Hero() {
   return (
-    <section className="bg-linear-to-r from-indigo-600 via-pink-600 to-amber-400 text-white">
-      <div className="mx-auto max-w-7xl px-6 py-24">
-        <div className="max-w-2xl">
-          <h1 className="text-4xl font-bold">Discover curated products for your lifestyle</h1>
-          <p className="mt-4 text-lg">High-quality goods, fair prices, and fast shipping. Shop new arrivals and exclusive drops.</p>
-          <div className="mt-8 flex gap-4">
-            <Link href="/collections/new" className="rounded bg-white/20 px-4 py-2 font-semibold hover:bg-white/30">Shop New</Link>
-            <Link href="/collections/sale" className="rounded bg-white px-4 py-2 font-semibold text-black">Sale</Link>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
+    <motion.div
+      className="relative p-2"
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
+      <EmblaCarousel slides={slides} />
+    </motion.div>
+  );
 }
