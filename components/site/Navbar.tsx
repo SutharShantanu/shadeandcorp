@@ -115,7 +115,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm dark:bg-zinc-900/80">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 py-4">
         <div className="flex items-center gap-4">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -139,7 +139,7 @@ export default function Navbar() {
             </SheetContent>
           </Sheet>
 
-          <Link href="/" className="text-2xl font-bold">
+          <Link href="/" className="text-4xl font-bold font-body">
             Shade & Co
           </Link>
         </div>

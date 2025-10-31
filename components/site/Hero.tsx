@@ -66,29 +66,30 @@ const EmblaCarousel: React.FC<PropType> = ({
       </div>
 
       {/* Controls */}
-      <div className="embla__controls absolute bottom-6 left-0 right-0 flex flex-col items-center gap-4">
-        <div className="flex justify-between w-full px-6">
+      <div className="absolute inset-0 flex items-center justify-between px-6 pointer-events-none">
+        <div className="pointer-events-auto">
           <PrevButton
             onClick={onPrevButtonClick}
             disabled={prevBtnDisabled}
             enabled={!prevBtnDisabled}
           />
+        </div>
+        <div className="pointer-events-auto">
           <NextButton
             onClick={onNextButtonClick}
             disabled={nextBtnDisabled}
             enabled={!nextBtnDisabled}
           />
         </div>
+      </div>
 
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center">
         <div className="embla__dots flex gap-3">
           {scrollSnaps.map((_, index) => (
             <DotButton
               key={index}
               selected={index === selectedIndex}
               onClick={() => onDotButtonClick(index)}
-              // className={`w-3 h-3 rounded-full transition-all duration-300 ${
-              //   index === selectedIndex ? "bg-white scale-125" : "bg-white/40"
-              // }`}
               className={'embla__dot'.concat(
                 index === selectedIndex ? ' embla__dot--selected' : ''
               )}

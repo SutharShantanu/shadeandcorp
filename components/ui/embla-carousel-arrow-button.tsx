@@ -81,7 +81,7 @@ export const PrevButton: React.FC<
   Omit<ArrowButtonProps, "children" | "className"> & { disabled?: boolean }
 > = (props) => (
   <ArrowButton {...props} className="left-4">
-    <ChevronLeft className="h-6 w-6" />
+    <ChevronLeft className="size-5" />
   </ArrowButton>
 );
 
@@ -89,6 +89,6 @@ export const NextButton: React.FC<
   Omit<ArrowButtonProps, "children" | "className"> & { disabled?: boolean }
 > = (props) => (
   <ArrowButton {...props} className="right-4">
-    <ChevronRight className="h-6 w-6" />
+    <ChevronRight className="size-5" />
   </ArrowButton>
 );
