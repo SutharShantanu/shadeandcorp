@@ -1,15 +1,32 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Allow next/image to load images from these external hosts used across the app
   images: {
-    domains: [
-      "cdn-icons-png.flaticon.com",
-      "avatars.githubusercontent.com",
-      "lh3.googleusercontent.com",
-      "images.unsplash.com",
-      "plus.unsplash.com",
-      "picsum.photos"
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn-icons-png.flaticon.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "plus.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+      },
     ],
   },
 };

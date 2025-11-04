@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
 import { EmblaOptionsType } from "embla-carousel";
 import AutoPlay from "embla-carousel-autoplay";
@@ -14,22 +15,66 @@ import {
   usePrevNextButtons,
 } from "../ui/embla-carousel-arrow-button";
 
+type SlideType = {
+  image: string;
+  alt?: string;
+  title: string;
+  subtitle: string;
+  ctaText: string;
+  ctaLink: string;
+  theme?: "light" | "dark";
+};
+
 type PropType = {
-  slides: { image: string; alt?: string }[];
+  slides: SlideType[];
   options?: EmblaOptionsType;
 };
 
-const slides = [
-  { image: "https://picsum.photos/1200/600?1", alt: "Slide 1" },
-  { image: "https://picsum.photos/1200/600?2", alt: "Slide 2" },
-  { image: "https://picsum.photos/1200/600?3", alt: "Slide 3" },
+// Fashion-focused slides with compelling content
+const slides: SlideType[] = [
+  {
+    image: "/hero/summer-collection.jpg",
+    alt: "Summer Fashion Collection",
+    title: "Summer Collection 2024",
+    subtitle: "Discover the latest trends in warm-weather fashion",
+    ctaText: "Shop Now",
+    ctaLink: "/collection/summer",
+    theme: "light"
+  },
+  {
+    image: "/hero/new-arrivals.jpg",
+    alt: "New Arrivals",
+    title: "New Arrivals",
+    subtitle: "Fresh styles just dropped. Be the first to shop",
+    ctaText: "Explore New",
+    ctaLink: "/new-arrivals",
+    theme: "dark"
+  },
+  {
+    image: "/hero/sale-banner.jpg",
+    alt: "Seasonal Sale",
+    title: "Up to 50% Off",
+    subtitle: "Limited time offer on selected items",
+    ctaText: "Shop Sale",
+    ctaLink: "/sale",
+    theme: "light"
+  },
+  {
+    image: "/hero/designer-collab.jpg", 
+    alt: "Designer Collaboration",
+    title: "Designer Collaboration",
+    subtitle: "Exclusive collection with leading designers",
+    ctaText: "Discover",
+    ctaLink: "/designers",
+    theme: "dark"
+  }
 ];
 
 const EmblaCarousel: React.FC<PropType> = ({
   slides,
   options = { loop: true },
 }) => {
-  const autoplayOptions = { delay: 5000, stopOnInteraction: false };
+  const autoplayOptions = { delay: 6000, stopOnInteraction: false };
   const [emblaRef, emblaApi] = useEmblaCarousel(options, [
     Fade(),
     AutoPlay(autoplayOptions),
@@ -45,7 +90,7 @@ const EmblaCarousel: React.FC<PropType> = ({
   } = usePrevNextButtons(emblaApi);
 
   return (
-    <div className="embla relative overflow-hidden w-full max-w-7xl mx-auto h-[60vh]">
+    <div className="embla relative overflow-hidden w-full max-w-7xl mx-auto h-[70vh] min-h-[500px] md:h-[80vh]">
       <div className="embla__viewport h-full" ref={emblaRef}>
         <div className="embla__container flex h-full">
           {slides.map((slide, index) => (
@@ -53,20 +98,61 @@ const EmblaCarousel: React.FC<PropType> = ({
               key={index}
               className="embla__slide relative flex-[0_0_100%] h-full"
             >
+              {/* Background Image */}
               <Image
                 src={slide.image}
                 alt={slide.alt || `slide-${index}`}
                 fill
-                className="object-cover rounded-2xl"
-                priority
+                className="object-cover"
+                priority={index === 0}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
               />
+              
+              {/* Overlay for better text readability */}
+              <div className={`absolute inset-0 bg-black/20 ${slide.theme === 'dark' ? 'bg-black/30' : ''}`} />
+              
+              {/* Content Overlay */}
+              <div className="absolute inset-0 flex items-center">
+                <div className="container mx-auto px-6 md:px-8">
+                  <div className={`max-w-lg ${
+                    slide.theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, delay: 0.2 }}
+                    >
+                      <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+                        {slide.title}
+                      </h1>
+                      <p className="text-xl md:text-2xl mb-8 opacity-90 leading-relaxed">
+                        {slide.subtitle}
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        <Link
+                          href={slide.ctaLink}
+                          className="bg-black text-white px-8 py-4 rounded-full font-semibold hover:bg-gray-800 transition-colors duration-300 text-center text-lg"
+                        >
+                          {slide.ctaText}
+                        </Link>
+                        <Link
+                          href="/shop-all"
+                          className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-black transition-all duration-300 text-center text-lg"
+                        >
+                          Shop All
+                        </Link>
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Controls */}
-      <div className="absolute inset-0 flex items-center justify-between px-6 pointer-events-none">
+      {/* Navigation Arrows */}
+      <div className="absolute inset-0 flex items-center justify-between px-4 md:px-6 pointer-events-none">
         <div className="pointer-events-auto">
           <PrevButton
             onClick={onPrevButtonClick}
@@ -83,18 +169,45 @@ const EmblaCarousel: React.FC<PropType> = ({
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-0 right-0 flex justify-center">
-        <div className="embla__dots flex gap-3">
+      {/* Dots Indicator */}
+      <div className="absolute bottom-8 left-0 right-0 flex justify-center">
+        <div className="embla__dots flex gap-3 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2">
           {scrollSnaps.map((_, index) => (
             <DotButton
               key={index}
               selected={index === selectedIndex}
               onClick={() => onDotButtonClick(index)}
-              className={'embla__dot'.concat(
-                index === selectedIndex ? ' embla__dot--selected' : ''
-              )}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === selectedIndex 
+                  ? 'bg-white scale-125' 
+                  : 'bg-white/60 hover:bg-white/80'
+              }`}
             />
           ))}
+        </div>
+      </div>
+
+      {/* Quick Stats Bar */}
+      <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 text-center">
+            <div>
+              <p className="font-semibold text-lg">Free Shipping</p>
+              <p className="text-sm text-gray-600">On orders over $50</p>
+            </div>
+            <div>
+              <p className="font-semibold text-lg">Easy Returns</p>
+              <p className="text-sm text-gray-600">30-day policy</p>
+            </div>
+            <div>
+              <p className="font-semibold text-lg">Secure Payment</p>
+              <p className="text-sm text-gray-600">100% protected</p>
+            </div>
+            <div>
+              <p className="font-semibold text-lg">24/7 Support</p>
+              <p className="text-sm text-gray-600">Always here to help</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -103,13 +216,13 @@ const EmblaCarousel: React.FC<PropType> = ({
 
 export default function Hero() {
   return (
-    <motion.div
-      className="relative p-2"
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
+    <motion.section
+      className="relative"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
     >
       <EmblaCarousel slides={slides} />
-    </motion.div>
+    </motion.section>
   );
 }

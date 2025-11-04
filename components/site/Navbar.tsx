@@ -50,17 +50,58 @@ import {
 import { Kbd } from "@/components/ui/kbd";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const categories = [
   {
-    title: "Clothing",
+    title: "Men",
     items: [
-      { title: "Men", href: "/category/men" },
-      { title: "Women", href: "/category/women" },
-      { title: "Kids", href: "/category/kids" },
-      { title: "New Arrivals", href: "/new-arrivals" },
-      { title: "Sale", href: "/sale" },
+      { title: "T-Shirts", href: "/men/t-shirts" },
+      { title: "Casual Shirts", href: "/men/casual-shirts" },
+      { title: "Formal Shirts", href: "/men/formal-shirts" },
+      { title: "Jeans", href: "/men/jeans" },
+      { title: "Casual Trousers", href: "/men/casual-trousers" },
+      { title: "Formal Trousers", href: "/men/formal-trousers" },
+      { title: "Shorts", href: "/men/shorts" },
+      { title: "Jackets", href: "/men/jackets" },
+      { title: "Blazers", href: "/men/blazers" },
+      { title: "Sweaters", href: "/men/sweaters" },
+      { title: "Sweatshirts", href: "/men/sweatshirts" },
+      { title: "Activewear", href: "/men/activewear" },
     ],
+    image: "/images/men-category.jpg",
+  },
+  {
+    title: "Women",
+    items: [
+      { title: "Dresses", href: "/women/dresses" },
+      { title: "Tops", href: "/women/tops" },
+      { title: "T-Shirts", href: "/women/t-shirts" },
+      { title: "Jeans", href: "/women/jeans" },
+      { title: "Trousers", href: "/women/trousers" },
+      { title: "Skirts", href: "/women/skirts" },
+      { title: "Jumpsuits", href: "/women/jumpsuits" },
+      { title: "Blouses", href: "/women/blouses" },
+      { title: "Sweaters", href: "/women/sweaters" },
+      { title: "Jackets", href: "/women/jackets" },
+      { title: "Activewear", href: "/women/activewear" },
+      { title: "Lingerie", href: "/women/lingerie" },
+    ],
+    image: "/images/women-category.jpg",
+  },
+  {
+    title: "Kids",
+    items: [
+      { title: "Boys Clothing", href: "/kids/boys" },
+      { title: "Girls Clothing", href: "/kids/girls" },
+      { title: "Infants", href: "/kids/infants" },
+      { title: "School Uniforms", href: "/kids/school-uniforms" },
+      { title: "Party Wear", href: "/kids/party-wear" },
+      { title: "Footwear", href: "/kids/footwear" },
+      { title: "Accessories", href: "/kids/accessories" },
+      { title: "Winter Wear", href: "/kids/winter-wear" },
+    ],
+    image: "/images/kids-category.jpg",
   },
   {
     title: "Collections",
@@ -69,19 +110,84 @@ const categories = [
       { title: "Winter Essentials", href: "/collections/winter" },
       { title: "Active Wear", href: "/collections/active" },
       { title: "Loungewear", href: "/collections/lounge" },
+      { title: "Festive Collection", href: "/collections/festive" },
+      { title: "Premium Collection", href: "/collections/premium" },
     ],
+    image: "/images/collections.jpg",
   },
   {
     title: "Accessories",
     items: [
-      { title: "Bags", href: "/accessories/bags" },
-      { title: "Jewelry", href: "/accessories/jewelry" },
+      { title: "Bags & Backpacks", href: "/accessories/bags" },
       { title: "Watches", href: "/accessories/watches" },
       { title: "Sunglasses", href: "/accessories/sunglasses" },
       { title: "Belts", href: "/accessories/belts" },
+      { title: "Wallets", href: "/accessories/wallets" },
+      { title: "Jewelry", href: "/accessories/jewelry" },
+      { title: "Hats & Caps", href: "/accessories/hats" },
+      { title: "Scarves", href: "/accessories/scarves" },
     ],
+    image: "/images/accessories.jpg",
   },
 ];
+
+// Subcategories for detailed dropdowns
+const detailedCategories = {
+  men: [
+    {
+      title: "Topwear",
+      items: ["T-Shirts", "Casual Shirts", "Formal Shirts", "Sweaters", "Sweatshirts", "Jackets"]
+    },
+    {
+      title: "Bottomwear",
+      items: ["Jeans", "Casual Trousers", "Formal Trousers", "Shorts", "Track Pants"]
+    },
+    {
+      title: "Footwear",
+      items: ["Casual Shoes", "Sports Shoes", "Formal Shoes", "Sandals", "Sneakers"]
+    },
+    {
+      title: "Accessories",
+      items: ["Watches", "Belts", "Wallets", "Sunglasses", "Bags", "Caps"]
+    }
+  ],
+  women: [
+    {
+      title: "Western Wear",
+      items: ["Dresses", "Tops", "T-Shirts", "Jeans", "Trousers", "Skirts"]
+    },
+    {
+      title: "Indian Wear",
+      items: ["Kurtas", "Sarees", "Lehengas", "Salwar Suits", "Blouses"]
+    },
+    {
+      title: "Footwear",
+      items: ["Heels", "Flats", "Sandals", "Sports Shoes", "Boots"]
+    },
+    {
+      title: "Beauty & Accessories",
+      items: ["Jewelry", "Handbags", "Watches", "Sunglasses", "Scarves"]
+    }
+  ],
+  kids: [
+    {
+      title: "Boys (2-16 Years)",
+      items: ["T-Shirts", "Shirts", "Jeans", "Shorts", "Jackets", "Sportswear"]
+    },
+    {
+      title: "Girls (2-16 Years)",
+      items: ["Dresses", "Tops", "Skirts", "Jeans", "Leggings", "Party Wear"]
+    },
+    {
+      title: "Infants (0-2 Years)",
+      items: ["Rompers", "Bodysuits", "Sleepwear", "Winter Wear", "Accessories"]
+    },
+    {
+      title: "Toys & Accessories",
+      items: ["Backpacks", "Shoes", "Hats", "Water Bottles", "Stationery"]
+    }
+  ]
+};
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -91,15 +197,12 @@ export default function Navbar() {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+K or Cmd+K to focus search
       const key = e.key?.toLowerCase?.();
       if ((e.ctrlKey || e.metaKey) && key === "k") {
         e.preventDefault();
         setSearch(true);
-        // focus the input if available
         if (inputRef.current) {
           inputRef.current.focus();
-          // optionally select the value for quick typing
           inputRef.current.select();
         }
       }
@@ -108,6 +211,7 @@ export default function Navbar() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+  
   const { data: session } = useSession();
 
   const cartCount = 3;
@@ -153,22 +257,68 @@ export default function Navbar() {
                     {category.title}
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                      {category.items.map((item) => (
-                        <li key={item.title}>
-                          <NavigationMenuLink asChild>
-                            <Link
-                              href={item.href}
-                              className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-                            >
-                              <div className="text-sm font-medium leading-none">
-                                {item.title}
+                    <div className="w-[800px] p-6">
+                      <div className="grid grid-cols-2 gap-8">
+                        <div className="space-y-6">
+                          <h3 className="text-lg font-semibold">{category.title} Collection</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            {category.items.map((item) => (
+                              <Link
+                                key={item.title}
+                                href={item.href}
+                                className="group flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                              >
+                                <div className="h-2 w-2 rounded-full bg-zinc-300 group-hover:bg-zinc-600" />
+                                <span className="text-sm">{item.title}</span>
+                              </Link>
+                            ))}
+                          </div>
+                          
+                          {/* Detailed subcategories for main categories */}
+                          {(category.title === "Men" || category.title === "Women" || category.title === "Kids") && (
+                            <div className="pt-4 border-t">
+                              <h4 className="font-medium mb-3">Shop by Category</h4>
+                              <div className="grid grid-cols-2 gap-4">
+                                {detailedCategories[category.title.toLowerCase() as keyof typeof detailedCategories]?.map((subcat) => (
+                                  <div key={subcat.title}>
+                                    <h5 className="text-sm font-medium mb-2">{subcat.title}</h5>
+                                    <div className="space-y-1">
+                                      {subcat.items.map((item) => (
+                                        <Link
+                                          key={item}
+                                          href={`/${category.title.toLowerCase()}/${item.toLowerCase().replace(/\s+/g, '-')}`}
+                                          className="block text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                                        >
+                                          {item}
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="relative rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                          <Image
+                            src={category.image}
+                            alt={`${category.title} Collection`}
+                            width={400}
+                            height={300}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute bottom-4 left-4">
+                            <Link 
+                              href={`/${category.title.toLowerCase()}`}
+                              className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                            >
+                              Shop {category.title}
                             </Link>
-                          </NavigationMenuLink>
-                        </li>
-                      ))}
-                    </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
               ))}
