@@ -7,19 +7,14 @@ import { Heart, ShoppingCart, Zap, Eye, Share2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { NumberField } from "../ui/number-input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 export type Product = {
   id: string;
@@ -51,6 +46,8 @@ export type Product = {
     width: number;
     height: number;
   };
+  // Add size availability information
+  sizeAvailability?: { [size: string]: boolean };
 };
 
 interface ProductCardProps {
@@ -83,6 +80,21 @@ export default function ProductCard({
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isImageHovered, setIsImageHovered] = useState(false);
+
+  // Check if a size is available
+  const isSizeAvailable = (size: string) => {
+    if (product.sizeAvailability) {
+      return product.sizeAvailability[size] !== false;
+    }
+    return true; // Default to available if no specific availability data
+  };
+
+  // Handle size selection
+  const handleSizeSelect = (size: string) => {
+    if (isSizeAvailable(size)) {
+      setSelectedSize(size);
+    }
+  };
 
   // Handle image hover for multiple images
   const handleImageHover = () => {
@@ -144,7 +156,7 @@ export default function ProductCard({
     return (
       <TooltipProvider>
         <div
-          className={`group relative bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-all duration-300 ${className}`}
+          className={`group relative bg-white rounded-lg border border-gray-200 hover:shadow-lg transition-all ${className}`}
         >
           <Link href={`/products/${product.slug}`} className="block">
             {/* Image Container */}
@@ -153,7 +165,7 @@ export default function ProductCard({
                 src={product.images[0]}
                 alt={product.title}
                 fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                className="object-cover transition-transform group-hover:scale-105"
                 sizes="(max-width: 768px) 50vw, 25vw"
               />
 
@@ -172,7 +184,7 @@ export default function ProductCard({
               </div>
 
               {/* Quick Actions */}
-              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -279,23 +291,23 @@ export default function ProductCard({
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-2">
               {product.isNew && (
-                <Badge className="bg-green-500 hover:bg-green-600 text-white border-0 px-3 py-1 text-xs font-bold">
-                  NEW
+                <Badge className="bg-emerald-500 hover:bg-emerald-600 border-0 text-xs uppercase font-semibold py-1">
+                  New
                 </Badge>
               )}
               {product.isBestSeller && (
-                <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white border-0 px-3 py-1 text-xs font-bold">
-                  BESTSELLER
+                <Badge className="bg-yellow-500 hover:bg-yellow-600 border-0 text-xs uppercase font-semibold py-1">
+                  Bestseller
                 </Badge>
               )}
               {discountPercentage > 0 && (
-                <Badge className="bg-red-500 hover:bg-red-600 text-white border-0 px-3 py-1 text-xs font-bold">
+                <Badge className="bg-red-500 hover:bg-red-600 border-0 text-xs uppercase font-semibold py-1">
                   -{discountPercentage}%
                 </Badge>
               )}
               {product.isFeatured && (
-                <Badge className="bg-purple-500 hover:bg-purple-600 text-white border-0 px-3 py-1 text-xs font-bold">
-                  FEATURED
+                <Badge className="bg-purple-500 hover:bg-purple-600 border-0 text-xs uppercase font-semibold py-1">
+                  Featured
                 </Badge>
               )}
             </div>
@@ -306,8 +318,8 @@ export default function ProductCard({
                 <TooltipTrigger asChild>
                   <Button
                     size="icon"
-                    variant="secondary"
-                    className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                    variant="ghost"
+                    className="rounded-full backdrop-blur-sm p-0"
                     onClick={(e) => {
                       e.preventDefault();
                       handleAddToWishlist();
@@ -331,8 +343,8 @@ export default function ProductCard({
                 <TooltipTrigger asChild>
                   <Button
                     size="icon"
-                    variant="secondary"
-                    className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                    variant="ghost"
+                    className="rounded-full backdrop-blur-sm p-0"
                     onClick={(e) => {
                       e.preventDefault();
                       handleQuickView();
@@ -342,7 +354,7 @@ export default function ProductCard({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Quick View</p>
+                  <p>View</p>
                 </TooltipContent>
               </Tooltip>
 
@@ -350,30 +362,17 @@ export default function ProductCard({
                 <TooltipTrigger asChild>
                   <Button
                     size="icon"
-                    variant="secondary"
-                    className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-sm"
+                    variant="ghost"
+                    className="rounded-full backdrop-blur-sm p-0"
                   >
                     <Share2 className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Share Product</p>
+                  <p>Share</p>
                 </TooltipContent>
               </Tooltip>
             </div>
-
-            {/* Stock Status */}
-            {isLowStock && (
-              <div className="absolute top-3 left-1/2 transform -translate-x-1/2">
-                <Badge
-                  variant="secondary"
-                  className="bg-orange-100 text-orange-700 border-0 text-xs"
-                >
-                  <Clock className="w-3 h-3 mr-1" />
-                  Only {product.stockQuantity} left
-                </Badge>
-              </div>
-            )}
 
             {isOutOfStock && (
               <div className="absolute top-3 left-1/2 transform -translate-x-1/2">
@@ -383,31 +382,6 @@ export default function ProductCard({
                 >
                   Out of Stock
                 </Badge>
-              </div>
-            )}
-
-            {/* Size Quick View */}
-            {isImageHovered && product.sizes.length > 0 && (
-              <div className="absolute bottom-3 left-3 right-3">
-                <div className="flex justify-center gap-1">
-                  {product.sizes.slice(0, 5).map((size) => (
-                    <div
-                      key={size}
-                      className={`bg-white/90 backdrop-blur-sm text-xs font-medium px-2 py-1 rounded min-w-8 text-center transition-all ${
-                        selectedSize === size
-                          ? "border-2 border-black"
-                          : "border border-transparent"
-                      }`}
-                    >
-                      {size}
-                    </div>
-                  ))}
-                  {product.sizes.length > 5 && (
-                    <div className="bg-white/90 backdrop-blur-sm text-xs font-medium px-2 py-1 rounded">
-                      +{product.sizes.length - 5}
-                    </div>
-                  )}
-                </div>
               </div>
             )}
           </div>
@@ -477,25 +451,62 @@ export default function ProductCard({
             </div>
           )}
 
-          {/* Size Selector */}
+          {/* Size Selector - Myntra Style with RadioGroup */}
           {product.sizes.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-600">Size:</span>
-                <span className="text-xs text-gray-500">{selectedSize}</span>
+                <span className="text-xs text-gray-600 font-medium">
+                  SELECT SIZE
+                </span>
+                <span className="text-xs text-gray-500 font-medium">
+                  {selectedSize}
+                </span>
               </div>
-              <Select value={selectedSize} onValueChange={setSelectedSize}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {product.sizes.map((size) => (
-                    <SelectItem key={size} value={size}>
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <RadioGroup
+                value={selectedSize}
+                onValueChange={handleSizeSelect}
+                className="flex flex-wrap gap-2"
+              >
+                {product.sizes.map((size) => {
+                  const available = isSizeAvailable(size);
+                  return (
+                    <div key={size} className="relative">
+                      <RadioGroupItem
+                        value={size}
+                        id={`size-${size}`}
+                        disabled={!available}
+                        className="sr-only" // Hide the default radio button
+                      />
+                      <Label
+                        htmlFor={`size-${size}`}
+                        className={`
+                          relative flex items-center justify-center w-10 h-10 text-sm font-medium border rounded-md cursor-pointer transition-all
+                          ${
+                            selectedSize === size
+                              ? "border-black bg-black text-white"
+                              : available
+                              ? "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                              : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                          }
+                        `}
+                        title={
+                          available
+                            ? `Select ${size}`
+                            : `${size} - Out of Stock`
+                        }
+                      >
+                        {size}
+                        {/* Cross line for unavailable sizes - Myntra style */}
+                        {!available && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-full h-0.5 bg-gray-400 transform rotate-45 rounded-full" />
+                          </div>
+                        )}
+                      </Label>
+                    </div>
+                  );
+                })}
+              </RadioGroup>
             </div>
           )}
 
@@ -519,20 +530,20 @@ export default function ProductCard({
           {/* Action Buttons */}
           <div className="flex gap-2 pt-2">
             <Button
-              className="flex-1"
-              disabled={isOutOfStock}
+              className="flex-1 bg-black hover:bg-gray-800 text-white"
+              disabled={isOutOfStock || !selectedSize}
               onClick={handleAddToCart}
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
-              Add to Cart
+              ADD TO BAG
             </Button>
             <Button
               variant="outline"
-              className="flex-1"
-              disabled={isOutOfStock}
+              className="flex-1 border-gray-300 hover:bg-gray-50"
+              disabled={isOutOfStock || !selectedSize}
               onClick={handleBuyNow}
             >
-              Buy Now
+              WISHLIST
             </Button>
           </div>
 

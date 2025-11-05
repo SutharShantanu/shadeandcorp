@@ -151,7 +151,7 @@ function NumberField({
         max={max}
         disabled={disabled}
         className={cn(
-          "border-0 shadow-none bg-gray-50 min-w-fit px-0 focus-visible:ring-0 rounded-none text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+          "border-0 shadow-none bg-gray-50 min-w-fit font-semibold px-0 focus-visible:ring-0 rounded-none text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
           currentSize.input
         )}
         {...props}
