@@ -47,7 +47,7 @@ const newArrivals: ProductType[] = [
     discount: 23,
     rating: 4.5,
     reviewCount: 128,
-    stock: 15
+    stock: 15,
   },
   {
     id: "2",
@@ -65,13 +65,13 @@ const newArrivals: ProductType[] = [
     discount: 25,
     rating: 4.8,
     reviewCount: 89,
-    stock: 8
+    stock: 8,
   },
   {
     id: "3",
     name: "Premium Wool Sweater",
     brand: "Massimo Dutti",
-    price: 75.50,
+    price: 75.5,
     image: "/products/sweater-1.jpg",
     images: ["/products/sweater-1.jpg", "/products/sweater-2.jpg"],
     category: "Sweaters",
@@ -80,7 +80,7 @@ const newArrivals: ProductType[] = [
     isNew: true,
     rating: 4.3,
     reviewCount: 64,
-    stock: 12
+    stock: 12,
   },
   {
     id: "4",
@@ -98,7 +98,7 @@ const newArrivals: ProductType[] = [
     discount: 14,
     rating: 4.6,
     reviewCount: 203,
-    stock: 20
+    stock: 20,
   },
   {
     id: "5",
@@ -113,7 +113,7 @@ const newArrivals: ProductType[] = [
     isNew: true,
     rating: 4.4,
     reviewCount: 95,
-    stock: 6
+    stock: 6,
   },
   {
     id: "6",
@@ -131,7 +131,7 @@ const newArrivals: ProductType[] = [
     discount: 22,
     rating: 4.7,
     reviewCount: 156,
-    stock: 25
+    stock: 25,
   },
   {
     id: "7",
@@ -146,7 +146,7 @@ const newArrivals: ProductType[] = [
     isNew: true,
     rating: 4.9,
     reviewCount: 42,
-    stock: 5
+    stock: 5,
   },
   {
     id: "8",
@@ -164,13 +164,13 @@ const newArrivals: ProductType[] = [
     discount: 18,
     rating: 4.5,
     reviewCount: 178,
-    stock: 14
-  }
+    stock: 14,
+  },
 ];
 
-const ProductCard: React.FC<{ product: ProductType; index: number }> = ({ 
-  product, 
-  index 
+const ProductCard: React.FC<{ product: ProductType; index: number }> = ({
+  product,
+  index,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -196,7 +196,7 @@ const ProductCard: React.FC<{ product: ProductType; index: number }> = ({
       className="group"
     >
       <Card className="overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl bg-white">
-        <div 
+        <div
           className="relative aspect-3/4 overflow-hidden cursor-pointer"
           onMouseEnter={handleImageHover}
           onMouseLeave={handleImageLeave}
@@ -209,10 +209,10 @@ const ProductCard: React.FC<{ product: ProductType; index: number }> = ({
             className="object-cover transition-all duration-500"
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           />
-          
+
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-linear-to-r from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          
+
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {product.isNew && (
@@ -284,11 +284,15 @@ const ProductCard: React.FC<{ product: ProductType; index: number }> = ({
           <div className="space-y-2">
             {/* Brand */}
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-gray-600">{product.brand}</p>
+              <p className="text-sm font-semibold text-gray-600">
+                {product.brand}
+              </p>
               <div className="flex items-center gap-1">
                 <Zap className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                 <span className="text-xs text-gray-500">{product.rating}</span>
-                <span className="text-xs text-gray-400">({product.reviewCount})</span>
+                <span className="text-xs text-gray-400">
+                  ({product.reviewCount})
+                </span>
               </div>
             </div>
 
@@ -299,7 +303,9 @@ const ProductCard: React.FC<{ product: ProductType; index: number }> = ({
 
             {/* Price */}
             <div className="flex items-center gap-2">
-              <span className="font-bold text-lg text-gray-900">${product.price}</span>
+              <span className="font-bold text-lg text-gray-900">
+                ${product.price}
+              </span>
               {product.originalPrice && (
                 <span className="text-sm text-gray-500 line-through">
                   ${product.originalPrice}
@@ -341,7 +347,7 @@ const FilterTabs: React.FC<{
     { id: "trending", label: "Trending" },
     { id: "bestsellers", label: "Bestsellers" },
     { id: "discount", label: "On Sale" },
-    { id: "low-stock", label: "Almost Gone" }
+    { id: "low-stock", label: "Almost Gone" },
   ];
 
   return (
@@ -353,8 +359,8 @@ const FilterTabs: React.FC<{
             variant={activeFilter === filter.id ? "default" : "outline"}
             onClick={() => onFilterChange(filter.id)}
             className={`rounded-full px-6 ${
-              activeFilter === filter.id 
-                ? "bg-black text-white" 
+              activeFilter === filter.id
+                ? "bg-black text-white"
                 : "border-gray-300 text-gray-700 hover:bg-gray-50"
             }`}
           >
@@ -387,7 +393,7 @@ export default function NewArrivals() {
 
   return (
     <section className="py-16 md:py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto ">
         {/* Section Header - Zara Style */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -396,14 +402,18 @@ export default function NewArrivals() {
           viewport={{ once: true }}
           className="text-center mb-12 md:mb-16"
         >
-          <Badge variant="outline" className="mb-4 px-4 py-1 text-sm font-semibold border-gray-300">
+          <Badge
+            variant="outline"
+            className="mb-4 px-4 py-1 text-sm font-semibold border-gray-300"
+          >
             JUST ARRIVED
           </Badge>
           <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
             New Arrivals
           </h2>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Discover the latest styles fresh off the runway. Be the first to shop our newest collection.
+            Discover the latest styles fresh off the runway. Be the first to
+            shop our newest collection.
           </p>
         </motion.div>
 
@@ -415,17 +425,16 @@ export default function NewArrivals() {
           viewport={{ once: true }}
           className="mb-8"
         >
-          <FilterTabs activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+          <FilterTabs
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+          />
         </motion.div>
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
           {filteredProducts.map((product, index) => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
-              index={index}
-            />
+            <ProductCard key={product.id} product={product} index={index} />
           ))}
         </div>
 
@@ -437,8 +446,8 @@ export default function NewArrivals() {
           viewport={{ once: true }}
           className="text-center mt-12"
         >
-          <Button 
-            asChild 
+          <Button
+            asChild
             size="lg"
             className="rounded-full px-8 py-6 bg-black text-white hover:bg-gray-800 transition-all duration-300 font-semibold text-base shadow-lg hover:shadow-xl"
           >
@@ -450,7 +459,6 @@ export default function NewArrivals() {
             </Link>
           </Button>
         </motion.div>
-
       </div>
     </section>
   );

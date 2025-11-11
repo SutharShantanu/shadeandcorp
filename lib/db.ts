@@ -1,34 +1,108 @@
-// This is a placeholder implementation
-// In a real app, replace with actual database queries
+import User, { IUser } from '@/models/User';
+import connectDB from '@/lib/mongoDB';
 
-interface User {
-  id: string
-  email: string
-  name: string | null
-  image?: string | null
-  passwordHash?: string
+export async function getUserByEmail(email: string): Promise<IUser | null> {
+  await connectDB();
+  return User.findOne({ email }).lean();
 }
 
-const mockUsers: User[] = []
-
-export async function getUserByEmail(email: string): Promise<User | null> {
-  // In a real implementation, query your database
-  return mockUsers.find(user => user.email === email) || null
+export async function getUserById(id: string): Promise<IUser | null> {
+  await connectDB();
+  return User.findById(id).lean();
 }
 
-export async function createUser(data: Omit<User, "id">): Promise<User> {
-  const newUser = {
-    id: Math.random().toString(36).slice(2),
-    ...data,
-  }
-  mockUsers.push(newUser)
-  return newUser
+export async function createUser(userData: Partial<IUser>): Promise<IUser> {
+  await connectDB();
+  const user = new User(userData);
+  return user.save();
 }
 
-export async function updateUser(id: string, data: Partial<User>): Promise<User | null> {
-  const index = mockUsers.findIndex(user => user.id === id)
-  if (index === -1) return null
-  
-  mockUsers[index] = { ...mockUsers[index], ...data }
-  return mockUsers[index]
+export async function updateUser(id: string, updateData: Partial<IUser>): Promise<IUser | null> {
+  await connectDB();
+  return User.findByIdAndUpdate(id, updateData, { new: true });
+}
+
+export async function setEmailVerificationToken(email: string, token: string): Promise<void> {
+  await connectDB();
+  const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  await User.findOneAndUpdate(
+    { email },
+    { 
+      emailVerificationToken: token,
+      emailVerificationExpires: expires
+    }
+  );
+}
+
+export async function verifyEmailToken(token: string): Promise<IUser | null> {
+  await connectDB();
+  return User.findOneAndUpdate(
+    {
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: new Date() }
+    },
+    {
+      isEmailVerified: true,
+      isVerified: true,
+      emailVerificationToken: undefined,
+      emailVerificationExpires: undefined
+    },
+    { new: true }
+  );
+}
+
+export async function setPasswordResetToken(email: string, token: string): Promise<void> {
+  await connectDB();
+  const expires = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+  await User.findOneAndUpdate(
+    { email },
+    {
+      resetPasswordToken: token,
+      resetPasswordExpires: expires
+    }
+  );
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<boolean> {
+  await connectDB();
+  const user = await User.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: new Date() }
+  });
+
+  if (!user) return false;
+
+  user.password = newPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
+  return true;
+}
+
+export async function setPhoneVerificationCode(phone: string, code: string): Promise<void> {
+  await connectDB();
+  const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  await User.findOneAndUpdate(
+    { phone },
+    {
+      phoneVerificationCode: code,
+      phoneVerificationExpires: expires
+    }
+  );
+}
+
+export async function verifyPhoneCode(phone: string, code: string): Promise<boolean> {
+  await connectDB();
+  const result = await User.findOneAndUpdate(
+    {
+      phone,
+      phoneVerificationCode: code,
+      phoneVerificationExpires: { $gt: new Date() }
+    },
+    {
+      phoneVerificationCode: undefined,
+      phoneVerificationExpires: undefined
+    }
+  );
+  return !!result;
 }

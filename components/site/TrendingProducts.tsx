@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import NumberFlow from "@number-flow/react";
-import { Zap, Clock, TrendingUp, Star } from "lucide-react";
+import { Zap, Clock, TrendingUp, Star, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 // Enhanced product data matching our new Product type
 const trendingProducts: Product[] = [
@@ -150,7 +151,7 @@ const trendingProducts: Product[] = [
     ],
     category: "Accessories",
     subCategory: "Jewelry",
-    sizes: ["One Size"],
+    sizes: ["Default"],
     colors: [
       { name: "Rainbow Set", value: "#F59E0B" },
       { name: "Silver Collection", value: "#D1D5DB" },
@@ -298,7 +299,7 @@ const CountdownTimer = ({ endDate }: { endDate: Date }) => {
         { value: timeLeft.seconds, label: "Seconds" },
       ].map((item, index) => (
         <div key={item.label} className="flex flex-col items-center">
-          <div className="bg-gradient-to-br from-red-500 to-pink-600 text-white rounded-lg p-3 min-w-[70px] shadow-lg">
+          <div className="bg-linear-to-br from-red-500 to-pink-600 text-white rounded-lg p-3 min-w-[70px] shadow-lg">
             <NumberFlow
               className="text-2xl font-bold font-mono"
               value={item.value}
@@ -436,8 +437,8 @@ export default function TrendingProducts() {
   };
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-white to-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 md:py-24">
+      <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -457,7 +458,7 @@ export default function TrendingProducts() {
           </h2>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
             Discover our exclusive collections with limited-time discounts.
-            Don't miss out on these amazing deals!
+            Don&apos;t miss out on these amazing deals!
           </p>
 
           {/* Countdown Timer */}
@@ -490,7 +491,7 @@ export default function TrendingProducts() {
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-4"
         >
           {filteredProducts.map((product, index) => (
             <ProductCard
@@ -511,19 +512,15 @@ export default function TrendingProducts() {
           viewport={{ once: true }}
           className="text-center mt-12"
         >
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
+          <Link
+            href="/products"
             className="rounded-full px-8 py-6 border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition-all duration-300 font-semibold text-base"
           >
-            <a href="/products">
-              View All Special Offers
-              <span className="ml-2 transform group-hover:translate-x-1 transition-transform duration-300">
-                →
-              </span>
-            </a>
-          </Button>
+            View All Special Offers
+            <span className="ml-2 transform group-hover:translate-x-1 transition-transform duration-300">
+              <ArrowRight />
+            </span>
+          </Link>
         </motion.div>
       </div>
     </section>

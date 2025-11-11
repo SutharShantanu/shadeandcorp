@@ -29,17 +29,17 @@ const categories: CategoryType[] = [
     link: "/category/mens",
     itemsCount: 1247,
     isTrending: true,
-    discount: "UP TO 40% OFF"
+    discount: "UP TO 40% OFF",
   },
   {
-    id: "2", 
+    id: "2",
     name: "Women's Fashion",
     image: "/categories/womens-fashion.jpg",
     description: "Trend-setting pieces for every occasion",
     link: "/category/womens",
     itemsCount: 2156,
     isTrending: true,
-    discount: "NEW ARRIVALS"
+    discount: "NEW ARRIVALS",
   },
   {
     id: "3",
@@ -48,16 +48,16 @@ const categories: CategoryType[] = [
     description: "Complete your look with our accessories",
     link: "/category/accessories",
     itemsCount: 843,
-    isNew: true
+    isNew: true,
   },
   {
     id: "4",
     name: "Footwear",
-    image: "/categories/footwear.jpg", 
+    image: "/categories/footwear.jpg",
     description: "Step out in style with our shoe collection",
     link: "/category/footwear",
     itemsCount: 692,
-    discount: "FLAT 30% OFF"
+    discount: "FLAT 30% OFF",
   },
   {
     id: "5",
@@ -66,7 +66,7 @@ const categories: CategoryType[] = [
     description: "Light and breezy styles for warm days",
     link: "/collection/summer",
     itemsCount: 534,
-    isNew: true
+    isNew: true,
   },
   {
     id: "6",
@@ -75,13 +75,13 @@ const categories: CategoryType[] = [
     description: "Stay warm and stylish",
     link: "/collection/winter",
     itemsCount: 387,
-    isTrending: true
-  }
+    isTrending: true,
+  },
 ];
 
-const CategoryCard: React.FC<{ category: CategoryType; index: number }> = ({ 
-  category, 
-  index 
+const CategoryCard: React.FC<{ category: CategoryType; index: number }> = ({
+  category,
+  index,
 }) => {
   return (
     <motion.div
@@ -102,10 +102,10 @@ const CategoryCard: React.FC<{ category: CategoryType; index: number }> = ({
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             />
-            
+
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-            
+
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-2">
               {category.discount && (
@@ -127,7 +127,10 @@ const CategoryCard: React.FC<{ category: CategoryType; index: number }> = ({
 
             {/* Items Count */}
             <div className="absolute top-3 right-3">
-              <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm text-gray-900 px-2 py-1 text-xs">
+              <Badge
+                variant="secondary"
+                className="bg-white/90 backdrop-blur-sm text-gray-900 px-2 py-1 text-xs"
+              >
                 {category.itemsCount}+ items
               </Badge>
             </div>
@@ -135,8 +138,8 @@ const CategoryCard: React.FC<{ category: CategoryType; index: number }> = ({
             {/* Hover Overlay Content */}
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div className="bg-black/70 backdrop-blur-sm rounded-full p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-white text-black hover:bg-gray-100 font-semibold rounded-full px-6"
                 >
                   Shop Now
@@ -171,7 +174,7 @@ const CategoryCard: React.FC<{ category: CategoryType; index: number }> = ({
 export default function ProductCategories() {
   return (
     <section className="py-16 md:py-24 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto ">
         {/* Section Header - Inspired by Myntra/Zara */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -180,25 +183,25 @@ export default function ProductCategories() {
           viewport={{ once: true }}
           className="text-center mb-12 md:mb-16"
         >
-          <Badge variant="outline" className="mb-4 px-4 py-1 text-sm font-semibold border-gray-300">
+          <Badge
+            variant="outline"
+            className="mb-4 px-4 py-1 text-sm font-semibold border-gray-300"
+          >
             EXPLORE COLLECTIONS
           </Badge>
           <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
             Shop By Category
           </h2>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Discover curated collections inspired by the latest trends from top fashion brands
+            Discover curated collections inspired by the latest trends from top
+            fashion brands
           </p>
         </motion.div>
 
         {/* Categories Grid - H&M Style Layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {categories.map((category, index) => (
-            <CategoryCard 
-              key={category.id} 
-              category={category} 
-              index={index}
-            />
+            <CategoryCard key={category.id} category={category} index={index} />
           ))}
         </div>
 
@@ -210,9 +213,9 @@ export default function ProductCategories() {
           viewport={{ once: true }}
           className="text-center mt-12"
         >
-          <Button 
-            asChild 
-            variant="outline" 
+          <Button
+            asChild
+            variant="outline"
             size="lg"
             className="rounded-full px-8 py-6 border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition-all duration-300 font-semibold text-base"
           >
@@ -238,7 +241,7 @@ export default function ProductCategories() {
             { name: "Formal Attire", href: "/style/formal", count: "856" },
             { name: "Sportswear", href: "/style/sports", count: "723" },
             { name: "Party Dresses", href: "/style/party", count: "634" },
-            { name: "Ethnic Wear", href: "/style/ethnic", count: "945" }
+            { name: "Ethnic Wear", href: "/style/ethnic", count: "945" },
           ].map((link) => (
             <Link
               key={link.name}

@@ -116,7 +116,7 @@ const FeatureCard: React.FC<{ feature: FeatureItem; index: number }> = ({
 export default function Features() {
   return (
     <section className="py-16 md:py-24 bg-linear-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto ">
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
