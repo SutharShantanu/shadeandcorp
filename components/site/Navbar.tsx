@@ -1,38 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Kbd } from "@/components/ui/kbd";
 import {
-  Search,
-  Menu,
   Heart,
+  Search,
   ShoppingBag,
+  User,
   Settings,
   LogOut,
-  User,
   BadgeCheck,
+  CreditCard,
+  MapPin,
+  Bell,
+  BadgeInfo,
 } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { useEffect, useRef, useState } from "react";
+import { Menu } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -41,16 +28,35 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Kbd } from "@/components/ui/kbd";
-import { Badge } from "@/components/ui/badge";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import {} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuGroup,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
 
 const categories = [
   {
@@ -131,76 +137,193 @@ const categories = [
   },
 ];
 
-// Subcategories for detailed dropdowns
 const detailedCategories = {
   men: [
     {
       title: "Topwear",
-      items: ["T-Shirts", "Casual Shirts", "Formal Shirts", "Sweaters", "Sweatshirts", "Jackets"]
+      items: [
+        "T-Shirts",
+        "Casual Shirts",
+        "Formal Shirts",
+        "Sweaters",
+        "Sweatshirts",
+        "Jackets",
+      ],
     },
     {
       title: "Bottomwear",
-      items: ["Jeans", "Casual Trousers", "Formal Trousers", "Shorts", "Track Pants"]
+      items: [
+        "Jeans",
+        "Casual Trousers",
+        "Formal Trousers",
+        "Shorts",
+        "Track Pants",
+      ],
     },
     {
       title: "Footwear",
-      items: ["Casual Shoes", "Sports Shoes", "Formal Shoes", "Sandals", "Sneakers"]
+      items: [
+        "Casual Shoes",
+        "Sports Shoes",
+        "Formal Shoes",
+        "Sandals",
+        "Sneakers",
+      ],
     },
     {
       title: "Accessories",
-      items: ["Watches", "Belts", "Wallets", "Sunglasses", "Bags", "Caps"]
-    }
+      items: ["Watches", "Belts", "Wallets", "Sunglasses", "Bags", "Caps"],
+    },
   ],
   women: [
     {
       title: "Western Wear",
-      items: ["Dresses", "Tops", "T-Shirts", "Jeans", "Trousers", "Skirts"]
+      items: ["Dresses", "Tops", "T-Shirts", "Jeans", "Trousers", "Skirts"],
     },
     {
       title: "Indian Wear",
-      items: ["Kurtas", "Sarees", "Lehengas", "Salwar Suits", "Blouses"]
+      items: ["Kurtas", "Sarees", "Lehengas", "Salwar Suits", "Blouses"],
     },
     {
       title: "Footwear",
-      items: ["Heels", "Flats", "Sandals", "Sports Shoes", "Boots"]
+      items: ["Heels", "Flats", "Sandals", "Sports Shoes", "Boots"],
     },
     {
       title: "Beauty & Accessories",
-      items: ["Jewelry", "Handbags", "Watches", "Sunglasses", "Scarves"]
-    }
+      items: ["Jewelry", "Handbags", "Watches", "Sunglasses", "Scarves"],
+    },
   ],
   kids: [
     {
       title: "Boys (2-16 Years)",
-      items: ["T-Shirts", "Shirts", "Jeans", "Shorts", "Jackets", "Sportswear"]
+      items: ["T-Shirts", "Shirts", "Jeans", "Shorts", "Jackets", "Sportswear"],
     },
     {
       title: "Girls (2-16 Years)",
-      items: ["Dresses", "Tops", "Skirts", "Jeans", "Leggings", "Party Wear"]
+      items: ["Dresses", "Tops", "Skirts", "Jeans", "Leggings", "Party Wear"],
     },
     {
       title: "Infants (0-2 Years)",
-      items: ["Rompers", "Bodysuits", "Sleepwear", "Winter Wear", "Accessories"]
+      items: [
+        "Rompers",
+        "Bodysuits",
+        "Sleepwear",
+        "Winter Wear",
+        "Accessories",
+      ],
     },
     {
       title: "Toys & Accessories",
-      items: ["Backpacks", "Shoes", "Hats", "Water Bottles", "Stationery"]
-    }
-  ]
+      items: ["Backpacks", "Shoes", "Hats", "Water Bottles", "Stationery"],
+    },
+  ],
 };
 
-export default function Navbar() {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState(false);
+interface CategoryNavigationProps {
+  className?: string;
+}
+
+export function CategoryNavigation({ className }: CategoryNavigationProps) {
+  return (
+    <NavigationMenu className={className}>
+      <NavigationMenuList>
+        {categories.map((category) => (
+          <NavigationMenuItem key={category.title}>
+            <NavigationMenuTrigger>{category.title}</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <div className="w-[800px] p-6">
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold">
+                      {category.title} Collection
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      {category.items.map((item) => (
+                        <Link
+                          key={item.title}
+                          href={item.href}
+                          className="group flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                        >
+                          <div className="h-2 w-2 rounded-full bg-zinc-300 group-hover:bg-zinc-600" />
+                          <span className="text-sm">{item.title}</span>
+                        </Link>
+                      ))}
+                    </div>
+
+                    {(category.title === "Men" ||
+                      category.title === "Women" ||
+                      category.title === "Kids") && (
+                      <div className="pt-4 border-t">
+                        <h4 className="font-medium mb-3">Shop by Category</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          {detailedCategories[
+                            category.title.toLowerCase() as keyof typeof detailedCategories
+                          ]?.map((subcat) => (
+                            <div key={subcat.title}>
+                              <h5 className="text-sm font-medium mb-2">
+                                {subcat.title}
+                              </h5>
+                              <div className="space-y-1">
+                                {subcat.items.map((item) => (
+                                  <Link
+                                    key={item}
+                                    href={`/${category.title.toLowerCase()}/${item
+                                      .toLowerCase()
+                                      .replace(/\s+/g, "-")}`}
+                                    className="block text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                                  >
+                                    {item}
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="relative rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                    <Image
+                      src={category.image}
+                      alt={`${category.title} Collection`}
+                      width={400}
+                      height={300}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-4 left-4">
+                      <Link
+                        href={`/${category.title.toLowerCase()}`}
+                        className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                      >
+                        Shop {category.title}
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        ))}
+      </NavigationMenuList>
+    </NavigationMenu>
+  );
+}
+
+interface SearchBarProps {
+  className?: string;
+}
+
+export function SearchBar({ className }: SearchBarProps) {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const key = e.key?.toLowerCase?.();
       if ((e.ctrlKey || e.metaKey) && key === "k") {
         e.preventDefault();
-        setSearch(true);
+        setIsSearchOpen(true);
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.select();
@@ -211,238 +334,297 @@ export default function Navbar() {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
-  
-  const { data: session } = useSession();
 
+  return (
+    <div className={`flex w-1/3 items-center relative ${className}`}>
+      <Input
+        ref={inputRef}
+        placeholder="Search products..."
+        className="pl-10"
+        onClick={() => setIsSearchOpen(true)}
+        aria-label="Search products"
+      />
+      <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
+      <Kbd className="absolute right-3 pointer-events-none">Ctrl + K</Kbd>
+    </div>
+  );
+}
+interface ActionButtonsProps {
+  wishlistCount?: number;
+  cartCount?: number;
+  className?: string;
+}
+
+export function ActionButtons({
+  wishlistCount = 0,
+  cartCount = 0,
+  className,
+}: ActionButtonsProps) {
+  return (
+    <TooltipProvider>
+      <div className={`flex items-center gap-2 ${className}`}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link href="/wishlist">
+              <Button variant="ghost" size="icon" className="relative">
+                <Heart className="h-5 w-5 fill-red-400 stroke-red-400" />
+                {wishlistCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
+                  >
+                    {wishlistCount}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>Wishlist</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link href="/cart">
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingBag className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <Badge
+                    variant="default"
+                    className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
+                  >
+                    {cartCount}
+                  </Badge>
+                )}
+              </Button>
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent>Cart</TooltipContent>
+        </Tooltip>
+      </div>
+    </TooltipProvider>
+  );
+}
+interface UserMenuProps {
+  className?: string;
+}
+
+export function UserMenu({ className }: UserMenuProps) {
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  if (!session) {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <Button
+          onClick={() => router.push("/login")}
+          size="sm"
+          variant="outline"
+        >
+          Login
+        </Button>
+        <Button onClick={() => router.push("/signup")} size="sm">
+          Sign Up
+        </Button>
+      </div>
+    );
+  }
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
+
+  const handleSignOut = async () => {
+    signOut();
+    router.push("/");
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="relative h-9 w-9 rounded-full transition-all hover:scale-105"
+        >
+          <Avatar className="h-9 w-9 transition-all">
+            <AvatarImage
+              src={session.user?.image || ""}
+              alt={session.user?.name || "User avatar"}
+            />
+            <AvatarFallback className="">
+              {session.user?.name?.[0].toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        className="w-64"
+        align="end"
+        forceMount
+        sideOffset={8}
+      >
+        <TooltipProvider>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium leading-none flex items-center gap-1.5">
+                  {session.user?.name}
+                  {session.user?.isVerified ? (
+                    <BadgeCheck className="h-4 w-4 fill-accent-foreground text-primary-foreground" />
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <BadgeInfo className="h-4 w-4 text-destructive" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Your email is not verified.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </p>
+              </div>
+              <p className="text-xs leading-none text-muted-foreground truncate">
+                {session.user?.email}
+              </p>
+            </div>
+          </DropdownMenuLabel>
+        </TooltipProvider>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => handleNavigation("/profile")}>
+            <User className="mr-1 h-4 w-4" />
+            <span>Profile</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleNavigation("/orders")}>
+            <ShoppingBag className="mr-1 h-4 w-4" />
+            <span>My Orders</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleNavigation("/wishlist")}>
+            <Heart className="mr-1 h-4 w-4" />
+            <span>Wishlist</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => handleNavigation("/addresses")}>
+            <MapPin className="mr-1 h-4 w-4" />
+            <span>Addresses</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => handleNavigation("/payment-methods")}
+          >
+            <CreditCard className="mr-1 h-4 w-4" />
+            <span>Payment Methods</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleNavigation("/notifications")}>
+            <Bell className="mr-1 h-4 w-4" />
+            <span>Notifications</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => handleNavigation("/settings")}>
+            <Settings className="mr-1 h-4 w-4" />
+            <span>Settings</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleSignOut}
+            className="text-red-600 focus:text-red-600"
+          >
+            <LogOut className="mr-1 h-4 w-4" />
+            <span>Log out</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+interface MobileMenuProps {
+  categories: Array<{
+    title: string;
+    items: Array<{ title: string; href: string }>;
+  }>;
+}
+
+export function MobileMenu({ categories }: MobileMenuProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="-ml-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 md:hidden"
+          aria-label="menu"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+        <SheetHeader className="text-left">
+          <SheetTitle>Menu</SheetTitle>
+          <SheetDescription>
+            Browse our collections and categories
+          </SheetDescription>
+        </SheetHeader>
+
+        <nav className="mt-8">
+          <div className="space-y-4">
+            {categories.map((category) => (
+              <div key={category.title} className="space-y-2">
+                <h3 className="font-semibold text-lg">{category.title}</h3>
+                <div className="grid grid-cols-1 gap-1 pl-4">
+                  {category.items.map((item) => (
+                    <Link
+                      key={item.title}
+                      href={item.href}
+                      className="block py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={() => setOpen(false)}
+                    >
+                      {item.title}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </nav>
+      </SheetContent>
+    </Sheet>
+  );
+}
+export default function Navbar() {
   const cartCount = 3;
   const wishlistCount = 5;
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur-sm dark:bg-zinc-900/80">
+    <header className="sticky top-0 z-50 backdrop-blur-sm ">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 py-4">
+        {/* Left Section - Mobile Menu & Logo */}
         <div className="flex items-center gap-4">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="-ml-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 md:hidden"
-                aria-label="menu"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-                <SheetDescription>
-                  Browse our collections and categories
-                </SheetDescription>
-              </SheetHeader>
-              {/* Mobile navigation content */}
-            </SheetContent>
-          </Sheet>
+          <MobileMenu categories={categories} />
 
-          <Link href="/" className="text-4xl font-bold font-body">
+          <Link href="/" className="text-2xl font-bold font-body md:text-4xl">
             Shade & Co
           </Link>
         </div>
 
+        {/* Center Section - Navigation & Search */}
         <nav className="hidden flex-1 items-center gap-6 md:flex">
-          <NavigationMenu>
-            <NavigationMenuList>
-              {categories.map((category) => (
-                <NavigationMenuItem key={category.title}>
-                  <NavigationMenuTrigger>
-                    {category.title}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="w-[800px] p-6">
-                      <div className="grid grid-cols-2 gap-8">
-                        <div className="space-y-6">
-                          <h3 className="text-lg font-semibold">{category.title} Collection</h3>
-                          <div className="grid grid-cols-2 gap-4">
-                            {category.items.map((item) => (
-                              <Link
-                                key={item.title}
-                                href={item.href}
-                                className="group flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                              >
-                                <div className="h-2 w-2 rounded-full bg-zinc-300 group-hover:bg-zinc-600" />
-                                <span className="text-sm">{item.title}</span>
-                              </Link>
-                            ))}
-                          </div>
-                          
-                          {/* Detailed subcategories for main categories */}
-                          {(category.title === "Men" || category.title === "Women" || category.title === "Kids") && (
-                            <div className="pt-4 border-t">
-                              <h4 className="font-medium mb-3">Shop by Category</h4>
-                              <div className="grid grid-cols-2 gap-4">
-                                {detailedCategories[category.title.toLowerCase() as keyof typeof detailedCategories]?.map((subcat) => (
-                                  <div key={subcat.title}>
-                                    <h5 className="text-sm font-medium mb-2">{subcat.title}</h5>
-                                    <div className="space-y-1">
-                                      {subcat.items.map((item) => (
-                                        <Link
-                                          key={item}
-                                          href={`/${category.title.toLowerCase()}/${item.toLowerCase().replace(/\s+/g, '-')}`}
-                                          className="block text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                                        >
-                                          {item}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="relative rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800">
-                          <Image
-                            src={category.image}
-                            alt={`${category.title} Collection`}
-                            width={400}
-                            height={300}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute bottom-4 left-4">
-                            <Link 
-                              href={`/${category.title.toLowerCase()}`}
-                              className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                            >
-                              Shop {category.title}
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
-
-          <div className="flex w-1/3 items-center relative">
-            <Input
-              ref={inputRef}
-              placeholder="Search products..."
-              className="pl-10"
-              onClick={() => setSearch(true)}
-              aria-label="Search products"
-            />
-            <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
-            <Kbd className="absolute right-3 pointer-events-none">Ctrl + K</Kbd>
-          </div>
+          <CategoryNavigation />
+          <SearchBar />
         </nav>
 
+        {/* Right Section - Actions & User Menu */}
         <div className="flex items-center gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/wishlist">
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Heart className="h-5 w-5 fill-red-400 stroke-red-400" />
-                    {wishlistCount > 0 && (
-                      <Badge
-                        variant="destructive"
-                        className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
-                      >
-                        {wishlistCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Wishlist</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href="/cart">
-                  <Button variant="ghost" size="icon" className="relative">
-                    <ShoppingBag className="h-5 w-5" />
-                    {cartCount > 0 && (
-                      <Badge
-                        variant="default"
-                        className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
-                      >
-                        {cartCount}
-                      </Badge>
-                    )}
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Cart</TooltipContent>
-            </Tooltip>
-
-            {session ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-8 w-8 rounded-full"
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={session.user?.image || ""}
-                        alt={session.user?.name || ""}
-                      />
-                      <AvatarFallback>
-                        {session.user?.name?.[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none flex items-center gap-1">
-                        {session.user?.name}
-                        <BadgeCheck className="h-4 w-4 text-blue-500" />
-                      </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {session.user?.email}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <User className="mr-2 h-4 w-4" />
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    router.push("/login");
-                  }}
-                  size="sm"
-                >
-                  Login
-                </Button>
-
-                <Link href="/signup">
-                  <Button variant="secondary" size="sm">
-                    Sign Up
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </TooltipProvider>
+          <ActionButtons wishlistCount={wishlistCount} cartCount={cartCount} />
+          <UserMenu />
         </div>
       </div>
     </header>

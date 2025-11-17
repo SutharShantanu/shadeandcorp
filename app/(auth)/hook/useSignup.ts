@@ -1,70 +1,231 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { registerSchema } from "@/types/auth"
-import type { z } from "zod"
-type RegisterInput = z.infer<typeof registerSchema>
-import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useState, useCallback } from "react";
+import { useForm, UseFormReturn } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
+type BaseFormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+};
+
+// Schema allows EITHER email or phone (not both)
+const signupSchema = z
+  .object({
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    email: z.string(),
+    phone: z.string(),
+    password: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    const hasEmail = data.email.trim() !== "";
+    const hasPhone = data.phone.trim() !== "";
+    const hasPassword = data.password.trim() !== "";
+
+    // Require exactly one signup method
+    if (!hasEmail) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Email is required",
+        path: ["email"],
+      });
+      if (!hasPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Password is required",
+          path: ["password"],
+        });
+      }
+    }
+    if (!hasPhone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone number is required.",
+        path: ["phone"],
+      });
+    }
+
+    if (hasEmail && hasPhone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please use either email or phone number, not both",
+        path: ["phone"],
+      });
+      return;
+    }
+
+    // Email flow
+    if (hasEmail) {
+      const emailCheck = z.string().email().safeParse(data.email);
+      if (!emailCheck.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Please enter a valid email address",
+          path: ["email"],
+        });
+      }
+
+      if (!hasPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Password is required for email signup",
+          path: ["password"],
+        });
+      } else if (data.password.length < 6) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Password must be at least 6 characters",
+          path: ["password"],
+        });
+      }
+    }
+
+    // Phone flow
+    if (hasPhone) {
+      const digits = data.phone.replace(/\D/g, "");
+      if (digits.length < 10) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Phone number must be at least 10 digits",
+          path: ["phone"],
+        });
+      }
+    }
+  });
+
+export type SignupForm = UseFormReturn<BaseFormValues>;
 
 export function useSignup() {
-  const router = useRouter()
-  const form = useForm<RegisterInput>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: { name: "", email: "", password: "" },
-    mode: "onSubmit",
-  })
+  const router = useRouter();
 
-  const [loading, setLoading] = useState(false)
+  const [signupMethod, setSignupMethod] = useState<"email" | "phone" | null>(
+    "email"
+  );
+  const [loading, setLoading] = useState(false);
 
-  async function onSubmit(data: RegisterInput) {
-    setLoading(true)
+  const form = useForm<BaseFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      password: "",
+    },
+    mode: "all",
+  });
+
+  const updateSignupMethod = useCallback(
+    (method: "email" | "phone" | null) => {
+      setSignupMethod(method);
+      form.clearErrors();
+
+      if (method === "email") {
+        form.setValue("phone", "");
+      } else if (method === "phone") {
+        form.setValue("email", "");
+        form.setValue("password", "");
+      }
+    },
+    [form]
+  );
+
+  async function onSubmit(data: BaseFormValues) {
+    setLoading(true);
+
     try {
+      const hasEmail = data.email.trim() !== "";
+      const hasPhone = data.phone.trim() !== "";
+
+      const actualMethod = hasEmail
+        ? "email"
+        : hasPhone
+        ? "phone"
+        : signupMethod;
+
+      if (!actualMethod) {
+        form.setError("root", {
+          type: "manual",
+          message: "Please choose a signup method",
+        });
+        return false;
+      }
+
+      const submitData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: actualMethod === "email" ? data.email : undefined,
+        phone: actualMethod === "phone" ? data.phone : undefined,
+        password:
+          actualMethod === "email" ? data.password : "temporary-password", // ignored for phone
+      };
+
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
+        body: JSON.stringify(submitData),
+      });
 
-      const json = await res.json()
+      const json = await res.json();
 
       if (!res.ok) {
         form.setError("root", {
           type: "manual",
-          message: json?.error || "Registration failed",
-        })
-        return false
+          message: json?.error || "Registration failed. Please try again.",
+        });
+        return false;
       }
 
-      const result = await signIn("credentials", {
-        redirect: false,
-        email: data.email,
-        password: data.password,
-      })
+      // Auto sign-in for email signup
+      if (actualMethod === "email") {
+        const result = await signIn("credentials", {
+          redirect: false,
+          emailOrPhone: data.email,
+          password: data.password,
+        });
 
-      if (result?.error) {
-        form.setError("root", {
-          type: "manual",
-          message: "Registration succeeded but sign-in failed",
-        })
-        return false
+        if (result?.error) {
+          form.setError("root", {
+            type: "manual",
+            message:
+              "Registration succeeded but sign-in failed. Please log in manually.",
+          });
+          return false;
+        }
+
+        router.push("/");
+        router.refresh();
+      } else {
+        router.push("/login?message=registration-success");
       }
 
-      router.push("/")
-      router.refresh()
-      return true
-    } catch (error) {
-      console.error("Signup error:", error)
-      form.setError("root", { type: "manual", message: "Server error" })
-      return false
+      return true;
+    } catch (err) {
+      console.error("Signup error:", err);
+      form.setError("root", {
+        type: "manual",
+        message: "Something went wrong. Please try again.",
+      });
+      return false;
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
-  return { form, loading, onSubmit }
+  return {
+    form,
+    loading,
+    onSubmit,
+    signupMethod,
+    updateSignupMethod,
+  };
 }
 
-export default useSignup
+export default useSignup;

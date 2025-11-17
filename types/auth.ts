@@ -1,9 +1,11 @@
-import { z } from "zod"
-import type { DefaultSession } from "next-auth"
+import { z } from "zod";
+import type { DefaultSession } from "next-auth";
+import { DefaultJWT } from "next-auth/jwt";
+import { parsePhoneNumber } from "libphonenumber-js";
 
-// Login validation schema
+// LOGIN SCHEMA
 export const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  emailOrPhone: z.string().min(1, "Email or phone number is required"),
   password: z
     .string()
     .min(6, "Password must be at least 6 characters long")
@@ -11,52 +13,146 @@ export const loginSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
 });
+export type LoginFormData = z.infer<typeof loginSchema>;
 
-export type LoginInput = z.infer<typeof loginSchema>;
+// REGISTER SCHEMA
 
-// Registration validation schema
-export const registerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-})
+export const registerSchema = z
+  .object({
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
 
-// Inferred types from schemas
-export interface LoginFormData {
-    email: string;
-    password: string;
-}
+    password: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    const hasEmail = typeof data.email === "string" && data.email.trim() !== "";
+    const hasPhone = typeof data.phone === "string" && data.phone.trim() !== "";
+    const hasPassword = typeof data.password === "string" && data.password.trim() !== "";    
 
+    // REQUIRE: at least 1 method
+    if (!hasEmail && !hasPhone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Either email or phone number is required",
+        path: ["email"],
+      });
+      return;
+    }
+
+    // NOT BOTH
+    if (hasEmail && hasPhone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please use either email or phone number, not both",
+        path: ["phone"],
+      });
+      return;
+    }
+
+    // EMAIL SIGNUP
+    if (hasEmail) {
+      const emailCheck = z.string().email().safeParse(data.email);
+      if (!emailCheck.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Please enter a valid email address",
+          path: ["email"],
+        });
+      }
+
+      if (!hasPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Password is required for email signup",
+          path: ["password"],
+        });
+      } else {
+        if (data.password!.length < 6)
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Password must be at least 6 characters",
+            path: ["password"],
+          });
+
+        if (!/[A-Z]/.test(data.password!))
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Password must contain at least one uppercase letter",
+            path: ["password"],
+          });
+
+        if (!/[0-9]/.test(data.password!))
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Password must contain at least one number",
+            path: ["password"],
+          });
+
+        if (!/[^A-Za-z0-9]/.test(data.password!))
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Password must contain at least one special character",
+            path: ["password"],
+          });
+      }
+    }
+
+    // PHONE SIGNUP
+    if (hasPhone) {
+      try {
+        const phoneObj = parsePhoneNumber(data.phone!);
+        if (!phoneObj.isValid()) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Please enter a valid phone number",
+            path: ["phone"],
+          });
+        }
+      } catch {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Please enter a valid phone number",
+          path: ["phone"],
+        });
+      }
+    }
+  });
+
+// Login response type
 export interface LoginResponse {
-    success: boolean;
-    message: string;
-    token?: string;
-    error?: string;
+  success: boolean;
+  message: string;
+  token?: string;
+  error?: string;
 }
-// NextAuth type extensions
+
+// NEXTAUTH TYPES
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
-      id: string
-      email: string
-      name: string | null
-      image?: string | null
-      provider?: string
-    }
+      id: string;
+      email: string;
+      name: string | null;
+      image?: string | null;
+      provider?: string;
+      isVerified:boolean;
+    };
   }
 
   interface User {
-    id: string
-    email: string
-    name: string | null
-    image?: string | null
-    provider?: string
+    id: string;
+    email: string;
+    name: string | null;
+    image?: string | null;
+    provider?: string;
   }
 }
 
 declare module "next-auth/jwt" {
-  interface JWT {
-    id?: string
-    provider?: string
+  interface JWT extends DefaultJWT {
+    id: string;
+    provider?: string;
   }
 }

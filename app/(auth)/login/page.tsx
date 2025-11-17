@@ -32,7 +32,6 @@ import Image from "next/image";
 import { CircleQuestionMark } from "lucide-react";
 
 export default function Login() {
-  1;
   const router = useRouter();
   const { form, loading, onSubmit } = useLogin();
 
@@ -117,16 +116,16 @@ export default function Login() {
 
                     <FormField
                       control={form.control}
-                      name="email"
+                      name="emailOrPhone"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Email Address</FormLabel>
+                          <FormLabel>Email or Phone Number</FormLabel>
                           <FormControl>
                             <Input
-                              id="email"
-                              type="email"
-                              placeholder="you@example.com"
-                              aria-label="Email Address"
+                              id="emailOrPhone"
+                              type="text"
+                              placeholder="you@example.com or +1234567890"
+                              aria-label="Email or Phone Number"
                               aria-required="true"
                               {...field}
                             />
@@ -164,6 +163,12 @@ export default function Login() {
                         <CircleQuestionMark size={14} className="" />
                       </Link>
                     </div>
+
+                    {form.formState.errors.root && (
+                      <div className="text-sm text-destructive">
+                        {form.formState.errors.root.message}
+                      </div>
+                    )}
 
                     <Button
                       type="submit"

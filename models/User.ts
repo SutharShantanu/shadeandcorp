@@ -10,6 +10,7 @@ export const GenderEnum = {
 
 export const RoleEnum = {
   USER: "user",
+  CUSTOMER: "customer",
   SELLER: "seller",
   ADMIN: "admin",
   SUPPORT: "support",
@@ -111,7 +112,7 @@ const UserSchema: Schema<IUser> = new Schema({
   resetPasswordExpires: { type: Date },
   phoneVerificationCode: { type: String },
   phoneVerificationExpires: { type: Date },
-  role: { type: String, enum: Object.values(RoleEnum), default: RoleEnum.USER },
+  role: { type: String, enum: Object.values(RoleEnum), default: RoleEnum.CUSTOMER },
   accountStatus: { type: String, enum: Object.values(AccountStatusEnum), default: AccountStatusEnum.ACTIVE },
   addresses: [{
     address1: { type: String, required: true },

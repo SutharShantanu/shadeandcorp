@@ -22,19 +22,28 @@ export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       id: "credentials",
-      name: "Email & Password",
+      name: "Email/Phone & Password",
       credentials: {
-        email: { label: "Email", type: "email" },
+        emailOrPhone: { label: "Email or Phone", type: "text" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials, req) {
         try {
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error("Email and password are required!");
+          if (!credentials?.emailOrPhone || !credentials?.password) {
+            throw new Error("Email/Phone and password are required!");
           }
 
           await connectDB();
-          const user = await User.findOne({ email: credentials.email });
+          
+          // Check if input is email (contains @) or phone number
+          const isEmail = credentials.emailOrPhone.includes('@');
+          let user;
+          
+          if (isEmail) {
+            user = await User.findOne({ email: credentials.emailOrPhone.toLowerCase().trim() });
+          } else {
+            user = await User.findOne({ phone: credentials.emailOrPhone.trim() });
+          }
 
           if (!user) throw new Error("User not found");
           if (user.accountStatus === "suspended") throw new Error("Account suspended");
@@ -76,13 +85,10 @@ export const authOptions: NextAuthOptions = {
           user.lastLogin = new Date();
           await user.save();
 
-          const userObject = user.toObject();
-          const { password, ...safeUser } = userObject;
-          
           return {
-            id: user._id.toString(),
+            id: user._id?.toString?.() ?? (user._id as string),
             email: user.email,
-            name: `${user.firstName} ${user.lastName}`.trim(),
+            name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
             firstName: user.firstName,
             lastName: user.lastName,
             image: user.profilePicture,
@@ -116,24 +122,17 @@ export const authOptions: NextAuthOptions = {
     GitHubProvider({
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
-      async profile(profile) {
-        // Fetch full user data from GitHub
-        const response = await fetch('https://api.github.com/user', {
-          headers: {
-            Authorization: `token ${(profile as any).access_token}`,
-          },
-        });
-        const githubUser = await response.json();
-
-        const nameParts = (githubUser.name || profile.login).split(' ');
-        const firstName = nameParts[0] || profile.login;
+      profile(profile) {
+        // GitHub profile already contains the necessary data
+        const nameParts = (profile.name || profile.login || '').split(' ');
+        const firstName = nameParts[0] || profile.login || 'User';
         const lastName = nameParts.slice(1).join(' ') || '';
 
         return {
           id: profile.id.toString(),
-          name: githubUser.name || profile.login,
+          name: profile.name || profile.login,
           email: profile.email,
-          image: githubUser.avatar_url,
+          image: profile.avatar_url,
           firstName,
           lastName,
         }
@@ -142,11 +141,11 @@ export const authOptions: NextAuthOptions = {
   ],
 
   pages: {
-    signIn: "/auth/login",
-    signOut: "/auth/logout",
-    error: "/auth/error",
-    verifyRequest: "/auth/verify-email",
-    newUser: "/auth/signup",
+    signIn: "/login",
+    signOut: "/logout",
+    error: "/error",
+    verifyRequest: "/verify-email",
+    newUser: "/signup",
   },
 
   secret: process.env.NEXTAUTH_SECRET,
@@ -157,7 +156,7 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       try {
         await connectDB();
 
@@ -171,25 +170,42 @@ export const authOptions: NextAuthOptions = {
 
           if (!existingUser) {
             // Create new user for OAuth
+            const firstName = typeof user.firstName === 'string'
+              ? user.firstName
+              : (typeof user.name === 'string' ? user.name.split(' ')[0] : 'User');
+            const lastName = typeof user.lastName === 'string'
+              ? user.lastName
+              : (typeof user.name === 'string' ? user.name.split(' ').slice(1).join(' ') : '');
+
             const newUserData: Partial<IUser> = {
-              firstName: (user as any).firstName || user.name?.split(' ')[0] || 'User',
-              lastName: (user as any).lastName || user.name?.split(' ').slice(1).join(' ') || '',
+              firstName,
+              lastName,
               email: user.email!,
-              password: `${account.provider}-oauth`,
+              password: `${account.provider}-oauth-${Date.now()}`,
               profilePicture: user.image || '',
               isVerified: true,
               isEmailVerified: true,
-              role: "user",
+              role: "customer", // Default role for OAuth users
               accountStatus: "active",
             };
 
             await createUser(newUserData);
           } else {
             // Update existing user's last login
-            await updateUser(existingUser._id.toString(), { 
-              lastLogin: new Date(),
-              profilePicture: user.image || existingUser.profilePicture 
-            });
+            // Ensure existingUser._id is a valid ObjectId/string
+            const userId = typeof existingUser._id === 'string'
+              ? existingUser._id
+              : (existingUser._id && typeof existingUser._id.toString === 'function'
+                ? existingUser._id.toString()
+                : '');
+            if (userId) {
+              await updateUser(userId, { 
+                lastLogin: new Date(),
+                profilePicture: user.image || existingUser.profilePicture 
+              });
+            } else {
+              throw new Error('Invalid user ID for update');
+            }
           }
         }
 
@@ -207,11 +223,12 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         token.name = user.name;
         token.image = user.image;
-        token.firstName = (user as any).firstName;
-        token.lastName = (user as any).lastName;
-        token.isVerified = (user as any).isVerified;
-        token.isEmailVerified = (user as any).isEmailVerified;
-        token.role = (user as any).role;
+        // Use type guard for extra fields that only exist on IUser
+        if ('firstName' in user) token.firstName = user.firstName;
+        if ('lastName' in user) token.lastName = user.lastName;
+        if ('isVerified' in user) token.isVerified = user.isVerified;
+        if ('isEmailVerified' in user) token.isEmailVerified = user.isEmailVerified;
+        if ('role' in user) token.role = user.role;
         token.provider = account?.provider;
       }
 
@@ -239,11 +256,28 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name as string;
         session.user.image = token.image as string;
         session.user.email = token.email as string;
-        session.user.firstName = token.firstName as string;
-        session.user.lastName = token.lastName as string;
-        session.user.isVerified = token.isVerified as boolean;
-        session.user.isEmailVerified = token.isEmailVerified as boolean;
-        session.user.role = token.role as string;
+
+        // Assign only if fields exist in token
+        if ('firstName' in token) {
+          // @ts-expect-error: firstName is dynamically added to user
+          session.user.firstName = token.firstName as string;
+        }
+        if ('lastName' in token) {
+          // @ts-expect-error: lastName is dynamically added to user
+          session.user.lastName = token.lastName as string;
+        }
+        if ('isVerified' in token) {
+          // @ts-expect-error: isVerified is dynamically added to user
+          session.user.isVerified = token.isVerified as boolean;
+        }
+        if ('isEmailVerified' in token) {
+          // @ts-expect-error: isEmailVerified is dynamically added to user
+          session.user.isEmailVerified = token.isEmailVerified as boolean;
+        }
+        if ('role' in token) {
+          // @ts-expect-error: role is dynamically added to user
+          session.user.role = token.role as string;
+        }
         session.user.provider = token.provider as string;
       }
       return session;

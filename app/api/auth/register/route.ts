@@ -1,72 +1,116 @@
 import { NextResponse } from "next/server"
 import { registerSchema } from "@/types/auth"
-import { getUserByEmail, createUser } from "@/lib/db"
-import { hashPassword } from "@/lib/utils"
+import { getUserByEmail, getUserByPhone, createUser } from "@/lib/db"
+import connectDB from "@/lib/mongoDB"
+import User, { RoleEnum } from "@/models/User"
+import { parsePhoneNumber } from "libphonenumber-js";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json()
+    console.log("body",body)
     const parsed = registerSchema.safeParse(body)
+    console.log("parsed",parsed)
+
     if (!parsed.success) {
-      return NextResponse.json({ ok: false, error: "Invalid input" }, { status: 400 })
+      return NextResponse.json(
+        { ok: false, error: "Invalid input", details: parsed.error.issues },
+        { status: 400 }
+      )
+    }
+    
+    const { firstName, lastName, email, phone, password } = parsed.data;
+
+    // Connect to database
+    await connectDB()
+
+    // Check if user already exists by email
+    if (email && email.trim() !== "") {
+      const existingByEmail = await getUserByEmail(email)
+      if (existingByEmail) {
+        return NextResponse.json(
+          { ok: false, error: "User with this email already exists" },
+          { status: 409 }
+        )
+      }
     }
 
-    const { name, email, password } = parsed.data
+    // Parse phone number from E.164 format and extract country code
+    let phoneNumber: string | undefined = undefined
+    let countryCode: string = "91" // Default to India
 
-    const existing = await getUserByEmail(email)
-    if (existing) {
-      return NextResponse.json({ ok: false, error: "User already exists" }, { status: 409 })
+    if (phone && phone.trim() !== "") {
+      // Check if user already exists by phone (using the full E.164 format for lookup)
+      const existingByPhone = await getUserByPhone(phone.trim())
+      if (existingByPhone) {
+        return NextResponse.json(
+          { ok: false, error: "User with this phone number already exists" },
+          { status: 409 }
+        )
+      }
+
+      try {
+        const parsedPhone = parsePhoneNumber(phone.trim())
+        if (parsedPhone) {
+          phoneNumber = parsedPhone.number || phone.trim() // Store full E.164 format for easier lookup
+          countryCode = parsedPhone.countryCallingCode
+        } else {
+          // If parsing fails, store the phone as-is
+          phoneNumber = phone.trim()
+        }
+      } catch (error) {
+        // If parsing fails, store the phone as-is
+        phoneNumber = phone.trim()
+      }
     }
 
-    const passwordHash = hashPassword(password)
+    // Create user with customer role by default
+    // If no email provided, generate a placeholder email for phone-only users
+    const userEmail = email && email.trim() !== "" 
+      ? email.toLowerCase().trim() 
+      : `phone_${phoneNumber || phone?.trim() || ""}_${Date.now()}@placeholder.local`
 
-    const user = await createUser({ name, email, passwordHash })
+    const userData = {
+      firstName,
+      lastName,
+      email: userEmail,
+      phone: phoneNumber,
+      countryCode,
+      password, // Password will be hashed by the User model's pre-save hook
+      role: RoleEnum.CUSTOMER, // Default role is customer
+      accountStatus: "active",
+      isVerified: false,
+      isEmailVerified: email && email.trim() !== "" ? false : false,
+    }
 
-    return NextResponse.json({ ok: true, user })
+    const user = await createUser(userData)
+
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user.toObject()
+
+    return NextResponse.json(
+      { 
+        ok: true, 
+        user: userWithoutPassword,
+        message: "User created successfully"
+      },
+      { status: 201 }
+    )
   } catch (error) {
     console.error("Register error:", error)
-    return NextResponse.json({ ok: false, error: "Server error" }, { status: 500 })
-  }
-}
-import { NextResponse } from "next/server"
-import { registerSchema } from "@/types/auth"
-import { getUserByEmail, createUser } from "@/lib/db"
-import { hashPassword } from "@/lib/utils"
-
-export async function POST(req: Request) {
-  try {
-    const body = await req.json()
-    const parsed = registerSchema.safeParse(body)
-    if (!parsed.success) {
-      return NextResponse.json({ ok: false, error: "Invalid input" }, { status: 400 })
+    
+    // Handle duplicate email/phone error from MongoDB
+    if (error instanceof Error && error.message.includes("duplicate key")) {
+      const field = error.message.includes("email") ? "email" : "phone"
+      return NextResponse.json(
+        { ok: false, error: `User with this ${field} already exists` },
+        { status: 409 }
+      )
     }
 
-    const { name, email, password } = parsed.data
-
-    const existing = await getUserByEmail(email)
-    if (existing) {
-      return NextResponse.json({ ok: false, error: "User already exists" }, { status: 409 })
-    }
-
-    const passwordHash = hashPassword(password)
-
-    const user = await createUser({ name, email, passwordHash })
-
-    return NextResponse.json({ ok: true, user })
-  } catch (error) {
-    console.error("Register error:", error)
-    return NextResponse.json({ ok: false, error: "Server error" }, { status: 500 })
-  }
-}
-import { NextResponse } from "next/server"
-
-export async function POST(req: Request) {
-  try {
-    const body = await req.json()
-    // This is a placeholder. In a real app you'd create a user record and hash passwords.
-    console.log("register body", body)
-    return NextResponse.json({ ok: true })
-  } catch (err) {
-    return NextResponse.json({ error: "Bad request" }, { status: 400 })
+    return NextResponse.json(
+      { ok: false, error: "Server error. Please try again later." },
+      { status: 500 }
+    )
   }
 }

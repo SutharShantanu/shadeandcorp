@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { loginSchema, type LoginInput } from "@/types/auth";
 
@@ -11,7 +11,7 @@ export function useLogin() {
   const router = useRouter();
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { emailOrPhone: "", password: "" },
     mode: "onSubmit",
   });
 
@@ -20,28 +20,40 @@ export function useLogin() {
   async function onSubmit(data: LoginInput) {
     setLoading(true);
     try {
-      const res = await axios.post("/api/auth/login", data);
+      const result = await signIn("credentials", {
+        emailOrPhone: data.emailOrPhone,
+        password: data.password,
+        redirect: false,
+      });
 
-      if (res.status === 200) {
+      if (result?.error) {
+        let message = "Invalid credentials. Please try again.";
+        
+        // Handle specific error messages
+        if (result.error === "User not found") {
+          message = "No account found with this email address.";
+        } else if (result.error === "Invalid credentials") {
+          message = "Invalid email or password.";
+        } else if (result.error === "Account suspended") {
+          message = "Your account has been suspended. Please contact support.";
+        } else if (result.error.includes("required")) {
+          message = result.error;
+        } else {
+          message = result.error;
+        }
+
+        form.setError("root", { type: "manual", message });
+        return;
+      }
+
+      if (result?.ok) {
         router.push("/");
         router.refresh();
       }
     } catch (err: unknown) {
-      let message = "Invalid credentials or server error. Please try again.";
+      let message = "An unexpected error occurred. Please try again.";
 
-      if (axios.isAxiosError(err)) {
-        const data = err.response?.data;
-        if (
-          data &&
-          typeof data === "object" &&
-          "message" in data &&
-          typeof (data as { message?: unknown }).message === "string"
-        ) {
-          message = (data as { message: string }).message;
-        } else if (err.message) {
-          message = err.message;
-        }
-      } else if (err instanceof Error && err.message) {
+      if (err instanceof Error && err.message) {
         message = err.message;
       }
 

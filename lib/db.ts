@@ -3,12 +3,33 @@ import connectDB from '@/lib/mongoDB';
 
 export async function getUserByEmail(email: string): Promise<IUser | null> {
   await connectDB();
-  return User.findOne({ email }).lean();
+  const user = await User.findOne({ email }).lean();
+  return user as unknown as IUser | null;
 }
+
+export async function getUserByPhone(phone: string): Promise<IUser | null> {
+  await connectDB();
+  const user = await User.findOne({ phone }).lean();
+  return user as unknown as IUser | null;
+}
+
+export async function getUserByEmailOrPhone(emailOrPhone: string): Promise<IUser | null> {
+  await connectDB();
+  // Check if it's an email (contains @) or phone number
+  const isEmail = emailOrPhone.includes('@');
+  if (isEmail) {
+    const user = await User.findOne({ email: emailOrPhone.toLowerCase().trim() }).lean();
+    return user as unknown as IUser | null;
+  } else {
+    const user = await User.findOne({ phone: emailOrPhone.trim() }).lean();
+    return user as unknown as IUser | null;
+  }
+} // <-- This closing brace was missing
 
 export async function getUserById(id: string): Promise<IUser | null> {
   await connectDB();
-  return User.findById(id).lean();
+  const user = await User.findById(id).lean();
+  return user ? (user as unknown as IUser) : null;
 }
 
 export async function createUser(userData: Partial<IUser>): Promise<IUser> {
