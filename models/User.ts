@@ -73,6 +73,8 @@ export interface IUser extends Document {
   gender: string;
   birthday?: Date;
   profilePicture: string;
+  bio?: string;
+  urls?: string[];
   isVerified: boolean;
   isEmailVerified: boolean;
   emailVerificationToken?: string;
@@ -104,6 +106,8 @@ const UserSchema: Schema<IUser> = new Schema({
   gender: { type: String, enum: Object.values(GenderEnum), default: GenderEnum.UNKNOWN },
   birthday: { type: Date },
   profilePicture: { type: String, default: "" },
+  bio: { type: String, default: "" },
+  urls: [{ type: String }],
   isVerified: { type: Boolean, default: false },
   isEmailVerified: { type: Boolean, default: false },
   emailVerificationToken: { type: String },

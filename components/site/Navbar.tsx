@@ -422,7 +422,7 @@ export function UserMenu({ className }: UserMenuProps) {
         >
           Login
         </Button>
-        <Button onClick={() => router.push("/signup")} size="sm">
+        <Button variant="default" onClick={() => router.push("/signup")} size="sm">
           Sign Up
         </Button>
       </div>
