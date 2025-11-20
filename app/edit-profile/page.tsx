@@ -11,10 +11,8 @@ import {
   CreditCard,
   Settings,
   Bell,
-  Edit,
+  ArrowLeft,
   Link2,
-  Package,
-  MapPin,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,31 +21,34 @@ import { Button } from "@/components/ui/button";
 import Loading from "@/components/ui/loading";
 import { useProfile } from "@/app/(auth)/hook/useProfile";
 
-import ProfileDisplayTab from "@/components/profile/ProfileDisplayTab";
-import AccountDisplayTab from "@/components/profile/AccountDisplayTab";
+import ProfileTab from "@/components/profile/ProfileTab";
+import AccountTab from "@/components/profile/AccountTab";
 import BillingTab from "@/components/profile/BillingTab";
 import AppearanceTab from "@/components/profile/AppearanceTab";
 import NotificationsTab from "@/components/profile/NotificationsTab";
 import ConnectedAccountsTab from "@/components/profile/ConnectedAccountsTab";
-import OrdersTab from "@/components/profile/OrdersTab";
-import AddressesTab from "@/components/profile/AddressesTab";
 
 const VALID_TABS = [
   "profile",
   "account",
   "connected",
-  "orders",
-  "addresses",
   "billing",
   "appearance",
   "notifications",
 ] as const;
 
-export default function ProfilePage() {
+export default function EditProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
-  const { fetching, userProfile } = useProfile();
+  const {
+    profileForm,
+    accountForm,
+    loading,
+    fetching,
+    userProfile,
+    updateProfile,
+  } = useProfile();
 
   // Get tab from URL query parameter, default to "profile"
   const tabFromUrl = searchParams.get("tab");
@@ -56,6 +57,7 @@ export default function ProfilePage() {
       ? tabFromUrl
       : "profile";
   const [activeTab, setActiveTab] = useState(initialTab);
+  const [showErrors, setShowErrors] = useState(false);
 
   // Update activeTab when URL changes (using useEffect for URL param changes)
   // This is necessary to sync state with URL params (e.g., browser back/forward)
@@ -74,24 +76,47 @@ export default function ProfilePage() {
   // Update URL when tab changes (without page reload)
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    const newUrl = `/profile?tab=${value}`;
+    setShowErrors(false);
+    const newUrl = `/edit-profile?tab=${value}`;
     router.replace(newUrl, { scroll: false });
   };
-
-  // Redirect to login if unauthenticated (using useEffect to avoid render-time navigation)
-  useEffect(() => {
-    if (status === "unauthenticated" || !session) {
-      router.push("/login");
-    }
-  }, [status, session, router]);
 
   if (status === "loading" || fetching) {
     return <Loading />;
   }
 
   if (status === "unauthenticated" || !session) {
+    router.push("/login");
     return null;
   }
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowErrors(true);
+
+    const isValid = await profileForm.trigger();
+    if (!isValid) return;
+
+    const result = await updateProfile(profileForm.getValues(), "profile");
+    if (result.success) {
+      // Redirect to profile page with the same tab
+      router.push(`/profile?tab=${activeTab}`);
+    }
+  };
+
+  const handleAccountSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowErrors(true);
+
+    const isValid = await accountForm.trigger();
+    if (!isValid) return;
+
+    const result = await updateProfile(accountForm.getValues(), "account");
+    if (result.success) {
+      // Redirect to profile page with the same tab
+      router.push(`/profile?tab=${activeTab}`);
+    }
+  };
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
@@ -102,15 +127,15 @@ export default function ProfilePage() {
       >
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Profile</h1>
+            <h1 className="text-3xl font-bold mb-2">Edit Profile</h1>
             <p className="text-muted-foreground">
-              View your account information and settings.
+              Update your account settings and preferences.
             </p>
           </div>
-          <Link href={`/edit-profile?tab=${activeTab}`}>
-            <Button>
-              <Edit className="size-4 mr-2" />
-              Edit Profile
+          <Link href={`/profile?tab=${activeTab}`}>
+            <Button variant="outline">
+              <ArrowLeft className="size-4 mr-2" />
+              Back to Profile
             </Button>
           </Link>
         </div>
@@ -122,7 +147,7 @@ export default function ProfilePage() {
               onValueChange={handleTabChange}
               className="w-full"
             >
-              <TabsList>
+              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 mb-6">
                 <TabsTrigger
                   value="profile"
                   className="flex items-center gap-2"
@@ -143,17 +168,6 @@ export default function ProfilePage() {
                 >
                   <Link2 className="size-4" />
                   <span className="hidden lg:inline">Connected</span>
-                </TabsTrigger>
-                <TabsTrigger value="orders" className="flex items-center gap-2">
-                  <Package className="size-4" />
-                  <span className="hidden lg:inline">Orders</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="addresses"
-                  className="flex items-center gap-2"
-                >
-                  <MapPin className="size-4" />
-                  <span className="hidden lg:inline">Addresses</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="billing"
@@ -179,23 +193,27 @@ export default function ProfilePage() {
               </TabsList>
 
               <TabsContent value="profile" className="mt-6">
-                <ProfileDisplayTab userProfile={userProfile} />
+                <ProfileTab
+                  form={profileForm}
+                  loading={loading}
+                  showErrors={showErrors}
+                  onSubmit={handleProfileSubmit}
+                  userProfile={userProfile}
+                />
               </TabsContent>
 
               <TabsContent value="account" className="mt-6">
-                <AccountDisplayTab userProfile={userProfile} />
+                <AccountTab
+                  form={accountForm}
+                  loading={loading}
+                  showErrors={showErrors}
+                  onSubmit={handleAccountSubmit}
+                  userProfile={userProfile}
+                />
               </TabsContent>
 
               <TabsContent value="connected" className="mt-6">
                 <ConnectedAccountsTab userProfile={userProfile} />
-              </TabsContent>
-
-              <TabsContent value="orders" className="mt-6">
-                <OrdersTab userProfile={userProfile} />
-              </TabsContent>
-
-              <TabsContent value="addresses" className="mt-6">
-                <AddressesTab userProfile={userProfile} />
               </TabsContent>
 
               <TabsContent value="billing" className="mt-6">

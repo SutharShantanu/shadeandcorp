@@ -1,0 +1,83 @@
+"use client";
+
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Button } from "./ui/button";
+import Image from "next/image";
+import { Spinner } from "./ui/spinner";
+
+const SocialLoginButtons = () => {
+  const router = useRouter();
+  const [loading, setLoading] = useState<"google" | "github" | null>(null);
+
+  const handleSocialLogin = async (provider: "google" | "github") => {
+    setLoading(provider);
+    try {
+      const result = await signIn(provider, {
+        redirect: false,
+        callbackUrl: "/",
+      });
+
+      if (result?.error) {
+        console.error(`${provider} sign in error:`, result.error);
+        // You can add toast notification here if needed
+      } else if (result?.ok) {
+        router.push("/");
+        router.refresh();
+      }
+    } catch (error) {
+      console.error(`Error signing in with ${provider}:`, error);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3">
+      <Button
+        type="button"
+        variant="outline"
+        className="w-1/2"
+        onClick={() => handleSocialLogin("google")}
+        disabled={loading !== null}
+        aria-busy={loading === "google"}
+      >
+        {loading === "google" ? (
+          <Spinner className="h-4 w-4" />
+        ) : (
+          <Image
+            src="https://cdn-icons-png.flaticon.com/64/281/281764.png"
+            alt="google-logo"
+            width={20}
+            height={20}
+            className="w-5 h-5"
+          />
+        )}
+        <span>Continue with Google</span>
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        className="w-1/2"
+        onClick={() => handleSocialLogin("github")}
+        disabled={loading !== null}
+        aria-busy={loading === "github"}
+      >
+        {loading === "github" ? (
+          <Spinner className="h-4 w-4" />
+        ) : (
+          <Image
+            src="https://cdn-icons-png.flaticon.com/64/2111/2111432.png"
+            alt="github-logo"
+            width={20}
+            height={20}
+            className="w-5 h-5"
+          />
+        )}
+        <span>Continue with GitHub</span>
+      </Button>
+    </div>
+  );
+};
+export default SocialLoginButtons;

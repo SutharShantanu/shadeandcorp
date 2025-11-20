@@ -22,3 +22,11 @@ export interface OtpDialogProps {
   onVerify: () => void;
   onResend: () => void;
 }
+
+export type BaseFormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+};

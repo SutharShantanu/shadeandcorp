@@ -118,23 +118,44 @@ export default function ProfileTab({
           </div>
         </div>
 
-        {/* Username (First Name + Last Name) */}
+        {/* First Name */}
         <FormField
           control={form.control}
           name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>First Name</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="shadcn"
+                  placeholder="John"
                   {...field}
                   value={field.value || ""}
                 />
               </FormControl>
               <FormDescription>
-                This is your public display name. It can be your real name or a
-                pseudonym. You can only change this once every 30 days.
+                Your first name.
+              </FormDescription>
+              {showErrors && <FormMessage />}
+            </FormItem>
+          )}
+        />
+
+        {/* Last Name */}
+        <FormField
+          control={form.control}
+          name="lastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Name</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Doe"
+                  {...field}
+                  value={field.value || ""}
+                />
+              </FormControl>
+              <FormDescription>
+                Your last name.
               </FormDescription>
               {showErrors && <FormMessage />}
             </FormItem>

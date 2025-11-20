@@ -18,6 +18,7 @@ export const profileSchema = z.object({
 
 export const accountSchema = z.object({
   phone: z.string().optional(),
+  countryCode: z.string().optional(),
   gender: z.string().optional(),
   birthday: z.string().optional(),
 });
@@ -54,6 +55,7 @@ export interface UserProfile {
   lastName: string;
   email: string;
   phone?: string;
+  countryCode?: string;
   profilePicture?: string;
   gender?: string;
   birthday?: string;
@@ -64,7 +66,11 @@ export interface UserProfile {
   isVerified: boolean;
   isEmailVerified: boolean;
   role: string;
+  accountStatus?: string;
   joinDate: string;
+  lastLogin?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export function useProfile() {
@@ -93,6 +99,7 @@ export function useProfile() {
     resolver: zodResolver(accountSchema),
     defaultValues: {
       phone: "",
+      countryCode: "91",
       gender: "",
       birthday: "",
     },
@@ -129,6 +136,7 @@ export function useProfile() {
           // Populate account form
           accountForm.reset({
             phone: user.phone || "",
+            countryCode: user.countryCode || "91",
             gender: user.gender || "",
             birthday: user.birthday ? new Date(user.birthday).toISOString().split("T")[0] : "",
           });

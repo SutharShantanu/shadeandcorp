@@ -6,36 +6,96 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { LoginFormValues } from "@/types/Login";
 
-export type LoginFormValues = {
-  email: string;
-  phone: string;
-  password: string;
-};
+const loginFormSchema = z
+  .object({
+    email: z.string(),
+    phone: z.string(),
+    password: z.string(),
+  })
+  .superRefine((data, ctx) => {
+    const hasEmail = data.email.trim() !== "";
+    const hasPhone = data.phone.trim() !== "";
+    const hasPassword = data.password.trim() !== "";
 
-// Custom schema for login form with separate email/phone fields
-const loginFormSchema = z.object({
-  email: z.string().optional(),
-  phone: z.string().optional(),
-  password: z
-    .string()
-    .min(6, "Password must be at least 6 characters long")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
-});
+    // Require exactly one login method
+    if (!hasEmail) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Email is required",
+        path: ["email"],
+      });
+      if (!hasPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Password is required",
+          path: ["password"],
+        });
+      }
+    }
+    if (!hasPhone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Phone number is required.",
+        path: ["phone"],
+      });
+    }
 
-export type LoginForm = UseFormReturn<LoginFormValues, any, LoginFormValues>;
+    if (hasEmail && hasPhone) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Please use either email or phone number, not both",
+        path: ["phone"],
+      });
+      return;
+    }
+
+    // Email flow
+    if (hasEmail) {
+      const emailCheck = z.string().email().safeParse(data.email);
+      if (!emailCheck.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Please enter a valid email address",
+          path: ["email"],
+        });
+      }
+
+      if (!hasPassword) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Password is required",
+          path: ["password"],
+        });
+      }
+    }
+
+    // Phone flow - OTP based, no password required
+    if (hasPhone) {
+      const digits = data.phone.replace(/\D/g, "");
+      if (digits.length < 10) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Phone number must be at least 10 digits",
+          path: ["phone"],
+        });
+      }
+      // Password not required for phone login (uses OTP instead)
+    }
+  });
+
+export type LoginForm = UseFormReturn<LoginFormValues>;
 
 export function useLogin() {
   const router = useRouter();
   const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<LoginFormValues, any, LoginFormValues>({
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: { email: "", phone: "", password: "" },
-    mode: "onSubmit",
+    mode: "all",
   });
 
   const updateLoginMethod = useCallback(
@@ -47,6 +107,7 @@ export function useLogin() {
         form.setValue("phone", "");
       } else if (method === "phone") {
         form.setValue("email", "");
+        form.setValue("password", "");
       }
     },
     [form]
@@ -54,39 +115,19 @@ export function useLogin() {
 
   async function onSubmit(data: LoginFormValues) {
     setLoading(true);
-    try {
-      // Validate based on login method
-      if (loginMethod === "email") {
-        if (!data.email || data.email.trim() === "") {
-          form.setError("email", { type: "manual", message: "Email is required" });
-          setLoading(false);
-          return;
-        }
-        const emailCheck = z.string().email().safeParse(data.email);
-        if (!emailCheck.success) {
-          form.setError("email", { type: "manual", message: "Please enter a valid email address" });
-          setLoading(false);
-          return;
-        }
-      } else {
-        if (!data.phone || data.phone.trim() === "") {
-          form.setError("phone", { type: "manual", message: "Phone number is required" });
-          setLoading(false);
-          return;
-        }
-        const digits = data.phone.replace(/\D/g, "");
-        if (digits.length < 10) {
-          form.setError("phone", { type: "manual", message: "Phone number must be at least 10 digits" });
-          setLoading(false);
-          return;
-        }
-      }
 
-      // Combine email or phone into emailOrPhone for backend
-      const emailOrPhone = loginMethod === "email" ? data.email : data.phone;
+    try {
+      const hasEmail = data.email.trim() !== "";
+      const hasPhone = data.phone.trim() !== "";
+
+      const actualMethod = hasEmail
+        ? "email"
+        : hasPhone
+        ? "phone"
+        : loginMethod;
 
       const result = await signIn("credentials", {
-        emailOrPhone,
+        emailOrPhone: actualMethod === "email" ? data.email : data.phone,
         password: data.password,
         redirect: false,
       });

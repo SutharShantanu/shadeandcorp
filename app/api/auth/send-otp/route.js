@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import twilio from "twilio";
+import { otpStoreService } from "@/lib/otpStore";
 
 // --- ENV VARS ---
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioPhone = process.env.TWILIO_PHONE;
-
-// In-memory OTP store (use Redis in production)
-const otpStore = new Map();
 
 export async function POST(req) {
   try {
@@ -23,11 +21,8 @@ export async function POST(req) {
     // Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Save OTP for 5 minutes
-    otpStore.set(phone, {
-      otp,
-      expiresAt: Date.now() + 5 * 60 * 1000,
-    });
+    // Save OTP for 5 minutes using shared store
+    otpStoreService.set(phone, otp, 5 * 60 * 1000);
 
     // Send via Twilio
     const client = twilio(accountSid, authToken);

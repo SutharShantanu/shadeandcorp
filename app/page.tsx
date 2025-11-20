@@ -1,9 +1,7 @@
-import Navbar from "@/components/site/Navbar";
 import Announcement from "@/components/site/Announcement";
 import Features from "@/components/site/Features";
 import FAQ from "@/components/site/FAQ";
 import Team from "@/components/site/Team";
-import Footer from "@/components/site/Footer";
 import Hero from "@/components/site/Hero";
 import TrendingProducts from "@/components/site/TrendingProducts";
 import ProductCategories from "@/components/site/ProductCategories";
@@ -18,7 +16,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black">
       <Announcement />
-      <Navbar />
       <div className="max-w-7xl mx-auto">
         <main className="flex flex-col gap-8 md:gap-12">
           {/* Section 1: Hero Banner */}
@@ -58,7 +55,6 @@ export default function Home() {
           {/* <Newsletter /> */}
         </main>
       </div>
-      <Footer />
     </div>
   );
 }

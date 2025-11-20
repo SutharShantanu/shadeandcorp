@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-
-// Use the same store (in real world move to Redis)
-const otpStore = new Map();
+import { otpStoreService } from "@/lib/otpStore";
 
 export async function POST(req) {
   try {
@@ -14,32 +12,32 @@ export async function POST(req) {
       );
     }
 
-    const saved = otpStore.get(phone);
+    // Verify OTP using shared store
+    const isValid = otpStoreService.verify(phone, otp);
 
-    if (!saved) {
-      return NextResponse.json(
-        { success: false, message: "No OTP found, please request again" },
-        { status: 404 }
-      );
-    }
-
-    if (saved.expiresAt < Date.now()) {
-      otpStore.delete(phone);
-      return NextResponse.json(
-        { success: false, message: "OTP expired, please resend" },
-        { status: 400 }
-      );
-    }
-
-    if (saved.otp !== otp) {
+    if (!isValid) {
+      const saved = otpStoreService.get(phone);
+      if (!saved) {
+        return NextResponse.json(
+          { success: false, message: "No OTP found, please request again" },
+          { status: 404 }
+        );
+      }
+      if (saved.expiresAt < Date.now()) {
+        otpStoreService.delete(phone);
+        return NextResponse.json(
+          { success: false, message: "OTP expired, please resend" },
+          { status: 400 }
+        );
+      }
       return NextResponse.json(
         { success: false, message: "Invalid OTP" },
         { status: 400 }
       );
     }
 
-    // OTP is correct
-    otpStore.delete(phone);
+    // OTP is correct - delete it
+    otpStoreService.delete(phone);
 
     return NextResponse.json(
       { success: true, message: "OTP verified successfully" },

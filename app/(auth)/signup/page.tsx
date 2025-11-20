@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import { SignupForm, useSignup } from "@/app/(auth)/hook/useSignup";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,43 +50,7 @@ import {
   FieldGroup,
   FieldSeparator,
 } from "@/components/ui/field";
-import Image from "next/image";
-
-// Social Login Buttons Component
-function SocialLoginButtons() {
-  return (
-    <div className="flex items-center gap-3">
-      <Button
-        type="button"
-        variant="outline"
-        className="w-1/2"
-        onClick={() => signIn("google")}
-      >
-        <Image
-          src="https://cdn-icons-png.flaticon.com/64/281/281764.png"
-          alt="google-logo"
-          width={20}
-          height={20}
-        />
-        <span>Continue with Google</span>
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        className="w-1/2"
-        onClick={() => signIn("github")}
-      >
-        <Image
-          src="https://cdn-icons-png.flaticon.com/64/2111/2111432.png"
-          alt="github-logo"
-          width={20}
-          height={20}
-        />
-        <span>Continue with GitHub</span>
-      </Button>
-    </div>
-  );
-}
+import SocialLoginButtons from "@/components/SocialLoginButton";
 
 // Name Fields Component
 function NameFields({
@@ -389,7 +352,7 @@ function OtpDialog({
   );
 }
 
-export default function SignupPage() {
+export default function Signup() {
   const router = useRouter();
   const { form, loading, onSubmit, signupMethod, updateSignupMethod } =
     useSignup();

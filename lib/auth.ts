@@ -6,6 +6,7 @@ import { getDeviceInfo } from "@/lib/deviceUtils";
 import connectDB from "@/lib/mongoDB";
 import User, { IUser } from "@/models/User";
 import { createUser, updateUser } from "@/lib/db";
+import { otpStoreService } from "@/lib/otpStore";
 
 interface GeoData {
   ip?: string;
@@ -29,8 +30,8 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         try {
-          if (!credentials?.emailOrPhone || !credentials?.password) {
-            throw new Error("Email/Phone and password are required!");
+          if (!credentials?.emailOrPhone) {
+            throw new Error("Email/Phone is required!");
           }
 
           await connectDB();
@@ -40,17 +41,36 @@ export const authOptions: NextAuthOptions = {
           let user;
           
           if (isEmail) {
+            // Email login requires password
+            if (!credentials?.password) {
+              throw new Error("Password is required for email login!");
+            }
             user = await User.findOne({ email: credentials.emailOrPhone.toLowerCase().trim() });
+            
+            if (!user) throw new Error("User not found");
+            if (user.accountStatus === "suspended") throw new Error("Account suspended");
+            if (user.accountStatus === "deleted") throw new Error("Account not found");
+
+            const isPasswordValid = await user.comparePassword(credentials.password);
+            if (!isPasswordValid) throw new Error("Invalid credentials");
           } else {
-            user = await User.findOne({ phone: credentials.emailOrPhone.trim() });
+            // Phone login uses OTP verification
+            const phone = credentials.emailOrPhone.trim();
+            user = await User.findOne({ phone });
+            
+            if (!user) throw new Error("User not found");
+            if (user.accountStatus === "suspended") throw new Error("Account suspended");
+            if (user.accountStatus === "deleted") throw new Error("Account not found");
+
+            // Check if OTP was verified
+            const isOtpVerified = otpStoreService.isVerified(phone);
+            if (!isOtpVerified) {
+              throw new Error("OTP verification required. Please verify your phone number first.");
+            }
+
+            // Delete verification token after use (one-time use)
+            otpStoreService.deleteVerificationToken(phone);
           }
-
-          if (!user) throw new Error("User not found");
-          if (user.accountStatus === "suspended") throw new Error("Account suspended");
-          if (user.accountStatus === "deleted") throw new Error("Account not found");
-
-          const isPasswordValid = await user.comparePassword(credentials.password);
-          if (!isPasswordValid) throw new Error("Invalid credentials");
 
           // Track login session
           const ip = req?.headers?.["x-forwarded-for"]?.split(",")[0] ||

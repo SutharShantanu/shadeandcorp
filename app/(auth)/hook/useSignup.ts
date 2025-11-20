@@ -6,14 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
-type BaseFormValues = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  password: string;
-};
+import { BaseFormValues } from "@/types/Signup";
 
 // Schema allows EITHER email or phone (not both)
 const signupSchema = z
@@ -104,7 +97,6 @@ export type SignupForm = UseFormReturn<BaseFormValues>;
 
 export function useSignup() {
   const router = useRouter();
-
   const [signupMethod, setSignupMethod] = useState<"email" | "phone" | null>(
     "email"
   );

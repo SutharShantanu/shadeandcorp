@@ -64,6 +64,43 @@ export default function AccountTab({
           )}
         />
 
+        {/* Country Code */}
+        <FormField
+          control={form.control}
+          name="countryCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Country Code</FormLabel>
+              <Select
+                value={field.value || userProfile?.countryCode || "91"}
+                onValueChange={field.onChange}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select country code" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="91">+91 (India)</SelectItem>
+                  <SelectItem value="1">+1 (USA/Canada)</SelectItem>
+                  <SelectItem value="44">+44 (UK)</SelectItem>
+                  <SelectItem value="61">+61 (Australia)</SelectItem>
+                  <SelectItem value="81">+81 (Japan)</SelectItem>
+                  <SelectItem value="86">+86 (China)</SelectItem>
+                  <SelectItem value="49">+49 (Germany)</SelectItem>
+                  <SelectItem value="33">+33 (France)</SelectItem>
+                  <SelectItem value="39">+39 (Italy)</SelectItem>
+                  <SelectItem value="34">+34 (Spain)</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Select your country code for phone number.
+              </FormDescription>
+              {showErrors && <FormMessage />}
+            </FormItem>
+          )}
+        />
+
         {/* Gender */}
         <FormField
           control={form.control}

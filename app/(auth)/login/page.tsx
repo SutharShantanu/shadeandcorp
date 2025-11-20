@@ -19,10 +19,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PhoneInput } from "@/components/ui/phone-input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import { Spinner } from "@/components/ui/spinner";
 import { PasswordInput } from "@/components/ui/password-input";
 import Loading from "@/components/ui/loading";
+import { toast } from "sonner";
 import {
   Field,
   FieldDescription,
@@ -31,42 +44,8 @@ import {
 } from "@/components/ui/field";
 import Image from "next/image";
 import { CircleQuestionMark } from "lucide-react";
-
-// Social Login Buttons Component
-function SocialLoginButtons() {
-  return (
-    <div className="flex items-center gap-3">
-      <Button
-        type="button"
-        variant="outline"
-        className="w-1/2"
-        onClick={() => signIn("google")}
-      >
-        <Image
-          src="https://cdn-icons-png.flaticon.com/64/281/281764.png"
-          alt="google-logo"
-          width={20}
-          height={20}
-        />
-        <span>Continue with Google</span>
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        className="w-1/2"
-        onClick={() => signIn("github")}
-      >
-        <Image
-          src="https://cdn-icons-png.flaticon.com/64/2111/2111432.png"
-          alt="github-logo"
-          width={20}
-          height={20}
-        />
-        <span>Continue with GitHub</span>
-      </Button>
-    </div>
-  );
-}
+import NavigateHomeButton from "@/components/NavigateHomeButton";
+import SocialLoginButtons from "@/components/SocialLoginButton";
 
 // Email Login Form Component
 function EmailLoginForm({
@@ -172,11 +151,13 @@ function EmailLoginForm({
 function PhoneLoginForm({
   form,
   loading,
+  isSendingOtp,
   onSwitchToEmail,
   showErrors,
 }: {
   form: LoginForm;
   loading: boolean;
+  isSendingOtp: boolean;
   onSwitchToEmail: () => void;
   showErrors: boolean;
 }) {
@@ -208,50 +189,20 @@ function PhoneLoginForm({
         )}
       />
 
-      <FormField
-        control={form.control}
-        name="password"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Password</FormLabel>
-            <FormControl>
-              <PasswordInput
-                id="password"
-                aria-label="Password"
-                placeholder="Enter your password"
-                {...field}
-                value={field.value || ""}
-              />
-            </FormControl>
-            {showErrors && <FormMessage />}
-          </FormItem>
-        )}
-      />
-
-      <div className="flex justify-end text-muted-foreground">
-        <Link
-          href="/forgot-password"
-          className="hover:underline underline-offset-2 text-sm flex items-center gap-1"
-        >
-          Forgot Password
-          <CircleQuestionMark size={14} className="" />
-        </Link>
-      </div>
-
       <div className="space-y-3">
         <Button
           type="submit"
-          disabled={loading}
-          aria-busy={loading}
+          disabled={loading || isSendingOtp}
+          aria-busy={loading || isSendingOtp}
           className="w-full"
         >
-          {loading ? (
+          {isSendingOtp ? (
             <motion.div className="flex items-center gap-1">
               <Spinner className="h-4 w-4" />
-              <span>Signing in...</span>
+              <span>Sending OTP...</span>
             </motion.div>
           ) : (
-            "Login with Phone"
+            "Send OTP"
           )}
         </Button>
 
@@ -268,11 +219,101 @@ function PhoneLoginForm({
   );
 }
 
+// OTP Dialog Component
+function OtpDialog({
+  open,
+  onOpenChange,
+  phoneNumber,
+  otp,
+  onOtpChange,
+  loading,
+  onVerify,
+  onResend,
+  canResend,
+  resendTimeLeft,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  phoneNumber: string;
+  otp: string;
+  onOtpChange: (value: string) => void;
+  loading: boolean;
+  onVerify: () => void;
+  onResend: () => void;
+  canResend: boolean;
+  resendTimeLeft: number;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-center">Verify Phone Number</DialogTitle>
+          <DialogDescription className="text-center">
+            Enter the 6-digit OTP sent to{" "}
+            <span className="font-medium text-foreground">{phoneNumber}</span>
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          <div className="flex justify-center">
+            <InputOTP maxLength={6} value={otp} onChange={onOtpChange}>
+              <InputOTPGroup className="gap-2">
+                {[0, 1, 2, 3, 4, 5].map((index) => (
+                  <InputOTPSlot
+                    key={index}
+                    index={index}
+                    className="w-12 h-12 rounded-md border"
+                  />
+                ))}
+              </InputOTPGroup>
+            </InputOTP>
+          </div>
+
+          <div className="text-center space-y-3">
+            <Button
+              onClick={onVerify}
+              disabled={loading || otp.length !== 6}
+              className="w-full"
+            >
+              {loading ? (
+                <motion.div className="flex items-center gap-1">
+                  <Spinner className="h-4 w-4" />
+                  <span>Verifying OTP...</span>
+                </motion.div>
+              ) : (
+                "Verify OTP & Login"
+              )}
+            </Button>
+
+            <div className="text-center">
+              {canResend ? (
+                <Button variant="link" className="text-sm" onClick={onResend}>
+                  Didn&apos;t receive OTP? Resend
+                </Button>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Resend OTP in {resendTimeLeft}s
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function Login() {
   const router = useRouter();
   const { form, loading, onSubmit, loginMethod, updateLoginMethod } =
     useLogin();
   const [showErrors, setShowErrors] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [showOtpDialog, setShowOtpDialog] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [canResendOtp, setCanResendOtp] = useState(true);
+  const [resendTimeLeft, setResendTimeLeft] = useState(0);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
   const isReady = true;
   const session = null;
@@ -292,14 +333,180 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setShowErrors(true);
+
+    // Handle phone login with OTP
+    if (loginMethod === "phone") {
+      const phone = form.getValues("phone");
+
+      // Validate phone
+      const isValid = await form.trigger("phone");
+      if (!isValid) {
+        const phoneError = form.formState.errors.phone;
+        if (phoneError) {
+          toast.error(
+            phoneError.message || "Please enter a valid phone number"
+          );
+        }
+        return;
+      }
+
+      setIsSendingOtp(true);
+      try {
+        const res = await fetch("/api/auth/send-otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ phone }),
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+          toast.error(data.message || "Failed to send OTP");
+          return;
+        }
+
+        toast.success("OTP sent to your phone!");
+        setShowOtpDialog(true);
+        setCanResendOtp(false);
+        setResendTimeLeft(30);
+
+        // Start countdown timer
+        const interval = setInterval(() => {
+          setResendTimeLeft((prev) => {
+            if (prev <= 1) {
+              clearInterval(interval);
+              setCanResendOtp(true);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      } catch (error) {
+        console.error("Error sending OTP:", error);
+        toast.error("Failed to send OTP. Please try again.");
+      } finally {
+        setIsSendingOtp(false);
+      }
+      return;
+    }
+
+    // Handle email login with password
     await onSubmit(form.getValues());
+  };
+
+  const handleOtpVerification = async () => {
+    if (isVerifyingOtp) return;
+
+    if (otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    setIsVerifyingOtp(true);
+
+    try {
+      const phone = form.getValues("phone");
+      const res = await fetch("/api/auth/verify-login-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone, otp }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        toast.error(data.message || "OTP verification failed");
+        return;
+      }
+
+      // Sign in using NextAuth with the verified user
+      // Password is not required for phone login (OTP verified)
+      const result = await signIn("credentials", {
+        emailOrPhone: phone,
+        password: "", // Not used for OTP login, but required by NextAuth
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error(result.error || "Login failed. Please try again.");
+        return;
+      }
+
+      if (result?.ok) {
+        toast.success("OTP Verified! Logging in...");
+        setShowOtpDialog(false);
+        router.push("/");
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      toast.error("Verification failed. Please try again.");
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  const handleOtpChange = (value: string) => {
+    setOtp(value);
+    if (value.length === 6 && !isVerifyingOtp) {
+      handleOtpVerification();
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (!canResendOtp) return;
+
+    const phone = form.getValues("phone");
+    setOtp("");
+    setCanResendOtp(false);
+    setResendTimeLeft(30);
+
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        toast.error(data.message || "Failed to resend OTP");
+        setCanResendOtp(true);
+        return;
+      }
+
+      toast.success("OTP resent to your phone number");
+
+      // Start countdown timer
+      const interval = setInterval(() => {
+        setResendTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setCanResendOtp(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      toast.error("Failed to resend OTP. Please try again.");
+      setCanResendOtp(true);
+    }
   };
 
   if (!isReady) return <Loading />;
 
   return (
     <motion.div
-      className="flex min-h-svh flex-col items-center justify-center bg-linear-to-br from-background via-background to-muted/20 p-4"
+      className="flex flex-col min-h-svh items-center justify-center bg-linear-to-br from-background via-background to-muted/20 p-4"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
@@ -312,7 +519,8 @@ export default function Login() {
       >
         <Card className="w-full flex flex-col md:flex-row overflow-hidden py-0">
           {/* Image Side - Full width on mobile, 50% on md and above */}
-          <div className="w-full md:w-1/2 h-48 md:h-auto">
+          <div className="relative w-full md:w-1/2 h-48 md:h-auto">
+            <NavigateHomeButton />
             <Image
               src="https://picsum.photos/2000/2000"
               alt="Welcome back"
@@ -360,6 +568,7 @@ export default function Login() {
                         <PhoneLoginForm
                           form={form as LoginForm}
                           loading={loading}
+                          isSendingOtp={isSendingOtp}
                           onSwitchToEmail={switchToEmail}
                           showErrors={showErrors}
                         />
@@ -413,6 +622,19 @@ export default function Login() {
           </div>
         </Card>
       </motion.div>
+
+      <OtpDialog
+        open={showOtpDialog}
+        onOpenChange={setShowOtpDialog}
+        phoneNumber={form.getValues("phone") || ""}
+        otp={otp}
+        onOtpChange={handleOtpChange}
+        loading={isVerifyingOtp}
+        onVerify={handleOtpVerification}
+        onResend={handleResendOtp}
+        canResend={canResendOtp}
+        resendTimeLeft={resendTimeLeft}
+      />
     </motion.div>
   );
 }

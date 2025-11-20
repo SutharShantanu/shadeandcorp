@@ -422,7 +422,11 @@ export function UserMenu({ className }: UserMenuProps) {
         >
           Login
         </Button>
-        <Button variant="default" onClick={() => router.push("/signup")} size="sm">
+        <Button
+          variant="default"
+          onClick={() => router.push("/signup")}
+          size="sm"
+        >
           Sign Up
         </Button>
       </div>
@@ -599,12 +603,12 @@ export function MobileMenu({ categories }: MobileMenuProps) {
     </Sheet>
   );
 }
-export default function Navbar() {
+export default function Navbar({ className }: { className?: string }) {
   const cartCount = 3;
   const wishlistCount = 5;
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-sm ">
+    <header className={`sticky top-0 z-50 backdrop-blur-sm shadow-sm ${className}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 py-4">
         {/* Left Section - Mobile Menu & Logo */}
         <div className="flex items-center gap-4">

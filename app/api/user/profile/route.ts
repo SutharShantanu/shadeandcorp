@@ -34,17 +34,22 @@ export async function GET() {
         lastName: user.lastName,
         email: user.email,
         phone: user.phone,
+        countryCode: user.countryCode,
         profilePicture: user.profilePicture,
         gender: user.gender,
         birthday: user.birthday,
         bio: (user as any).bio || "",
         urls: (user as any).urls || [],
-        addresses: user.addresses,
-        paymentMethods: user.paymentMethods,
+        addresses: user.addresses || [],
+        paymentMethods: user.paymentMethods || [],
         isVerified: user.isVerified,
         isEmailVerified: user.isEmailVerified,
         role: user.role,
+        accountStatus: user.accountStatus,
         joinDate: user.joinDate,
+        lastLogin: user.lastLogin,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       },
     });
   } catch (error) {
@@ -79,11 +84,12 @@ export async function PATCH(req: Request) {
       );
     }
 
-    // Update allowed fields
+    // Update allowed fields (users can't update email, role, accountStatus, etc.)
     const allowedFields = [
       "firstName",
       "lastName",
       "phone",
+      "countryCode",
       "profilePicture",
       "gender",
       "birthday",
@@ -92,8 +98,13 @@ export async function PATCH(req: Request) {
     ];
 
     for (const field of allowedFields) {
-      if (field in body) {
-        (user as any)[field] = body[field];
+      if (field in body && body[field] !== undefined) {
+        // Handle date fields
+        if (field === "birthday" && body[field]) {
+          (user as any)[field] = new Date(body[field]);
+        } else {
+          (user as any)[field] = body[field];
+        }
       }
     }
 
