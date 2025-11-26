@@ -27,7 +27,7 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
         <Card>
           <CardHeader>
             <CardTitle>Phone Number</CardTitle>
-            <CardDescription>Your phone number for account verification</CardDescription>
+            <CardDescription>Your phone number and country code</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
