@@ -41,25 +41,24 @@ export default function ProfileDisplayTab({ userProfile }: ProfileDisplayTabProp
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>First Name</CardTitle>
-            <CardDescription>Your first name</CardDescription>
+            <CardTitle>Name</CardTitle>
+            <CardDescription>Your full name</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm font-medium">
-              {userProfile?.firstName || "Not set"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Last Name</CardTitle>
-            <CardDescription>Your last name</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm font-medium">
-              {userProfile?.lastName || "Not set"}
-            </p>
+            <div className="space-y-2">
+              <div>
+                <p className="text-xs text-muted-foreground">First Name</p>
+                <p className="text-sm font-medium">
+                  {userProfile?.firstName || "Not set"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Last Name</p>
+                <p className="text-sm font-medium">
+                  {userProfile?.lastName || "Not set"}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 

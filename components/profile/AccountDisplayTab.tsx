@@ -30,22 +30,20 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
             <CardDescription>Your phone number for account verification</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm font-medium">
-              {userProfile?.countryCode && `+${userProfile.countryCode} `}
-              {userProfile?.phone || "Not set"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Country Code</CardTitle>
-            <CardDescription>Your phone number country code</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm font-medium">
-              {userProfile?.countryCode ? `+${userProfile.countryCode}` : "Not set"}
-            </p>
+            <div className="space-y-2">
+              <div>
+                <p className="text-xs text-muted-foreground">Country Code</p>
+                <p className="text-sm font-medium">
+                  {userProfile?.countryCode ? `+${userProfile.countryCode}` : "Not set"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Phone</p>
+                <p className="text-sm font-medium">
+                  {userProfile?.phone || "Not set"}
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
