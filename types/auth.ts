@@ -29,7 +29,7 @@ export const registerSchema = z
   .superRefine((data, ctx) => {
     const hasEmail = typeof data.email === "string" && data.email.trim() !== "";
     const hasPhone = typeof data.phone === "string" && data.phone.trim() !== "";
-    const hasPassword = typeof data.password === "string" && data.password.trim() !== "";    
+    const hasPassword = typeof data.password === "string" && data.password.trim() !== "";
 
     // REQUIRE: at least 1 method
     if (!hasEmail && !hasPhone) {
@@ -135,15 +135,17 @@ declare module "next-auth" {
       id: string;
       email: string;
       name: string | null;
+      isEmailVerified: boolean;
       image?: string | null;
       provider?: string;
-      isVerified:boolean;
+
     };
   }
 
   interface User {
     id: string;
     email: string;
+    isEmailVerified: boolean;
     name: string | null;
     image?: string | null;
     provider?: string;

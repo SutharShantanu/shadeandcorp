@@ -1,8 +1,10 @@
 "use client";
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
+import { BadgeCheck, BadgeInfo } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface ProfileDisplayTabProps {
   userProfile: UserProfile | null;
@@ -14,15 +16,15 @@ export default function ProfileDisplayTab({ userProfile }: ProfileDisplayTabProp
     : "User";
 
   return (
-    <div className="space-y-6">
-      {/* Profile Picture */}
+    <div className="space-y-8">
+      {/* Profile Picture & Basic Info */}
       <div className="flex items-center gap-4">
-        <Avatar className="size-20">
+        <Avatar className="size-24 border">
           <AvatarImage
             src={userProfile?.profilePicture}
             alt={displayName}
           />
-          <AvatarFallback className="text-lg">
+          <AvatarFallback className="text-xl">
             {displayName
               .split(" ")
               .map((n) => n[0])
@@ -32,104 +34,56 @@ export default function ProfileDisplayTab({ userProfile }: ProfileDisplayTabProp
           </AvatarFallback>
         </Avatar>
         <div>
-          <h3 className="text-lg font-semibold">{displayName}</h3>
-          <p className="text-sm text-muted-foreground">{userProfile?.email}</p>
+          <h3 className="text-xl font-semibold">{displayName}</h3>
+          <p className="text-sm text-muted-foreground flex items-center gap-1">{userProfile?.email}
+            {userProfile?.isEmailVerified ? (
+              <BadgeCheck className="h-4 w-4 fill-accent-foreground text-primary-foreground" />
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <BadgeInfo className="h-4 w-4 text-destructive" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Your email is not verified.</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </p>
         </div>
       </div>
 
-      {/* Profile Information */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>First Name</CardTitle>
-            <CardDescription>Your first name</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm font-medium">
-              {userProfile?.firstName || "Not set"}
-            </p>
-          </CardContent>
-        </Card>
+      <Separator />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Last Name</CardTitle>
-            <CardDescription>Your last name</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm font-medium">
-              {userProfile?.lastName || "Not set"}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Email</CardTitle>
-            <CardDescription>Your verified email address</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm font-medium">{userProfile?.email || "Not set"}</p>
-            {userProfile?.isEmailVerified && (
-              <span className="text-xs text-green-600 mt-1 inline-block">✓ Verified</span>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Bio</CardTitle>
-            <CardDescription>Tell us about yourself</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">
-              {userProfile?.bio || "No bio added yet."}
-            </p>
-          </CardContent>
-        </Card>
-
-        {userProfile?.urls && userProfile.urls.length > 0 && (
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>URLs</CardTitle>
-              <CardDescription>Links to your website, blog, or social media profiles</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {userProfile.urls.map((url, index) => (
-                  <a
-                    key={index}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline block"
-                  >
-                    {url}
-                  </a>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {userProfile?.joinDate && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Member Since</CardTitle>
-              <CardDescription>Your account creation date</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm font-medium">
-                {new Date(userProfile.joinDate).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
-            </CardContent>
-          </Card>
-        )}
+      {/* Personal Information */}
+      <div>
+        <h4 className="text-sm font-semibold mb-4">Personal Information</h4>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">First Name</p>
+            <p className="text-sm font-medium">{userProfile?.firstName || "Not set"}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Last Name</p>
+            <p className="text-sm font-medium">{userProfile?.lastName || "Not set"}</p>
+          </div>
+        </div>
       </div>
+
+      {userProfile?.joinDate && (
+        <>
+          <Separator />
+          <div>
+            <h4 className="text-sm font-semibold mb-2">Member Since</h4>
+            <p className="text-sm text-muted-foreground">
+              {new Date(userProfile.joinDate).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          </div>
+        </>
+      )}
     </div>
   );
 }

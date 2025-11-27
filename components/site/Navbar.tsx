@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
-import { Kbd } from "@/components/ui/kbd";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import {
   Heart,
   Search,
@@ -37,9 +36,10 @@ import {
 } from "@/components/ui/tooltip";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import {} from "lucide-react";
+import { } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAppSelector } from "@/lib/store";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,6 +57,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
 
 const categories = [
   {
@@ -229,7 +230,7 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
       <NavigationMenuList>
         {categories.map((category) => (
           <NavigationMenuItem key={category.title}>
-            <NavigationMenuTrigger>{category.title}</NavigationMenuTrigger>
+            <NavigationMenuTrigger className="bg-transparent">{category.title}</NavigationMenuTrigger>
             <NavigationMenuContent>
               <div className="w-[800px] p-6">
                 <div className="grid grid-cols-2 gap-8">
@@ -253,34 +254,34 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                     {(category.title === "Men" ||
                       category.title === "Women" ||
                       category.title === "Kids") && (
-                      <div className="pt-4 border-t">
-                        <h4 className="font-medium mb-3">Shop by Category</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          {detailedCategories[
-                            category.title.toLowerCase() as keyof typeof detailedCategories
-                          ]?.map((subcat) => (
-                            <div key={subcat.title}>
-                              <h5 className="text-sm font-medium mb-2">
-                                {subcat.title}
-                              </h5>
-                              <div className="space-y-1">
-                                {subcat.items.map((item) => (
-                                  <Link
-                                    key={item}
-                                    href={`/${category.title.toLowerCase()}/${item
-                                      .toLowerCase()
-                                      .replace(/\s+/g, "-")}`}
-                                    className="block text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                                  >
-                                    {item}
-                                  </Link>
-                                ))}
+                        <div className="pt-4 border-t">
+                          <h4 className="font-medium mb-3">Shop by Category</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            {detailedCategories[
+                              category.title.toLowerCase() as keyof typeof detailedCategories
+                            ]?.map((subcat) => (
+                              <div key={subcat.title}>
+                                <h5 className="text-sm font-medium mb-2">
+                                  {subcat.title}
+                                </h5>
+                                <div className="space-y-1">
+                                  {subcat.items.map((item) => (
+                                    <Link
+                                      key={item}
+                                      href={`/${category.title.toLowerCase()}/${item
+                                        .toLowerCase()
+                                        .replace(/\s+/g, "-")}`}
+                                      className="block text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                                    >
+                                      {item}
+                                    </Link>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
 
                   <div className="relative rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800">
@@ -315,7 +316,6 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ className }: SearchBarProps) {
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -323,7 +323,6 @@ export function SearchBar({ className }: SearchBarProps) {
       const key = e.key?.toLowerCase?.();
       if ((e.ctrlKey || e.metaKey) && key === "k") {
         e.preventDefault();
-        setIsSearchOpen(true);
         if (inputRef.current) {
           inputRef.current.focus();
           inputRef.current.select();
@@ -336,16 +335,24 @@ export function SearchBar({ className }: SearchBarProps) {
   }, []);
 
   return (
-    <div className={`flex w-1/3 items-center relative ${className}`}>
-      <Input
-        ref={inputRef}
-        placeholder="Search products..."
-        className="pl-10"
-        onClick={() => setIsSearchOpen(true)}
-        aria-label="Search products"
-      />
-      <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
-      <Kbd className="absolute right-3 pointer-events-none">Ctrl + K</Kbd>
+    <div className={`flex w-1/3 items-center ${className}`}>
+      <InputGroup className="border-transparent shadow-none">
+        <InputGroupInput
+          ref={inputRef}
+          placeholder="Search products..."
+          aria-label="Search products"
+        />
+        <InputGroupAddon>
+          <Search className="h-4 w-4" />
+        </InputGroupAddon>
+        <InputGroupAddon align="inline-end">
+          <KbdGroup>
+            <Kbd>Ctrl</Kbd>
+            +
+            <Kbd>K</Kbd>
+          </KbdGroup>
+        </InputGroupAddon>
+      </InputGroup>
     </div>
   );
 }
@@ -472,7 +479,7 @@ export function UserMenu({ className }: UserMenuProps) {
               <div className="flex items-center gap-2">
                 <p className="text-sm font-medium leading-none flex items-center gap-1.5">
                   {session.user?.name}
-                  {session.user?.isVerified ? (
+                  {session.user?.isEmailVerified ? (
                     <BadgeCheck className="h-4 w-4 fill-accent-foreground text-primary-foreground" />
                   ) : (
                     <Tooltip>
@@ -605,7 +612,8 @@ export function MobileMenu({ categories }: MobileMenuProps) {
 }
 export default function Navbar({ className }: { className?: string }) {
   const cartCount = 3;
-  const wishlistCount = 5;
+  // Read wishlist count from Redux
+  const wishlistCount = useAppSelector((s: { wishlist: { items: unknown[] } }) => s.wishlist.items.length);
 
   return (
     <header className={`sticky top-0 z-50 backdrop-blur-sm shadow-sm ${className}`}>

@@ -79,8 +79,8 @@ export async function POST(req: Request) {
       password, // Password will be hashed by the User model's pre-save hook
       role: RoleEnum.CUSTOMER, // Default role is customer
       accountStatus: "active",
-      isVerified: false,
       isEmailVerified: email && email.trim() !== "" ? false : false,
+      isPhoneVerified: false,
     }
 
     const user = await createUser(userData)

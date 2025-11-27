@@ -107,6 +107,7 @@ export async function POST(req: Request) {
       loggedInAt: new Date(),
     });
 
+    user.isPhoneVerified = true; // Mark phone as verified
     user.lastLogin = new Date();
     await user.save();
 
@@ -127,8 +128,9 @@ export async function POST(req: Request) {
           firstName: user.firstName,
           lastName: user.lastName,
           image: user.profilePicture,
-          isVerified: user.isVerified,
+          
           isEmailVerified: user.isEmailVerified,
+          isPhoneVerified: user.isPhoneVerified,
           role: user.role,
         },
       },

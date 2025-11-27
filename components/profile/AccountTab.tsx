@@ -1,5 +1,15 @@
 "use client";
 
+import * as React from "react";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import {
   Form,
   FormControl,
@@ -64,43 +74,6 @@ export default function AccountTab({
           )}
         />
 
-        {/* Country Code */}
-        <FormField
-          control={form.control}
-          name="countryCode"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Country Code</FormLabel>
-              <Select
-                value={field.value || userProfile?.countryCode || "91"}
-                onValueChange={field.onChange}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select country code" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="91">+91 (India)</SelectItem>
-                  <SelectItem value="1">+1 (USA/Canada)</SelectItem>
-                  <SelectItem value="44">+44 (UK)</SelectItem>
-                  <SelectItem value="61">+61 (Australia)</SelectItem>
-                  <SelectItem value="81">+81 (Japan)</SelectItem>
-                  <SelectItem value="86">+86 (China)</SelectItem>
-                  <SelectItem value="49">+49 (Germany)</SelectItem>
-                  <SelectItem value="33">+33 (France)</SelectItem>
-                  <SelectItem value="39">+39 (Italy)</SelectItem>
-                  <SelectItem value="34">+34 (Spain)</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                Select your country code for phone number.
-              </FormDescription>
-              {showErrors && <FormMessage />}
-            </FormItem>
-          )}
-        />
-
         {/* Gender */}
         <FormField
           control={form.control}
@@ -132,18 +105,63 @@ export default function AccountTab({
         <FormField
           control={form.control}
           name="birthday"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Birthday</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} value={field.value || ""} />
-              </FormControl>
-              <FormDescription>
-                Your birthday helps us personalize your experience.
-              </FormDescription>
-              {showErrors && <FormMessage />}
-            </FormItem>
-          )}
+          render={({ field }) => {
+            const [month, setMonth] = React.useState<Date>(
+              field.value ? new Date(field.value) : new Date()
+            );
+
+            return (
+              <FormItem className="flex flex-col">
+                <FormLabel>Birthday</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(new Date(field.value), "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        field.value ? new Date(field.value) : undefined
+                      }
+                      onSelect={(date) =>
+                        field.onChange(
+                          date ? format(date, "yyyy-MM-dd") : ""
+                        )
+                      }
+                      month={month}
+                      onMonthChange={setMonth}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      captionLayout="dropdown"
+                      startMonth={new Date(1900, 0)}
+                      endMonth={new Date()}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  Your birthday helps us personalize your experience.
+                </FormDescription>
+                {showErrors && <FormMessage />}
+              </FormItem>
+            );
+          }}
         />
 
         {/* Submit Button */}

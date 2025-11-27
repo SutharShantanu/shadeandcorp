@@ -1,24 +1,28 @@
-import { DefaultSession } from "next-auth";
+import "next-auth";
+import "next-auth/jwt";
 
 declare module "next-auth" {
   interface Session {
     user: {
       id: string;
-      firstName: string;
-      lastName: string;
-      isVerified: boolean;
-      isEmailVerified: boolean;
-      role: string;
-      provider: string;
-    } & DefaultSession["user"];
+      email: string;
+      name: string | null;
+      image?: string | null;
+      firstName?: string;
+      lastName?: string;
+      isEmailVerified?: boolean;
+      isPhoneVerified?: boolean;
+      role?: string;
+      provider?: string;
+    };
   }
 
   interface User {
     id: string;
     firstName?: string;
     lastName?: string;
-    isVerified?: boolean;
     isEmailVerified?: boolean;
+    isPhoneVerified?: boolean;
     role?: string;
     provider?: string;
   }
@@ -29,8 +33,8 @@ declare module "next-auth/jwt" {
     id: string;
     firstName?: string;
     lastName?: string;
-    isVerified?: boolean;
     isEmailVerified?: boolean;
+    isPhoneVerified?: boolean;
     role?: string;
     provider?: string;
   }

@@ -7,9 +7,186 @@ import {
   ChevronRightIcon,
 } from "lucide-react"
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker"
+import type { CaptionLabelProps, MonthGridProps } from "react-day-picker"
+import {
+  eachMonthOfInterval,
+  eachYearOfInterval,
+  endOfYear,
+  format,
+  isAfter,
+  isBefore,
+  startOfYear,
+} from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import { ScrollArea } from "@/components/ui/scroll-area"
+
+// Helper components for advanced calendar selection
+function MonthGrid({
+  className,
+  children,
+  isYearView,
+  setIsYearView,
+  startDate,
+  endDate,
+  years,
+  currentMonth,
+  onMonthSelect,
+}: {
+  className?: string
+  children: React.ReactNode
+  isYearView: boolean
+  setIsYearView: React.Dispatch<React.SetStateAction<boolean>>
+  startDate: Date
+  endDate: Date
+  years: Date[]
+  currentMonth: Date
+  onMonthSelect: (date: Date) => void
+}) {
+  const currentYearRef = React.useRef<HTMLDivElement>(null)
+  const currentMonthButtonRef = React.useRef<HTMLButtonElement>(null)
+  const scrollAreaRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (isYearView && currentYearRef.current && scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      ) as HTMLElement
+
+      if (viewport) {
+        const yearTop = currentYearRef.current.offsetTop
+        viewport.scrollTop = yearTop
+      }
+
+      setTimeout(() => {
+        currentMonthButtonRef.current?.focus()
+      }, 100)
+    }
+  }, [isYearView])
+
+  const currentYear = currentMonth.getFullYear()
+  const currentMonthIndex = currentMonth.getMonth()
+
+  return (
+    <div className="relative">
+      <table className={className}>{children}</table>
+      {isYearView && (
+        <div className="bg-background absolute inset-0 z-20 -mx-2 -mb-2">
+          <ScrollArea ref={scrollAreaRef} className="h-full">
+            {years.map((year) => {
+              const months = eachMonthOfInterval({
+                start: startOfYear(year),
+                end: endOfYear(year),
+              })
+
+              const isCurrentYear = year.getFullYear() === currentYear
+
+              return (
+                <div
+                  key={year.getFullYear()}
+                  ref={isCurrentYear ? currentYearRef : undefined}
+                >
+                  <CollapsibleYear
+                    title={year.getFullYear().toString()}
+                    open={isCurrentYear}
+                  >
+                    <div className="grid grid-cols-3 gap-2">
+                      {months.map((month) => {
+                        const isDisabled =
+                          isBefore(month, startDate) || isAfter(month, endDate)
+                        const isCurrentMonth =
+                          month.getMonth() === currentMonthIndex &&
+                          year.getFullYear() === currentYear
+
+                        return (
+                          <Button
+                            key={month.getTime()}
+                            ref={
+                              isCurrentMonth ? currentMonthButtonRef : undefined
+                            }
+                            variant={isCurrentMonth ? "default" : "outline"}
+                            size="sm"
+                            className="h-7"
+                            disabled={isDisabled}
+                            onClick={() => onMonthSelect(month)}
+                          >
+                            {format(month, "MMM")}
+                          </Button>
+                        )
+                      })}
+                    </div>
+                  </CollapsibleYear>
+                </div>
+              )
+            })}
+          </ScrollArea>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CaptionLabel({
+  children,
+  isYearView,
+  setIsYearView,
+}: {
+  isYearView: boolean
+  setIsYearView: React.Dispatch<React.SetStateAction<boolean>>
+} & React.HTMLAttributes<HTMLSpanElement>) {
+  return (
+    <Button
+      className="data-[state=open]:text-muted-foreground/80 -ms-2 flex items-center gap-2 text-sm font-medium hover:bg-transparent [&[data-state=open]>svg]:rotate-180"
+      variant="ghost"
+      size="sm"
+      onClick={() => setIsYearView((prev) => !prev)}
+      data-state={isYearView ? "open" : "closed"}
+    >
+      {children}
+      <ChevronDownIcon
+        className="text-muted-foreground/80 shrink-0 transition-transform duration-200"
+        aria-hidden="true"
+      />
+    </Button>
+  )
+}
+
+function CollapsibleYear({
+  title,
+  children,
+  open,
+}: {
+  title: string
+  children: React.ReactNode
+  open?: boolean
+}) {
+  return (
+    <Collapsible className="border-t px-2 py-1.5" defaultOpen={open}>
+      <CollapsibleTrigger asChild>
+        <Button
+          className="flex w-full justify-start gap-2 text-sm font-medium hover:bg-transparent [&[data-state=open]>svg]:rotate-180"
+          variant="ghost"
+          size="sm"
+        >
+          <ChevronDownIcon
+            className="text-muted-foreground/80 shrink-0 transition-transform duration-200"
+            aria-hidden="true"
+          />
+          {title}
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down overflow-hidden px-3 py-1 text-sm transition-all">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  )
+}
 
 function Calendar({
   className,
@@ -24,6 +201,16 @@ function Calendar({
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
 }) {
   const defaultClassNames = getDefaultClassNames()
+  const [isYearView, setIsYearView] = React.useState(false)
+
+  // Generate years range based on startMonth and endMonth
+  const years = React.useMemo(() => {
+    if (!props.startMonth || !props.endMonth) return []
+    return eachYearOfInterval({
+      start: startOfYear(props.startMonth),
+      end: endOfYear(props.endMonth),
+    })
+  }, [props.startMonth, props.endMonth])
 
   return (
     <DayPicker
@@ -158,6 +345,36 @@ function Calendar({
             <ChevronDownIcon className={cn("size-4", className)} {...props} />
           )
         },
+        CaptionLabel:
+          captionLayout === "dropdown" && years.length > 0
+            ? (labelProps: CaptionLabelProps) => (
+              <CaptionLabel
+                isYearView={isYearView}
+                setIsYearView={setIsYearView}
+                {...labelProps}
+              />
+            )
+            : undefined,
+        MonthGrid:
+          captionLayout === "dropdown" && years.length > 0
+            ? (gridProps: MonthGridProps) => (
+              <MonthGrid
+                className={gridProps.className}
+                isYearView={isYearView}
+                setIsYearView={setIsYearView}
+                startDate={props.startMonth!}
+                endDate={props.endMonth!}
+                years={years}
+                currentMonth={props.month || new Date()}
+                onMonthSelect={(selectedMonth: Date) => {
+                  props.onMonthChange?.(selectedMonth)
+                  setIsYearView(false)
+                }}
+              >
+                {gridProps.children}
+              </MonthGrid>
+            )
+            : undefined,
         DayButton: CalendarDayButton,
         WeekNumber: ({ children, ...props }) => {
           return (

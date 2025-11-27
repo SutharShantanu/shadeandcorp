@@ -63,8 +63,8 @@ export interface UserProfile {
   urls?: string[];
   addresses?: any[];
   paymentMethods?: any[];
-  isVerified: boolean;
   isEmailVerified: boolean;
+  isPhoneVerified: boolean;
   role: string;
   accountStatus?: string;
   joinDate: string;
@@ -74,7 +74,7 @@ export interface UserProfile {
 }
 
 export function useProfile() {
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -122,7 +122,7 @@ export function useProfile() {
         if (data.ok && data.user) {
           const user = data.user;
           setUserProfile(user);
-          
+
           // Populate profile form
           profileForm.reset({
             firstName: user.firstName || "",
@@ -178,6 +178,9 @@ export function useProfile() {
         // Update local state
         if (data.user) {
           setUserProfile((prev) => (prev ? { ...prev, ...data.user } : data.user));
+
+          // Update NextAuth session to refresh user data from database
+          await update();
         }
         return { success: true, message: data.message || "Profile updated successfully" };
       } else {

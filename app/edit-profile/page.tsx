@@ -9,10 +9,11 @@ import {
   User,
   Shield,
   CreditCard,
-  Settings,
   Bell,
   ArrowLeft,
-  Link2,
+  Package,
+  MapPin,
+  Lock,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,16 +25,18 @@ import { useProfile } from "@/app/(auth)/hook/useProfile";
 import ProfileTab from "@/components/profile/ProfileTab";
 import AccountTab from "@/components/profile/AccountTab";
 import BillingTab from "@/components/profile/BillingTab";
-import AppearanceTab from "@/components/profile/AppearanceTab";
 import NotificationsTab from "@/components/profile/NotificationsTab";
-import ConnectedAccountsTab from "@/components/profile/ConnectedAccountsTab";
+import SecurityTab from "@/components/profile/SecurityTab";
+import OrdersTab from "@/components/profile/OrdersTab";
+import AddressesTab from "@/components/profile/AddressesTab";
 
 const VALID_TABS = [
   "profile",
   "account",
-  "connected",
+  "security",
+  "orders",
+  "addresses",
   "billing",
-  "appearance",
   "notifications",
 ] as const;
 
@@ -50,14 +53,16 @@ export default function EditProfilePage() {
     updateProfile,
   } = useProfile();
 
-  // Get tab from URL query parameter, default to "profile"
+  // Get tab and action from URL query parameters
   const tabFromUrl = searchParams.get("tab");
+  const actionFromUrl = searchParams.get("action");
   const initialTab =
     tabFromUrl && VALID_TABS.includes(tabFromUrl as (typeof VALID_TABS)[number])
       ? tabFromUrl
       : "profile";
   const [activeTab, setActiveTab] = useState(initialTab);
   const [showErrors, setShowErrors] = useState(false);
+  const [shouldOpenModal, setShouldOpenModal] = useState(actionFromUrl === "add");
 
   // Update activeTab when URL changes (using useEffect for URL param changes)
   // This is necessary to sync state with URL params (e.g., browser back/forward)
@@ -119,7 +124,7 @@ export default function EditProfilePage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
+    <div className="container mx-auto py-8 max-w-7xl">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -147,7 +152,7 @@ export default function EditProfilePage() {
               onValueChange={handleTabChange}
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 mb-6">
+              <TabsList>
                 <TabsTrigger
                   value="profile"
                   className="flex items-center gap-2"
@@ -163,11 +168,22 @@ export default function EditProfilePage() {
                   <span className="hidden lg:inline">Account</span>
                 </TabsTrigger>
                 <TabsTrigger
-                  value="connected"
+                  value="security"
                   className="flex items-center gap-2"
                 >
-                  <Link2 className="size-4" />
-                  <span className="hidden lg:inline">Connected</span>
+                  <Lock className="size-4" />
+                  <span className="hidden lg:inline">Security</span>
+                </TabsTrigger>
+                <TabsTrigger value="orders" className="flex items-center gap-2">
+                  <Package className="size-4" />
+                  <span className="hidden lg:inline">Orders</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="addresses"
+                  className="flex items-center gap-2"
+                >
+                  <MapPin className="size-4" />
+                  <span className="hidden lg:inline">Addresses</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="billing"
@@ -177,18 +193,11 @@ export default function EditProfilePage() {
                   <span className="hidden lg:inline">Billing</span>
                 </TabsTrigger>
                 <TabsTrigger
-                  value="appearance"
-                  className="flex items-center gap-2"
-                >
-                  <Settings className="size-4" />
-                  <span className="hidden lg:inline">Appearance</span>
-                </TabsTrigger>
-                <TabsTrigger
                   value="notifications"
                   className="flex items-center gap-2"
                 >
                   <Bell className="size-4" />
-                  <span className="hidden lg:inline">Notifications</span>
+                  <span className="hidden lg:inline">Preferences</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -212,16 +221,20 @@ export default function EditProfilePage() {
                 />
               </TabsContent>
 
-              <TabsContent value="connected" className="mt-6">
-                <ConnectedAccountsTab userProfile={userProfile} />
+              <TabsContent value="security" className="mt-6">
+                <SecurityTab userProfile={userProfile} />
+              </TabsContent>
+
+              <TabsContent value="orders" className="mt-6">
+                <OrdersTab userProfile={userProfile} />
+              </TabsContent>
+
+              <TabsContent value="addresses" className="mt-6">
+                <AddressesTab userProfile={userProfile} shouldOpenModal={shouldOpenModal} onModalClose={() => setShouldOpenModal(false)} />
               </TabsContent>
 
               <TabsContent value="billing" className="mt-6">
-                <BillingTab userProfile={userProfile} />
-              </TabsContent>
-
-              <TabsContent value="appearance" className="mt-6">
-                <AppearanceTab userProfile={userProfile} />
+                <BillingTab userProfile={userProfile} shouldOpenModal={shouldOpenModal} onModalClose={() => setShouldOpenModal(false)} />
               </TabsContent>
 
               <TabsContent value="notifications" className="mt-6">

@@ -1,7 +1,8 @@
 "use client";
 
-import { Bell } from "lucide-react";
+import { Bell, Palette } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
 
 interface NotificationsTabProps {
@@ -12,9 +13,9 @@ export default function NotificationsTab({ userProfile }: NotificationsTabProps)
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold mb-2">Notifications</h3>
+        <h3 className="text-lg font-semibold mb-2">Preferences</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Manage your notification preferences.
+          Manage your notifications and appearance preferences.
         </p>
       </div>
 
@@ -28,6 +29,23 @@ export default function NotificationsTab({ userProfile }: NotificationsTabProps)
         <CardContent>
           <p className="text-sm text-muted-foreground">
             Notification settings will be available soon.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            Appearance
+          </CardTitle>
+          <CardDescription>
+            Customize how the application looks to you.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Theme and display settings will be available soon.
           </p>
         </CardContent>
       </Card>

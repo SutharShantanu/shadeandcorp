@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, Plus, X } from "lucide-react";
+import { Camera } from "lucide-react";
+import ProfilePictureModal from "@/components/profile/ProfilePictureModal";
 import {
   Form,
   FormControl,
@@ -40,40 +41,10 @@ export default function ProfileTab({
   onSubmit,
   userProfile,
 }: ProfileTabProps) {
-  const [urls, setUrls] = useState<string[]>(
-    form.watch("urls") || []
-  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const addUrl = () => {
-    const newUrls = [...urls, ""];
-    setUrls(newUrls);
-    form.setValue("urls", newUrls);
-  };
-
-  const removeUrl = (index: number) => {
-    const newUrls = urls.filter((_, i) => i !== index);
-    setUrls(newUrls);
-    form.setValue("urls", newUrls);
-  };
-
-  const updateUrl = (index: number, value: string) => {
-    const newUrls = [...urls];
-    newUrls[index] = value;
-    setUrls(newUrls);
-    form.setValue("urls", newUrls);
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // In a real app, you'd upload to a storage service and get the URL
-      // For now, we'll use a placeholder
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        form.setValue("profilePicture", reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handlePictureSelect = (imageUrl: string) => {
+    form.setValue("profilePicture", imageUrl);
   };
 
   const displayName = userProfile
@@ -85,82 +56,84 @@ export default function ProfileTab({
       <form onSubmit={onSubmit} className="space-y-6">
         {/* Profile Picture */}
         <div className="flex items-center gap-4">
-          <Avatar className="size-20">
-            <AvatarImage
-              src={form.watch("profilePicture") || userProfile?.profilePicture}
-              alt={displayName}
-            />
-            <AvatarFallback className="text-lg">
-              {displayName
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .toUpperCase()
-                .slice(0, 2) || "U"}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="size-24">
+              <AvatarImage
+                src={form.watch("profilePicture") || userProfile?.profilePicture}
+                alt={displayName}
+              />
+              <AvatarFallback className="text-2xl">
+                {displayName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()
+                  .slice(0, 2) || "U"}
+              </AvatarFallback>
+            </Avatar>
+            <Button
+              type="button"
+              size="icon"
+              variant="secondary"
+              className="absolute bottom-0 right-0 rounded-full size-8"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <Camera className="size-4" />
+            </Button>
+          </div>
           <div>
-            <input
-              type="file"
-              id="profile-picture"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
+            <p className="text-sm font-medium">{displayName}</p>
+            <p className="text-xs text-muted-foreground mb-2">
+              Click the camera icon to update your profile picture
+            </p>
             <Button
               type="button"
               variant="outline"
-              onClick={() => document.getElementById("profile-picture")?.click()}
+              size="sm"
+              onClick={() => setIsModalOpen(true)}
             >
-              <Upload className="size-4 mr-2" />
-              Upload image
+              Change Picture
             </Button>
           </div>
         </div>
 
-        {/* First Name */}
-        <FormField
-          control={form.control}
-          name="firstName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>First Name</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="John"
-                  {...field}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormDescription>
-                Your first name.
-              </FormDescription>
-              {showErrors && <FormMessage />}
-            </FormItem>
-          )}
-        />
-
-        {/* Last Name */}
-        <FormField
-          control={form.control}
-          name="lastName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Last Name</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Doe"
-                  {...field}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormDescription>
-                Your last name.
-              </FormDescription>
-              {showErrors && <FormMessage />}
-            </FormItem>
-          )}
-        />
+        {/* First and Last Name */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="firstName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>First Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="John"
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                {showErrors && <FormMessage />}
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Doe"
+                    {...field}
+                    value={field.value || ""}
+                  />
+                </FormControl>
+                {showErrors && <FormMessage />}
+              </FormItem>
+            )}
+          />
+        </div>
 
         {/* Email */}
         <FormField
@@ -193,65 +166,6 @@ export default function ProfileTab({
           )}
         />
 
-        {/* Bio */}
-        <FormField
-          control={form.control}
-          name="bio"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bio</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Tell us about yourself"
-                  className="min-h-[100px]"
-                  {...field}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormDescription>
-                You can @mention other users and organizations to link to them.
-              </FormDescription>
-              {showErrors && <FormMessage />}
-            </FormItem>
-          )}
-        />
-
-        {/* URLs */}
-        <div className="space-y-2">
-          <FormLabel>URLs</FormLabel>
-          <FormDescription>
-            Add links to your website, blog, or social media profiles.
-          </FormDescription>
-          <div className="space-y-2">
-            {urls.map((url, index) => (
-              <div key={index} className="flex gap-2">
-                <Input
-                  placeholder="https://example.com"
-                  value={url}
-                  onChange={(e) => updateUrl(index, e.target.value)}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => removeUrl(index)}
-                >
-                  <X className="size-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addUrl}
-              className="w-full"
-            >
-              <Plus className="size-4 mr-2" />
-              Add URL
-            </Button>
-          </div>
-        </div>
-
         {/* Submit Button */}
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={loading}>
@@ -265,8 +179,16 @@ export default function ProfileTab({
             )}
           </Button>
         </div>
+
+        {/* Profile Picture Modal */}
+        <ProfilePictureModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          currentPicture={form.watch("profilePicture") || userProfile?.profilePicture}
+          onSelect={handlePictureSelect}
+          displayName={displayName}
+        />
       </form>
     </Form>
   );
 }
-

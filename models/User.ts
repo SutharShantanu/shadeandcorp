@@ -75,8 +75,8 @@ export interface IUser extends Document {
   profilePicture: string;
   bio?: string;
   urls?: string[];
-  isVerified: boolean;
   isEmailVerified: boolean;
+  isPhoneVerified: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
   resetPasswordToken?: string;
@@ -108,8 +108,8 @@ const UserSchema: Schema<IUser> = new Schema({
   profilePicture: { type: String, default: "" },
   bio: { type: String, default: "" },
   urls: [{ type: String }],
-  isVerified: { type: Boolean, default: false },
   isEmailVerified: { type: Boolean, default: false },
+  isPhoneVerified: { type: Boolean, default: false },
   emailVerificationToken: { type: String },
   emailVerificationExpires: { type: Date },
   resetPasswordToken: { type: String },
@@ -153,9 +153,9 @@ const UserSchema: Schema<IUser> = new Schema({
 });
 
 // Password hashing middleware
-UserSchema.pre('save', async function(next) {
+UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -166,7 +166,7 @@ UserSchema.pre('save', async function(next) {
 });
 
 // Method to compare password
-UserSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 

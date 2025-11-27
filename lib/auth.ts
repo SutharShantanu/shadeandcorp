@@ -35,18 +35,18 @@ export const authOptions: NextAuthOptions = {
           }
 
           await connectDB();
-          
+
           // Check if input is email (contains @) or phone number
           const isEmail = credentials.emailOrPhone.includes('@');
           let user;
-          
+
           if (isEmail) {
             // Email login requires password
             if (!credentials?.password) {
               throw new Error("Password is required for email login!");
             }
             user = await User.findOne({ email: credentials.emailOrPhone.toLowerCase().trim() });
-            
+
             if (!user) throw new Error("User not found");
             if (user.accountStatus === "suspended") throw new Error("Account suspended");
             if (user.accountStatus === "deleted") throw new Error("Account not found");
@@ -57,24 +57,20 @@ export const authOptions: NextAuthOptions = {
             // Phone login uses OTP verification
             const phone = credentials.emailOrPhone.trim();
             user = await User.findOne({ phone });
-            
+
             if (!user) throw new Error("User not found");
             if (user.accountStatus === "suspended") throw new Error("Account suspended");
             if (user.accountStatus === "deleted") throw new Error("Account not found");
 
-            // Check if OTP was verified
-            const isOtpVerified = otpStoreService.isVerified(phone);
-            if (!isOtpVerified) {
-              throw new Error("OTP verification required. Please verify your phone number first.");
+            // Check if phone was verified
+            if (!user.isPhoneVerified) {
+              throw new Error("Phone verification required. Please verify your phone number first.");
             }
-
-            // Delete verification token after use (one-time use)
-            otpStoreService.deleteVerificationToken(phone);
           }
 
           // Track login session
           const ip = req?.headers?.["x-forwarded-for"]?.split(",")[0] ||
-                    req?.headers?.["x-real-ip"];
+            req?.headers?.["x-real-ip"];
 
           let geoData: GeoData = {};
           try {
@@ -112,7 +108,6 @@ export const authOptions: NextAuthOptions = {
             firstName: user.firstName,
             lastName: user.lastName,
             image: user.profilePicture,
-            isVerified: user.isVerified,
             isEmailVerified: user.isEmailVerified,
             role: user.role,
           };
@@ -169,7 +164,7 @@ export const authOptions: NextAuthOptions = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-  
+
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -203,8 +198,8 @@ export const authOptions: NextAuthOptions = {
               email: user.email!,
               password: `${account.provider}-oauth-${Date.now()}`,
               profilePicture: user.image || '',
-              isVerified: true,
               isEmailVerified: true,
+              isPhoneVerified: false,
               role: "customer", // Default role for OAuth users
               accountStatus: "active",
             };
@@ -219,9 +214,9 @@ export const authOptions: NextAuthOptions = {
                 ? existingUser._id.toString()
                 : '');
             if (userId) {
-              await updateUser(userId, { 
+              await updateUser(userId, {
                 lastLogin: new Date(),
-                profilePicture: user.image || existingUser.profilePicture 
+                profilePicture: user.image || existingUser.profilePicture
               });
             } else {
               throw new Error('Invalid user ID for update');
@@ -246,14 +241,13 @@ export const authOptions: NextAuthOptions = {
         // Use type guard for extra fields that only exist on IUser
         if ('firstName' in user) token.firstName = user.firstName;
         if ('lastName' in user) token.lastName = user.lastName;
-        if ('isVerified' in user) token.isVerified = user.isVerified;
         if ('isEmailVerified' in user) token.isEmailVerified = user.isEmailVerified;
         if ('role' in user) token.role = user.role;
         token.provider = account?.provider;
       }
 
       // Refresh user data on session update
-      if (trigger === "update" && session) {
+      if (trigger === "update") {
         await connectDB();
         const dbUser = await User.findById(token.id);
         if (dbUser) {
@@ -261,8 +255,8 @@ export const authOptions: NextAuthOptions = {
           token.firstName = dbUser.firstName;
           token.lastName = dbUser.lastName;
           token.image = dbUser.profilePicture;
-          token.isVerified = dbUser.isVerified;
           token.isEmailVerified = dbUser.isEmailVerified;
+          token.isPhoneVerified = dbUser.isPhoneVerified;
           token.role = dbUser.role;
         }
       }
@@ -279,23 +273,18 @@ export const authOptions: NextAuthOptions = {
 
         // Assign only if fields exist in token
         if ('firstName' in token) {
-          // @ts-expect-error: firstName is dynamically added to user
           session.user.firstName = token.firstName as string;
         }
         if ('lastName' in token) {
-          // @ts-expect-error: lastName is dynamically added to user
           session.user.lastName = token.lastName as string;
         }
-        if ('isVerified' in token) {
-          // @ts-expect-error: isVerified is dynamically added to user
-          session.user.isVerified = token.isVerified as boolean;
-        }
         if ('isEmailVerified' in token) {
-          // @ts-expect-error: isEmailVerified is dynamically added to user
           session.user.isEmailVerified = token.isEmailVerified as boolean;
         }
+        if ('isPhoneVerified' in token) {
+          session.user.isPhoneVerified = token.isPhoneVerified as boolean;
+        }
         if ('role' in token) {
-          // @ts-expect-error: role is dynamically added to user
           session.user.role = token.role as string;
         }
         session.user.provider = token.provider as string;
