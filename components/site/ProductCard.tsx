@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -39,6 +39,7 @@ import {
   SizeSelectorProps,
 } from "@/types/ProductCard";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { SizeChart } from "@/components/ui/size-chart";
 
 // ==================== COMPONENT: SizeSelectionModal ====================
 interface SizeSelectionModalProps {
@@ -53,6 +54,7 @@ interface SizeSelectionModalProps {
   onProceed: (action: "addToBag" | "buyNow") => void;
   open: boolean;
   pendingAction: "addToBag" | "buyNow" | null;
+  onOpenSizeChart: () => void;
 }
 
 function SizeSelectionModal({
@@ -67,6 +69,7 @@ function SizeSelectionModal({
   onProceed,
   open,
   pendingAction,
+  onOpenSizeChart,
 }: SizeSelectionModalProps) {
   const selectedColorObj = product.colors.find(
     (color) => color.value === selectedColor
@@ -81,7 +84,7 @@ function SizeSelectionModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="mt-4">
+        <div className="p-6">
           {/* Product Compact Info */}
           <div className="flex gap-6 mb-8">
             {/* Product Image */}
@@ -124,11 +127,11 @@ function SizeSelectionModal({
           </div>
 
           {/* Color Selection */}
-          <div className="mb-6">
+          <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="font-medium text-gray-900">Color</span>
+              <span className="font-medium">Color</span>
               {selectedColorObj && (
-                <span className="text-sm text-gray-600">
+                <span className="text-sm">
                   Selected: {selectedColorObj.name}
                 </span>
               )}
@@ -136,93 +139,85 @@ function SizeSelectionModal({
             <RadioGroup
               value={selectedColor}
               onValueChange={onColorSelect}
-              className="flex gap-2"
+              className="flex gap-2 items-center"
             >
-              {product.colors.map((color) => (
-                <RadioGroupItem
-                  key={color.value}
-                  value={color.value}
-                  id={`color-${product.id}-${color.value}`}
-                  className="sr-only"
-                />
-              ))}
+              {product?.colors && product.colors.length > 0 && (
+                <div className="flex gap-2">
+                  {product.colors.map((color) => (
+                    <RadioGroupItem
+                      key={color.value}
+                      value={color.value}
+                      id={`color-${product.id}-${color.value}`}
+                      aria-label={color.name}
+                      className="h-10 w-10 cursor-pointer"
+                      style={{ backgroundColor: color.value }}
+                      title={color.name}
+                    />
+                  ))}
+                </div>
+              )}
             </RadioGroup>
-            <div className="flex gap-2 mt-2">
-              {product.colors.map((color) => (
-                <Label
-                  key={color.value}
-                  htmlFor={`color-${product.id}-${color.value}`}
-                  className={`
-                    relative w-10 h-10 rounded-full border-2 cursor-pointer transition-all
-                    ${
-                      selectedColor === color.value
-                        ? "border-gray-900 ring-2 ring-gray-900 ring-offset-2"
-                        : "border-gray-300 hover:border-gray-400"
-                    }
-                  `}
-                  style={{ backgroundColor: color.value }}
-                  title={color.name}
-                />
-              ))}
-            </div>
-          </div>
 
-          {/* Size Selection */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-medium text-gray-900">Size</span>
+            {/* Size Selection */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-medium text-gray-900">Size</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm text-blue-600 hover:text-blue-700"
+                  onClick={onOpenSizeChart}
+                >
+                  <Ruler className="w-4 h-4 mr-1" />
+                  Size Guide
+                </Button>
+              </div>
+
+              <SizeSelector
+                product={product}
+                selectedSize={selectedSize}
+                sizeError={sizeError}
+                onSizeSelect={onSizeSelect}
+                isSizeAvailable={isSizeAvailable}
+              />
+            </div>
+
+            {/* Additional Info */}
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h4 className="font-medium text-gray-900 mb-2">Product Details</h4>
+              <ul className="text-sm text-gray-600 space-y-1">
+                <li>• Free shipping on orders over $50</li>
+                <li>• 30-day return policy</li>
+                <li>• 1-year warranty included</li>
+                {product.tags && product.tags.length > 0 && (
+                  <li>• Tags: {product.tags.slice(0, 3).join(", ")}</li>
+                )}
+              </ul>
+            </div>
+
+            {/* Action Button */}
+            <div className="flex gap-3">
               <Button
-                variant="ghost"
-                size="sm"
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className="flex-1 h-12 text-base font-medium"
+                onClick={() => pendingAction && onProceed(pendingAction)}
+                disabled={!selectedSize || !pendingAction}
+                size="lg"
               >
-                <Ruler className="w-4 h-4 mr-1" />
-                Size Guide
+                {pendingAction === "addToBag" ? (
+                  <>
+                    <ShoppingCart className="w-5 h-5 mr-1" />
+                    Add to Bag
+                  </>
+                ) : pendingAction === "buyNow" ? (
+                  <>
+                    Proceed to Checkout
+                    <ArrowRight className="w-5 h-5 ml-1" />
+                  </>
+                ) : (
+                  <>Confirm</>
+                )}
               </Button>
             </div>
-
-            <SizeSelector
-              product={product}
-              selectedSize={selectedSize}
-              sizeError={sizeError}
-              onSizeSelect={onSizeSelect}
-              isSizeAvailable={isSizeAvailable}
-            />
-          </div>
-
-          {/* Additional Info */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <h4 className="font-medium text-gray-900 mb-2">Product Details</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Free shipping on orders over $50</li>
-              <li>• 30-day return policy</li>
-              <li>• 1-year warranty included</li>
-              {product.tags && product.tags.length > 0 && (
-                <li>• Tags: {product.tags.slice(0, 3).join(", ")}</li>
-              )}
-            </ul>
-          </div>
-
-          {/* Action Button */}
-          <div className="flex gap-3">
-            <Button
-              className="flex-1 h-12 text-base font-medium"
-              onClick={() => onProceed(pendingAction!)}
-              disabled={!selectedSize}
-              size="lg"
-            >
-              {pendingAction === "addToBag" ? (
-                <>
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  Add to Bag
-                </>
-              ) : (
-                <>
-                  Proceed to Checkout
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </>
-              )}
-            </Button>
           </div>
         </div>
       </DialogContent>
@@ -343,9 +338,8 @@ function QuickActionButtons({
             }}
           >
             <Heart
-              className={`w-4 h-4 ${
-                isWishlisted ? "fill-red-500 text-red-500" : ""
-              }`}
+              className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""
+                }`}
             />
           </Button>
         </TooltipTrigger>
@@ -498,10 +492,9 @@ function SizeSelector({
                 htmlFor={`size-${product.id}-${size}`}
                 className={`
                   relative flex items-center justify-center w-8 h-8 text-xs font-medium border rounded-full cursor-pointer transition-all
-                  ${
-                    selectedSize === size
-                      ? "border-black bg-black text-white"
-                      : available
+                  ${selectedSize === size
+                    ? "border-black bg-black text-white"
+                    : available
                       ? "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
                       : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                   }
@@ -595,6 +588,7 @@ export default function ProductCard({
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showSizeModal, setShowSizeModal] = useState(false);
+  const [sizeChartOpen, setSizeChartOpen] = useState(false);
   const [sizeError, setSizeError] = useState("");
   const [pendingAction, setPendingAction] = useState<
     "addToBag" | "buyNow" | null
@@ -672,6 +666,7 @@ export default function ProductCard({
       );
       setShowSizeModal(false);
       setPendingAction(null);
+      setShowCheckoutModal(true);
     } else if (action === "buyNow") {
       setShowSizeModal(false);
       setPendingAction(null);
@@ -687,9 +682,9 @@ export default function ProductCard({
     product.discount ||
     (product.originalPrice
       ? Math.round(
-          ((product.originalPrice - product.price) / product.originalPrice) *
-            100
-        )
+        ((product.originalPrice - product.price) / product.originalPrice) *
+        100
+      )
       : 0);
 
   // Stock status
@@ -758,6 +753,7 @@ export default function ProductCard({
           onProceed={handleProceed}
           open={showSizeModal}
           pendingAction={pendingAction}
+          onOpenSizeChart={() => setSizeChartOpen(true)}
         />
 
         {/* Quick Checkout Modal */}
@@ -769,7 +765,36 @@ export default function ProductCard({
           selectedColor={selectedColor}
           quantity={1}
         />
+
+        {/* Size Chart (no drawer) */}
+        <SizeChartDrawer
+          product={product}
+          open={sizeChartOpen}
+          onOpenChange={setSizeChartOpen}
+        />
       </div>
     </TooltipProvider>
+  );
+}
+
+// Local size chart dialog controlled by ProductCard state
+function SizeChartDrawer({
+  product,
+  open,
+  onOpenChange,
+}: {
+  product: Product;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Size Guide</DialogTitle>
+        </DialogHeader>
+        <SizeChart brand={product.brand} category={product.category} />
+      </DialogContent>
+    </Dialog>
   );
 }

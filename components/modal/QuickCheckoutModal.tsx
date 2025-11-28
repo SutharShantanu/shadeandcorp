@@ -4,25 +4,24 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { loadRazorpay } from "@/lib/razorpay";
-import {
-  CreditCard,
-  Ticket,
-  Shield,
-  Truck,
-  RotateCcw,
-  CheckCircle2,
-  X,
-} from "lucide-react";
+import { CreditCard, ArrowLeft, Truck, Package, Zap } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image";
-import { Product } from "../site/ProductCard";
+import { Product } from "@/types/ProductCard";
+import { useAuthInfo } from "@/hook/useAuthInfo";
+import { OrderSummary } from "@/components/modal/checkout/OrderSummary";
+import { DeliveryAddress } from "@/components/modal/checkout/DeliveryAddress";
+import { ShippingMethodSelector } from "@/components/modal/checkout/ShippingMethodSelector";
+import { GiftOptions } from "@/components/modal/checkout/GiftOptions";
+import { CouponButton } from "@/components/modal/checkout/CouponButton";
+import { CouponList } from "@/components/modal/checkout/CouponList";
+import { PriceBreakdown } from "@/components/modal/checkout/PriceBreakdown";
+import { TrustBadges } from "@/components/modal/checkout/TrustBadges";
 
 interface QuickCheckoutModalProps {
   open: boolean;
@@ -31,6 +30,35 @@ interface QuickCheckoutModalProps {
   selectedSize: string;
   selectedColor: string;
   quantity: number;
+}
+
+interface Address {
+  _id?: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  addressType: string;
+  isDefault: boolean;
+}
+
+interface ExtendedUser {
+  id: string;
+  email: string;
+  name: string | null;
+  address?: Address[];
+}
+
+interface BankOffer {
+  id: string;
+  bank: string;
+  type: "card" | "upi" | "netbanking";
+  discount: number;
+  description: string;
+  minAmount?: number;
+  code?: string;
 }
 
 interface Coupon {
@@ -49,21 +77,86 @@ const coupons: Coupon[] = [
     discount: 10,
     type: "percentage",
     description: "Get 10% off on your first order",
+  },
+];
+
+const bankOffers: BankOffer[] = [
+  {
+    id: "b1",
+    bank: "HDFC Bank",
+    type: "card",
+    discount: 10,
+    description: "10% instant discount on HDFC Credit Cards",
+    minAmount: 1500,
+    code: "HDFCCARD10",
+  },
+  {
+    id: "b2",
+    bank: "SBI",
+    type: "card",
+    discount: 5,
+    description: "5% cashback on SBI Debit Cards",
     minAmount: 1000,
+    code: "SBIDEBIT5",
   },
   {
-    id: "2",
-    code: "FLAT500",
-    discount: 500,
-    type: "fixed",
-    description: "Get ₹500 off on orders above ₹2000",
+    id: "b3",
+    bank: "Paytm",
+    type: "upi",
+    discount: 50,
+    description: "Flat ₹50 off on Paytm UPI",
+    minAmount: 500,
+    code: "PAYTMUPI50",
   },
   {
-    id: "3",
-    code: "STYLECAST15",
-    discount: 15,
-    type: "percentage",
-    description: "Extra 15% off on StyleCast products",
+    id: "b4",
+    bank: "PhonePe",
+    type: "upi",
+    discount: 100,
+    description: "Get ₹100 cashback on PhonePe UPI",
+    minAmount: 2000,
+    code: "PHONEPE100",
+  },
+  {
+    id: "b5",
+    bank: "ICICI Bank",
+    type: "netbanking",
+    discount: 7.5,
+    description: "7.5% off on ICICI Net Banking",
+    minAmount: 3000,
+    code: "ICICINET75",
+  },
+];
+
+interface ShippingMethod {
+  id: string;
+  name: string;
+  price: number;
+  estimatedDays: string;
+  icon: typeof Truck;
+}
+
+const shippingMethods: ShippingMethod[] = [
+  {
+    id: "standard",
+    name: "Standard Shipping",
+    price: 0,
+    estimatedDays: "5-7 days",
+    icon: Package,
+  },
+  {
+    id: "express",
+    name: "Express Shipping",
+    price: 15,
+    estimatedDays: "2-3 days",
+    icon: Truck,
+  },
+  {
+    id: "overnight",
+    name: "Overnight Delivery",
+    price: 30,
+    estimatedDays: "1 day",
+    icon: Zap,
   },
 ];
 
@@ -107,15 +200,50 @@ export default function QuickCheckoutModal({
   open,
   onOpenChange,
   product,
-  selectedSize,
-  selectedColor,
-  quantity,
+  selectedSize: initialSize,
+  selectedColor: initialColor,
+  quantity: initialQuantity,
 }: QuickCheckoutModalProps) {
+  const { session } = useAuthInfo();
+  const user = session?.user;
+
+  // Product customization states
+  const [selectedSize, setSelectedSize] = useState<string>(initialSize);
+  const [selectedColor, setSelectedColor] = useState<string>(initialColor);
+  const [quantity, setQuantity] = useState<number>(initialQuantity);
+
+  // Checkout states
   const [selectedCoupon, setSelectedCoupon] = useState<string>("");
+  const [customCouponCode, setCustomCouponCode] = useState<string>("");
+  const [shippingMethod, setShippingMethod] = useState<string>("standard");
+  const [selectedAddress, setSelectedAddress] = useState<string>("");
+  const [isGift, setIsGift] = useState(false);
+  const [giftMessage, setGiftMessage] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showCouponUI, setShowCouponUI] = useState(false);
+  const [couponSearch, setCouponSearch] = useState("");
+
+  // Get user addresses
+  const userAddresses: Address[] = (user as ExtendedUser)?.address || [];
+  const defaultAddress = userAddresses.find((addr) => addr.isDefault);
+
+  // Set default address on mount
+  useState(() => {
+    if (defaultAddress?._id) {
+      setSelectedAddress(defaultAddress._id);
+    }
+  });
 
   const selectedCouponData = coupons.find(
     (coupon) => coupon.id === selectedCoupon
+  );
+
+  const selectedShippingMethod = shippingMethods.find(
+    (method) => method.id === shippingMethod
+  );
+
+  const selectedAddressData = userAddresses.find(
+    (addr) => addr._id === selectedAddress
   );
 
   // Calculate totals
@@ -125,8 +253,79 @@ export default function QuickCheckoutModal({
       ? (subtotal * selectedCouponData.discount) / 100
       : selectedCouponData.discount
     : 0;
-  const shipping = 40; // Fixed shipping cost
-  const total = Math.max(0, subtotal - discount + shipping);
+  const shipping = selectedAddressData && selectedShippingMethod ? selectedShippingMethod.price : 0;
+  const giftWrapFee = isGift ? 5 : 0;
+  const total = Math.max(0, subtotal - discount + shipping + giftWrapFee);
+
+  // Quantity handlers
+  const handleIncreaseQuantity = () => {
+    setQuantity((prev) => prev + 1);
+  };
+
+  const handleDecreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity((prev) => prev - 1);
+    }
+  };
+
+  const handleApplyCustomCoupon = () => {
+    const coupon = coupons.find(
+      (c) => c.code.toLowerCase() === customCouponCode.toLowerCase()
+    );
+    if (coupon) {
+      if (coupon.minAmount && subtotal < coupon.minAmount) {
+        toast.error(
+          `This coupon requires a minimum purchase of $${coupon.minAmount}`
+        );
+        return;
+      }
+      setSelectedCoupon(coupon.id);
+      toast.success(`Coupon "${coupon.code}" applied successfully!`);
+      setCustomCouponCode("");
+      setShowCouponUI(false);
+    } else {
+      toast.error("Invalid coupon code");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setSelectedCoupon("");
+    toast.info("Coupon removed");
+  };
+
+  const handleCouponSelect = (couponId: string) => {
+    const coupon = coupons.find((c) => c.id === couponId);
+    if (coupon) {
+      setSelectedCoupon(couponId);
+      setShowCouponUI(false);
+      toast.success(`Coupon "${coupon.code}" applied successfully!`);
+    }
+  };
+
+  // Filter coupons based on search and eligibility
+  const allCoupons = [...coupons, ...bankOffers.map(offer => ({
+    id: offer.id,
+    code: offer.code || offer.bank,
+    discount: offer.discount,
+    type: offer.type === "card" || offer.type === "upi" || offer.type === "netbanking" ? "fixed" as const : "percentage" as const,
+    description: offer.description,
+    minAmount: offer.minAmount,
+    category: offer.type,
+  }))];
+
+  const filteredCoupons = allCoupons.filter((coupon) => {
+    const matchesSearch = coupon.code.toLowerCase().includes(couponSearch.toLowerCase()) ||
+      coupon.description.toLowerCase().includes(couponSearch.toLowerCase());
+    return matchesSearch;
+  });
+
+  const eligibleCoupons = filteredCoupons.filter(
+    (coupon) => !coupon.minAmount || subtotal >= coupon.minAmount
+  );
+
+  const ineligibleCoupons = filteredCoupons.filter(
+    (coupon) => coupon.minAmount && subtotal < coupon.minAmount
+  );
 
   const handlePayment = async () => {
     if (!selectedSize) {
@@ -226,159 +425,147 @@ export default function QuickCheckoutModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl w-full max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>Quick Checkout</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </DialogTitle>
+          <div className="flex items-center gap-3">
+            {showCouponUI && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowCouponUI(false)}
+                className="shrink-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            <DialogTitle className="text-2xl">
+              {showCouponUI ? "Available Coupons" : "Quick Checkout"}
+            </DialogTitle>
+          </div>
         </DialogHeader>
-
-        <div className="space-y-6">
-          {/* Order Summary */}
-          <div className="border rounded-lg p-4">
-            <h3 className="font-semibold mb-3">Order Summary</h3>
-            <div className="flex gap-4">
-              <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
-                <Image
-                  src={product.images[0]}
-                  alt={product.title}
-                  className="w-full h-full object-cover"
-                  width={80}
-                  height={80}
+        <div className="overflow-y-auto p-6">
+          {!showCouponUI && (
+            // Main Checkout View
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Product Details & Customization */}
+              <div className="lg:col-span-2 space-y-4">
+                {/* Order Summary Component */}
+                <OrderSummary
+                  product={product}
+                  selectedSize={selectedSize}
+                  onSizeChange={setSelectedSize}
+                  selectedColor={selectedColor}
+                  onColorChange={setSelectedColor}
+                  quantity={quantity}
+                  onQuantityIncrease={handleIncreaseQuantity}
+                  onQuantityDecrease={handleDecreaseQuantity}
                 />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-medium text-sm">{product.title}</h4>
-                <p className="text-xs text-gray-600">{product.brand}</p>
-                <div className="flex items-center gap-4 mt-1 text-xs text-gray-600">
-                  <span>Size: {selectedSize}</span>
-                  <span>
-                    Color:{" "}
-                    {
-                      product.colors.find(
-                        (c: { value: string; name: string }) =>
-                          c.value === selectedColor
-                      )?.name
-                    }
-                  </span>
-                  <span>Qty: {quantity}</span>
-                </div>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="font-semibold">${product.price}</span>
-                  {product.originalPrice && (
-                    <span className="text-xs text-gray-500 line-through">
-                      ${product.originalPrice}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Coupon Selection */}
-          <div className="border rounded-lg p-4">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Ticket className="w-4 h-4" />
-              Apply Coupon
-            </h3>
-            <RadioGroup
-              value={selectedCoupon}
-              onValueChange={setSelectedCoupon}
-            >
-              <div className="space-y-2">
-                {coupons.map((coupon) => (
-                  <div key={coupon.id} className="flex items-center space-x-2">
-                    <RadioGroupItem
-                      value={coupon.id}
-                      id={`coupon-${coupon.id}`}
-                    />
-                    <Label
-                      htmlFor={`coupon-${coupon.id}`}
-                      className="flex-1 cursor-pointer"
+                {/* Delivery Address Component */}
+                <DeliveryAddress
+                  addresses={userAddresses}
+                  selectedAddress={selectedAddress}
+                  onAddressChange={setSelectedAddress}
+                />
+
+                {/* Shipping Method Component */}
+                {selectedAddress && (
+                  <ShippingMethodSelector
+                    methods={shippingMethods}
+                    selectedMethod={shippingMethod}
+                    onMethodChange={setShippingMethod}
+                  />
+                )}
+
+                {/* Gift Options Component */}
+                <GiftOptions
+                  isGift={isGift}
+                  onGiftToggle={setIsGift}
+                  giftMessage={giftMessage}
+                  onMessageChange={setGiftMessage}
+                />
+
+              </div>
+
+              {/* Right Column - Price Summary & Payment */}
+              <div className="lg:col-span-1">
+                <div className="sticky top-0 space-y-4">
+                  {/* Coupon Button Component */}
+                  <CouponButton
+                    selectedCoupon={selectedCouponData}
+                    hasCoupons={allCoupons.length > 0}
+                    hasEligibleCoupons={eligibleCoupons.length > 0}
+                    onOpenCoupons={() => setShowCouponUI(true)}
+                    onRemoveCoupon={handleRemoveCoupon}
+                  />
+                  {/* Price Breakdown Component */}
+                  <PriceBreakdown
+                    quantity={quantity}
+                    subtotal={subtotal}
+                    discount={discount}
+                    couponCode={selectedCouponData?.code}
+                    shipping={shipping}
+                    shippingMethodName={selectedShippingMethod?.name}
+                    giftWrapFee={giftWrapFee}
+                    total={total}
+                    hasAddress={selectedAddress !== ""}
+                  />
+
+                  {/* Trust Badges Component */}
+                  <TrustBadges showFreeShipping={selectedAddress !== "" && shipping === 0} />
+
+                  {/* Payment Button */}
+                  <DialogFooter>
+                    <Button
+                      className="w-full py-6 text-lg font-semibold"
+                      onClick={handlePayment}
+                      disabled={isProcessing || !selectedSize || !selectedAddress}
                     >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <span className="font-medium">{coupon.code}</span>
-                          <span className="text-xs text-green-600 ml-2">
-                            -{coupon.discount}
-                            {coupon.type === "percentage" ? "%" : "₹"}
-                          </span>
-                        </div>
-                        {selectedCoupon === coupon.id && (
-                          <CheckCircle2 className="w-4 h-4 text-green-600" />
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-600">
-                        {coupon.description}
-                      </p>
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </RadioGroup>
-          </div>
+                      {isProcessing ? (
+                        <>Processing...</>
+                      ) : !selectedAddress ? (
+                        "Add Delivery Address"
+                      ) : (
+                        <>
+                          <CreditCard className="w-5 h-5 mr-2" />
+                          Pay ${total.toFixed(2)}
+                        </>
+                      )}
+                    </Button>
+                  </DialogFooter>
 
-          {/* Price Breakdown */}
-          <div className="border rounded-lg p-4">
-            <h3 className="font-semibold mb-3">Price Details</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
-              </div>
-              {selectedCouponData && (
-                <div className="flex justify-between text-green-600">
-                  <span>Coupon Discount ({selectedCouponData.code})</span>
-                  <span>-${discount.toFixed(2)}</span>
+                  <p className="text-xs text-center text-gray-500">
+                    By continuing, you agree to our{" "}
+                    <a href="#" className="underline">
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a href="#" className="underline">
+                      Privacy Policy
+                    </a>
+                  </p>
                 </div>
-              )}
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>${shipping.toFixed(2)}</span>
-              </div>
-              <div className="border-t pt-2 flex justify-between font-semibold">
-                <span>Total</span>
-                <span>${total.toFixed(2)}</span>
               </div>
             </div>
-          </div>
-
-          {/* Trust Badges */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="flex flex-col items-center text-xs">
-              <Shield className="w-6 h-6 text-green-600 mb-1" />
-              <span>100% Secure</span>
-            </div>
-            <div className="flex flex-col items-center text-xs">
-              <Truck className="w-6 h-6 text-green-600 mb-1" />
-              <span>Free Shipping</span>
-            </div>
-            <div className="flex flex-col items-center text-xs">
-              <RotateCcw className="w-6 h-6 text-green-600 mb-1" />
-              <span>Easy Returns</span>
-            </div>
-          </div>
-
-          {/* Payment Button */}
-          <Button
-            className="w-full py-3 text-lg font-semibold"
-            onClick={handlePayment}
-            disabled={isProcessing || !selectedSize}
-          >
-            <CreditCard className="w-5 h-5 mr-2" />
-            {isProcessing ? "Processing..." : `Pay $${total.toFixed(2)}`}
-          </Button>
-
-          <p className="text-xs text-center text-gray-600">
-            By continuing, you agree to our Terms of Service and Privacy Policy
-          </p>
+          )}
+        </div>
+        <div className="overflow-y-auto px-6">
+          {showCouponUI && (
+            <CouponList
+              searchQuery={couponSearch}
+              onSearchChange={setCouponSearch}
+              customCode={customCouponCode}
+              onCustomCodeChange={setCustomCouponCode}
+              onApplyCustomCode={handleApplyCustomCoupon}
+              eligibleCoupons={eligibleCoupons}
+              ineligibleCoupons={ineligibleCoupons}
+              selectedCoupon={selectedCoupon}
+              onSelectCoupon={handleCouponSelect}
+              subtotal={subtotal}
+              onBack={() => setShowCouponUI(false)}
+              onRemoveCoupon={handleRemoveCoupon}
+            />
+          )}
         </div>
       </DialogContent>
     </Dialog>
