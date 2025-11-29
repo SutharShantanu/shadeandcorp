@@ -36,10 +36,10 @@ import {
 } from "@/components/ui/tooltip";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import AvatarBadge from "@/components/site/AvatarBadge";
 import { useAppSelector } from "@/lib/store";
+import { getNotificationsByCategory } from "@/lib/notificationUtils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -449,22 +449,23 @@ export function UserMenu({ className }: UserMenuProps) {
     router.push("/");
   };
 
+  // Get notifications from session
+  const notifications = session.user?.notifications || [];
+  // Highest priority is handled by AvatarBadge; here we only need category counts
+
+  // Get notifications by category for menu items
+  const profileNotifications = getNotificationsByCategory(notifications, "profile");
+  const orderNotifications = getNotificationsByCategory(notifications, "orders");
+  const settingsNotifications = getNotificationsByCategory(notifications, "settings");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-9 w-9 rounded-full transition-all hover:scale-105"
+          className="relative h-9 w-9 rounded-full transition-all"
         >
-          <Avatar className="h-9 w-9 transition-all">
-            <AvatarImage
-              src={session.user?.image || ""}
-              alt={session.user?.name || "User avatar"}
-            />
-            <AvatarFallback className="">
-              {session.user?.name?.[0].toUpperCase() || "U"}
-            </AvatarFallback>
-          </Avatar>
+          <AvatarBadge />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -503,15 +504,21 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => handleNavigation("/profile")}>
+          <DropdownMenuItem onClick={() => handleNavigation("/profile")} className="relative">
             <User className="mr-1 h-4 w-4" />
             <span>Profile</span>
+            {profileNotifications.length > 0 && (
+              <span className="ml-auto inline-flex h-2 w-2 rounded-full bg-blue-500 dark:bg-blue-400" />
+            )}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleNavigation("/orders")}>
+          <DropdownMenuItem onClick={() => handleNavigation("/orders")} className="relative">
             <ShoppingBag className="mr-1 h-4 w-4" />
             <span>My Orders</span>
+            {orderNotifications.length > 0 && (
+              <span className="ml-auto inline-flex h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+            )}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleNavigation("/wishlist")}>
+          <DropdownMenuItem onClick={() => handleNavigation("/wishlist")} className="relative">
             <Heart className="mr-1 h-4 w-4" />
             <span>Wishlist</span>
           </DropdownMenuItem>
@@ -520,19 +527,26 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => handleNavigation("/addresses")}>
+          <DropdownMenuItem onClick={() => handleNavigation("/addresses")} className="relative">
             <MapPin className="mr-1 h-4 w-4" />
             <span>Addresses</span>
+            {session.user?.hasMissingAddress && (
+              <span className="ml-auto inline-flex h-2 w-2 rounded-full bg-amber-500 dark:bg-amber-400" />
+            )}
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => handleNavigation("/payment-methods")}
-          >
+          <DropdownMenuItem onClick={() => handleNavigation("/payment-methods")} className="relative">
             <CreditCard className="mr-1 h-4 w-4" />
             <span>Payment Methods</span>
+            {session.user?.hasMissingPayment && (
+              <span className="ml-auto inline-flex h-2 w-2 rounded-full bg-amber-500 dark:bg-amber-400" />
+            )}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleNavigation("/notifications")}>
+          <DropdownMenuItem onClick={() => handleNavigation("/notifications")} className="relative">
             <Bell className="mr-1 h-4 w-4" />
             <span>Notifications</span>
+            {settingsNotifications.length > 0 && (
+              <span className="ml-auto inline-flex h-2 w-2 rounded-full bg-purple-500 dark:bg-purple-400" />
+            )}
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
@@ -552,7 +566,7 @@ export function UserMenu({ className }: UserMenuProps) {
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
-    </DropdownMenu>
+    </DropdownMenu >
   );
 }
 interface MobileMenuProps {

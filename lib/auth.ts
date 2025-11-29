@@ -7,6 +7,7 @@ import connectDB from "@/lib/mongoDB";
 import User, { IUser } from "@/models/User";
 import { createUser, updateUser } from "@/lib/db";
 import { otpStoreService } from "@/lib/otpStore";
+import { generateUserNotifications } from "@/lib/notificationUtils";
 
 interface GeoData {
   ip?: string;
@@ -288,6 +289,39 @@ export const authOptions: NextAuthOptions = {
           session.user.role = token.role as string;
         }
         session.user.provider = token.provider as string;
+
+        // Fetch fresh user data for notifications
+        try {
+          await connectDB();
+          const dbUser = await User.findById(token.id);
+
+          if (dbUser) {
+            // Generate notifications based on user data
+            const notifications = generateUserNotifications({
+              isEmailVerified: dbUser.isEmailVerified,
+              isPhoneVerified: dbUser.isPhoneVerified,
+              phone: dbUser.phone,
+              addresses: dbUser.addresses || [],
+              paymentMethods: dbUser.paymentMethods || [],
+              birthday: dbUser.birthday,
+              gender: dbUser.gender,
+              // TODO: Add order counts when order system is implemented
+              // pendingOrders: orderCounts.pending,
+              // dispatchedOrders: orderCounts.dispatched,
+              // deliveredOrders: orderCounts.delivered,
+            });
+
+            session.user.notifications = notifications;
+
+            // Set quick flags for common checks
+            session.user.hasProfileIncomplete = !dbUser.birthday || !dbUser.gender || !dbUser.phone;
+            session.user.hasMissingAddress = !dbUser.addresses || dbUser.addresses.length === 0;
+            session.user.hasMissingPayment = !dbUser.paymentMethods || dbUser.paymentMethods.length === 0;
+            session.user.hasMissingPhone = !dbUser.phone;
+          }
+        } catch (error) {
+          console.error("Error generating notifications:", error);
+        }
       }
       return session;
     },
