@@ -1,18 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CreditCard, Plus, Edit, Trash2, Check } from "lucide-react";
+import { CreditCard, Plus, Edit, Trash2, Check, X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription } from "../ui/alert";
+import { CreditCardInput } from "@/components/ui/credit-card-input";
+import { UpiInput } from "@/components/ui/upi-input";
+import { paymentMethodSchema, type PaymentMethodFormData } from "@/lib/validations/payment";
 
 interface BillingTabProps {
   userProfile: UserProfile | null;
@@ -22,9 +29,10 @@ interface BillingTabProps {
 
 interface PaymentMethod {
   id: string;
-  type: "credit-card" | "debit-card" | "upi" | "net-banking" | "other";
+  type: "credit-card" | "debit-card" | "upi" | "net-banking";
   cardNumber?: string;
   expiryDate?: string;
+  cvc?: string;
   cardHolderName: string;
   upiId?: string;
   accountNumber?: string;
@@ -35,78 +43,100 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
   const router = useRouter();
 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(
-    (userProfile?.paymentMethods || []).map((method: any, index: number) => ({
+    (userProfile?.paymentMethods || []).map((method: PaymentMethod & { _id?: string }, index: number) => ({
       id: method._id || `pm-${index}`,
       type: method.type || "credit-card",
       cardNumber: method.cardNumber,
       expiryDate: method.expiryDate,
+      cvc: method.cvc,
       cardHolderName: method.cardHolderName || "",
       upiId: method.upiId,
       accountNumber: method.accountNumber,
-      isDefault: method.isDefault || false,
+      isDefault: method.isDefault ?? false,
     }))
   );
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
-  const [formData, setFormData] = useState<Omit<PaymentMethod, "id">>({
-    type: "credit-card",
-    cardNumber: "",
-    expiryDate: "",
-    cardHolderName: "",
-    upiId: "",
-    accountNumber: "",
-    isDefault: false,
+  const [alertDismissed, setAlertDismissed] = useState(false);
+
+  // Form for adding payment method
+  const addForm = useForm<PaymentMethodFormData>({
+    resolver: zodResolver(paymentMethodSchema),
+    mode: "onChange",
+    defaultValues: {
+      type: "credit-card",
+      cardNumber: "",
+      expiryDate: "",
+      cvc: "",
+      cardHolderName: "",
+      upiId: "",
+      accountNumber: "",
+      isDefault: false,
+    },
   });
+
+  // Form for editing payment method
+  const editForm = useForm<PaymentMethodFormData>({
+    resolver: zodResolver(paymentMethodSchema),
+    mode: "onChange",
+    defaultValues: {
+      type: "credit-card",
+      cardNumber: "",
+      expiryDate: "",
+      cvc: "",
+      cardHolderName: "",
+      upiId: "",
+      accountNumber: "",
+      isDefault: false,
+    },
+  });
+
+  const watchAddType = addForm.watch("type");
+  const watchEditType = editForm.watch("type");
+  const addFormCardHolderName = addForm.watch("cardHolderName");
+  const addFormExpiryDate = addForm.watch("expiryDate");
+  const addFormCvc = addForm.watch("cvc");
+  const editFormCardHolderName = editForm.watch("cardHolderName");
+  const editFormExpiryDate = editForm.watch("expiryDate");
+  const editFormCvc = editForm.watch("cvc");
 
   // Auto-open modal when shouldOpenModal is true
   useEffect(() => {
     if (shouldOpenModal) {
-      openAddDialog();
+      addForm.reset({
+        type: "credit-card",
+        cardNumber: "",
+        expiryDate: "",
+        cvc: "",
+        cardHolderName: "",
+        upiId: "",
+        accountNumber: "",
+        isDefault: false,
+      });
+      setIsAddDialogOpen(true);
       if (onModalClose) {
         onModalClose();
       }
     }
-  }, [shouldOpenModal, onModalClose]);
+  }, [shouldOpenModal, onModalClose, addForm]);
 
+  // Populate edit form when dialog opens
   useEffect(() => {
     if (selectedMethod && isEditDialogOpen) {
-      setFormData({
+      editForm.reset({
         type: selectedMethod.type,
         cardNumber: selectedMethod.cardNumber || "",
         expiryDate: selectedMethod.expiryDate || "",
+        cvc: selectedMethod.cvc || "",
         cardHolderName: selectedMethod.cardHolderName,
         upiId: selectedMethod.upiId || "",
         accountNumber: selectedMethod.accountNumber || "",
         isDefault: selectedMethod.isDefault,
       });
     }
-  }, [selectedMethod, isEditDialogOpen]);
-
-  const formatCardNumber = (value: string) => {
-    const cleaned = value.replace(/\s/g, "");
-    const chunks = cleaned.match(/.{1,4}/g) || [];
-    return chunks.join(" ");
-  };
-
-  const handleCardNumberChange = (value: string) => {
-    const cleaned = value.replace(/\s/g, "");
-    if (cleaned.length <= 16 && /^\d*$/.test(cleaned)) {
-      setFormData({ ...formData, cardNumber: cleaned });
-    }
-  };
-
-  const handleExpiryChange = (value: string) => {
-    const cleaned = value.replace(/\D/g, "");
-    if (cleaned.length <= 4) {
-      let formatted = cleaned;
-      if (cleaned.length >= 2) {
-        formatted = cleaned.slice(0, 2) + "/" + cleaned.slice(2);
-      }
-      setFormData({ ...formData, expiryDate: formatted });
-    }
-  };
+  }, [selectedMethod, isEditDialogOpen, editForm]);
 
   const maskCardNumber = (cardNumber: string) => {
     return "**** **** **** " + cardNumber.slice(-4);
@@ -122,32 +152,32 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
     toast.success("Default payment method updated");
   };
 
-  const handleAddMethod = () => {
+  const onAddSubmit = (data: PaymentMethodFormData) => {
     const newMethod: PaymentMethod = {
       id: `pm-${Date.now()}`,
-      ...formData,
-      isDefault: paymentMethods.length === 0 ? true : formData.isDefault,
+      ...data,
+      isDefault: paymentMethods.length === 0 ? true : data.isDefault,
     };
 
     setPaymentMethods(
-      formData.isDefault
+      data.isDefault
         ? [...paymentMethods.map(m => ({ ...m, isDefault: false })), newMethod]
         : [...paymentMethods, newMethod]
     );
 
     toast.success("Payment method added successfully");
     setIsAddDialogOpen(false);
-    resetForm();
+    addForm.reset();
   };
 
-  const handleEditMethod = () => {
+  const onEditSubmit = (data: PaymentMethodFormData) => {
     if (!selectedMethod) return;
 
     setPaymentMethods(
       paymentMethods.map((method) =>
         method.id === selectedMethod.id
-          ? { ...method, ...formData }
-          : formData.isDefault
+          ? { ...method, ...data }
+          : data.isDefault
             ? { ...method, isDefault: false }
             : method
       )
@@ -156,7 +186,7 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
     toast.success("Payment method updated successfully");
     setIsEditDialogOpen(false);
     setSelectedMethod(null);
-    resetForm();
+    editForm.reset();
   };
 
   const handleDeleteMethod = () => {
@@ -175,20 +205,17 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
     setSelectedMethod(null);
   };
 
-  const resetForm = () => {
-    setFormData({
+  const openAddDialog = () => {
+    addForm.reset({
       type: "credit-card",
       cardNumber: "",
       expiryDate: "",
+      cvc: "",
       cardHolderName: "",
       upiId: "",
       accountNumber: "",
       isDefault: false,
     });
-  };
-
-  const openAddDialog = () => {
-    resetForm();
     setIsAddDialogOpen(true);
   };
 
@@ -277,7 +304,7 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                         <p className="text-muted-foreground">Expires: {method.expiryDate}</p>
                       </>
                     )}
-                    {(method.type === "net-banking" || method.type === "other") && method.accountNumber && (
+                    {method.type === "net-banking" && method.accountNumber && (
                       <p className="font-medium font-mono">****{method.accountNumber.slice(-4)}</p>
                     )}
                   </div>
@@ -314,256 +341,327 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
 
       {/* Add Payment Method Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-2xl px-6 py-4 max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="p-0 pb-4">
             <DialogTitle>Add Payment Method</DialogTitle>
             <DialogDescription>
               Add a new payment method for faster checkout.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="paymentType">Payment Type *</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value: "credit-card" | "debit-card" | "upi" | "net-banking" | "other") =>
-                  setFormData({ ...formData, type: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="credit-card">Credit Card</SelectItem>
-                  <SelectItem value="debit-card">Debit Card</SelectItem>
-                  <SelectItem value="upi">UPI</SelectItem>
-                  <SelectItem value="net-banking">Net Banking</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="cardHolderName">{formData.type === "upi" ? "UPI Name" : "Account Holder Name"} *</Label>
-              <Input
-                id="cardHolderName"
-                value={formData.cardHolderName}
-                onChange={(e) => setFormData({ ...formData, cardHolderName: e.target.value })}
-                placeholder="John Doe"
+          <Form {...addForm}>
+            <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-4 pt-4">
+              {/* Payment Type Selection */}
+              <FormField
+                control={addForm.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Type *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="credit-card">Credit Card</SelectItem>
+                        <SelectItem value="debit-card">Debit Card</SelectItem>
+                        <SelectItem value="upi">UPI</SelectItem>
+                        <SelectItem value="net-banking">Net Banking</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* UPI Fields */}
-            {formData.type === "upi" && (
-              <div className="grid gap-2">
-                <Label htmlFor="upiId">UPI ID *</Label>
-                <Input
-                  id="upiId"
-                  value={formData.upiId}
-                  onChange={(e) => setFormData({ ...formData, upiId: e.target.value })}
-                  placeholder="username@upi"
+              {/* Card Payment Fields */}
+              {(watchAddType === "credit-card" || watchAddType === "debit-card") && (
+                <FormField
+                  control={addForm.control}
+                  name="cardNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <CreditCardInput
+                        cardNumber={field.value || ""}
+                        expiryDate={addFormExpiryDate || ""}
+                        cvc={addFormCvc || ""}
+                        cardHolderName={addFormCardHolderName || ""}
+                        onCardNumberChange={(value) => addForm.setValue("cardNumber", value.replace(/\s/g, ""))}
+                        onExpiryDateChange={(value) => addForm.setValue("expiryDate", value)}
+                        onCVCChange={(value) => addForm.setValue("cvc", value)}
+                        onCardHolderNameChange={(value) => addForm.setValue("cardHolderName", value)}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-            )}
+              )}
 
-            {/* Card Fields */}
-            {(formData.type === "credit-card" || formData.type === "debit-card") && (
-              <>
-                <div className="grid gap-2">
-                  <Label htmlFor="cardNumber">Card Number *</Label>
-                  <Input
-                    id="cardNumber"
-                    value={formatCardNumber(formData.cardNumber || "")}
-                    onChange={(e) => handleCardNumberChange(e.target.value)}
-                    placeholder="1234 5678 9012 3456"
-                    maxLength={19}
+              {/* UPI Payment Fields */}
+              {watchAddType === "upi" && (
+                <>
+                  <FormField
+                    control={addForm.control}
+                    name="cardHolderName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>UPI Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="expiryDate">Expiry Date (MM/YY) *</Label>
-                  <Input
-                    id="expiryDate"
-                    value={formData.expiryDate}
-                    onChange={(e) => handleExpiryChange(e.target.value)}
-                    placeholder="MM/YY"
-                    maxLength={5}
+                  <FormField
+                    control={addForm.control}
+                    name="upiId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>UPI ID *</FormLabel>
+                        <FormControl>
+                          <UpiInput
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            placeholder="username@paytm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-              </>
-            )}
+                </>
+              )}
 
-            {/* Net Banking / Other Fields */}
-            {(formData.type === "net-banking" || formData.type === "other") && (
-              <div className="grid gap-2">
-                <Label htmlFor="accountNumber">Account Number *</Label>
-                <Input
-                  id="accountNumber"
-                  value={formData.accountNumber}
-                  onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
-                  placeholder="Account number"
-                />
-              </div>
-            )}
+              {/* Net Banking Payment Fields */}
+              {watchAddType === "net-banking" && (
+                <>
+                  <FormField
+                    control={addForm.control}
+                    name="cardHolderName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Account Holder Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={addForm.control}
+                    name="accountNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Account Number *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Account number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="isDefault"
-                checked={formData.isDefault}
-                onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                className="h-4 w-4 rounded border-gray-300"
+              {/* Set as Default */}
+              <FormField
+                control={addForm.control}
+                name="isDefault"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-muted/50 p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base font-medium cursor-pointer">
+                        Default Payment Method
+                      </FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        Use this as your primary payment option for faster checkout
+                      </div>
+                    </div>
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
-              <Label htmlFor="isDefault" className="cursor-pointer">
-                Set as default payment method
-              </Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAddMethod}
-              disabled={
-                !formData.cardHolderName ||
-                (formData.type === "upi" && !formData.upiId) ||
-                ((formData.type === "credit-card" || formData.type === "debit-card") &&
-                  (!formData.cardNumber || formData.cardNumber.length !== 16 || !formData.expiryDate || formData.expiryDate.length !== 5)) ||
-                ((formData.type === "net-banking" || formData.type === "other") && !formData.accountNumber)
-              }
-            >
-              Add Payment Method
-            </Button>
-          </DialogFooter>
+
+              <DialogFooter className="pt-4">
+                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  Add Payment Method
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 
       {/* Edit Payment Method Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Payment Method</DialogTitle>
             <DialogDescription>
               Update your payment method details.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="edit-paymentType">Payment Type *</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value: "credit-card" | "debit-card" | "upi" | "net-banking" | "other") =>
-                  setFormData({ ...formData, type: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="credit-card">Credit Card</SelectItem>
-                  <SelectItem value="debit-card">Debit Card</SelectItem>
-                  <SelectItem value="upi">UPI</SelectItem>
-                  <SelectItem value="net-banking">Net Banking</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-cardHolderName">{formData.type === "upi" ? "UPI Name" : "Account Holder Name"} *</Label>
-              <Input
-                id="edit-cardHolderName"
-                value={formData.cardHolderName}
-                onChange={(e) => setFormData({ ...formData, cardHolderName: e.target.value })}
-                placeholder="John Doe"
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 pt-4">
+              {/* Payment Type Selection */}
+              <FormField
+                control={editForm.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Type *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="credit-card">Credit Card</SelectItem>
+                        <SelectItem value="debit-card">Debit Card</SelectItem>
+                        <SelectItem value="upi">UPI</SelectItem>
+                        <SelectItem value="net-banking">Net Banking</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* UPI Fields */}
-            {formData.type === "upi" && (
-              <div className="grid gap-2">
-                <Label htmlFor="edit-upiId">UPI ID *</Label>
-                <Input
-                  id="edit-upiId"
-                  value={formData.upiId}
-                  onChange={(e) => setFormData({ ...formData, upiId: e.target.value })}
-                  placeholder="username@upi"
+              {/* Card Payment Fields */}
+              {(watchEditType === "credit-card" || watchEditType === "debit-card") && (
+                <FormField
+                  control={editForm.control}
+                  name="cardNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <CreditCardInput
+                        cardNumber={field.value || ""}
+                        expiryDate={editFormExpiryDate || ""}
+                        cvc={editFormCvc || ""}
+                        cardHolderName={editFormCardHolderName || ""}
+                        onCardNumberChange={(value) => editForm.setValue("cardNumber", value.replace(/\s/g, ""))}
+                        onExpiryDateChange={(value) => editForm.setValue("expiryDate", value)}
+                        onCVCChange={(value) => editForm.setValue("cvc", value)}
+                        onCardHolderNameChange={(value) => editForm.setValue("cardHolderName", value)}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-            )}
+              )}
 
-            {/* Card Fields */}
-            {(formData.type === "credit-card" || formData.type === "debit-card") && (
-              <>
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-cardNumber">Card Number *</Label>
-                  <Input
-                    id="edit-cardNumber"
-                    value={formatCardNumber(formData.cardNumber || "")}
-                    onChange={(e) => handleCardNumberChange(e.target.value)}
-                    placeholder="1234 5678 9012 3456"
-                    maxLength={19}
+              {/* UPI Payment Fields */}
+              {watchEditType === "upi" && (
+                <>
+                  <FormField
+                    control={editForm.control}
+                    name="cardHolderName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>UPI Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-expiryDate">Expiry Date (MM/YY) *</Label>
-                  <Input
-                    id="edit-expiryDate"
-                    value={formData.expiryDate}
-                    onChange={(e) => handleExpiryChange(e.target.value)}
-                    placeholder="MM/YY"
-                    maxLength={5}
+                  <FormField
+                    control={editForm.control}
+                    name="upiId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>UPI ID *</FormLabel>
+                        <FormControl>
+                          <UpiInput
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            placeholder="username@paytm"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-              </>
-            )}
+                </>
+              )}
 
-            {/* Net Banking / Other Fields */}
-            {(formData.type === "net-banking" || formData.type === "other") && (
-              <div className="grid gap-2">
-                <Label htmlFor="edit-accountNumber">Account Number *</Label>
-                <Input
-                  id="edit-accountNumber"
-                  value={formData.accountNumber}
-                  onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
-                  placeholder="Account number"
-                />
-              </div>
-            )}
+              {/* Net Banking Payment Fields */}
+              {watchEditType === "net-banking" && (
+                <>
+                  <FormField
+                    control={editForm.control}
+                    name="cardHolderName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Account Holder Name *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={editForm.control}
+                    name="accountNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Account Number *</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Account number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="edit-isDefault"
-                checked={formData.isDefault}
-                onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                className="h-4 w-4 rounded border-gray-300"
+              {/* Set as Default */}
+              <FormField
+                control={editForm.control}
+                name="isDefault"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-muted/50 p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base font-medium cursor-pointer">
+                        Default Payment Method
+                      </FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        Use this as your primary payment option for faster checkout
+                      </div>
+                    </div>
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
-              <Label htmlFor="edit-isDefault" className="cursor-pointer">
-                Set as default payment method
-              </Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleEditMethod}
-              disabled={
-                !formData.cardHolderName ||
-                (formData.type === "upi" && !formData.upiId) ||
-                ((formData.type === "credit-card" || formData.type === "debit-card") &&
-                  (!formData.cardNumber || formData.cardNumber.length !== 16 || !formData.expiryDate || formData.expiryDate.length !== 5)) ||
-                ((formData.type === "net-banking" || formData.type === "other") && !formData.accountNumber)
-              }
-            >
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+              <DialogFooter className="pt-4">\n                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>\n                  Cancel\n                </Button>\n                <Button type="submit">\n                  Save Changes\n                </Button>\n              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent >
+      </Dialog >
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      < AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Payment Method</AlertDialogTitle>

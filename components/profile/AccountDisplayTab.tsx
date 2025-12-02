@@ -179,7 +179,7 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
               ) : (
                 <Badge variant="outline" className="text-amber-600">
                   <BadgeAlert className="h-4 w-4" />
-                  Add phone first
+                  Add phone number first
                 </Badge>
               )}
             </div>

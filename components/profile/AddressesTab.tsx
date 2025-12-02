@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MapPin, Plus, Edit, Trash2, Check } from "lucide-react";
+import { MapPin, Plus, Edit, Trash2, Check, Navigation } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { CountrySelect, StateSelect, CitySelect } from "@/components/ui/country-
 import { toast } from "sonner";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
 import { useRouter } from "next/navigation";
+import { Country, State } from "country-state-city";
 interface AddressesTabProps {
   userProfile: UserProfile | null;
   shouldOpenModal?: boolean;
@@ -53,6 +54,7 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [formData, setFormData] = useState<Omit<Address, "id">>({
     address1: "",
     address2: "",
@@ -184,6 +186,119 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
     setIsDeleteDialogOpen(true);
   };
 
+  const detectLocation = async () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    const toastId = toast.loading("Detecting your location...");
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          // Use OpenStreetMap Nominatim API for reverse geocoding
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+            {
+              headers: {
+                'User-Agent': 'ShadeAndCo/1.0'
+              }
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch location details");
+          }
+
+          const data = await response.json();
+          const address = data.address;
+
+          console.log("Location API Response:", data); // Debug log
+
+          // Find country by ISO code
+          const countryCode = address.country_code?.toUpperCase();
+          const country = Country.getAllCountries().find(
+            c => c.isoCode === countryCode
+          );
+
+          // Find state by name - try multiple possible fields
+          const stateName = address.state || address.province || address.region || address.state_district;
+          const states = countryCode ? State.getStatesOfCountry(countryCode) : [];
+
+          // Try exact match first, then partial match
+          let state = states.find(
+            s => s.name.toLowerCase() === stateName?.toLowerCase()
+          );
+
+          // If no exact match, try finding by partial match
+          if (!state && stateName) {
+            state = states.find(
+              s => s.name.toLowerCase().includes(stateName.toLowerCase()) ||
+                stateName.toLowerCase().includes(s.name.toLowerCase())
+            );
+          }
+
+          console.log("Detected State:", stateName, "Mapped to:", state?.name); // Debug log
+
+          // Extract address components
+          const street = address.road || address.street || "";
+          const houseNumber = address.house_number || "";
+          const suburb = address.suburb || address.neighbourhood || "";
+          const city = address.city || address.town || address.village || "";
+          const postcode = address.postcode || "";
+
+          // Build address line 1
+          const addressLine1 = [houseNumber, street].filter(Boolean).join(" ");
+          const addressLine2 = suburb;
+
+          setFormData({
+            ...formData,
+            address1: addressLine1,
+            address2: addressLine2,
+            city: city,
+            state: state?.isoCode || "",
+            zipCode: postcode,
+            country: country?.isoCode || "IN",
+          });
+
+          toast.success("Location detected successfully!", { id: toastId });
+        } catch (error) {
+          console.error("Error fetching location details:", error);
+          toast.error("Failed to detect location details. Please enter manually.", { id: toastId });
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (error) => {
+        setIsDetectingLocation(false);
+        let errorMessage = "Failed to detect location";
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Location permission denied. Please allow location access.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out.";
+            break;
+        }
+
+        toast.error(errorMessage, { id: toastId });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -259,14 +374,26 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
 
       {/* Add Address Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-xl px-6 py-4 max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="p-0 pb-4">
             <DialogTitle>Add New Address</DialogTitle>
             <DialogDescription>
-              Add a new shipping address for faster checkout.
+              Add a new shipping address for faster checkout
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {/* Auto-detect Location Button */}
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                onClick={detectLocation}
+                disabled={isDetectingLocation}
+              >
+                <Navigation className={`h-4 w-4 ${isDetectingLocation ? 'animate-pulse' : ''}`} />
+                {isDetectingLocation ? "Detecting Location..." : "Auto-detect My Location"}
+              </Button>
+            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="address1">Address Line 1 *</Label>
               <Input
@@ -285,7 +412,7 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
                 placeholder="Apartment, suite, etc. (optional)"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="country">Country *</Label>
                 <CountrySelect
@@ -302,23 +429,25 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
                 />
               </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="city">City *</Label>
-              <CitySelect
-                countryCode={formData.country}
-                stateCode={formData.state}
-                value={formData.city}
-                onChange={(value) => setFormData({ ...formData, city: value })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="zipCode">ZIP Code *</Label>
-              <Input
-                id="zipCode"
-                value={formData.zipCode}
-                onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
-                placeholder="ZIP Code"
-              />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="city">City *</Label>
+                <CitySelect
+                  countryCode={formData.country}
+                  stateCode={formData.state}
+                  value={formData.city}
+                  onChange={(value) => setFormData({ ...formData, city: value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="zipCode">ZIP Code *</Label>
+                <Input
+                  id="zipCode"
+                  value={formData.zipCode}
+                  onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
+                  placeholder="ZIP Code"
+                />
+              </div>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="addressType">Address Type *</Label>
@@ -367,14 +496,28 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
 
       {/* Edit Address Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Address</DialogTitle>
             <DialogDescription>
-              Update your shipping address details.
+              Update your shipping address details
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {/* Auto-detect Location Button */}
+            <div className="flex justify-center pb-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={detectLocation}
+                disabled={isDetectingLocation}
+                className="w-full sm:w-auto"
+              >
+                <Navigation className={`h-4 w-4 mr-2 ${isDetectingLocation ? 'animate-pulse' : ''}`} />
+                {isDetectingLocation ? "Detecting Location..." : "Auto-detect My Location"}
+              </Button>
+            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="edit-address1">Address Line 1 *</Label>
               <Input
@@ -393,7 +536,7 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
                 placeholder="Apartment, suite, etc. (optional)"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="edit-country">Country *</Label>
                 <CountrySelect
@@ -410,23 +553,25 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
                 />
               </div>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-city">City *</Label>
-              <CitySelect
-                countryCode={formData.country}
-                stateCode={formData.state}
-                value={formData.city}
-                onChange={(value) => setFormData({ ...formData, city: value })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="edit-zipCode">ZIP Code *</Label>
-              <Input
-                id="edit-zipCode"
-                value={formData.zipCode}
-                onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
-                placeholder="ZIP Code"
-              />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-city">City *</Label>
+                <CitySelect
+                  countryCode={formData.country}
+                  stateCode={formData.state}
+                  value={formData.city}
+                  onChange={(value) => setFormData({ ...formData, city: value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-zipCode">ZIP Code *</Label>
+                <Input
+                  id="edit-zipCode"
+                  value={formData.zipCode}
+                  onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
+                  placeholder="ZIP Code"
+                />
+              </div>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="edit-addressType">Address Type *</Label>

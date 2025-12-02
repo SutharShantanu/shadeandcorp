@@ -28,6 +28,16 @@ interface CountrySelectProps {
   placeholder?: string;
 }
 
+// Helper function to get country flag emoji
+const getCountryFlag = (countryCode: string) => {
+  if (!countryCode) return "";
+  const codePoints = countryCode
+    .toUpperCase()
+    .split("")
+    .map((char) => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+};
+
 export function CountrySelect({
   value,
   onChange,
@@ -52,7 +62,12 @@ export function CountrySelect({
           className={cn("w-full justify-between", className)}
           disabled={disabled}
         >
-          {selectedCountry ? selectedCountry.name : placeholder}
+          <span className="flex items-center gap-2">
+            {selectedCountry && (
+              <span className="text-lg">{getCountryFlag(selectedCountry.isoCode)}</span>
+            )}
+            {selectedCountry ? selectedCountry.name : placeholder}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -71,16 +86,20 @@ export function CountrySelect({
                       onChange(country.isoCode);
                       setOpen(false);
                     }}
+                    className="justify-between"
                   >
+                    <span className="flex items-center">
+                      <span className="text-lg mr-2">{getCountryFlag(country.isoCode)}</span>
+                      {country.name}
+                    </span>
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "h-4 w-4",
                         value === country.isoCode
                           ? "opacity-100"
                           : "opacity-0"
                       )}
                     />
-                    {country.name}
                   </CommandItem>
                 ))}
               </ScrollArea>
