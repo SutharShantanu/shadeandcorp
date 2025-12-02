@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { registerSchema } from "@/types/auth"
 import { getUserByEmail, getUserByPhone, createUser } from "@/lib/db"
 import connectDB from "@/lib/mongoDB"
-import User, { RoleEnum } from "@/models/User"
+import { RoleEnum } from "@/models/User"
 import { parsePhoneNumber } from "libphonenumber-js";
 
 export async function POST(req: Request) {
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    
+
     const { firstName, lastName, email, phone, password } = parsed.data;
 
     // Connect to database
@@ -66,8 +66,8 @@ export async function POST(req: Request) {
 
     // Create user with customer role by default
     // If no email provided, generate a placeholder email for phone-only users
-    const userEmail = email && email.trim() !== "" 
-      ? email.toLowerCase().trim() 
+    const userEmail = email && email.trim() !== ""
+      ? email.toLowerCase().trim()
       : `phone_${phoneNumber || phone?.trim() || ""}_${Date.now()}@placeholder.local`
 
     const userData = {
@@ -89,8 +89,8 @@ export async function POST(req: Request) {
     const { password: _, ...userWithoutPassword } = user.toObject()
 
     return NextResponse.json(
-      { 
-        ok: true, 
+      {
+        ok: true,
         user: userWithoutPassword,
         message: "User created successfully"
       },
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
     )
   } catch (error) {
     console.error("Register error:", error)
-    
+
     // Handle duplicate email/phone error from MongoDB
     if (error instanceof Error && error.message.includes("duplicate key")) {
       const field = error.message.includes("email") ? "email" : "phone"

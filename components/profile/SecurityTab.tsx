@@ -4,7 +4,19 @@ import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Dialog,
@@ -24,21 +36,68 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Label } from "@/components/ui/label";
-import { Laptop, Smartphone, Tablet, Monitor, LogOut, Shield, KeyRound, Trash2 } from "lucide-react";
+import { Laptop, Smartphone, Tablet, Monitor, LogOut, Shield, KeyRound, Trash2, CircleX, CircleCheck } from "lucide-react";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
 import { toast } from "sonner";
 import { signOut } from "next-auth/react";
+import { Spinner } from "../ui/spinner";
+
+interface Session {
+    deviceInfo?: string;
+    city?: string;
+    country?: string;
+    ipAddress?: string;
+    loggedInAt?: string | Date;
+}
+
+interface ExtendedUserProfile extends UserProfile {
+    sessions?: Session[];
+}
 
 interface SecurityTabProps {
-    userProfile: UserProfile | null;
+    userProfile: ExtendedUserProfile | null;
 }
 
 export default function SecurityTab({ userProfile }: SecurityTabProps) {
     const [changePasswordOpen, setChangePasswordOpen] = useState(false);
     const [deleteSessionId, setDeleteSessionId] = useState<number | null>(null);
     const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
-    const [revokeProvider, setRevokeProvider] = useState<string | null>(null);
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    // const [revokeProvider, setRevokeProvider] = useState<string | null>(null);
+    // Zod schema for password validation
+    const changePasswordSchema = z.object({
+        currentPassword: z.string().min(1, "Current password is required"),
+        newPassword: z
+            .string()
+            .min(8, "Must be at least 8 characters")
+            .regex(/[A-Z]/, "Must include an uppercase letter")
+            .regex(/[a-z]/, "Must include a lowercase letter")
+            .regex(/[0-9]/, "Must include a number")
+            .regex(/[^A-Za-z0-9]/, "Must include a symbol"),
+        confirmPassword: z.string(),
+    }).refine((data) => data.newPassword === data.confirmPassword, {
+        path: ["confirmPassword"],
+        message: "Passwords do not match",
+    }).refine((data) => data.currentPassword !== data.newPassword, {
+        path: ["newPassword"],
+        message: "New password must be different from current password",
+    });
+
+    const form = useForm<{
+        currentPassword: string;
+        newPassword: string;
+        confirmPassword: string;
+    }>({
+        resolver: zodResolver(changePasswordSchema),
+        mode: "onChange",
+        defaultValues: {
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+        },
+    });
+
+    const canSubmit = form.formState.isValid;
 
     const getDeviceIcon = (deviceInfo: string) => {
         const info = deviceInfo.toLowerCase();
@@ -67,25 +126,54 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
         }
     };
 
-    const handleLogoutSession = async (sessionIndex: number) => {
+    const handleLogoutSession = async (_sessionIndex: number) => {
+        void _sessionIndex;
         // Implement logout specific session
         toast.success("Session logged out successfully");
         setDeleteSessionId(null);
     };
 
-    const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        // Implement password change logic
-        toast.success("Password changed successfully");
-        setChangePasswordOpen(false);
+    const onSubmit = async (values: {
+        currentPassword: string;
+        newPassword: string;
+        confirmPassword: string;
+    }) => {
+        setIsChangingPassword(true);
+        const toastId = toast.loading("Changing password...");
+
+        try {
+            const response = await fetch("/api/user/change-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    currentPassword: values.currentPassword,
+                    newPassword: values.newPassword,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                toast.error(data.message || "Failed to change password", { id: toastId });
+                return;
+            }
+
+            toast.success("Password changed successfully! A confirmation email has been sent.", { id: toastId });
+            setChangePasswordOpen(false);
+            form.reset();
+        } catch (error) {
+            console.error("Password change error:", error);
+            toast.error("An unexpected error occurred. Please try again.", { id: toastId });
+        } finally {
+            setIsChangingPassword(false);
+        }
     };
 
-    const handleRevokeConnection = async (provider: string) => {
-        // Implement revoke OAuth connection
-        toast.success(`${provider} connection revoked`);
-        setRevokeProvider(null);
-    };
+    // const handleRevokeConnection = async (provider: string) => {
+    //     // Implement revoke OAuth connection
+    //     toast.success(`${provider} connection revoked`);
+    //     setRevokeProvider(null);
+    // };
 
     const handleDeleteAccount = async () => {
         // Implement account deletion
@@ -141,45 +229,48 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
             <div>
                 <h4 className="text-sm font-semibold mb-4">Recent Login Sessions</h4>
                 <div className="space-y-3">
-                    {userProfile?.sessions && userProfile.sessions.length > 0 ? (
-                        userProfile.sessions.slice(0, 5).map((session: any, index: number) => {
-                            const DeviceIcon = getDeviceIcon(session.deviceInfo || "");
-                            const isCurrent = index === userProfile.sessions.length - 1;
+                    {(() => {
+                        const sessions: Session[] = userProfile?.sessions ?? [];
+                        return sessions.length > 0 ? (
+                            sessions.slice(0, 5).map((session: Session, index: number) => {
+                                const DeviceIcon = getDeviceIcon(session.deviceInfo || "");
+                                const isCurrent = index === sessions.length - 1;
 
-                            return (
-                                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                                            <DeviceIcon className="h-5 w-5" />
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-sm font-medium">
-                                                    {session.city || "Unknown"}, {session.country || "Unknown"}
-                                                </p>
-                                                {isCurrent && <Badge variant="default" className="text-xs">Current</Badge>}
+                                return (
+                                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                                                <DeviceIcon className="h-5 w-5" />
                                             </div>
-                                            <p className="text-xs text-muted-foreground">
-                                                {session.ipAddress} • {formatDate(session.loggedInAt)}
-                                            </p>
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-sm font-medium">
+                                                        {session.city || "Unknown"}, {session.country || "Unknown"}
+                                                    </p>
+                                                    {isCurrent && <Badge variant="default" className="text-xs">Current</Badge>}
+                                                </div>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {session.ipAddress} • {formatDate(session.loggedInAt)}
+                                                </p>
+                                            </div>
                                         </div>
+                                        {!isCurrent && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setDeleteSessionId(index)}
+                                            >
+                                                <LogOut className="h-4 w-4" />
+                                                Logout
+                                            </Button>
+                                        )}
                                     </div>
-                                    {!isCurrent && (
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => setDeleteSessionId(index)}
-                                        >
-                                            <LogOut className="h-4 w-4" />
-                                            Logout
-                                        </Button>
-                                    )}
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <p className="text-sm text-muted-foreground">No recent sessions</p>
-                    )}
+                                );
+                            })
+                        ) : (
+                            <p className="text-sm text-muted-foreground">No recent sessions</p>
+                        );
+                    })()}
                 </div>
             </div>
 
@@ -206,35 +297,105 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
 
             {/* Change Password Dialog */}
             <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
-                <DialogContent>
-                    <DialogHeader>
+                <DialogContent className="px-6 py-4">
+                    <DialogHeader className="p-0 pb-4">
                         <DialogTitle>Change Password</DialogTitle>
                         <DialogDescription>
                             Enter your current password and choose a new one.
                         </DialogDescription>
                     </DialogHeader>
-                    <form onSubmit={handleChangePassword}>
-                        <div className="space-y-4 py-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="current-password">Current Password</Label>
-                                <Input id="current-password" name="currentPassword" type="password" required />
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="contents">
+                            <div className="overflow-y-auto max-h-[60vh] space-y-4 py-2 px-1 mb-4">
+                                <FormField
+                                    control={form.control}
+                                    name="currentPassword"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Current Password</FormLabel>
+                                            <FormControl>
+                                                <PasswordInput
+                                                    id="current-password"
+                                                    autoComplete="current-password"
+                                                    placeholder="••••••••"
+                                                    {...field}
+                                                    value={field.value || ""}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="newPassword"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>New Password</FormLabel>
+                                            <FormControl>
+                                                <PasswordInput
+                                                    id="new-password"
+                                                    autoComplete="new-password"
+                                                    placeholder="Create a strong password"
+                                                    {...field}
+                                                    value={field.value || ""}
+                                                />
+                                            </FormControl>
+                                            <PasswordStrength password={field.value || ""} />
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="confirmPassword"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Confirm New Password</FormLabel>
+                                            <FormControl>
+                                                <PasswordInput
+                                                    id="confirm-password"
+                                                    autoComplete="new-password"
+                                                    placeholder="Repeat password"
+                                                    {...field}
+                                                    value={field.value || ""}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="new-password">New Password</Label>
-                                <Input id="new-password" name="newPassword" type="password" required />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                                <Input id="confirm-password" name="confirmPassword" type="password" required />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setChangePasswordOpen(false)}>
-                                Cancel
-                            </Button>
-                            <Button type="submit">Change Password</Button>
-                        </DialogFooter>
-                    </form>
+                            <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setChangePasswordOpen(false)}
+                                    disabled={isChangingPassword}
+                                >
+                                    <CircleX className="h-4 w-4" />
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="default"
+                                    disabled={!canSubmit || isChangingPassword}
+                                >
+                                    {isChangingPassword ? (
+                                        <>
+                                            <Spinner className="h-4 w-4" />
+                                            Changing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CircleCheck className="h-4 w-4" />
+                                            Change Password
+                                        </>
+                                    )}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
                 </DialogContent>
             </Dialog>
 
@@ -244,7 +405,7 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Logout this session?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will log out the device from your account. You'll need to log in again on that device.
+                            This will log out the device from your account. You&apos;ll need to log in again on that device.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

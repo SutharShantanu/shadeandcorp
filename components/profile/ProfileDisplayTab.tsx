@@ -3,7 +3,7 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
-import { BadgeCheck, BadgeInfo } from "lucide-react";
+import { BadgeAlert, BadgeCheck } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface ProfileDisplayTabProps {
@@ -41,7 +41,7 @@ export default function ProfileDisplayTab({ userProfile }: ProfileDisplayTabProp
             ) : (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <BadgeInfo className="h-4 w-4 text-destructive" />
+                  <BadgeAlert className="h-4 w-4 text-destructive" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Your email is not verified.</p>

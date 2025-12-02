@@ -78,10 +78,12 @@ export interface IUser extends Document {
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
   emailVerificationToken?: string;
+  emailVerificationOTP?: string;
   emailVerificationExpires?: Date;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
   phoneVerificationCode?: string;
+  phoneVerificationOTP?: string;
   phoneVerificationExpires?: Date;
   role: string;
   accountStatus: string;
@@ -111,10 +113,12 @@ const UserSchema: Schema<IUser> = new Schema({
   isEmailVerified: { type: Boolean, default: false },
   isPhoneVerified: { type: Boolean, default: false },
   emailVerificationToken: { type: String },
+  emailVerificationOTP: { type: String },
   emailVerificationExpires: { type: Date },
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date },
   phoneVerificationCode: { type: String },
+  phoneVerificationOTP: { type: String },
   phoneVerificationExpires: { type: Date },
   role: { type: String, enum: Object.values(RoleEnum), default: RoleEnum.CUSTOMER },
   accountStatus: { type: String, enum: Object.values(AccountStatusEnum), default: AccountStatusEnum.ACTIVE },

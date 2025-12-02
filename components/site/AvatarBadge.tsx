@@ -47,7 +47,7 @@ export default function AvatarBadge({ className }: AvatarBadgeProps) {
 
     return (
         <div className={`relative ${className ?? ""}`}>
-            <Avatar className="h-8 w-8 transition-all ring-2 ring-ring ring-offset-2 ring-offset-background">
+            <Avatar className="h-8 w-8 transition-all ring ring-ring ring-offset-2 ring-offset-background">
                 <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User avatar"} />
                 <AvatarFallback>{session?.user?.name?.[0].toUpperCase() || "U"}</AvatarFallback>
             </Avatar>

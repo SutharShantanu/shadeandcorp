@@ -8,7 +8,7 @@ import User from "@/models/User";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { ok: false, error: "Unauthorized" },
@@ -42,6 +42,7 @@ export async function GET() {
         urls: (user as any).urls || [],
         addresses: user.addresses || [],
         paymentMethods: user.paymentMethods || [],
+        isEmailVerified: user.isEmailVerified,
         isPhoneVerified: user.isPhoneVerified,
         role: user.role,
         accountStatus: user.accountStatus,
@@ -64,7 +65,7 @@ export async function GET() {
 export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { ok: false, error: "Unauthorized" },
@@ -74,7 +75,7 @@ export async function PATCH(req: Request) {
 
     const body = await req.json();
     await connectDB();
-    
+
     const user = await User.findById(session.user.id);
     if (!user) {
       return NextResponse.json(

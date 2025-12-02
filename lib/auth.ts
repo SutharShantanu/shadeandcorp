@@ -272,31 +272,21 @@ export const authOptions: NextAuthOptions = {
         session.user.image = token.image as string;
         session.user.email = token.email as string;
 
-        // Assign only if fields exist in token
-        if ('firstName' in token) {
-          session.user.firstName = token.firstName as string;
-        }
-        if ('lastName' in token) {
-          session.user.lastName = token.lastName as string;
-        }
-        if ('isEmailVerified' in token) {
-          session.user.isEmailVerified = token.isEmailVerified as boolean;
-        }
-        if ('isPhoneVerified' in token) {
-          session.user.isPhoneVerified = token.isPhoneVerified as boolean;
-        }
-        if ('role' in token) {
-          session.user.role = token.role as string;
-        }
-        session.user.provider = token.provider as string;
-
-        // Fetch fresh user data for notifications
+        // Fetch fresh user data from database to ensure we have latest values
         try {
           await connectDB();
           const dbUser = await User.findById(token.id);
 
           if (dbUser) {
-            // Generate notifications based on user data
+            // Use fresh database values for critical fields
+            session.user.isEmailVerified = dbUser.isEmailVerified;
+            session.user.isPhoneVerified = dbUser.isPhoneVerified;
+            session.user.firstName = dbUser.firstName;
+            session.user.lastName = dbUser.lastName;
+            session.user.role = dbUser.role;
+            session.user.provider = token.provider as string;
+
+            // Generate notifications based on fresh user data
             const notifications = generateUserNotifications({
               isEmailVerified: dbUser.isEmailVerified,
               isPhoneVerified: dbUser.isPhoneVerified,
@@ -305,10 +295,6 @@ export const authOptions: NextAuthOptions = {
               paymentMethods: dbUser.paymentMethods || [],
               birthday: dbUser.birthday,
               gender: dbUser.gender,
-              // TODO: Add order counts when order system is implemented
-              // pendingOrders: orderCounts.pending,
-              // dispatchedOrders: orderCounts.dispatched,
-              // deliveredOrders: orderCounts.delivered,
             });
 
             session.user.notifications = notifications;
@@ -318,9 +304,44 @@ export const authOptions: NextAuthOptions = {
             session.user.hasMissingAddress = !dbUser.addresses || dbUser.addresses.length === 0;
             session.user.hasMissingPayment = !dbUser.paymentMethods || dbUser.paymentMethods.length === 0;
             session.user.hasMissingPhone = !dbUser.phone;
+          } else {
+            // Fallback to token values if DB fetch fails
+            if ('firstName' in token) {
+              session.user.firstName = token.firstName as string;
+            }
+            if ('lastName' in token) {
+              session.user.lastName = token.lastName as string;
+            }
+            if ('isEmailVerified' in token) {
+              session.user.isEmailVerified = token.isEmailVerified as boolean;
+            }
+            if ('isPhoneVerified' in token) {
+              session.user.isPhoneVerified = token.isPhoneVerified as boolean;
+            }
+            if ('role' in token) {
+              session.user.role = token.role as string;
+            }
+            session.user.provider = token.provider as string;
           }
         } catch (error) {
-          console.error("Error generating notifications:", error);
+          console.error("Error fetching fresh user data in session:", error);
+          // Fallback to token values on error
+          if ('firstName' in token) {
+            session.user.firstName = token.firstName as string;
+          }
+          if ('lastName' in token) {
+            session.user.lastName = token.lastName as string;
+          }
+          if ('isEmailVerified' in token) {
+            session.user.isEmailVerified = token.isEmailVerified as boolean;
+          }
+          if ('isPhoneVerified' in token) {
+            session.user.isPhoneVerified = token.isPhoneVerified as boolean;
+          }
+          if ('role' in token) {
+            session.user.role = token.role as string;
+          }
+          session.user.provider = token.provider as string;
         }
       }
       return session;
