@@ -1,17 +1,19 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 import { CreditCard as CreditCardIcon } from "lucide-react";
 import { usePaymentInputs } from "react-payment-inputs";
 import images, { type CardImages } from "react-payment-inputs/images";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-interface CreditCardInputProps {
+interface CardInputProps {
     cardNumber: string;
     expiryDate: string;
     cvc: string;
     cardHolderName: string;
+    cardType?: "credit-card" | "debit-card";
     onCardNumberChange: (value: string) => void;
     onExpiryDateChange: (value: string) => void;
     onCVCChange: (value: string) => void;
@@ -19,18 +21,20 @@ interface CreditCardInputProps {
     disabled?: boolean;
 }
 
-export function CreditCardInput({
+export function CardInput({
     cardNumber,
     expiryDate,
     cvc,
     cardHolderName,
+    cardType = "credit-card",
     onCardNumberChange,
     onExpiryDateChange,
     onCVCChange,
     onCardHolderNameChange,
     disabled = false,
-}: CreditCardInputProps) {
+}: CardInputProps) {
     const id = useId();
+    const [cvcLabel, setCvcLabel] = useState<"CVC" | "CCV">("CVC");
     const { meta, getCardNumberProps, getExpiryDateProps, getCVCProps, getCardImageProps } = usePaymentInputs();
 
     // Format card number with spaces for display
@@ -84,17 +88,22 @@ export function CreditCardInput({
                                     <rect x="12" y="12" width="24" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-yellow-700" />
                                 </svg>
                             </div>
-                            <div className="flex h-8 items-center justify-center">
-                                {meta.cardType ? (
-                                    <svg
-                                        className="h-8 w-12"
-                                        {...getCardImageProps({
-                                            images: images as unknown as CardImages,
-                                        })}
-                                    />
-                                ) : (
-                                    <CreditCardIcon className="h-8 w-8 opacity-50" />
-                                )}
+                            <div className="flex flex-col items-end gap-2">
+                                <div className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide backdrop-blur-sm">
+                                    {cardType === "credit-card" ? "Credit" : "Debit"}
+                                </div>
+                                <div className="flex h-8 items-center justify-center">
+                                    {meta.cardType ? (
+                                        <svg
+                                            className="h-8 w-12"
+                                            {...getCardImageProps({
+                                                images: images as unknown as CardImages,
+                                            })}
+                                        />
+                                    ) : (
+                                        <CreditCardIcon className="h-8 w-8 opacity-50" />
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -170,7 +179,7 @@ export function CreditCardInput({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 items-end">
                     <div>
                         <Label htmlFor={`expiry-${id}`}>Expiry Date</Label>
                         <Input
@@ -185,7 +194,18 @@ export function CreditCardInput({
                         />
                     </div>
                     <div>
-                        <Label htmlFor={`cvc-${id}`}>CVC</Label>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor={`cvc-${id}`}>{cvcLabel}</Label>
+                            <Select value={cvcLabel} onValueChange={(value) => setCvcLabel(value as "CVC" | "CCV")} defaultValue="CVC">
+                                <SelectTrigger className="h-6 w-fit text-xs">
+                                    <SelectValue placeholder="CVC" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="CVC">CVC</SelectItem>
+                                    <SelectItem value="CCV">CCV</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <Input
                             {...getCVCProps({
                                 onChange: (e: React.ChangeEvent<HTMLInputElement>) => onCVCChange(e.target.value),

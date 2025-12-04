@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "../ui/alert";
-import { CreditCardInput } from "@/components/ui/credit-card-input";
+import { CardInput } from "@/components/ui/card-input";
 import { UpiInput } from "@/components/ui/upi-input";
 import { paymentMethodSchema, type PaymentMethodFormData } from "@/lib/validations/payment";
 
@@ -382,7 +382,7 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                   name="cardNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <CreditCardInput
+                      <CardInput
                         cardNumber={field.value || ""}
                         expiryDate={addFormExpiryDate || ""}
                         cvc={addFormCvc || ""}
@@ -546,7 +546,7 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                   name="cardNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <CreditCardInput
+                      <CardInput
                         cardNumber={field.value || ""}
                         expiryDate={editFormExpiryDate || ""}
                         cvc={editFormCvc || ""}

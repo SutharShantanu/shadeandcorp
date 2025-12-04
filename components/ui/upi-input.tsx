@@ -37,11 +37,9 @@ export function UpiInput({ value, onChange, placeholder = "username@upi", disabl
         const newValue = e.target.value;
         onChange(newValue);
 
-        // Auto-open suggestions when typing @ or when input has no @
+        // Auto-open suggestions when typing without @
         const hasAt = newValue.includes("@");
         if (!hasAt && newValue.length > 0) {
-            setOpen(true);
-        } else if (newValue.endsWith("@")) {
             setOpen(true);
         } else {
             setOpen(false);
@@ -75,6 +73,9 @@ export function UpiInput({ value, onChange, placeholder = "username@upi", disabl
                         if (value && !value.includes("@")) {
                             setOpen(true);
                         }
+                    }}
+                    onBlur={() => {
+                        setTimeout(() => setOpen(false), 200);
                     }}
                     placeholder={placeholder}
                     disabled={disabled}
