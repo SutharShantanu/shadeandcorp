@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
+import { signInWithPhoneNumber, type ConfirmationResult } from "firebase/auth";
+import { type Control, type FieldValues, type UseFormReturn } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { SignupForm, useSignup } from "@/app/(auth)/hook/useSignup";
 
@@ -51,19 +53,20 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import SocialLoginButtons from "@/components/SocialLoginButton";
+import { firebaseAuth, setupRecaptcha } from "@/lib/firebaseClient";
+import { PasswordStrength } from "@/components/auth/PasswordStrength";
 
 // Name Fields Component
 function NameFields({
   form,
-  showErrors,
 }: {
   form: SignupForm;
-  showErrors: boolean;
 }) {
+  const control = form.control as unknown as Control<FieldValues>;
   return (
     <div className="grid grid-cols-2 gap-3">
       <FormField
-        control={form.control}
+        control={control}
         name="firstName"
         render={({ field }) => (
           <FormItem>
@@ -78,13 +81,13 @@ function NameFields({
                 value={field.value || ""}
               />
             </FormControl>
-            {showErrors && <FormMessage />}
+            <FormMessage />
           </FormItem>
         )}
       />
 
       <FormField
-        control={form.control}
+        control={control}
         name="lastName"
         render={({ field }) => (
           <FormItem>
@@ -99,7 +102,7 @@ function NameFields({
                 value={field.value || ""}
               />
             </FormControl>
-            {showErrors && <FormMessage />}
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -112,13 +115,13 @@ function EmailSignupForm({
   form,
   loading,
   onSwitchToPhone,
-  showErrors,
 }: {
   form: SignupForm;
   loading: boolean;
   onSwitchToPhone: () => void;
-  showErrors: boolean;
 }) {
+  const control = form.control as unknown as Control<FieldValues>;
+  const isEmailFormValid = form.formState.isValid;
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
@@ -127,7 +130,7 @@ function EmailSignupForm({
       className="space-y-4"
     >
       <FormField
-        control={form.control}
+        control={control}
         name="email"
         render={({ field }) => (
           <FormItem>
@@ -142,13 +145,13 @@ function EmailSignupForm({
                 value={field.value || ""}
               />
             </FormControl>
-            {showErrors && <FormMessage />}
+            <FormMessage />
           </FormItem>
         )}
       />
 
       <FormField
-        control={form.control}
+        control={control}
         name="password"
         render={({ field }) => (
           <FormItem>
@@ -162,7 +165,8 @@ function EmailSignupForm({
                 value={field.value || ""}
               />
             </FormControl>
-            {showErrors && <FormMessage />}
+            <FormMessage />
+            {field.value && <PasswordStrength password={field.value} />}
           </FormItem>
         )}
       />
@@ -170,7 +174,7 @@ function EmailSignupForm({
       <div className="space-y-3">
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || !isEmailFormValid}
           aria-busy={loading}
           className="w-full"
         >
@@ -203,14 +207,13 @@ function PhoneSignupForm({
   loading,
   isSendingOtp,
   onSwitchToEmail,
-  showErrors,
 }: {
   form: SignupForm;
   loading: boolean;
   isSendingOtp: boolean;
   onSwitchToEmail: () => void;
-  showErrors: boolean;
 }) {
+  const control = form.control as unknown as Control<FieldValues>;
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
@@ -219,7 +222,7 @@ function PhoneSignupForm({
       className="space-y-4"
     >
       <FormField
-        control={form.control}
+        control={control}
         name="phone"
         render={({ field }) => (
           <FormItem>
@@ -234,7 +237,7 @@ function PhoneSignupForm({
                 value={field.value || ""}
               />
             </FormControl>
-            {showErrors && <FormMessage />}
+            <FormMessage />
           </FormItem>
         )}
       />
@@ -363,13 +366,12 @@ export default function Signup() {
   const [canResendOtp, setCanResendOtp] = useState(true);
   const [resendTimeLeft, setResendTimeLeft] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showErrors, setShowErrors] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const isReady = true;
 
   // Update your submit handlers to show errors on submission:
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowErrors(true); // Show errors after first submission attempt
 
     if (isSubmitting) return;
 
@@ -402,7 +404,6 @@ export default function Signup() {
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowErrors(true);
 
     // Validate only the phone form fields
     const isValid = await form.trigger(["firstName", "lastName", "phone"]);
@@ -427,25 +428,14 @@ export default function Signup() {
     setIsSendingOtp(true);
 
     try {
-      const res = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phone: form.getValues("phone"),
-          firstName: form.getValues("firstName"),
-          lastName: form.getValues("lastName"),
-        }),
-      });
+      setupRecaptcha();
+      const result = await signInWithPhoneNumber(
+        firebaseAuth,
+        form.getValues("phone") || "",
+        window.recaptchaVerifier
+      );
 
-      const data = await res.json();
-
-      if (!data.success) {
-        toast.error(data.message || "Failed to send OTP");
-        return;
-      }
-
+      setConfirmationResult(result);
       toast.success("OTP sent to your phone!");
       setShowOtpDialog(true);
       setCanResendOtp(false);
@@ -491,32 +481,18 @@ export default function Signup() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phone: form.getValues("phone"),
-          otp,
-          userData: {
-            firstName: form.getValues("firstName"),
-            lastName: form.getValues("lastName"),
-          },
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!data.success) {
-        toast.error(data.message || "OTP verification failed");
+      if (!confirmationResult) {
+        toast.error("OTP session expired. Please resend.");
         return;
       }
+
+      await confirmationResult.confirm(otp);
+
+      await onSubmit(form.getValues());
 
       toast.success("OTP Verified! Account created successfully.");
       setShowOtpDialog(false);
 
-      // Redirect to login or dashboard
       router.push("/login?message=registration-success");
     } catch (error) {
       console.error("OTP verification error:", error);
@@ -538,7 +514,8 @@ export default function Signup() {
     setOtp("");
     setCanResendOtp(false);
     setResendTimeLeft(30);
-    toast.success("OTP resent to your phone number");
+    // Re-send using Firebase flow
+    handlePhoneSubmit(new Event("submit") as unknown as React.FormEvent);
   };
 
   const handleAlertDialogClose = (open: boolean) => {
@@ -581,7 +558,7 @@ export default function Signup() {
               </motion.div>
             </CardHeader>
             <CardContent className="p-0">
-              <Form {...form}>
+              <Form {...(form as unknown as UseFormReturn<FieldValues>)}>
                 <form
                   onSubmit={
                     signupMethod === "phone"
@@ -598,7 +575,7 @@ export default function Signup() {
                         Or continue with
                       </FieldSeparator>
 
-                      <NameFields form={form} showErrors={showErrors} />
+                      <NameFields form={form} />
 
                       {/* Show email form by default, phone form when phone method is selected */}
                       {signupMethod === "phone" ? (
@@ -607,14 +584,12 @@ export default function Signup() {
                           loading={loading || isSubmitting}
                           isSendingOtp={isSendingOtp}
                           onSwitchToEmail={toggleSignupMethod}
-                          showErrors={showErrors}
                         />
                       ) : (
                         <EmailSignupForm
                           form={form}
                           loading={loading || isSubmitting}
                           onSwitchToPhone={switchToPhone}
-                          showErrors={showErrors}
                         />
                       )}
                     </Field>
@@ -653,6 +628,8 @@ export default function Signup() {
         canResend={canResendOtp}
         resendTimeLeft={resendTimeLeft}
       />
+
+      <div id="recaptcha-container" className="hidden" />
 
       <AlertDialog open={showAlertDialog} onOpenChange={handleAlertDialogClose}>
         <AlertDialogContent>

@@ -49,8 +49,8 @@ const SocialLoginButtons = () => {
           <Image
             src="https://cdn-icons-png.flaticon.com/64/281/281764.png"
             alt="google-logo"
-            width={20}
-            height={20}
+            width={100}
+            height={100}
             className="w-5 h-5"
           />
         )}
@@ -70,8 +70,8 @@ const SocialLoginButtons = () => {
           <Image
             src="https://cdn-icons-png.flaticon.com/64/2111/2111432.png"
             alt="github-logo"
-            width={20}
-            height={20}
+            width={100}
+            height={100}
             className="w-5 h-5"
           />
         )}

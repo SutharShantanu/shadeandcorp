@@ -40,7 +40,7 @@ export const paymentMethodSchema = z.object({
         if (!data.upiId || !data.upiId.includes("@")) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "Valid UPI ID is required (e.g., username@upi)",
+                message: "Valid UPI ID is required.",
                 path: ["upiId"],
             });
         }

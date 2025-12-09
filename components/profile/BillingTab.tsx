@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CreditCard, Plus, Edit, Trash2, Check, X } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { CircleCheck, CreditCard, Plus, Edit, Trash2, Check, X, BadgeCheck } from "lucide-react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Alert, AlertDescription } from "../ui/alert";
 import { CardInput } from "@/components/ui/card-input";
 import { UpiInput } from "@/components/ui/upi-input";
@@ -41,6 +41,8 @@ interface PaymentMethod {
 
 export default function BillingTab({ userProfile, shouldOpenModal, onModalClose }: BillingTabProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(
     (userProfile?.paymentMethods || []).map((method: PaymentMethod & { _id?: string }, index: number) => ({
@@ -93,14 +95,25 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
     },
   });
 
-  const watchAddType = addForm.watch("type");
-  const watchEditType = editForm.watch("type");
-  const addFormCardHolderName = addForm.watch("cardHolderName");
-  const addFormExpiryDate = addForm.watch("expiryDate");
-  const addFormCvc = addForm.watch("cvc");
-  const editFormCardHolderName = editForm.watch("cardHolderName");
-  const editFormExpiryDate = editForm.watch("expiryDate");
-  const editFormCvc = editForm.watch("cvc");
+  const watchAddType = useWatch({ control: addForm.control, name: "type" });
+  const watchEditType = useWatch({ control: editForm.control, name: "type" });
+
+  // Auto-open when URL contains action=add
+  useEffect(() => {
+    if (searchParams?.get("action") === "add") {
+      addForm.reset({
+        type: "credit-card",
+        cardNumber: "",
+        expiryDate: "",
+        cvc: "",
+        cardHolderName: "",
+        upiId: "",
+        accountNumber: "",
+        isDefault: false,
+      });
+      setIsAddDialogOpen(true);
+    }
+  }, [searchParams, addForm]);
 
   // Auto-open modal when shouldOpenModal is true
   useEffect(() => {
@@ -152,22 +165,52 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
     toast.success("Default payment method updated");
   };
 
-  const onAddSubmit = (data: PaymentMethodFormData) => {
-    const newMethod: PaymentMethod = {
-      id: `pm-${Date.now()}`,
-      ...data,
-      isDefault: paymentMethods.length === 0 ? true : data.isDefault,
-    };
+  const onAddSubmit = async (data: PaymentMethodFormData) => {
+    try {
+      const response = await fetch("/api/user/profile/payment-methods", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...data,
+          isDefault: paymentMethods.length === 0 ? true : data.isDefault,
+        }),
+      });
 
-    setPaymentMethods(
-      data.isDefault
-        ? [...paymentMethods.map(m => ({ ...m, isDefault: false })), newMethod]
-        : [...paymentMethods, newMethod]
-    );
+      if (!response.ok) {
+        const error = await response.json();
+        toast.error(error.error || "Failed to add payment method");
+        return;
+      }
 
-    toast.success("Payment method added successfully");
-    setIsAddDialogOpen(false);
-    addForm.reset();
+      const result = await response.json();
+
+      const newMethod: PaymentMethod = {
+        id: result.paymentMethod._id || `pm-${Date.now()}`,
+        ...data,
+        isDefault: paymentMethods.length === 0 ? true : data.isDefault,
+      };
+
+      setPaymentMethods(
+        data.isDefault
+          ? [...paymentMethods.map(m => ({ ...m, isDefault: false })), newMethod]
+          : [...paymentMethods, newMethod]
+      );
+
+      toast.success("Payment method added successfully");
+      setIsAddDialogOpen(false);
+      addForm.reset();
+
+      // Remove action=add from URL
+      const params = new URLSearchParams(searchParams?.toString() || "");
+      params.delete("action");
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    } catch (error) {
+      console.error("Error adding payment method:", error);
+      toast.error("An error occurred while adding payment method");
+    }
   };
 
   const onEditSubmit = (data: PaymentMethodFormData) => {
@@ -229,6 +272,18 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
     setIsDeleteDialogOpen(true);
   };
 
+  const handleAddDialogOpenChange = (open: boolean) => {
+    setIsAddDialogOpen(open);
+    if (!open && searchParams) {
+      const params = new URLSearchParams(searchParams.toString());
+      if (params.has("action")) {
+        params.delete("action");
+        const query = params.toString();
+        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -255,7 +310,7 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
             <div className="flex items-center gap-2 ml-4">
               <Button
                 size="sm"
-                onClick={() => router.push('/edit-profile?tab=billing&action=add')}
+                onClick={openAddDialog}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Plus className="h-4 w-4 mr-1" />
@@ -285,7 +340,7 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                     {method.cardHolderName}
                   </CardTitle>
                   {method.isDefault && (
-                    <Badge variant="default">Default</Badge>
+                    <Badge variant="default">Default <BadgeCheck className="h-4 w-4" /></Badge>
                   )}
                 </div>
               </CardHeader>
@@ -338,327 +393,329 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
           ))}
         </div>
       ) : null}
-
       {/* Add Payment Method Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-2xl px-6 py-4 max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="p-0 pb-4">
+      <Dialog open={isAddDialogOpen} onOpenChange={handleAddDialogOpenChange}>
+        <DialogContent className="max-w-4xl w-fit p-0 max-h-[90vh] flex flex-col">
+          {/* Sticky Header (contains close button automatically) */}
+          <DialogHeader className="px-6 pt-6 pb-4 border-b bg-background sticky top-0 z-50">
             <DialogTitle>Add Payment Method</DialogTitle>
-            <DialogDescription>
-              Add a new payment method for faster checkout.
-            </DialogDescription>
+            <DialogDescription>Add a new payment method for faster checkout.</DialogDescription>
           </DialogHeader>
-          <Form {...addForm}>
-            <form onSubmit={addForm.handleSubmit(onAddSubmit)} className="space-y-4 pt-4">
-              {/* Payment Type Selection */}
-              <FormField
-                control={addForm.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Payment Type *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select payment type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="credit-card">Credit Card</SelectItem>
-                        <SelectItem value="debit-card">Debit Card</SelectItem>
-                        <SelectItem value="upi">UPI</SelectItem>
-                        <SelectItem value="net-banking">Net Banking</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              {/* Card Payment Fields */}
-              {(watchAddType === "credit-card" || watchAddType === "debit-card") && (
+          {/* Scrollable Content */}
+          <div className="px-6 py-4 overflow-y-auto">
+            <Form {...addForm}>
+              {/* Give the form an id so footer outside can submit it */}
+              <form id="add-payment-form" onSubmit={addForm.handleSubmit(onAddSubmit)} className="flex flex-col gap-4">
+                {/* Payment Type Selection */}
                 <FormField
                   control={addForm.control}
-                  name="cardNumber"
+                  name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <CardInput
-                        cardNumber={field.value || ""}
-                        expiryDate={addFormExpiryDate || ""}
-                        cvc={addFormCvc || ""}
-                        cardHolderName={addFormCardHolderName || ""}
-                        onCardNumberChange={(value) => addForm.setValue("cardNumber", value.replace(/\s/g, ""))}
-                        onExpiryDateChange={(value) => addForm.setValue("expiryDate", value)}
-                        onCVCChange={(value) => addForm.setValue("cvc", value)}
-                        onCardHolderNameChange={(value) => addForm.setValue("cardHolderName", value)}
-                      />
+                      <FormLabel>Payment Type *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select payment type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="credit-card">Credit Card</SelectItem>
+                          <SelectItem value="debit-card">Debit Card</SelectItem>
+                          <SelectItem value="upi">UPI</SelectItem>
+                          <SelectItem value="net-banking">Net Banking</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              )}
 
-              {/* UPI Payment Fields */}
-              {watchAddType === "upi" && (
-                <>
-                  <FormField
-                    control={addForm.control}
-                    name="cardHolderName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>UPI Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                {/* Card Payment Fields */}
+                {(watchAddType === "credit-card" || watchAddType === "debit-card") && (
+                  <CardInput
+                    key={watchAddType}
+                    form={addForm}
+                    cardType={watchAddType}
+                    fieldNames={{
+                      cardHolderName: "cardHolderName",
+                      cardNumber: "cardNumber",
+                      expiryDate: "expiryDate",
+                      cvc: "cvc",
+                    }}
                   />
-                  <FormField
-                    control={addForm.control}
-                    name="upiId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>UPI ID *</FormLabel>
-                        <FormControl>
-                          <UpiInput
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            placeholder="username@paytm"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-
-              {/* Net Banking Payment Fields */}
-              {watchAddType === "net-banking" && (
-                <>
-                  <FormField
-                    control={addForm.control}
-                    name="cardHolderName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Account Holder Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={addForm.control}
-                    name="accountNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Account Number *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Account number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-
-              {/* Set as Default */}
-              <FormField
-                control={addForm.control}
-                name="isDefault"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-muted/50 p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base font-medium cursor-pointer">
-                        Default Payment Method
-                      </FormLabel>
-                      <div className="text-sm text-muted-foreground">
-                        Use this as your primary payment option for faster checkout
-                      </div>
-                    </div>
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
                 )}
-              />
 
-              <DialogFooter className="pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  Add Payment Method
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+                {/* UPI Payment Fields */}
+                {watchAddType === "upi" && (
+                  <div className="flex flex-col gap-2">
+                    <FormField
+                      control={addForm.control}
+                      name="cardHolderName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>UPI Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={addForm.control}
+                      name="upiId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>UPI ID *</FormLabel>
+                          <FormControl>
+                            <UpiInput value={field.value || ""} onChange={field.onChange} placeholder="username@paytm" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+
+                {/* Net Banking Payment */}
+                {watchAddType === "net-banking" && (
+                  <>
+                    <FormField
+                      control={addForm.control}
+                      name="cardHolderName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Account Holder Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={addForm.control}
+                      name="accountNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Account Number *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Account number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+
+                {/* Set as Default */}
+                <FormField
+                  control={addForm.control}
+                  name="isDefault"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="text-base font-medium">Default Payment Method</FormLabel>
+                      <FormControl>
+                        <div
+                          onClick={() => field.onChange(!field.value)}
+                          className={`border p-4 rounded-lg cursor-pointer shadow-sm transition-all ${field.value ? "border-primary bg-primary/5" : "border-border bg-muted/40"}`}
+                          aria-pressed={field.value}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-lg ${field.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                              <CircleCheck className="h-5 w-5" />
+                            </span>
+                            <div className="space-y-1 flex-1">
+                              <div className={`text-sm font-semibold ${field.value ? "text-primary" : "text-foreground"}`}>Use as default</div>
+                              <p className="text-xs text-muted-foreground">Use this as your primary payment option for faster checkout</p>
+                            </div>
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                            </div>
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          </div>
+
+          {/* Footer — outside scrollable area but submits the form via form="add-payment-form" */}
+          <DialogFooter className="px-6 py-4 border-t flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+            <Button type="submit" form="add-payment-form" disabled={!addForm.formState.isValid}>Add Payment Method</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
+      {/* ----------------------------------------------------------- */}
       {/* Edit Payment Method Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-md w-full p-0 max-h-[90vh] flex flex-col">
+          {/* Sticky Header */}
+          <DialogHeader className="px-6 pt-6 pb-4 border-b bg-background sticky top-0 z-50">
             <DialogTitle>Edit Payment Method</DialogTitle>
-            <DialogDescription>
-              Update your payment method details.
-            </DialogDescription>
+            <DialogDescription>Update your payment method details.</DialogDescription>
           </DialogHeader>
-          <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 pt-4">
-              {/* Payment Type Selection */}
-              <FormField
-                control={editForm.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Payment Type *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select payment type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="credit-card">Credit Card</SelectItem>
-                        <SelectItem value="debit-card">Debit Card</SelectItem>
-                        <SelectItem value="upi">UPI</SelectItem>
-                        <SelectItem value="net-banking">Net Banking</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              {/* Card Payment Fields */}
-              {(watchEditType === "credit-card" || watchEditType === "debit-card") && (
+          {/* Scrollable Content */}
+          <div className="px-6 py-4 overflow-y-auto">
+            <Form {...editForm}>
+              <form id="edit-payment-form" onSubmit={editForm.handleSubmit(onEditSubmit)} className="flex flex-col gap-4">
+                {/* Payment Type Selection */}
                 <FormField
                   control={editForm.control}
-                  name="cardNumber"
+                  name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <CardInput
-                        cardNumber={field.value || ""}
-                        expiryDate={editFormExpiryDate || ""}
-                        cvc={editFormCvc || ""}
-                        cardHolderName={editFormCardHolderName || ""}
-                        onCardNumberChange={(value) => editForm.setValue("cardNumber", value.replace(/\s/g, ""))}
-                        onExpiryDateChange={(value) => editForm.setValue("expiryDate", value)}
-                        onCVCChange={(value) => editForm.setValue("cvc", value)}
-                        onCardHolderNameChange={(value) => editForm.setValue("cardHolderName", value)}
-                      />
+                      <FormLabel>Payment Type *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select payment type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="credit-card">Credit Card</SelectItem>
+                          <SelectItem value="debit-card">Debit Card</SelectItem>
+                          <SelectItem value="upi">UPI</SelectItem>
+                          <SelectItem value="net-banking">Net Banking</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              )}
 
-              {/* UPI Payment Fields */}
-              {watchEditType === "upi" && (
-                <>
-                  <FormField
-                    control={editForm.control}
-                    name="cardHolderName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>UPI Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                {/* Card Payment Fields */}
+                {(watchEditType === "credit-card" || watchEditType === "debit-card") && (
+                  <CardInput
+                    key={watchEditType}
+                    form={editForm}
+                    cardType={watchEditType}
+                    fieldNames={{
+                      cardHolderName: "cardHolderName",
+                      cardNumber: "cardNumber",
+                      expiryDate: "expiryDate",
+                      cvc: "cvc",
+                    }}
                   />
-                  <FormField
-                    control={editForm.control}
-                    name="upiId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>UPI ID *</FormLabel>
-                        <FormControl>
-                          <UpiInput
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            placeholder="username@paytm"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-
-              {/* Net Banking Payment Fields */}
-              {watchEditType === "net-banking" && (
-                <>
-                  <FormField
-                    control={editForm.control}
-                    name="cardHolderName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Account Holder Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={editForm.control}
-                    name="accountNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Account Number *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Account number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </>
-              )}
-
-              {/* Set as Default */}
-              <FormField
-                control={editForm.control}
-                name="isDefault"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-muted/50 p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base font-medium cursor-pointer">
-                        Default Payment Method
-                      </FormLabel>
-                      <div className="text-sm text-muted-foreground">
-                        Use this as your primary payment option for faster checkout
-                      </div>
-                    </div>
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
                 )}
-              />
 
-              <DialogFooter className="pt-4">\n                <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>\n                  Cancel\n                </Button>\n                <Button type="submit">\n                  Save Changes\n                </Button>\n              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent >
-      </Dialog >
+                {/* UPI Payment */}
+                {watchEditType === "upi" && (
+                  <>
+                    <FormField
+                      control={editForm.control}
+                      name="cardHolderName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>UPI Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="upiId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>UPI ID *</FormLabel>
+                          <FormControl>
+                            <UpiInput value={field.value || ""} onChange={field.onChange} placeholder="username@paytm" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+
+                {/* Net Banking */}
+                {watchEditType === "net-banking" && (
+                  <>
+                    <FormField
+                      control={editForm.control}
+                      name="cardHolderName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Account Holder Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={editForm.control}
+                      name="accountNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Account Number *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Account number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+
+                {/* Set as Default */}
+                <FormField
+                  control={editForm.control}
+                  name="isDefault"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel className="text-base font-medium">Default Payment Method</FormLabel>
+                      <FormControl>
+                        <div
+                          onClick={() => field.onChange(!field.value)}
+                          className={`border p-4 rounded-lg cursor-pointer shadow-sm transition-all ${field.value ? "border-primary bg-primary/5 ring-2 ring-primary/40" : "border-border bg-muted/40"}`}
+                          aria-pressed={field.value}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-lg ${field.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                              <CircleCheck className="h-5 w-5" />
+                            </span>
+                            <div className="space-y-1 flex-1">
+                              <div className={`text-sm font-semibold ${field.value ? "text-primary" : "text-foreground"}`}>Use as default</div>
+                              <p className="text-xs text-muted-foreground">Use this as your primary payment option for faster checkout</p>
+                            </div>
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                            </div>
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          </div>
+
+          {/* Footer — outside scrollable area but submits the edit form */}
+          <DialogFooter className="px-6 py-4 border-t flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
+            <Button type="submit" form="edit-payment-form">Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       < AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} >

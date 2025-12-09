@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -18,6 +18,9 @@ import {
   PencilLine,
   Info,
   X,
+  Palette,
+  UserCircle,
+  Link2,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -30,13 +33,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
+  CommandShortcut,
 } from "@/components/ui/command";
 import Loading from "@/components/ui/loading";
 import { useProfile } from "@/app/(auth)/hook/useProfile";
@@ -61,32 +65,46 @@ const VALID_TABS = [
 ] as const;
 
 const SEARCH_ITEMS = [
-  { tab: "profile", keywords: ["name", "bio", "picture", "avatar", "personal", "info"], label: "Profile Information" },
-  { tab: "account", keywords: ["phone", "email", "gender", "birthday", "contact"], label: "Account Details" },
-  { tab: "security", keywords: ["password", "login", "sessions", "security", "delete", "remove"], label: "Security & Password" },
-  { tab: "security", keywords: ["connected", "oauth", "google", "revoke", "disconnect"], label: "Connected Accounts" },
-  { tab: "orders", keywords: ["orders", "purchases", "history", "buy"], label: "Order History" },
-  { tab: "addresses", keywords: ["address", "shipping", "delivery", "location"], label: "Shipping Addresses" },
-  { tab: "billing", keywords: ["payment", "card", "billing", "method"], label: "Payment Methods" },
-  { tab: "notifications", keywords: ["notifications", "alerts", "email", "preferences"], label: "Notifications" },
-  { tab: "notifications", keywords: ["appearance", "theme", "display", "dark", "light"], label: "Appearance & Theme" },
+  { tab: "profile", keywords: ["name", "bio", "picture", "avatar", "personal", "info"], label: "Profile Information", icon: UserCircle, category: "Account", description: "Update your name, bio, and profile picture" },
+  { tab: "account", keywords: ["phone", "email", "gender", "birthday", "contact"], label: "Account Details", icon: Shield, category: "Account", description: "Manage email, phone, and personal details" },
+  { tab: "security", keywords: ["password", "login", "sessions", "security", "delete", "remove"], label: "Security & Password", icon: Lock, category: "Security", description: "Change password and manage active sessions" },
+  { tab: "security", keywords: ["connected", "oauth", "google", "revoke", "disconnect"], label: "Connected Accounts", icon: Link2, category: "Security", description: "Manage third-party account connections" },
+  { tab: "orders", keywords: ["orders", "purchases", "history", "buy"], label: "Order History", icon: Package, category: "Shopping", description: "View and track your orders" },
+  { tab: "addresses", keywords: ["address", "shipping", "delivery", "location"], label: "Shipping Addresses", icon: MapPin, category: "Shopping", description: "Manage delivery addresses" },
+  { tab: "billing", keywords: ["payment", "card", "billing", "method"], label: "Payment Methods", icon: CreditCard, category: "Shopping", description: "Add or remove payment methods" },
+  { tab: "notifications", keywords: ["notifications", "alerts", "email", "preferences"], label: "Notification Settings", icon: Bell, category: "Preferences", description: "Configure email and push notifications" },
+  { tab: "notifications", keywords: ["appearance", "theme", "display", "dark", "light"], label: "Appearance & Theme", icon: Palette, category: "Preferences", description: "Customize theme and display settings" },
 ] as const;
 
 export default function ProfilePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { data: session, status } = useSession();
   const { fetching, userProfile } = useProfile();
 
   // Get tab from URL query parameter, default to "profile"
   const tabFromUrl = searchParams.get("tab");
+  const actionFromUrl = searchParams.get("action");
   const initialTab =
     tabFromUrl && VALID_TABS.includes(tabFromUrl as (typeof VALID_TABS)[number])
       ? tabFromUrl
-      : "profile";
+      : actionFromUrl === "add"
+        ? "addresses"
+        : "profile";
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [alertDismissed, setAlertDismissed] = useState(false);
+  const [shouldOpenModal, setShouldOpenModal] = useState(actionFromUrl === "add");
+
+  // Redirect /profile to /edit-profile
+  useEffect(() => {
+    if (pathname === "/profile") {
+      const qs = searchParams.toString();
+      router.replace(qs ? `/edit-profile?${qs}` : "/edit-profile");
+    }
+  }, [pathname, router, searchParams]);
 
   // Check for missing profile information
   const missingInfo = useMemo(() => {
@@ -106,10 +124,32 @@ export default function ProfilePage() {
     return missing;
   }, [userProfile]);
 
-  // Search functionality
+  // Search functionality with smart filtering
   const filteredSearchItems = useMemo(() => {
-    return SEARCH_ITEMS;
-  }, []);
+    if (!searchQuery.trim()) return SEARCH_ITEMS;
+
+    const query = searchQuery.toLowerCase();
+    return SEARCH_ITEMS.filter((item) => {
+      return (
+        item.label.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query) ||
+        item.keywords.some((keyword) => keyword.includes(query))
+      );
+    });
+  }, [searchQuery]);
+
+  // Group items by category
+  const groupedItems = useMemo(() => {
+    const groups: Record<string, Array<typeof SEARCH_ITEMS[number]>> = {};
+    filteredSearchItems.forEach((item) => {
+      if (!groups[item.category]) {
+        groups[item.category] = [];
+      }
+      groups[item.category].push(item);
+    });
+    return groups;
+  }, [filteredSearchItems]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -360,28 +400,102 @@ export default function ProfilePage() {
         </Card>
 
         {/* Search Command Dialog */}
-        <Command>
-          <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-            <CommandInput placeholder="Search settings..." />
-            <CommandList>
-              <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup heading="Settings">
-                {filteredSearchItems.map((item, index) => (
-                  <CommandItem
-                    key={index}
-                    onSelect={() => {
-                      setActiveTab(item.tab);
-                      handleTabChange(item.tab);
-                      setSearchOpen(false);
-                    }}
-                  >
-                    {item.label}
-                  </CommandItem>
-                ))}
+        <CommandDialog open={searchOpen} onOpenChange={setSearchOpen} className="max-w-2xl">
+          <CommandInput
+            placeholder="Search settings..."
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            onClose={() => {
+              setSearchOpen(false);
+              setSearchQuery("");
+            }}
+          />
+          <CommandList className="max-h-[90svh]">
+            <CommandEmpty>
+              <div className="py-6 text-center">
+                <Search className="mx-auto h-8 w-8 text-muted-foreground/50 mb-2" />
+                <p className="text-sm font-medium">No results found</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Try searching for profile, security, orders, or billing
+                </p>
+              </div>
+            </CommandEmpty>
+
+            {!searchQuery && (
+              <CommandGroup heading="Suggestions">
+                <CommandItem
+                  className="elipse "
+                  onSelect={() => {
+                    setActiveTab("profile");
+                    handleTabChange("profile");
+                    setSearchOpen(false);
+                    setSearchQuery("");
+                  }}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  <span>View Profile</span>
+                  <CommandShortcut>⌘P</CommandShortcut>
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    router.push(`/edit-profile?tab=${activeTab}`);
+                    setSearchOpen(false);
+                    setSearchQuery("");
+                  }}
+                >
+                  <PencilLine className="mr-2 h-4 w-4" />
+                  <span>Edit Profile</span>
+                  <CommandShortcut>⌘E</CommandShortcut>
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    setActiveTab("security");
+                    handleTabChange("security");
+                    setSearchOpen(false);
+                    setSearchQuery("");
+                  }}
+                >
+                  <Lock className="mr-2 h-4 w-4" />
+                  <span>Security Settings</span>
+                  <CommandShortcut>⌘S</CommandShortcut>
+                </CommandItem>
               </CommandGroup>
-            </CommandList>
-          </CommandDialog>
-        </Command>
+            )}
+
+            {!searchQuery && <CommandSeparator />}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 p-2">
+              {Object.entries(groupedItems).map(([category, items],) => (
+                <div key={category}>
+                  <CommandGroup heading={category} className="p-0!">
+                    {items.map((item, index) => {
+                      const Icon = item.icon;
+                      return (
+                        <CommandItem
+                          key={`${category}-${index}`}
+                          onSelect={() => {
+                            setActiveTab(item.tab);
+                            handleTabChange(item.tab);
+                            setSearchOpen(false);
+                            setSearchQuery("");
+                          }}
+                          className="flex items-start gap-2 border mb-2 px-3!"
+                        >
+                          <Icon className="mr-2 h-4 w-4 mt-0.5" />
+                          <div className="flex-1">
+                            <div className="font-medium">{item.label}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {item.description}
+                            </div>
+                          </div>
+                        </CommandItem>
+                      );
+                    })}
+                  </CommandGroup>
+                </div>
+              ))}
+            </div>
+          </CommandList>
+        </CommandDialog>
       </motion.div>
     </div>
   );

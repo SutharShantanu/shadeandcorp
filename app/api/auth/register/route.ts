@@ -8,9 +8,9 @@ import { parsePhoneNumber } from "libphonenumber-js";
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    console.log("body",body)
+    console.log("body", body)
     const parsed = registerSchema.safeParse(body)
-    console.log("parsed",parsed)
+    console.log("parsed", parsed)
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -81,6 +81,7 @@ export async function POST(req: Request) {
       accountStatus: "active",
       isEmailVerified: email && email.trim() !== "" ? false : false,
       isPhoneVerified: false,
+      connectedProviders: { credentials: true }
     }
 
     const user = await createUser(userData)

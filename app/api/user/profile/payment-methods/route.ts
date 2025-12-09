@@ -8,7 +8,7 @@ import User from "@/models/User";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { ok: false, error: "Unauthorized" },
@@ -26,11 +26,22 @@ export async function GET() {
       );
     }
 
-    // Mask card numbers for security (only show last 4 digits)
-    const maskedPaymentMethods = (user.paymentMethods || []).map((method: any) => ({
-      ...method.toObject(),
-      cardNumber: `**** **** **** ${method.cardNumber.slice(-4)}`,
-    }));
+    // Mask sensitive data for security
+    const maskedPaymentMethods = (user.paymentMethods || []).map((method: any) => {
+      const masked = method.toObject ? method.toObject() : { ...method };
+
+      // Mask card number if present
+      if (masked.cardNumber) {
+        masked.cardNumber = `**** **** **** ${masked.cardNumber.slice(-4)}`;
+      }
+
+      // Mask account number if present
+      if (masked.accountNumber) {
+        masked.accountNumber = `**** **** ${masked.accountNumber.slice(-4)}`;
+      }
+
+      return masked;
+    });
 
     return NextResponse.json({
       ok: true,
@@ -49,7 +60,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { ok: false, error: "Unauthorized" },
@@ -59,7 +70,7 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     await connectDB();
-    
+
     const user = await User.findById(session.user.id);
     if (!user) {
       return NextResponse.json(
@@ -68,29 +79,86 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validate required fields
-    if (!body.cardNumber || !body.expiryDate || !body.cardHolderName) {
+    const { type, cardHolderName, isDefault } = body;
+
+    // Validate payment type
+    if (!type || !["credit-card", "debit-card", "upi", "net-banking"].includes(type)) {
       return NextResponse.json(
-        { ok: false, error: "Missing required payment method fields" },
+        { ok: false, error: "Invalid payment method type" },
         { status: 400 }
       );
     }
 
-    // Basic card number validation (should be 13-19 digits)
-    const cardNumber = body.cardNumber.replace(/\s/g, "");
-    if (!/^\d{13,19}$/.test(cardNumber)) {
+    // Validate cardholder name
+    if (!cardHolderName) {
       return NextResponse.json(
-        { ok: false, error: "Invalid card number" },
+        { ok: false, error: "Cardholder name is required" },
         { status: 400 }
       );
     }
 
-    const newPaymentMethod = {
-      cardNumber: cardNumber,
-      expiryDate: body.expiryDate,
-      cardHolderName: body.cardHolderName,
-      isDefault: body.isDefault || false,
+    let newPaymentMethod: any = {
+      type,
+      cardHolderName,
+      isDefault: isDefault || false,
     };
+
+    // Validate based on payment type
+    if (type === "credit-card" || type === "debit-card") {
+      const { cardNumber, expiryDate, cvc } = body;
+
+      if (!cardNumber || !expiryDate || !cvc) {
+        return NextResponse.json(
+          { ok: false, error: "Card number, expiry date, and CVC are required for card payments" },
+          { status: 400 }
+        );
+      }
+
+      // Basic card number validation (should be 13-19 digits)
+      const cleanCardNumber = cardNumber.replace(/\s/g, "");
+      if (!/^\d{13,19}$/.test(cleanCardNumber)) {
+        return NextResponse.json(
+          { ok: false, error: "Invalid card number" },
+          { status: 400 }
+        );
+      }
+
+      newPaymentMethod = {
+        ...newPaymentMethod,
+        cardNumber: cleanCardNumber,
+        expiryDate,
+        cvc,
+      };
+    } else if (type === "upi") {
+      const { upiId } = body;
+
+      if (!upiId || !upiId.includes("@")) {
+        return NextResponse.json(
+          { ok: false, error: "Valid UPI ID is required" },
+          { status: 400 }
+        );
+      }
+
+      newPaymentMethod = {
+        ...newPaymentMethod,
+        upiId,
+      };
+    } else if (type === "net-banking") {
+      const { accountNumber, bankName } = body;
+
+      if (!accountNumber || !bankName) {
+        return NextResponse.json(
+          { ok: false, error: "Account number and bank name are required for net-banking" },
+          { status: 400 }
+        );
+      }
+
+      newPaymentMethod = {
+        ...newPaymentMethod,
+        accountNumber,
+        bankName,
+      };
+    }
 
     // If this is set as default, unset other defaults
     if (newPaymentMethod.isDefault) {
@@ -102,11 +170,11 @@ export async function POST(req: Request) {
     user.paymentMethods.push(newPaymentMethod);
     await user.save();
 
-    // Return masked card number
-    const response = {
-      ...newPaymentMethod,
-      cardNumber: `**** **** **** ${cardNumber.slice(-4)}`,
-    };
+    // Return masked sensitive data
+    const response = { ...newPaymentMethod };
+    if (response.cardNumber) {
+      response.cardNumber = `**** **** **** ${response.cardNumber.slice(-4)}`;
+    }
 
     return NextResponse.json({
       ok: true,
@@ -126,7 +194,7 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { ok: false, error: "Unauthorized" },
@@ -136,7 +204,7 @@ export async function PATCH(req: Request) {
 
     const body = await req.json();
     await connectDB();
-    
+
     const user = await User.findById(session.user.id);
     if (!user) {
       return NextResponse.json(
@@ -194,9 +262,14 @@ export async function PATCH(req: Request) {
 
     await user.save();
 
-    // Return masked card number
-    const updatedMethod = user.paymentMethods[methodIndex].toObject();
-    updatedMethod.cardNumber = `**** **** **** ${updatedMethod.cardNumber.slice(-4)}`;
+    // Return masked sensitive data
+    const updatedMethod = user.paymentMethods[methodIndex].toObject ? user.paymentMethods[methodIndex].toObject() : { ...user.paymentMethods[methodIndex] };
+    if (updatedMethod.cardNumber) {
+      updatedMethod.cardNumber = `**** **** **** ${updatedMethod.cardNumber.slice(-4)}`;
+    }
+    if (updatedMethod.accountNumber) {
+      updatedMethod.accountNumber = `**** **** ${updatedMethod.accountNumber.slice(-4)}`;
+    }
 
     return NextResponse.json({
       ok: true,
@@ -216,7 +289,7 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json(
         { ok: false, error: "Unauthorized" },
@@ -235,7 +308,7 @@ export async function DELETE(req: Request) {
     }
 
     await connectDB();
-    
+
     const user = await User.findById(session.user.id);
     if (!user) {
       return NextResponse.json(

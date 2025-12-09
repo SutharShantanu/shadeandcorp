@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import {
     Dialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,6 +21,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "sonner";
@@ -45,17 +47,16 @@ export default function VerifyEmailModal({
     const [showCloseWarning, setShowCloseWarning] = useState(false);
     const { update } = useSession();
 
-    // Sync URL parameter with modal state
+    // Sync URL with modal state
     useEffect(() => {
+        const url = new URL(window.location.href);
+
         if (open) {
-            const url = new URL(window.location.href);
-            url.searchParams.set('verifying-email', 'true');
-            window.history.pushState({}, '', url);
+            url.searchParams.set("verifying-email", "true");
         } else {
-            const url = new URL(window.location.href);
-            url.searchParams.delete('verifying-email');
-            window.history.pushState({}, '', url);
+            url.searchParams.delete("verifying-email");
         }
+        window.history.pushState({}, "", url);
     }, [open]);
 
     // Auto-submit when OTP is complete
@@ -85,36 +86,29 @@ export default function VerifyEmailModal({
 
             if (!response.ok || !data.success) {
                 toast.error(data.message || "Invalid or expired OTP", { id: toastId });
-                setOtp(""); // Clear OTP on error for retry
+                setOtp("");
                 return;
             }
 
             toast.success("Email verified successfully!", { id: toastId });
 
-            // Remove URL parameter before closing
+            // Remove URL param
             const url = new URL(window.location.href);
-            url.searchParams.delete('verifying-email');
-            window.history.pushState({}, '', url);
+            url.searchParams.delete("verifying-email");
+            window.history.pushState({}, "", url);
 
             onOpenChange(false);
             setOtp("");
 
-            // Call the success callback to refresh user data
-            if (onVerificationSuccess) {
-                onVerificationSuccess();
-            }
+            if (onVerificationSuccess) onVerificationSuccess();
 
-            // Update the session to reflect the new isEmailVerified status
             await update();
 
-            // Reload page after a short delay to update the UI
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            // setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
             console.error("OTP verification error:", error);
-            toast.error("An unexpected error occurred. Please try again.", { id: toastId });
-            setOtp(""); // Clear OTP on error for retry
+            toast.error("An unexpected error occurred.", { id: toastId });
+            setOtp("");
         } finally {
             setIsVerifying(false);
         }
@@ -136,18 +130,17 @@ export default function VerifyEmailModal({
                 return;
             }
 
-            toast.success("Verification email resent! Check your inbox.", { id: toastId });
-            setOtp(""); // Clear the OTP input
+            toast.success("Verification email resent!", { id: toastId });
+            setOtp("");
         } catch (error) {
             console.error("Resend OTP error:", error);
-            toast.error("An unexpected error occurred. Please try again.", { id: toastId });
+            toast.error("Unexpected error", { id: toastId });
         }
     };
 
-    const handleCloseAttempt = (shouldClose: boolean) => {
-        if (shouldClose) {
-            setShowCloseWarning(true);
-        }
+    const handleHeaderClose = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setShowCloseWarning(true);
     };
 
     const handleConfirmClose = () => {
@@ -158,6 +151,7 @@ export default function VerifyEmailModal({
 
     return (
         <>
+            {/* Warning popup before closing */}
             <AlertDialog open={showCloseWarning} onOpenChange={setShowCloseWarning}>
                 <AlertDialogContent className="max-w-sm">
                     <AlertDialogHeader>
@@ -166,64 +160,65 @@ export default function VerifyEmailModal({
                                 <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-500" />
                             </div>
                         </div>
-                        <AlertDialogTitle className="text-center">Cancel Email Verification?</AlertDialogTitle>
+
+                        <AlertDialogTitle className="text-center">
+                            Cancel Email Verification?
+                        </AlertDialogTitle>
+
                         <AlertDialogDescription className="text-center">
-                            You haven&apos;t verified your email yet. If you close this now, you&apos;ll need to request a new verification code.
-                            Are you sure you want to cancel?
+                            You haven't verified your email yet.
+                            If you close this now, you will need to request a new code.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter className="flex-row justify-center gap-2 sm:gap-2">
-                        <AlertDialogCancel >
+
+                    <AlertDialogFooter className="flex-row justify-center gap-2">
+                        <AlertDialogCancel>
                             <CircleX className="h-4 w-4" />
                             Continue Verifying
                         </AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleConfirmClose}
-                            className="bg-destructive hover:bg-destructive/90"
-                        >
-                            <CheckCircle2 className="h-4 w-4" />
 
+                        <AlertDialogAction onClick={handleConfirmClose} className="bg-destructive">
+                            <CheckCircle2 className="h-4 w-4" />
                             Yes, Cancel
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
-            <Dialog open={open} onOpenChange={handleCloseAttempt} modal>
+            {/* Main modal */}
+            <Dialog open={open} onOpenChange={() => setShowCloseWarning(true)} modal>
                 <DialogContent
                     className="sm:max-w-sm px-6 py-4"
                     onInteractOutside={(e) => e.preventDefault()}
                     onEscapeKeyDown={(e) => e.preventDefault()}
-                    showCloseButton={false}
                 >
-                    {/* Close button with warning */}
-                    <DialogClose
-                        onClick={(e) => {
-                            e.preventDefault();
-                            setShowCloseWarning(true);
-                        }}
-                        className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 z-50 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none"
-                        disabled={isVerifying}
-                    >
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Close</span>
-                    </DialogClose>
+                    <DialogHeader className="relative pb-2 border-b">
+                        {/* Close button INSIDE header */}
+                        <DialogPrimitive.Close
+                            onClick={handleHeaderClose}
+                            className="absolute right-0 top-1 opacity-70 hover:opacity-100 transition"
+                            disabled={isVerifying}
+                        >
+                            <X className="h-5 w-5" />
+                        </DialogPrimitive.Close>
 
-                    <DialogHeader className="p-0 border-0">
                         <div className="flex items-center justify-center mb-4">
                             <div className="rounded-full bg-emerald-100 dark:bg-emerald-900/20 p-3">
                                 <Mail className="h-6 w-6 text-emerald-600 dark:text-emerald-500" />
                             </div>
                         </div>
+
                         <DialogTitle className="text-center">Verify Your Email</DialogTitle>
+
                         <DialogDescription className="text-center">
-                            We&apos;ve sent a 6-digit verification code to
+                            We've sent a 6-digit code to
                             <br />
-                            <span className="font-semibold text-foreground">{email}</span>
+                            <span className="font-semibold">{email}</span>
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-6 py-4">
+                        {/* OTP Input */}
                         <div className="flex justify-center">
                             <InputOTP
                                 maxLength={6}
@@ -232,22 +227,23 @@ export default function VerifyEmailModal({
                                 disabled={isVerifying}
                                 autoFocus
                             >
-                                <InputOTPGroup className="">
-                                    <InputOTPSlot index={0} className="w-12 h-12 text-xl font-semibold" />
-                                    <InputOTPSlot index={1} className="w-12 h-12 text-xl font-semibold" />
-                                    <InputOTPSlot index={2} className="w-12 h-12 text-xl font-semibold" />
-                                    <InputOTPSlot index={3} className="w-12 h-12 text-xl font-semibold" />
-                                    <InputOTPSlot index={4} className="w-12 h-12 text-xl font-semibold" />
-                                    <InputOTPSlot index={5} className="w-12 h-12 text-xl font-semibold" />
+                                <InputOTPGroup>
+                                    {[0, 1, 2, 3, 4, 5].map((i) => (
+                                        <InputOTPSlot
+                                            key={i}
+                                            index={i}
+                                            className="w-12 h-12 text-xl font-semibold"
+                                        />
+                                    ))}
                                 </InputOTPGroup>
                             </InputOTP>
                         </div>
 
                         <div className="text-center text-xs text-muted-foreground">
-                            Didn&apos;t receive the code?{" "}
+                            Didn’t receive the code?{" "}
                             <Button
                                 variant="link"
-                                className="p-0 h-auto text-xs font-semibold text-muted-foreground"
+                                className="p-0 h-auto text-xs font-semibold"
                                 onClick={handleResendOTP}
                                 disabled={isVerifying}
                             >
@@ -256,7 +252,7 @@ export default function VerifyEmailModal({
                         </div>
                     </div>
 
-                    <DialogFooter className="flex-row justify-center gap-2 sm:gap-2">
+                    <DialogFooter className="flex-row justify-center gap-2">
                         <Button
                             variant="outline"
                             onClick={() => setShowCloseWarning(true)}
@@ -266,6 +262,7 @@ export default function VerifyEmailModal({
                             <CircleX className="h-4 w-4" />
                             Cancel
                         </Button>
+
                         <Button
                             onClick={handleVerifyOTP}
                             size="sm"
@@ -274,7 +271,8 @@ export default function VerifyEmailModal({
                             {isVerifying ? (
                                 <>
                                     <Spinner className="h-4 w-4" />
-                                    Verifying...</>
+                                    Verifying...
+                                </>
                             ) : (
                                 <>
                                     <CheckCircle2 className="h-4 w-4" />

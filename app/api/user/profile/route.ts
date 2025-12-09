@@ -38,8 +38,6 @@ export async function GET() {
         profilePicture: user.profilePicture,
         gender: user.gender,
         birthday: user.birthday,
-        bio: (user as any).bio || "",
-        urls: (user as any).urls || [],
         addresses: user.addresses || [],
         paymentMethods: user.paymentMethods || [],
         isEmailVerified: user.isEmailVerified,
@@ -101,9 +99,9 @@ export async function PATCH(req: Request) {
       if (field in body && body[field] !== undefined) {
         // Handle date fields
         if (field === "birthday" && body[field]) {
-          (user as any)[field] = new Date(body[field]);
+          (user as User)[field] = new Date(body[field]);
         } else {
-          (user as any)[field] = body[field];
+          (user as User)[field] = body[field];
         }
       }
     }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { MapPin, Plus, Edit, Trash2, Check, Navigation } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CountrySelect, StateSelect, CitySelect } from "@/components/ui/country-state-select";
 import { toast } from "sonner";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Country, State } from "country-state-city";
 interface AddressesTabProps {
   userProfile: UserProfile | null;
@@ -35,11 +35,13 @@ interface Address {
 
 export default function AddressesTab({ userProfile, shouldOpenModal, onModalClose }: AddressesTabProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   // Convert userProfile addresses to Address format
   const [addresses, setAddresses] = useState<Address[]>(
-    (userProfile?.addresses || []).map((addr: any, index: number) => ({
-      id: addr._id || `addr-${index}`,
+    (userProfile?.addresses || []).map((addr: Address, index: number) => ({
+      id: addr.id || `addr-${index}`,
       address1: addr.address1 || "",
       address2: addr.address2,
       city: addr.city || "",
@@ -66,10 +68,19 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
     isDefault: false,
   });
 
+  // Auto-open when URL contains action=add
+  useEffect(() => {
+    if (searchParams?.get("action") === "add") {
+      resetForm();
+      setIsAddDialogOpen(true);
+    }
+  }, [searchParams]);
+
   // Auto-open modal when shouldOpenModal is true
   useEffect(() => {
     if (shouldOpenModal) {
-      openAddDialog();
+      resetForm();
+      setIsAddDialogOpen(true);
       if (onModalClose) {
         onModalClose();
       }
@@ -121,6 +132,12 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
     toast.success("Address added successfully");
     setIsAddDialogOpen(false);
     resetForm();
+
+    // Remove action=add from URL
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    params.delete("action");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   };
 
   const handleEditAddress = () => {
@@ -373,7 +390,20 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
       )}
 
       {/* Add Address Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+      <Dialog
+        open={isAddDialogOpen}
+        onOpenChange={(open) => {
+          setIsAddDialogOpen(open);
+          if (!open && searchParams) {
+            const params = new URLSearchParams(searchParams.toString());
+            if (params.has("action")) {
+              params.delete("action");
+              const query = params.toString();
+              router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+            }
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-xl px-6 py-4 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="p-0 pb-4">
             <DialogTitle>Add New Address</DialogTitle>
@@ -481,7 +511,16 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAddDialogOpen(false);
+                const params = new URLSearchParams(searchParams?.toString() || "");
+                params.delete("action");
+                const query = params.toString();
+                router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+              }}
+            >
               Cancel
             </Button>
             <Button

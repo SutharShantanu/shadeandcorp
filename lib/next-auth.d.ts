@@ -33,6 +33,11 @@ declare module "next-auth" {
       isPhoneVerified?: boolean;
       role?: string;
       provider?: string;
+      connectedProviders?: {
+        google?: boolean;
+        github?: boolean;
+        credentials?: boolean;
+      };
       notifications?: UserNotification[];
       hasProfileIncomplete?: boolean;
       hasMissingAddress?: boolean;
@@ -49,6 +54,11 @@ declare module "next-auth" {
     isPhoneVerified?: boolean;
     role?: string;
     provider?: string;
+    connectedProviders?: {
+      google?: boolean;
+      github?: boolean;
+      credentials?: boolean;
+    };
     notifications?: UserNotification[];
     hasProfileIncomplete?: boolean;
     hasMissingAddress?: boolean;
@@ -66,6 +76,11 @@ declare module "next-auth/jwt" {
     isPhoneVerified?: boolean;
     role?: string;
     provider?: string;
+    connectedProviders?: {
+      google?: boolean;
+      github?: boolean;
+      credentials?: boolean;
+    };
     notifications?: UserNotification[];
     hasProfileIncomplete?: boolean;
     hasMissingAddress?: boolean;

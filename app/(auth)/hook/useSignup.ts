@@ -8,92 +8,75 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { BaseFormValues } from "@/types/Signup";
 
-// Schema allows EITHER email or phone (not both)
+// Schema allows exactly one method: email+password OR phone (OTP handled separately)
 const signupSchema = z
   .object({
     firstName: z.string().min(2, "First name must be at least 2 characters"),
     lastName: z.string().min(2, "Last name must be at least 2 characters"),
-    email: z.string(),
-    phone: z.string(),
-    password: z.string(),
+    email: z.string().trim().optional().or(z.literal("")),
+    phone: z.string().trim().optional().or(z.literal("")),
+    password: z.string().trim().optional().or(z.literal("")),
   })
   .superRefine((data, ctx) => {
-    const hasEmail = data.email.trim() !== "";
-    const hasPhone = data.phone.trim() !== "";
-    const hasPassword = data.password.trim() !== "";
+    const email = data.email?.trim() || "";
+    const phone = data.phone?.trim() || "";
+    const password = data.password?.trim() || "";
 
-    // Require exactly one signup method
-    if (!hasEmail) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Email is required",
-        path: ["email"],
-      });
-      if (!hasPassword) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Password is required",
-          path: ["password"],
-        });
-      }
-    }
-    if (!hasPhone) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Phone number is required.",
-        path: ["phone"],
-      });
-    }
+    const hasEmail = email.length > 0;
+    const hasPhone = phone.length > 0;
 
-    if (hasEmail && hasPhone) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Please use either email or phone number, not both",
-        path: ["phone"],
-      });
+    // Require exactly one method
+    if (!hasEmail && !hasPhone) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Email or phone is required", path: ["email"] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Email or phone is required", path: ["phone"] });
       return;
     }
 
-    // Email flow
+    if (hasEmail && hasPhone) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please use either email or phone number, not both", path: ["phone"] });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please use either email or phone number, not both", path: ["email"] });
+      return;
+    }
+
+    // Email flow requires password and valid email
     if (hasEmail) {
-      const emailCheck = z.string().email().safeParse(data.email);
+      const emailCheck = z.string().email().safeParse(email);
       if (!emailCheck.success) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Please enter a valid email address",
-          path: ["email"],
-        });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Please enter a valid email address", path: ["email"] });
       }
 
-      if (!hasPassword) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Password is required for email signup",
-          path: ["password"],
-        });
-      } else if (data.password.length < 6) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Password must be at least 6 characters",
-          path: ["password"],
-        });
+      if (!password) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Password is required for email signup", path: ["password"] });
+      } else {
+        // Enhanced password validation (like SecurityTab)
+        if (password.length < 8) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Must be at least 8 characters", path: ["password"] });
+        }
+        if (!/[A-Z]/.test(password)) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Must include an uppercase letter", path: ["password"] });
+        }
+        if (!/[a-z]/.test(password)) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Must include a lowercase letter", path: ["password"] });
+        }
+        if (!/[0-9]/.test(password)) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Must include a number", path: ["password"] });
+        }
+        if (!/[^A-Za-z0-9]/.test(password)) {
+          ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Must include a symbol", path: ["password"] });
+        }
       }
     }
 
-    // Phone flow
+    // Phone flow requires valid phone number; password is ignored in this path
     if (hasPhone) {
-      const digits = data.phone.replace(/\D/g, "");
+      const digits = phone.replace(/\D/g, "");
       if (digits.length < 10) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Phone number must be at least 10 digits",
-          path: ["phone"],
-        });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Phone number must be at least 10 digits", path: ["phone"] });
       }
     }
   });
 
-export type SignupForm = UseFormReturn<BaseFormValues>;
+export type SignupForm = UseFormReturn<BaseFormValues, any, undefined>;
 
 export function useSignup() {
   const router = useRouter();
@@ -111,7 +94,7 @@ export function useSignup() {
       phone: "",
       password: "",
     },
-    mode: "all",
+    mode: "onChange", // Real-time validation like SecurityTab
   });
 
   const updateSignupMethod = useCallback(
@@ -139,8 +122,8 @@ export function useSignup() {
       const actualMethod = hasEmail
         ? "email"
         : hasPhone
-        ? "phone"
-        : signupMethod;
+          ? "phone"
+          : signupMethod;
 
       if (!actualMethod) {
         form.setError("root", {

@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model, CallbackError } from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export const GenderEnum = {
@@ -56,13 +56,24 @@ export interface ISession {
 
 // Interface for Payment Method
 export interface IPaymentMethod {
-  cardNumber: string;
-  expiryDate: string;
+  type: "credit-card" | "debit-card" | "upi" | "net-banking";
+  cardNumber?: string;
+  expiryDate?: string;
+  cvc?: string;
   cardHolderName: string;
+  upiId?: string;
+  accountNumber?: string;
+  bankName?: string;
   isDefault: boolean;
 }
 
 // Main User Interface
+export interface IConnectedProviders {
+  google?: boolean;
+  github?: boolean;
+  credentials?: boolean;
+}
+
 export interface IUser extends Document {
   firstName: string;
   lastName: string;
@@ -90,6 +101,7 @@ export interface IUser extends Document {
   addresses: IAddress[];
   paymentMethods: IPaymentMethod[];
   sessions: ISession[];
+  connectedProviders?: IConnectedProviders;
   joinDate: Date;
   lastLogin: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -133,9 +145,14 @@ const UserSchema: Schema<IUser> = new Schema({
     isDefault: { type: Boolean, default: false }
   }],
   paymentMethods: [{
-    cardNumber: { type: String, required: true },
-    expiryDate: { type: String, required: true },
+    type: { type: String, enum: ["credit-card", "debit-card", "upi", "net-banking"], required: true },
+    cardNumber: { type: String },
+    expiryDate: { type: String },
+    cvc: { type: String },
     cardHolderName: { type: String, required: true },
+    upiId: { type: String },
+    accountNumber: { type: String },
+    bankName: { type: String },
     isDefault: { type: Boolean, default: false }
   }],
   sessions: [{
@@ -150,6 +167,11 @@ const UserSchema: Schema<IUser> = new Schema({
     deviceInfo: { type: String, required: true },
     loggedInAt: { type: Date, default: Date.now }
   }],
+  connectedProviders: {
+    google: { type: Boolean, default: false },
+    github: { type: Boolean, default: false },
+    credentials: { type: Boolean, default: false }
+  },
   joinDate: { type: Date, default: Date.now },
   lastLogin: { type: Date, default: Date.now }
 }, {
@@ -157,15 +179,48 @@ const UserSchema: Schema<IUser> = new Schema({
 });
 
 // Password hashing middleware
-UserSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+UserSchema.pre<IUser>('save', async function () {
+  if (!this.isModified('password')) return;
 
-  try {
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error: unknown) {
-    next(error as CallbackError);
+  const salt = await bcrypt.genSalt(12);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+// Custom validator for payment methods
+UserSchema.pre<IUser>('save', function () {
+  if (this.isModified('paymentMethods')) {
+    const errors: Record<string, string> = {};
+
+    this.paymentMethods.forEach((method: IPaymentMethod, index: number) => {
+      if (method.type === 'credit-card' || method.type === 'debit-card') {
+        if (!method.cardNumber) {
+          errors[`paymentMethods.${index}.cardNumber`] = 'Card number is required for card payments';
+        }
+        if (!method.expiryDate) {
+          errors[`paymentMethods.${index}.expiryDate`] = 'Expiry date is required for card payments';
+        }
+        if (!method.cvc) {
+          errors[`paymentMethods.${index}.cvc`] = 'CVC is required for card payments';
+        }
+      } else if (method.type === 'upi') {
+        if (!method.upiId) {
+          errors[`paymentMethods.${index}.upiId`] = 'UPI ID is required for UPI payments';
+        }
+      } else if (method.type === 'net-banking') {
+        if (!method.accountNumber) {
+          errors[`paymentMethods.${index}.accountNumber`] = 'Account number is required for net-banking';
+        }
+        if (!method.bankName) {
+          errors[`paymentMethods.${index}.bankName`] = 'Bank name is required for net-banking';
+        }
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      const err = new Error('Validation failed');
+      Object.assign(err, { errors });
+      throw err;
+    }
   }
 });
 
@@ -174,6 +229,9 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string):
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Create and export the model
-const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+// Create and export the model (ensure schema updates apply in dev/hot-reload)
+if (mongoose.models.User) {
+  delete mongoose.models.User;
+}
+const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema);
 export default User;

@@ -36,11 +36,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Laptop, Smartphone, Tablet, Monitor, LogOut, Shield, KeyRound, Trash2, CircleX, CircleCheck } from "lucide-react";
+import { Laptop, Smartphone, Tablet, Monitor, LogOut, Shield, KeyRound, Trash2, CircleX, CircleCheck, Github, Mail, BadgeCheck, BadgePlus } from "lucide-react";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
 import { toast } from "sonner";
 import { signOut } from "next-auth/react";
 import { Spinner } from "../ui/spinner";
+import Image from "next/image";
 
 interface Session {
     deviceInfo?: string;
@@ -63,7 +64,48 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
     const [deleteSessionId, setDeleteSessionId] = useState<number | null>(null);
     const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
-    // const [revokeProvider, setRevokeProvider] = useState<string | null>(null);
+    const [revokeProvider, setRevokeProvider] = useState<string | null>(null);
+    const [isRevoking, setIsRevoking] = useState(false);
+    const [connectingProvider, setConnectingProvider] = useState<"google" | "github" | null>(null);
+
+    const connectedAccounts = [
+        {
+            id: "credentials",
+            name: "Email & Password",
+            description: userProfile?.email || "Not connected",
+            icon: Shield,
+            iconBg: "bg-primary/10",
+            iconColor: "text-primary",
+            cardBg: "bg-muted/30",
+            isPrimary: true,
+            isConnected: true,
+            signinUrl: null,
+        },
+        {
+            id: "google",
+            name: "Google",
+            description: "Connect account",
+            logo: "https://cdn-icons-png.flaticon.com/64/281/281764.png",
+            iconBg: "bg-white dark:bg-slate-950 border",
+            logoClass: "w-5 h-5",
+            cardBg: "hover:bg-muted/50 transition-colors",
+            isPrimary: false,
+            isConnected: false,
+            signinUrl: "/api/auth/signin/google",
+        },
+        {
+            id: "github",
+            name: "GitHub",
+            description: "Connect account",
+            logo: "https://cdn-icons-png.flaticon.com/64/2111/2111432.png",
+            iconBg: "bg-slate-950 dark:bg-slate-100",
+            logoClass: "w-5 h-5 invert dark:invert-0",
+            cardBg: "hover:bg-muted/50 transition-colors",
+            isPrimary: false,
+            isConnected: false,
+            signinUrl: "/api/auth/signin/github",
+        },
+    ];
     // Zod schema for password validation
     const changePasswordSchema = z.object({
         currentPassword: z.string().min(1, "Current password is required"),
@@ -98,6 +140,29 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
     });
 
     const canSubmit = form.formState.isValid;
+
+    const handleRevokeProvider = async (provider: string) => {
+        setIsRevoking(true);
+        try {
+            const response = await fetch(`/api/auth/revoke/${provider}`, {
+                method: "POST",
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to revoke provider");
+            }
+
+            toast.success(`${provider} account disconnected`);
+            setRevokeProvider(null);
+            // Optionally refresh the page or update state
+            window.location.reload();
+        } catch (error) {
+            toast.error(`Failed to disconnect ${provider}`);
+            console.error(error);
+        } finally {
+            setIsRevoking(false);
+        }
+    };
 
     const getDeviceIcon = (deviceInfo: string) => {
         const info = deviceInfo.toLowerCase();
@@ -204,22 +269,62 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
             {/* Connected Accounts */}
             <div>
                 <h4 className="text-sm font-semibold mb-4">Connected Accounts</h4>
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                <Shield className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium">Email & Password</p>
-                                <p className="text-xs text-muted-foreground">{userProfile?.email}</p>
-                            </div>
-                        </div>
-                        <Badge variant="outline">Primary</Badge>
-                    </div>
-
-                    {/* Google Account if connected */}
-                    {/* Add other OAuth providers here */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {connectedAccounts.map((account) => (
+                        <Card key={account.id} className={account.cardBg}>
+                            <CardContent className="flex flex-col gap-3">
+                                <div className="flex items-center gap-3">
+                                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${account.iconBg}`}>
+                                        {account.icon && <account.icon className={`h-5 w-5 ${account.iconColor}`} />}
+                                        {account.logo && (
+                                            <Image
+                                                src={account.logo}
+                                                alt={`${account.name}-logo`}
+                                                width={100}
+                                                height={100}
+                                                className={account.logoClass}
+                                            />
+                                        )}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-medium">{account.name}</p>
+                                        <p className="text-xs text-muted-foreground truncate">{account.description}</p>
+                                    </div>
+                                    {account.isPrimary ? (
+                                        <Badge variant="secondary" color="success" className="text-xs">
+                                            <BadgeCheck className="h-3 w-3" />
+                                            Primary
+                                        </Badge>
+                                    ) : (
+                                        account.signinUrl && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="w-fit"
+                                                onClick={() => {
+                                                    setConnectingProvider(account.id as "google" | "github");
+                                                    window.location.href = account.signinUrl!;
+                                                }}
+                                                disabled={isRevoking || connectingProvider !== null}
+                                            >
+                                                {connectingProvider === account.id ? (
+                                                    <>
+                                                        <Spinner className="h-4 w-4" />
+                                                        Connecting...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <BadgePlus className="h-4 w-4" />
+                                                        Connect
+                                                    </>
+                                                )}
+                                            </Button>
+                                        )
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
                 </div>
             </div>
 
@@ -297,7 +402,7 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
 
             {/* Change Password Dialog */}
             <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
-                <DialogContent className="px-6 py-4">
+                <DialogContent className="px-6 py-4 max-w-xl">
                     <DialogHeader className="p-0 pb-4">
                         <DialogTitle>Change Password</DialogTitle>
                         <DialogDescription>
@@ -366,7 +471,7 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
                                     )}
                                 />
                             </div>
-                            <DialogFooter>
+                            <DialogFooter className="px-0">
                                 <Button
                                     type="button"
                                     variant="outline"

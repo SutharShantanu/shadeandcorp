@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
-import { BadgeAlert, BadgeCheck, Mail } from "lucide-react";
+import { BadgeAlert, BadgeCheck, Mail, ShieldAlert, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -130,7 +130,7 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
               )}
               <p className="text-sm font-medium">{userProfile?.email}</p>
               {userProfile?.isEmailVerified ? (
-                <Badge variant="default" className="bg-emerald-600">
+                <Badge variant="secondary" color="success">
                   <BadgeCheck className="w-3 h-3" />
                   Verified
                 </Badge>
@@ -168,7 +168,7 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                     +{userProfile.countryCode} {userProfile.phone}
                   </p>
                   {userProfile?.isPhoneVerified ? (
-                    <Badge variant="default" className="bg-emerald-600">
+                    <Badge variant="secondary" color="success">
                       <BadgeCheck className="w-3 h-3 mr-1" />
                       Verified
                     </Badge>
@@ -177,7 +177,7 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                   )}
                 </>
               ) : (
-                <Badge variant="outline" className="text-amber-600">
+                <Badge variant="secondary" color="warning">
                   <BadgeAlert className="h-4 w-4" />
                   Add phone number first
                 </Badge>
@@ -187,13 +187,30 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
           {userProfile?.accountStatus && (
             <div className="space-y-1">
               <p className="text-sm font-medium">Account Status</p>
-              <p className="text-xs text-muted-foreground">Current account state</p>
               <Badge
-                variant={userProfile.accountStatus === "active" ? "default" : "destructive"}
-                className={userProfile.accountStatus === "active" ? "bg-emerald-600" : ""}
+                variant={
+                  userProfile.accountStatus === "active"
+                    ? "secondary"
+                    : userProfile.accountStatus === "suspended"
+                      ? "default"
+                      : "destructive"
+                }
+                color={
+                  userProfile.accountStatus === "active"
+                    ? "success"
+                    : userProfile.accountStatus === "suspended"
+                      ? "warning"
+                      : undefined
+                }
               >
                 {userProfile.accountStatus === "active" && (
                   <BadgeCheck className="w-3 h-3" />
+                )}
+                {userProfile.accountStatus === "suspended" && (
+                  <ShieldAlert className="w-3 h-3" />
+                )}
+                {userProfile.accountStatus === "deleted" && (
+                  <Trash2 className="w-3 h-3" />
                 )}
                 <span className="capitalize">{userProfile.accountStatus}</span>
               </Badge>

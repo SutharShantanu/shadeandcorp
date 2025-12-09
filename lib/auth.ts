@@ -99,6 +99,12 @@ export const authOptions: NextAuthOptions = {
             loggedInAt: new Date(),
           });
 
+          if (!user.connectedProviders) {
+            user.connectedProviders = { google: false, github: false, credentials: true };
+          } else if (!user.connectedProviders.credentials) {
+            user.connectedProviders.credentials = true;
+          }
+
           user.lastLogin = new Date();
           await user.save();
 
@@ -203,6 +209,11 @@ export const authOptions: NextAuthOptions = {
               isPhoneVerified: false,
               role: "customer", // Default role for OAuth users
               accountStatus: "active",
+              connectedProviders: {
+                google: account.provider === "google",
+                github: account.provider === "github",
+                credentials: false,
+              },
             };
 
             await createUser(newUserData);
@@ -215,9 +226,23 @@ export const authOptions: NextAuthOptions = {
                 ? existingUser._id.toString()
                 : '');
             if (userId) {
+              const connectedProviders = {
+                credentials: existingUser.connectedProviders?.credentials ?? true,
+                google: existingUser.connectedProviders?.google ?? false,
+                github: existingUser.connectedProviders?.github ?? false,
+              };
+
+              if (account.provider === "google") {
+                connectedProviders.google = true;
+              }
+              if (account.provider === "github") {
+                connectedProviders.github = true;
+              }
+
               await updateUser(userId, {
                 lastLogin: new Date(),
-                profilePicture: user.image || existingUser.profilePicture
+                profilePicture: user.image || existingUser.profilePicture,
+                connectedProviders
               });
             } else {
               throw new Error('Invalid user ID for update');
@@ -244,7 +269,15 @@ export const authOptions: NextAuthOptions = {
         if ('lastName' in user) token.lastName = user.lastName;
         if ('isEmailVerified' in user) token.isEmailVerified = user.isEmailVerified;
         if ('role' in user) token.role = user.role;
-        token.provider = account?.provider;
+        const provider = account?.provider || token.provider || "credentials";
+        token.provider = provider;
+
+        const previousProviders = token.connectedProviders ?? {};
+        token.connectedProviders = {
+          credentials: previousProviders.credentials || provider === "credentials",
+          google: previousProviders.google || provider === "google",
+          github: previousProviders.github || provider === "github",
+        };
       }
 
       // Refresh user data on session update
@@ -259,6 +292,7 @@ export const authOptions: NextAuthOptions = {
           token.isEmailVerified = dbUser.isEmailVerified;
           token.isPhoneVerified = dbUser.isPhoneVerified;
           token.role = dbUser.role;
+          token.connectedProviders = dbUser.connectedProviders ?? token.connectedProviders;
         }
       }
 
@@ -285,6 +319,21 @@ export const authOptions: NextAuthOptions = {
             session.user.lastName = dbUser.lastName;
             session.user.role = dbUser.role;
             session.user.provider = token.provider as string;
+            const dbConnected = dbUser.connectedProviders ?? {
+              credentials: dbUser.password?.length > 0,
+              google: false,
+              github: false,
+            };
+
+            const providerIsCredentials = token.provider === "credentials";
+
+            session.user.connectedProviders = {
+              credentials: (dbConnected.credentials ?? (dbUser.password?.length ?? 0) > 0) || providerIsCredentials,
+              google: dbConnected.google ?? false,
+              github: dbConnected.github ?? false,
+            };
+
+            token.connectedProviders = session.user.connectedProviders;
 
             // Generate notifications based on fresh user data
             const notifications = generateUserNotifications({
@@ -322,6 +371,21 @@ export const authOptions: NextAuthOptions = {
               session.user.role = token.role as string;
             }
             session.user.provider = token.provider as string;
+            const tokenConnected = token.connectedProviders as
+              | {
+                google?: boolean;
+                github?: boolean;
+                credentials?: boolean;
+              }
+              | undefined;
+
+            const providerIsCredentials = token.provider === "credentials";
+
+            session.user.connectedProviders = {
+              credentials: (tokenConnected?.credentials ?? false) || providerIsCredentials || (!token.provider && true),
+              google: tokenConnected?.google ?? token.provider === "google",
+              github: tokenConnected?.github ?? token.provider === "github",
+            };
           }
         } catch (error) {
           console.error("Error fetching fresh user data in session:", error);
@@ -342,6 +406,21 @@ export const authOptions: NextAuthOptions = {
             session.user.role = token.role as string;
           }
           session.user.provider = token.provider as string;
+          const tokenConnected = token.connectedProviders as
+            | {
+              google?: boolean;
+              github?: boolean;
+              credentials?: boolean;
+            }
+            | undefined;
+
+          const providerIsCredentials = token.provider === "credentials";
+
+          session.user.connectedProviders = {
+            credentials: (tokenConnected?.credentials ?? false) || providerIsCredentials || (!token.provider && true),
+            google: tokenConnected?.google ?? token.provider === "google",
+            github: tokenConnected?.github ?? token.provider === "github",
+          };
         }
       }
       return session;
