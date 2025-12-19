@@ -504,7 +504,7 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => handleNavigation("/profile")} className="relative">
+          <DropdownMenuItem onClick={() => handleNavigation("/profile?tab=profile")} className="relative">
             <User className="mr-1 h-4 w-4" />
             <span>Profile</span>
             {profileNotifications.length > 0 && (

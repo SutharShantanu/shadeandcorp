@@ -20,9 +20,21 @@ const alertVariants = cva(
         link:
           "text-primary underline-offset-4 hover:underline",
       },
+      color: {
+        default: "",
+        success:
+          "bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30 [&>svg]:text-green-600 dark:[&>svg]:text-green-400",
+        info:
+          "bg-blue-500/10 text-blue-700 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30 [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400",
+        warning:
+          "bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400 dark:border-yellow-500/30 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400",
+        danger:
+          "bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30 [&>svg]:text-red-600 dark:[&>svg]:text-red-400",
+      },
     },
     defaultVariants: {
       variant: "default",
+      color: "default",
     },
   }
 )
@@ -30,13 +42,14 @@ const alertVariants = cva(
 function Alert({
   className,
   variant,
+  color,
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
   return (
     <div
       data-slot="alert"
       role="alert"
-      className={cn(alertVariants({ variant }), className)}
+      className={cn(alertVariants({ variant, color }), className)}
       {...props}
     />
   )

@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import VerifyEmailModal from "@/components/modal/VerifyEmailModal";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 interface AccountDisplayTabProps {
   userProfile: UserProfile | null;
@@ -90,9 +91,18 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Birthday</p>
-            <p className="text-sm font-medium">
-              {formatDate(userProfile?.birthday)}
-            </p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="flex flex-col items-center justify-center bg-primary/10 text-primary rounded-md p-2 w-16 h-16 border border-primary/20">
+                <span className="text-xs font-bold uppercase">
+                  {userProfile?.birthday ? new Date(userProfile.birthday).toLocaleString('default', { month: 'short' }) : '--'}
+                </span>
+                <span className="text-2xl font-bold">
+                  {userProfile?.birthday ? new Date(userProfile.birthday).getDate() : '--'}
+                </span>
+              </div>
+              {userProfile?.birthday && <span className="text-sm text-muted-foreground">{new Date(userProfile.birthday).getFullYear()}</span>}
+              {!userProfile?.birthday && <span className="text-sm text-muted-foreground">Not set</span>}
+            </div>
           </div>
         </div>
       </div>
@@ -106,46 +116,47 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Phone Number</p>
             <p className="text-sm font-medium">
-              {userProfile?.countryCode && userProfile?.phone
-                ? `+${userProfile.countryCode} ${userProfile.phone}`
+              {userProfile?.phone
+                ? userProfile.phone.startsWith('+')
+                  ? userProfile.phone
+                  : `+${userProfile.countryCode} ${userProfile.phone}`
                 : "Not set"}
             </p>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Email Verification</p>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium">{userProfile?.email}</p>
+                {userProfile?.isEmailVerified ? (
+                  <Badge variant="secondary" color="success" className="h-6">
+                    <BadgeCheck className="w-3 h-3 mr-1" />
+                    Verified
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-amber-500 border-amber-500/50 bg-amber-500/10 h-6">
+                    Pending
+                  </Badge>
+                )}
+              </div>
+
               {!userProfile?.isEmailVerified && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <BadgeAlert className={`h-4 w-4 ${showOTPModal ? 'text-amber-500' : 'text-destructive'}`} />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {showOTPModal
-                        ? "Verification in progress. Please check your email for the OTP."
-                        : "Your email is not verified."}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-              <p className="text-sm font-medium">{userProfile?.email}</p>
-              {userProfile?.isEmailVerified ? (
-                <Badge variant="secondary" color="success">
-                  <BadgeCheck className="w-3 h-3" />
-                  Verified
-                </Badge>
-              ) : (
-                <>
+                <div className="flex items-center p-3 rounded-md bg-muted/50 border border-amber-500/20">
+                  <BadgeAlert className="h-4 w-4 text-amber-500 mr-2 shrink-0" />
+                  <div className="flex-1 mr-2">
+                    <p className="text-xs font-medium">Email not verified</p>
+                    <p className="text-[10px] text-muted-foreground">Verify to secure your account.</p>
+                  </div>
                   <Button
                     size="sm"
-                    variant="outline"
+                    variant="default"
                     onClick={handleVerifyEmail}
                     disabled={isVerifyingEmail || showOTPModal}
+                    className="h-7 text-xs"
                   >
-                    <Mail className="h-3 w-3" />
-                    {isVerifyingEmail ? "Sending..." : showOTPModal ? "Check Email" : "Verify"}
+                    {isVerifyingEmail ? "Sending..." : showOTPModal ? "Enter OTP" : "Verify Now"}
                   </Button>
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -162,10 +173,13 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Phone Verification</p>
             <div className="flex items-center gap-2">
-              {userProfile?.countryCode && userProfile?.phone ? (
+              {userProfile?.phone ? (
                 <>
                   <p className="text-sm font-medium">
-                    +{userProfile.countryCode} {userProfile.phone}
+                    {userProfile.phone.startsWith('+')
+                      ? userProfile.phone
+                      : `+${userProfile.countryCode} ${userProfile.phone}`
+                    }
                   </p>
                   {userProfile?.isPhoneVerified ? (
                     <Badge variant="secondary" color="success">
@@ -250,9 +264,13 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
           {userProfile?.lastLogin && (
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground">Last Login</p>
-              <p className="text-sm font-medium">
+              <Link
+                href="/profile?tab=security"
+                className="text-sm font-medium hover:underline text-primary flex items-center gap-1 group"
+              >
                 {formatDate(userProfile.lastLogin)}
-              </p>
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+              </Link>
             </div>
           )}
         </div>

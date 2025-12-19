@@ -1,6 +1,9 @@
 "use client";
 
 import { Bell, Palette } from "lucide-react";
+import { useTheme } from "next-themes";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
@@ -10,6 +13,7 @@ interface NotificationsTabProps {
 }
 
 export default function NotificationsTab({ userProfile }: NotificationsTabProps) {
+  const { theme, setTheme } = useTheme();
   return (
     <div className="space-y-6">
       <div>
@@ -44,12 +48,17 @@ export default function NotificationsTab({ userProfile }: NotificationsTabProps)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Theme and display settings will be available soon.
-          </p>
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">
+              Select your preferred theme for the application.
+            </p>
+            <div className="flex gap-4">
+              <ThemeToggle />
+            </div>
+          </div>
         </CardContent>
       </Card>
-    </div>
+    </div >
   );
 }
 

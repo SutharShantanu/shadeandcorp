@@ -98,13 +98,7 @@ export default function ProfilePage() {
   const [alertDismissed, setAlertDismissed] = useState(false);
   const [shouldOpenModal, setShouldOpenModal] = useState(actionFromUrl === "add");
 
-  // Redirect /profile to /edit-profile
-  useEffect(() => {
-    if (pathname === "/profile") {
-      const qs = searchParams.toString();
-      router.replace(qs ? `/edit-profile?${qs}` : "/edit-profile");
-    }
-  }, [pathname, router, searchParams]);
+
 
   // Check for missing profile information
   const missingInfo = useMemo(() => {
@@ -162,23 +156,16 @@ export default function ProfilePage() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // Update activeTab when URL changes (using useEffect for URL param changes)
-  // This is necessary to sync state with URL params (e.g., browser back/forward)
+  // Sync activeTab with URL parameters
   useEffect(() => {
     const currentTab = searchParams.get("tab");
-    if (
-      currentTab &&
-      VALID_TABS.includes(currentTab as (typeof VALID_TABS)[number]) &&
-      currentTab !== activeTab
-    ) {
+    if (currentTab && VALID_TABS.includes(currentTab as (typeof VALID_TABS)[number])) {
       setActiveTab(currentTab);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // Update URL when tab changes (without page reload)
+  // Update URL when tab changes (state updates via useEffect)
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
     const newUrl = `/profile?tab=${value}`;
     router.replace(newUrl, { scroll: false });
   };
@@ -278,7 +265,7 @@ export default function ProfilePage() {
         <Card>
           <CardHeader>
             {missingInfo.length > 0 && !alertDismissed && (
-              <Alert variant="secondary">
+              <Alert variant="secondary" color="warning">
                 <Info className="h-4 w-4 " />
                 <AlertDescription className="flex items-start justify-between gap-4">
                   <div className="flex-1">
@@ -319,7 +306,7 @@ export default function ProfilePage() {
               onValueChange={handleTabChange}
               className="w-full"
             >
-              <TabsList>
+              <TabsList className="relative z-10">
                 <TabsTrigger
                   value="profile"
                   className="flex items-center gap-2"
