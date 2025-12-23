@@ -83,7 +83,39 @@ Shade & Co Team`,
     await transporter.sendMail(mailOptions);
 }
 
-// POST - Send verification email
+// Helper function to send verification SMS via Firebase REST API
+async function sendPhoneVerificationSMS(
+    phone: string,
+    recaptchaToken: string
+): Promise<{ sessionInfo: string }> {
+    const apiKey = process.env.NEXT_PUBLIC_FB_API_KEY;
+    if (!apiKey) {
+        throw new Error("Firebase API Key is missing");
+    }
+
+    const response = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:sendVerificationCode?key=${apiKey}`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                phoneNumber: phone,
+                recaptchaToken: recaptchaToken,
+            }),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        console.error("Firebase SMS Error:", data);
+        throw new Error(data.error?.message || "Failed to send SMS via Firebase");
+    }
+
+    return { sessionInfo: data.sessionInfo };
+}
+
+// POST - Send verification (email or phone)
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -95,6 +127,9 @@ export async function POST(req: Request) {
             );
         }
 
+        const body = await req.json();
+        const { type, recaptchaToken } = body; // 'email' or 'phone'
+
         await connectDB();
         const user = await User.findById(session.user.id);
 
@@ -105,44 +140,96 @@ export async function POST(req: Request) {
             );
         }
 
-        if (user.isEmailVerified) {
-            return NextResponse.json(
-                { success: false, message: "Email is already verified." },
-                { status: 400 }
-            );
+        // Handle email verification
+        if (!type || type === 'email') {
+            if (user.isEmailVerified) {
+                return NextResponse.json(
+                    { success: false, message: "Email is already verified." },
+                    { status: 400 }
+                );
+            }
+
+            // Generate both OTP and token
+            const otp = generateOTP(); // 6-digit code
+            const token = generateToken(); // Unique token for link
+            const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+            // Store both OTP and token
+            user.emailVerificationToken = token;
+            user.emailVerificationOTP = otp;
+            user.emailVerificationExpires = expires;
+            await user.save();
+
+            // Send email with both OTP and link
+            try {
+                await sendVerificationEmailWithOTP(
+                    user.email,
+                    user.firstName || "User",
+                    otp,
+                    token
+                );
+            } catch (emailError) {
+                console.error("Error sending verification email:", emailError);
+                return NextResponse.json(
+                    { success: false, message: "Failed to send verification email. Please try again." },
+                    { status: 500 }
+                );
+            }
+
+            return NextResponse.json({
+                success: true,
+                message: "Verification email sent! Please check your inbox for the OTP code or verification link.",
+            });
         }
 
-        // Generate both OTP and token
-        const otp = generateOTP(); // 6-digit code
-        const token = generateToken(); // Unique token for link
-        const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        // Handle phone verification
+        if (type === 'phone') {
+            if (!user.phone) {
+                return NextResponse.json(
+                    { success: false, message: "No phone number found. Please add a phone number first." },
+                    { status: 400 }
+                );
+            }
 
-        // Store both OTP and token
-        user.emailVerificationToken = token;
-        user.emailVerificationOTP = otp;
-        user.emailVerificationExpires = expires;
-        await user.save();
+            if (user.isPhoneVerified) {
+                return NextResponse.json(
+                    { success: false, message: "Phone is already verified." },
+                    { status: 400 }
+                );
+            }
 
-        // Send email with both OTP and link
-        try {
-            await sendVerificationEmailWithOTP(
-                user.email,
-                user.firstName || "User",
-                otp,
-                token
-            );
-        } catch (emailError) {
-            console.error("Error sending verification email:", emailError);
-            return NextResponse.json(
-                { success: false, message: "Failed to send verification email. Please try again." },
-                { status: 500 }
-            );
+            if (!recaptchaToken) {
+                return NextResponse.json(
+                    { success: false, message: "ReCAPTCHA token is required." },
+                    { status: 400 }
+                );
+            }
+
+            // Send SMS via Firebase
+            try {
+                const { sessionInfo } = await sendPhoneVerificationSMS(
+                    user.phone,
+                    recaptchaToken
+                );
+
+                return NextResponse.json({
+                    success: true,
+                    message: "Verification SMS sent! Please check your phone for the OTP code.",
+                    sessionInfo
+                });
+            } catch (smsError: any) {
+                console.error("Error sending verification SMS:", smsError);
+                return NextResponse.json(
+                    { success: false, message: smsError.message || "Failed to send verification SMS. Please try again." },
+                    { status: 500 }
+                );
+            }
         }
 
-        return NextResponse.json({
-            success: true,
-            message: "Verification email sent! Please check your inbox for the OTP code or verification link.",
-        });
+        return NextResponse.json(
+            { success: false, message: "Invalid verification type. Use 'email' or 'phone'." },
+            { status: 400 }
+        );
     } catch (error) {
         console.error("Send verification error:", error);
         return NextResponse.json(

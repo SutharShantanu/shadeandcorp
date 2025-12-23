@@ -3,8 +3,10 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
-import { BadgeAlert, BadgeCheck } from "lucide-react";
+import { BadgeAlert, BadgeCheck, CalendarClock, User } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { IconBadge } from "../ui/icon-badge";
+import { format } from "date-fns";
 
 interface ProfileDisplayTabProps {
   userProfile: UserProfile | null;
@@ -60,11 +62,21 @@ export default function ProfileDisplayTab({ userProfile }: ProfileDisplayTabProp
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">First Name</p>
-            <p className="text-sm font-medium">{userProfile?.firstName || "Not set"}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <IconBadge>
+                <User className="h-4 w-4 text-muted-foreground" />
+              </IconBadge>
+              <p className="text-sm font-medium">{userProfile?.firstName || "Not set"}</p>
+            </div>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Last Name</p>
-            <p className="text-sm font-medium">{userProfile?.lastName || "Not set"}</p>
+            <div className="flex items-center gap-2 mt-1">
+              <IconBadge>
+                <User className="h-4 w-4 text-muted-foreground" />
+              </IconBadge>
+              <p className="text-sm font-medium">{userProfile?.lastName || "Not set"}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -72,15 +84,16 @@ export default function ProfileDisplayTab({ userProfile }: ProfileDisplayTabProp
       {userProfile?.joinDate && (
         <>
           <Separator />
-          <div>
-            <h4 className="text-sm font-semibold mb-2">Member Since</h4>
-            <p className="text-sm text-muted-foreground">
-              {new Date(userProfile.joinDate).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </p>
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Member Since</p>
+            <div className="flex items-center gap-2 mt-1">
+              <IconBadge>
+                <CalendarClock className="h-4 w-4 text-muted-foreground" />
+              </IconBadge>
+              <p className="text-sm font-medium">
+                {format(new Date(userProfile.joinDate), "MMMM d, yyyy")}
+              </p>
+            </div>
           </div>
         </>
       )}

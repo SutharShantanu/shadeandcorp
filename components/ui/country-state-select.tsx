@@ -21,7 +21,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Country, State, City } from "country-state-city";
 
 interface CountrySelectProps {
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
   className?: string;
   disabled?: boolean;
@@ -113,7 +113,7 @@ export function CountrySelect({
 
 interface StateSelectProps {
   countryCode: string;
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
   className?: string;
   disabled?: boolean;
@@ -184,7 +184,7 @@ export function StateSelect({
 interface CitySelectProps {
   countryCode: string;
   stateCode: string;
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
   className?: string;
   disabled?: boolean;

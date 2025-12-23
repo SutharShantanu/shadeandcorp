@@ -9,28 +9,32 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { toast } from "sonner";
-import { Mail, CheckCircle2, X } from "lucide-react";
+import { Phone, CheckCircle2 } from "lucide-react";
 import { Spinner } from "../ui/spinner";
 import { useSession } from "next-auth/react";
 import { IconBadge } from "../ui/icon-badge";
+import { setupRecaptcha } from "@/lib/firebaseClient";
 
-interface VerifyEmailModalProps {
+interface VerifyPhoneModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    email: string;
+    phone: string;
+    sessionInfo: string | null;
+    onSessionInfoUpdate: (info: string | null) => void;
     onVerificationSuccess?: () => void;
 }
 
-export default function VerifyEmailModal({
+export default function VerifyPhoneModal({
     open,
     onOpenChange,
-    email,
+    phone,
+    sessionInfo,
+    onSessionInfoUpdate,
     onVerificationSuccess,
-}: VerifyEmailModalProps) {
+}: VerifyPhoneModalProps) {
     const [otp, setOtp] = useState("");
     const [isVerifying, setIsVerifying] = useState(false);
     const [resendCooldown, setResendCooldown] = useState(0);
@@ -41,9 +45,9 @@ export default function VerifyEmailModal({
         const url = new URL(window.location.href);
 
         if (open) {
-            url.searchParams.set("verifying-email", "true");
+            url.searchParams.set("verifying-phone", "true");
         } else {
-            url.searchParams.delete("verifying-email");
+            url.searchParams.delete("verifying-phone");
         }
         window.history.pushState({}, "", url);
     }, [open]);
@@ -85,7 +89,11 @@ export default function VerifyEmailModal({
             const response = await fetch("/api/auth/verify-email", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ otp }),
+                body: JSON.stringify({
+                    otp,
+                    type: "phone",
+                    sessionInfo
+                }),
             });
 
             const data = await response.json();
@@ -96,11 +104,11 @@ export default function VerifyEmailModal({
                 return;
             }
 
-            toast.success("Email verified successfully!", { id: toastId });
+            toast.success("Phone verified successfully!", { id: toastId });
 
             // Remove URL param
             const url = new URL(window.location.href);
-            url.searchParams.delete("verifying-email");
+            url.searchParams.delete("verifying-phone");
             window.history.pushState({}, "", url);
 
             onOpenChange(false);
@@ -109,8 +117,6 @@ export default function VerifyEmailModal({
             if (onVerificationSuccess) onVerificationSuccess();
 
             await update();
-
-            // setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
             console.error("OTP verification error:", error);
             toast.error("An unexpected error occurred.", { id: toastId });
@@ -121,27 +127,49 @@ export default function VerifyEmailModal({
     };
 
     const handleResendOTP = async () => {
-        const toastId = toast.loading("Resending verification email...");
+        const toastId = toast.loading("Initializing resend...");
 
         try {
+            // Setup reCAPTCHA for resend as well
+            setupRecaptcha();
+            const appVerifier = window.recaptchaVerifier;
+
+            if (!appVerifier) {
+                throw new Error("reCAPTCHA failed to initialize");
+            }
+
+            // Clear previous reCAPTCHA
+            try {
+                await appVerifier.clear();
+            } catch (e) { }
+
+            const recaptchaToken = await appVerifier.verify();
+
+            toast.loading("Resending verification SMS...", { id: toastId });
+
             const response = await fetch("/api/auth/send-verification", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    type: "phone",
+                    recaptchaToken
+                }),
             });
 
             const data = await response.json();
 
             if (!response.ok || !data.success) {
-                toast.error(data.message || "Failed to resend verification email", { id: toastId });
+                toast.error(data.message || "Failed to resend verification SMS", { id: toastId });
                 return;
             }
 
-            toast.success("Verification email resent!", { id: toastId });
+            toast.success("Verification SMS resent!", { id: toastId });
+            onSessionInfoUpdate(data.sessionInfo);
             setOtp("");
             setResendCooldown(60); // Reset cooldown to 60 seconds
-        } catch (error) {
+        } catch (error: any) {
             console.error("Resend OTP error:", error);
-            toast.error("Unexpected error", { id: toastId });
+            toast.error(error.message || "An unexpected error occurred", { id: toastId });
         }
     };
 
@@ -151,7 +179,6 @@ export default function VerifyEmailModal({
     };
 
     return (
-
         <Dialog open={open} onOpenChange={onOpenChange} modal>
             <DialogContent
                 className="max-w-sm"
@@ -161,17 +188,16 @@ export default function VerifyEmailModal({
                 <DialogHeader className="">
                     <DialogTitle className="text-center flex items-center gap-2">
                         <IconBadge variant="success">
-                            <Mail />
+                            <Phone />
                         </IconBadge>
-                        Verify Your Email
+                        Verify Your Phone
                     </DialogTitle>
                 </DialogHeader>
-
 
                 <DialogDescription className="text-center pt-4">
                     We've sent a 6-digit code to
                     <br />
-                    <span className="font-semibold">{email}</span>
+                    <span className="font-semibold">{phone}</span>
                 </DialogDescription>
 
                 <div className="space-y-6 py-4">
@@ -197,7 +223,7 @@ export default function VerifyEmailModal({
                     </div>
 
                     <div className="text-center text-xs text-muted-foreground">
-                        Didn’t receive the code?{" "}
+                        Didn't receive the code?{" "}
                         <Button
                             variant="link"
                             className="p-0 h-auto text-xs font-semibold"

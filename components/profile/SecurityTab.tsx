@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,8 @@ import { toast } from "sonner";
 import { signOut } from "next-auth/react";
 import { Spinner } from "../ui/spinner";
 import Image from "next/image";
+import { IconBadge } from "../ui/icon-badge";
+import { format } from "date-fns";
 
 interface Session {
     deviceInfo?: string;
@@ -179,13 +182,7 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
     const formatDate = (dateString?: string | Date) => {
         if (!dateString) return "Not available";
         try {
-            return new Date(dateString).toLocaleString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-            });
+            return format(new Date(dateString), "MMM d, yyyy • p");
         } catch {
             return "Invalid date";
         }
@@ -253,9 +250,14 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
             <div>
                 <h4 className="text-sm font-semibold mb-4">Password & Authentication</h4>
                 <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-sm font-medium">Password</p>
-                        <p className="text-xs text-muted-foreground">Last changed: Never</p>
+                    <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground">Password</p>
+                        <div className="flex items-center gap-2 mt-1">
+                            <IconBadge>
+                                <KeyRound className="h-4 w-4 text-muted-foreground" />
+                            </IconBadge>
+                            <p className="text-sm font-medium">Last changed: Never</p>
+                        </div>
                     </div>
                     <Button onClick={() => setChangePasswordOpen(true)}>
                         <KeyRound className="h-4 w-4" />
@@ -271,21 +273,21 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
                 <h4 className="text-sm font-semibold mb-4">Connected Accounts</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {connectedAccounts.map((account) => (
-                        <Card key={account.id} className={account.cardBg}>
-                            <CardContent className="flex flex-col gap-3">
+                        <Card key={account.id} className={cn("bg-transparent", account.cardBg)}>
+                            <CardContent className="flex flex-col gap-3 p-4">
                                 <div className="flex items-center gap-3">
-                                    <div className={`h-10 w-10 rounded-full flex items-center justify-center ${account.iconBg}`}>
+                                    <IconBadge variant="default" className={cn("rounded-lg", account.iconBg)}>
                                         {account.icon && <account.icon className={`h-5 w-5 ${account.iconColor}`} />}
                                         {account.logo && (
                                             <Image
                                                 src={account.logo}
                                                 alt={`${account.name}-logo`}
-                                                width={100}
-                                                height={100}
+                                                width={20}
+                                                height={20}
                                                 className={account.logoClass}
                                             />
                                         )}
-                                    </div>
+                                    </IconBadge>
                                     <div className="flex-1">
                                         <p className="text-sm font-medium">{account.name}</p>
                                         <p className="text-xs text-muted-foreground truncate">{account.description}</p>
@@ -344,9 +346,9 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
                                 return (
                                     <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                                         <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                                                <DeviceIcon className="h-5 w-5" />
-                                            </div>
+                                            <IconBadge>
+                                                <DeviceIcon className="h-5 w-5 text-muted-foreground" />
+                                            </IconBadge>
                                             <div>
                                                 <div className="flex items-center gap-2">
                                                     <p className="text-sm font-medium">

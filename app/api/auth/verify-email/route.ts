@@ -76,7 +76,55 @@ Shade & Co Team`,
     await transporter.sendMail(mailOptions);
 }
 
-// POST - Verify email with OTP or token
+// Helper function to verify phone number via Firebase REST API
+async function verifyPhoneWithFirebase(
+    sessionInfo: string,
+    code: string
+): Promise<{ phoneNumber: string }> {
+    const apiKey = process.env.NEXT_PUBLIC_FB_API_KEY;
+    if (!apiKey) {
+        throw new Error("Firebase API Key is missing");
+    }
+
+    const response = await fetch(
+        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPhoneNumber?key=${apiKey}`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                sessionInfo,
+                code,
+            }),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        console.error("Firebase Verify Error:", data);
+        throw new Error(data.error?.message || "Failed to verify phone via Firebase");
+    }
+
+    return { phoneNumber: data.phoneNumber };
+}
+
+// Helper function to send phone verification confirmation SMS
+async function sendPhoneVerificationConfirmationSMS(
+    phone: string,
+    firstName: string
+): Promise<void> {
+    // This is optional if Firebase already sends a confirmation, but we'll keep the log for now.
+    console.log(`
+========================================
+SMS Confirmation
+========================================
+To: ${phone}
+Message: Hi ${firstName}, your phone number has been successfully verified! Thank you for being a part of Shade & Co.
+========================================
+    `);
+}
+
+// POST - Verify email or phone with OTP or token
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -89,7 +137,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { otp, token } = body;
+        const { otp, token, type, sessionInfo } = body; // type: 'email' or 'phone'
 
         // Must provide either OTP or token
         if (!otp && !token) {
@@ -109,63 +157,150 @@ export async function POST(req: Request) {
             );
         }
 
-        if (user.isEmailVerified) {
-            return NextResponse.json(
-                { success: false, message: "Email is already verified." },
-                { status: 400 }
-            );
+        // Handle email verification
+        if (!type || type === 'email') {
+            if (user.isEmailVerified) {
+                return NextResponse.json(
+                    { success: false, message: "Email is already verified." },
+                    { status: 400 }
+                );
+            }
+
+            // Check if verification has expired
+            if (user.emailVerificationExpires && new Date() > user.emailVerificationExpires) {
+                return NextResponse.json(
+                    { success: false, message: "Verification code has expired. Please request a new one." },
+                    { status: 400 }
+                );
+            }
+
+            // Verify using OTP or token
+            let isValid = false;
+
+            if (otp && user.emailVerificationOTP) {
+                // Verify OTP (case-insensitive comparison)
+                isValid = otp.trim().toLowerCase() === user.emailVerificationOTP.toLowerCase();
+            } else if (token && user.emailVerificationToken) {
+                // Verify token
+                isValid = token === user.emailVerificationToken;
+            }
+
+            if (!isValid) {
+                return NextResponse.json(
+                    { success: false, message: "Invalid verification code. Please try again." },
+                    { status: 400 }
+                );
+            }
+
+            // Mark email as verified and clear verification fields
+            user.isEmailVerified = true;
+            user.emailVerificationToken = undefined;
+            user.emailVerificationOTP = undefined;
+            user.emailVerificationExpires = undefined;
+            await user.save();
+
+            // Send confirmation email
+            try {
+                await sendVerificationConfirmationEmail(
+                    user.email,
+                    user.firstName || "User"
+                );
+            } catch (emailError) {
+                console.error("Error sending confirmation email:", emailError);
+                // Don't fail the verification if email fails to send
+            }
+
+            return NextResponse.json({
+                success: true,
+                message: "Email verified successfully!",
+            });
         }
 
-        // Check if verification has expired
-        if (user.emailVerificationExpires && new Date() > user.emailVerificationExpires) {
-            return NextResponse.json(
-                { success: false, message: "Verification code has expired. Please request a new one." },
-                { status: 400 }
-            );
+        // Handle phone verification
+        if (type === 'phone') {
+            if (user.isPhoneVerified) {
+                return NextResponse.json(
+                    { success: false, message: "Phone is already verified." },
+                    { status: 400 }
+                );
+            }
+
+            if (!otp && !token) {
+                return NextResponse.json(
+                    { success: false, message: "Verification code is required." },
+                    { status: 400 }
+                );
+            }
+
+            // Verify with Firebase if sessionInfo is provided
+            if (sessionInfo && otp) {
+                try {
+                    await verifyPhoneWithFirebase(sessionInfo, otp);
+                } catch (verifyError: any) {
+                    console.error("Firebase Verification Error:", verifyError);
+                    return NextResponse.json(
+                        { success: false, message: verifyError.message || "Invalid or expired verification code." },
+                        { status: 400 }
+                    );
+                }
+            } else {
+                // FALLBACK: Traditional logic if no sessionInfo (for existing codes or other flows)
+                // Check if verification has expired
+                if (user.phoneVerificationExpires && new Date() > user.phoneVerificationExpires) {
+                    return NextResponse.json(
+                        { success: false, message: "Verification code has expired. Please request a new one." },
+                        { status: 400 }
+                    );
+                }
+
+                // Verify using OTP or token
+                let isValid = false;
+
+                if (otp && user.phoneVerificationOTP) {
+                    isValid = otp.trim().toLowerCase() === user.phoneVerificationOTP.toLowerCase();
+                } else if (token && user.phoneVerificationCode) {
+                    isValid = token === user.phoneVerificationCode;
+                }
+
+                if (!isValid) {
+                    return NextResponse.json(
+                        { success: false, message: "Invalid verification code. Please try again." },
+                        { status: 400 }
+                    );
+                }
+            }
+
+            // Mark phone as verified and clear verification fields
+            user.isPhoneVerified = true;
+            user.phoneVerificationCode = undefined;
+            user.phoneVerificationOTP = undefined;
+            user.phoneVerificationExpires = undefined;
+            await user.save();
+
+            // Send confirmation SMS
+            try {
+                if (user.phone) {
+                    await sendPhoneVerificationConfirmationSMS(
+                        user.phone,
+                        user.firstName || "User"
+                    );
+                }
+            } catch (smsError) {
+                console.error("Error sending confirmation SMS:", smsError);
+            }
+
+            return NextResponse.json({
+                success: true,
+                message: "Phone verified successfully!",
+            });
         }
 
-        // Verify using OTP or token
-        let isValid = false;
-
-        if (otp && user.emailVerificationOTP) {
-            // Verify OTP (case-insensitive comparison)
-            isValid = otp.trim().toLowerCase() === user.emailVerificationOTP.toLowerCase();
-        } else if (token && user.emailVerificationToken) {
-            // Verify token
-            isValid = token === user.emailVerificationToken;
-        }
-
-        if (!isValid) {
-            return NextResponse.json(
-                { success: false, message: "Invalid verification code. Please try again." },
-                { status: 400 }
-            );
-        }
-
-        // Mark email as verified and clear verification fields
-        user.isEmailVerified = true;
-        user.emailVerificationToken = undefined;
-        user.emailVerificationOTP = undefined;
-        user.emailVerificationExpires = undefined;
-        await user.save();
-
-        // Send confirmation email
-        try {
-            await sendVerificationConfirmationEmail(
-                user.email,
-                user.firstName || "User"
-            );
-        } catch (emailError) {
-            console.error("Error sending confirmation email:", emailError);
-            // Don't fail the verification if email fails to send
-        }
-
-        return NextResponse.json({
-            success: true,
-            message: "Email verified successfully!",
-        });
+        return NextResponse.json(
+            { success: false, message: "Invalid verification type. Use 'email' or 'phone'." },
+            { status: 400 }
+        );
     } catch (error) {
-        console.error("Email verification error:", error);
+        console.error("Verification error:", error);
         return NextResponse.json(
             { success: false, message: "An error occurred during verification. Please try again." },
             { status: 500 }

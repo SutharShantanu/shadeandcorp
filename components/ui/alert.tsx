@@ -2,6 +2,8 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { X } from "lucide-react"
 
 const alertVariants = cva(
   "relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current transition-all ease-in-out",
@@ -14,11 +16,14 @@ const alertVariants = cva(
         outline:
           "bg-background text-foreground border-input dark:bg-input/30",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 border-none",
+          "bg-secondary text-secondary-foreground border-none",
+        // hover:bg-secondary/80
         ghost:
-          "bg-transparent border-none hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+          "bg-transparent border-none",
+        // hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50
         link:
-          "text-primary underline-offset-4 hover:underline",
+          "text-primary underline-offset-4",
+        // hover:underline
       },
       color: {
         default: "",
@@ -84,4 +89,28 @@ function AlertDescription({
   )
 }
 
-export { Alert, AlertTitle, AlertDescription }
+function AlertClose({
+  className,
+  onClick,
+  ...props
+}: React.ComponentProps<typeof Button>) {
+  return (
+    <Button
+      type="button"
+      size="icon"
+      variant="ghost"
+      onClick={onClick}
+      data-slot="alert-close"
+      className={cn(
+        "absolute right-3 top-3 h-8 w-8",
+        "text-muted-foreground hover:text-foreground",
+        className
+      )}
+      {...props}
+    >
+      <X className="h-4 w-4" />
+    </Button>
+  )
+}
+
+export { Alert, AlertTitle, AlertDescription, AlertClose }

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Package, ShoppingBag, Calendar, DollarSign, Eye, Truck } from "lucide-react";
+import { Package, ShoppingBag, Calendar, DollarSign, Eye, Truck, Tag } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
+import { IconBadge } from "../ui/icon-badge";
+import { format } from "date-fns";
 
 interface OrdersTabProps {
   userProfile: UserProfile | null;
@@ -63,11 +65,7 @@ export default function OrdersTab({ userProfile }: OrdersTabProps) {
   const [orders] = useState<Order[]>(mockOrders);
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    return format(new Date(dateString), "MMMM d, yyyy");
   };
 
   const formatStatus = (status: string) => {
@@ -99,14 +97,23 @@ export default function OrdersTab({ userProfile }: OrdersTabProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-base">Order {order.orderNumber}</CardTitle>
-                    <CardDescription className="flex items-center gap-2 mt-1">
-                      <Calendar className="size-3" />
-                      {formatDate(order.date)}
-                    </CardDescription>
+                    <div className="flex items-center gap-2 mt-2">
+                      <IconBadge variant="default" size="sm">
+                        <Calendar className="size-3 text-muted-foreground" />
+                      </IconBadge>
+                      <span className="text-xs text-muted-foreground">
+                        {formatDate(order.date)}
+                      </span>
+                    </div>
                   </div>
-                  <Badge className={statusColors[order.status]}>
-                    {formatStatus(order.status)}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <IconBadge variant="default" size="sm">
+                      <Tag className="size-3 text-muted-foreground" />
+                    </IconBadge>
+                    <Badge className={statusColors[order.status]}>
+                      {formatStatus(order.status)}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>

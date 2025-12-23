@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertClose, AlertDescription } from "@/components/ui/alert";
 import {
   User,
   Shield,
@@ -266,37 +266,35 @@ export default function ProfilePage() {
           <CardHeader>
             {missingInfo.length > 0 && !alertDismissed && (
               <Alert variant="secondary" color="warning">
-                <Info className="h-4 w-4 " />
-                <AlertDescription className="flex items-start justify-between gap-4">
+                <Info className="h-4 w-4" />
+
+                <AlertDescription className="flex items-start gap-4">
                   <div className="flex-1">
-                    <p className="font-medium">
-                      Complete your profile
+                    <p className="font-medium">Complete your profile</p>
+
+                    <p className="text-xs mb-2">
+                      You&apos;re missing the following information:
                     </p>
-                    <div className="text-sm space-y-1">
-                      <p className="text-xs mb-2">You&apos;re missing the following information:</p>
-                      <ul className="list-disc list-inside space-y-0.5">
-                        {missingInfo.map((item, index) => (
-                          <li key={index}>
-                            <button
-                              onClick={() => router.push(`/edit-profile?tab=${item.tab}&action=add`)}
-                              className="hover:underline capitalize inline cursor-pointer"
-                            >
-                              {item.label}
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+
+                    <ul className="list-disc list-inside space-y-0.5">
+                      {missingInfo.map((item, index) => (
+                        <li key={index}>
+                          <button
+                            onClick={() =>
+                              router.push(
+                                `/edit-profile?tab=${item.tab}&action=add`
+                              )
+                            }
+                            className="hover:underline capitalize inline cursor-pointer"
+                          >
+                            {item.label}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    onClick={() => setAlertDismissed(true)}
-                    className="h-8 w-8"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
                 </AlertDescription>
+                <AlertClose onClick={() => setAlertDismissed(true)} />
               </Alert>
             )}
           </CardHeader>

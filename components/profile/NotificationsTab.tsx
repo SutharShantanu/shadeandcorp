@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
+import { IconBadge } from "../ui/icon-badge";
 
 interface NotificationsTabProps {
   userProfile: UserProfile | null;
@@ -25,7 +26,12 @@ export default function NotificationsTab({ userProfile }: NotificationsTabProps)
 
       <Card>
         <CardHeader>
-          <CardTitle>Notification Preferences</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <IconBadge variant="default" size="sm">
+              <Bell className="h-4 w-4 text-muted-foreground" />
+            </IconBadge>
+            Notification Preferences
+          </CardTitle>
           <CardDescription>
             Choose what notifications you want to receive.
           </CardDescription>
@@ -40,7 +46,9 @@ export default function NotificationsTab({ userProfile }: NotificationsTabProps)
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5" />
+            <IconBadge variant="default" size="sm">
+              <Palette className="h-4 w-4 text-muted-foreground" />
+            </IconBadge>
             Appearance
           </CardTitle>
           <CardDescription>

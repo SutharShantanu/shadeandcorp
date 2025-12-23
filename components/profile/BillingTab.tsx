@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CircleCheck, CreditCard, Plus, Edit, Trash2, Check, X, BadgeCheck } from "lucide-react";
+import { CircleCheck, CreditCard, Plus, Edit, Trash2, Check, X, BadgeCheck, User, Wallet, Building2, Smartphone } from "lucide-react";
+import { IconBadge } from "../ui/icon-badge";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -336,7 +337,9 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <CreditCard className="h-4 w-4" />
+                    <IconBadge variant="default" size="sm">
+                      <User className="h-3 w-3 text-muted-foreground" />
+                    </IconBadge>
                     {method.cardHolderName}
                   </CardTitle>
                   {method.isDefault && (
@@ -347,9 +350,20 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
               <CardContent>
                 <div className="space-y-3">
                   <div className="text-sm">
-                    <Badge variant="outline" className="mb-2 capitalize">
-                      {method.type.replace("-", " ")}
-                    </Badge>
+                    <div className="flex items-center gap-2 mb-2">
+                      <IconBadge variant="default" size="sm" className="rounded-md h-auto py-0.5 px-1.5 border border-muted-foreground/10 bg-muted/50">
+                        {method.type === "credit-card" || method.type === "debit-card" ? (
+                          <Wallet className="h-2.5 w-2.5 text-muted-foreground" />
+                        ) : method.type === "upi" ? (
+                          <Smartphone className="h-2.5 w-2.5 text-muted-foreground" />
+                        ) : (
+                          <Building2 className="h-2.5 w-2.5 text-muted-foreground" />
+                        )}
+                        <span className="text-[10px] ml-1 uppercase font-bold tracking-wider">
+                          {method.type.replace("-", " ")}
+                        </span>
+                      </IconBadge>
+                    </div>
                     {method.type === "upi" && method.upiId && (
                       <p className="font-medium">{method.upiId}</p>
                     )}
