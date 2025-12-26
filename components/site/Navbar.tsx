@@ -58,6 +58,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
+import { Dot } from "../ui/dot";
 
 const categories = [
   {
@@ -449,11 +450,8 @@ export function UserMenu({ className }: UserMenuProps) {
     router.push("/");
   };
 
-  // Get notifications from session
   const notifications = session.user?.notifications || [];
-  // Highest priority is handled by AvatarBadge; here we only need category counts
 
-  // Get notifications by category for menu items
   const profileNotifications = getNotificationsByCategory(notifications, "profile");
   const orderNotifications = getNotificationsByCategory(notifications, "orders");
   const settingsNotifications = getNotificationsByCategory(notifications, "settings");
@@ -481,7 +479,7 @@ export function UserMenu({ className }: UserMenuProps) {
                 <p className="text-sm font-medium leading-none flex items-center gap-1.5">
                   {session.user?.name}
                   {session.user?.isEmailVerified ? (
-                    <BadgeCheck className="h-4 w-4 fill-accent-foreground text-primary-foreground" />
+                    <BadgeCheck className="h-4 w-4" />
                   ) : (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -504,22 +502,39 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => handleNavigation("/profile?tab=profile")} className="relative">
-            <User className="mr-1 h-4 w-4" />
+          <DropdownMenuItem
+            onClick={() => handleNavigation("/profile?tab=profile")}
+            className="relative"
+          >
+            <User className="size-4" />
             <span>Profile</span>
             {profileNotifications.length > 0 && (
-              <span className="ml-auto inline-flex h-2 w-2 rounded-full bg-blue-500 dark:bg-blue-400" />
+              <Dot
+                className="ml-auto"
+                variant="info"
+              />
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleNavigation("/orders")} className="relative">
-            <ShoppingBag className="mr-1 h-4 w-4" />
+
+          <DropdownMenuItem
+            onClick={() => handleNavigation("/orders")}
+            className="relative"
+          >
+            <ShoppingBag className="size-4" />
             <span>My Orders</span>
             {orderNotifications.length > 0 && (
-              <span className="ml-auto inline-flex h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+              <Dot
+                className="ml-auto"
+                variant="success"
+              />
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleNavigation("/wishlist")} className="relative">
-            <Heart className="mr-1 h-4 w-4" />
+
+          <DropdownMenuItem
+            onClick={() => handleNavigation("/wishlist")}
+            className="relative"
+          >
+            <Heart className="size-4" />
             <span>Wishlist</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -527,25 +542,45 @@ export function UserMenu({ className }: UserMenuProps) {
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => handleNavigation("/addresses")} className="relative">
-            <MapPin className="mr-1 h-4 w-4" />
+          <DropdownMenuItem
+            onClick={() => handleNavigation("/addresses")}
+            className="relative"
+          >
+            <MapPin className="size-4" />
             <span>Addresses</span>
             {session.user?.hasMissingAddress && (
-              <span className="ml-auto inline-flex h-2 w-2 rounded-full bg-amber-500 dark:bg-amber-400" />
+              <Dot
+                className="ml-auto"
+                variant="warning"
+              />
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleNavigation("/payment-methods")} className="relative">
-            <CreditCard className="mr-1 h-4 w-4" />
+
+          <DropdownMenuItem
+            onClick={() => handleNavigation("/payment-methods")}
+            className="relative"
+          >
+            <CreditCard className="size-4" />
             <span>Payment Methods</span>
             {session.user?.hasMissingPayment && (
-              <span className="ml-auto inline-flex h-2 w-2 rounded-full bg-amber-500 dark:bg-amber-400" />
+              <Dot
+                className="ml-auto"
+                variant="warning"
+              />
             )}
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleNavigation("/notifications")} className="relative">
-            <Bell className="mr-1 h-4 w-4" />
+
+          <DropdownMenuItem
+            onClick={() => handleNavigation("/notifications")}
+            className="relative"
+          >
+            <Bell className="size-4" />
             <span>Notifications</span>
             {settingsNotifications.length > 0 && (
-              <span className="ml-auto inline-flex h-2 w-2 rounded-full bg-purple-500 dark:bg-purple-400" />
+              <Dot
+                className="ml-auto"
+                variant="info"
+              />
             )}
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -554,19 +589,20 @@ export function UserMenu({ className }: UserMenuProps) {
 
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => handleNavigation("/settings")}>
-            <Settings className="mr-1 h-4 w-4" />
+            <Settings className="size-4" />
             <span>Settings</span>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={handleSignOut}
-            className="text-red-600 focus:text-red-600"
+            variant="destructive"
           >
-            <LogOut className="mr-1 h-4 w-4" />
-            <span>Log out</span>
+            <LogOut className="size-4" />
+            <span className="text-destructive">Log out</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
-    </DropdownMenu >
+    </DropdownMenu>
+
   );
 }
 interface MobileMenuProps {

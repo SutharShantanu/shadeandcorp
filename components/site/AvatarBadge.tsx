@@ -17,7 +17,7 @@ export default function AvatarBadge({ className }: AvatarBadgeProps) {
     const hasIncomplete = !!session?.user?.hasProfileIncomplete;
 
     // Base classes applied directly to icon instead of wrapper
-    const baseBadgeClasses = "absolute -bottom-1 -right-1 size-4.5";
+    const baseBadgeClasses = "absolute -bottom-1 -right-1 size-4";
 
     const renderHighest = () => {
         if (!highest) return null;
@@ -47,7 +47,7 @@ export default function AvatarBadge({ className }: AvatarBadgeProps) {
 
     return (
         <div className={`relative ${className ?? ""}`}>
-            <Avatar className="h-8 w-8 transition-all ring ring-ring ring-offset-2 ring-offset-background">
+            <Avatar className="h-8 w-8 transition-all ring ring-ring ring-offset-background">
                 <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User avatar"} />
                 <AvatarFallback>{session?.user?.name?.[0].toUpperCase() || "U"}</AvatarFallback>
             </Avatar>

@@ -119,7 +119,7 @@ function SizeSelectionModal({
                 )}
               </div>
               <div className="flex items-center gap-1 text-sm text-gray-600">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                 <span>{product.rating}</span>
                 <span>({product.reviewCount} reviews)</span>
               </div>
@@ -299,7 +299,7 @@ function ProductBadges({ product, discountPercentage }: ProductBadgesProps) {
         </Badge>
       )}
       {product.isBestSeller && (
-        <Badge className="bg-yellow-500 hover:bg-yellow-600 border-0 text-xs uppercase font-semibold py-1">
+        <Badge className="bg-amber-500 hover:bg-amber-600 border-0 text-xs uppercase font-semibold py-1">
           Bestseller
         </Badge>
       )}
@@ -392,7 +392,7 @@ function ProductInfoHeader({ product }: ProductInfoHeaderProps) {
     <div className="flex items-center justify-between">
       <p className="text-sm font-semibold text-gray-600">{product.brand}</p>
       <div className="flex items-center gap-1">
-        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
         <span className="text-sm font-medium">{product.rating}</span>
         <span className="text-xs text-gray-500">({product.reviewCount})</span>
       </div>

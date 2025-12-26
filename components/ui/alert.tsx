@@ -32,7 +32,7 @@ const alertVariants = cva(
         info:
           "bg-blue-500/10 text-blue-700 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30 [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400",
         warning:
-          "bg-yellow-500/10 text-yellow-700 border-yellow-500/20 dark:bg-yellow-500/20 dark:text-yellow-400 dark:border-yellow-500/30 [&>svg]:text-yellow-600 dark:[&>svg]:text-yellow-400",
+          "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30 [&>svg]:text-amber-600 dark:[&>svg]:text-amber-400",
         danger:
           "bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30 [&>svg]:text-red-600 dark:[&>svg]:text-red-400",
       },

@@ -117,7 +117,7 @@ export default function ResetPasswordPage() {
                     ) : (
                         <CardContent className="p-0 space-y-5">
                             {!token && (
-                                <div className="rounded-md border border-yellow-300 bg-yellow-50 p-3 text-xs text-yellow-700">
+                                <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-700">
                                     This page requires a valid reset token. Request a new link from the
                                     <Link href="/forgot-password" className="underline ml-1">forgot password</Link> page.
                                 </div>

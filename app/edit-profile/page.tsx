@@ -152,7 +152,7 @@ export default function EditProfilePage() {
               onValueChange={handleTabChange}
               className="w-full"
             >
-              <TabsList>
+              <TabsList className="relative z-10">
                 <TabsTrigger
                   value="profile"
                   className="flex items-center gap-2"

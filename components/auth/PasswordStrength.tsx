@@ -21,7 +21,7 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
     const percent = (passed / 5) * 100;
 
     const label = passed <= 2 ? "Weak" : passed === 3 ? "Fair" : passed === 4 ? "Good" : "Strong";
-    const barColor = passed <= 2 ? "bg-red-500" : passed === 3 ? "bg-yellow-500" : passed === 4 ? "bg-blue-500" : "bg-green-600";
+    const barColor = passed <= 2 ? "bg-red-500" : passed === 3 ? "bg-amber-500" : passed === 4 ? "bg-blue-500" : "bg-green-600";
     const badgeVariant = passed <= 2 ? "destructive" : passed === 3 ? "secondary" : "default";
 
     return (

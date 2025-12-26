@@ -15,7 +15,7 @@ const iconBadgeVariants = cva(
                 info:
                     "bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-500",
                 warning:
-                    "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-500",
+                    "bg-amber-100 text-amber-700 dark:bg-amber-900/20 dark:text-amber-500",
                 danger:
                     "bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-500",
             },

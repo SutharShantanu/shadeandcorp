@@ -224,10 +224,10 @@ export function CardInput<TFormValues extends FieldValues>({
                     <div className="relative flex h-full flex-col justify-between">
                         {/* Chip and Logo */}
                         <div className="flex items-start justify-between">
-                            <div className="h-10 w-12 rounded bg-linear-to-br from-yellow-200 to-yellow-400 shadow-lg">
+                            <div className="h-10 w-12 rounded bg-linear-to-br from-amber-200 to-amber-400 shadow-lg">
                                 <svg viewBox="0 0 48 40" className="h-full w-full p-1">
-                                    <rect x="4" y="4" width="40" height="32" rx="4" fill="none" stroke="currentColor" strokeWidth="2" className="text-yellow-700" />
-                                    <rect x="12" y="12" width="24" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-yellow-700" />
+                                    <rect x="4" y="4" width="40" height="32" rx="4" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-700" />
+                                    <rect x="12" y="12" width="24" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber-700" />
                                 </svg>
                             </div>
                             <div className="flex flex-col items-end gap-2">

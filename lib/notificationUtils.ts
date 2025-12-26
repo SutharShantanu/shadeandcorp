@@ -141,14 +141,14 @@ export function getHighestPriorityNotification(
  */
 export function getNotificationBadgeColor(type: UserNotification["type"]): string {
     const colorMap: Record<UserNotification["type"], string> = {
-        profile_incomplete: "rounded-full fill-blue-500 text-white",
-        email_unverified: "rounded-full fill-amber-500 text-white",
-        phone_unverified: "rounded-full fill-amber-500 text-white",
-        order_update: "rounded-full fill-emerald-500 text-white",
-        payment_required: "rounded-full fill-blue-500 text-white",
-        address_missing: "rounded-full fill-blue-500 text-white",
-        announcement: "rounded-full fill-purple-500 text-white",
-        security_alert: "rounded-full fill-red-500 text-white",
+        profile_incomplete: "rounded-full fill-blue-500 text-primary-foreground",
+        email_unverified: "rounded-full fill-amber-500 text-primary-foreground",
+        phone_unverified: "rounded-full fill-amber-500 text-primary-foreground",
+        order_update: "rounded-full fill-emerald-500 text-primary-foreground",
+        payment_required: "rounded-full fill-blue-500 text-primary-foreground",
+        address_missing: "rounded-full fill-blue-500 text-primary-foreground",
+        announcement: "rounded-full fill-purple-500 text-primary-foreground",
+        security_alert: "rounded-full fill-red-500 text-primary-foreground",
     };
 
     return colorMap[type] || "rounded-full fill-gray-500 text-white";

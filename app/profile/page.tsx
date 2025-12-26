@@ -111,6 +111,11 @@ export default function ProfilePage() {
     }
     if (!userProfile?.phone) {
       missing.push({ label: "phone number", tab: "account" });
+    } else if (!userProfile?.isPhoneVerified) {
+      missing.push({ label: "phone verification", tab: "account" });
+    }
+    if (!userProfile?.isEmailVerified) {
+      missing.push({ label: "email verification", tab: "account" });
     }
     if (!userProfile?.birthday) {
       missing.push({ label: "birthday", tab: "account" });
