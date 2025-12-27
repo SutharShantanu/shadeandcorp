@@ -129,32 +129,3 @@ export interface LoginResponse {
 }
 
 // NEXTAUTH TYPES
-declare module "next-auth" {
-  interface Session extends DefaultSession {
-    user: {
-      id: string;
-      email: string;
-      name: string | null;
-      isEmailVerified: boolean;
-      image?: string | null;
-      provider?: string;
-
-    };
-  }
-
-  interface User {
-    id: string;
-    email: string;
-    isEmailVerified: boolean;
-    name: string | null;
-    image?: string | null;
-    provider?: string;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT extends DefaultJWT {
-    id: string;
-    provider?: string;
-  }
-}

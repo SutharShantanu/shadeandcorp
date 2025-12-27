@@ -122,7 +122,7 @@ export async function POST(req: Request) {
         success: true,
         message: "OTP verified successfully",
         user: {
-          id: user._id?.toString() ?? (user._id as string),
+          id: String(user._id),
           email: user.email,
           name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
           firstName: user.firstName,

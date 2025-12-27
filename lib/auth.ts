@@ -109,7 +109,7 @@ export const authOptions: NextAuthOptions = {
           await user.save();
 
           return {
-            id: user._id?.toString?.() ?? (user._id as string),
+            id: String(user._id),
             email: user.email,
             name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim(),
             firstName: user.firstName,
@@ -342,7 +342,7 @@ export const authOptions: NextAuthOptions = {
               phone: dbUser.phone,
               addresses: dbUser.addresses || [],
               paymentMethods: dbUser.paymentMethods || [],
-              birthday: dbUser.birthday,
+              birthday: dbUser.birthday ? String(dbUser.birthday) : undefined,
               gender: dbUser.gender,
             });
 

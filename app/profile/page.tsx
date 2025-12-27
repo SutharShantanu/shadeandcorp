@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -76,7 +76,7 @@ const SEARCH_ITEMS = [
   { tab: "notifications", keywords: ["appearance", "theme", "display", "dark", "light"], label: "Appearance & Theme", icon: Palette, category: "Preferences", description: "Customize theme and display settings" },
 ] as const;
 
-export default function ProfilePage() {
+function ProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -488,5 +488,13 @@ export default function ProfilePage() {
         </CommandDialog>
       </motion.div>
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ProfileContent />
+    </Suspense>
   );
 }

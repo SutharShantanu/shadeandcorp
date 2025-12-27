@@ -13,9 +13,9 @@ const signupSchema = z
   .object({
     firstName: z.string().min(2, "First name must be at least 2 characters"),
     lastName: z.string().min(2, "Last name must be at least 2 characters"),
-    email: z.string().trim().optional().or(z.literal("")),
-    phone: z.string().trim().optional().or(z.literal("")),
-    password: z.string().trim().optional().or(z.literal("")),
+    email: z.string().trim(),
+    phone: z.string().trim(),
+    password: z.string().trim(),
   })
   .superRefine((data, ctx) => {
     const email = data.email?.trim() || "";
@@ -76,7 +76,7 @@ const signupSchema = z
     }
   });
 
-export type SignupForm = UseFormReturn<BaseFormValues, any, undefined>;
+export type SignupForm = UseFormReturn<BaseFormValues, any, BaseFormValues>;
 
 export function useSignup() {
   const router = useRouter();

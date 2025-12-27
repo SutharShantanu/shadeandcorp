@@ -28,7 +28,7 @@ export async function GET() {
 
     // Mask sensitive data for security
     const maskedPaymentMethods = (user.paymentMethods || []).map((method: any) => {
-      const masked = method.toObject ? method.toObject() : { ...method };
+      const masked = (method as any).toObject ? (method as any).toObject() : { ...method };
 
       // Mask card number if present
       if (masked.cardNumber) {
@@ -263,7 +263,7 @@ export async function PATCH(req: Request) {
     await user.save();
 
     // Return masked sensitive data
-    const updatedMethod = user.paymentMethods[methodIndex].toObject ? user.paymentMethods[methodIndex].toObject() : { ...user.paymentMethods[methodIndex] };
+    const updatedMethod = (user.paymentMethods[methodIndex] as any).toObject ? (user.paymentMethods[methodIndex] as any).toObject() : { ...user.paymentMethods[methodIndex] };
     if (updatedMethod.cardNumber) {
       updatedMethod.cardNumber = `**** **** **** ${updatedMethod.cardNumber.slice(-4)}`;
     }

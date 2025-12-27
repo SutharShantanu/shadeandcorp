@@ -5,7 +5,7 @@ import { getToken } from "next-auth/jwt";
 // Auth pages that should be inaccessible to authenticated users
 const authPages = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Check if the current path is an auth page

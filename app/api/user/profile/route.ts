@@ -99,9 +99,9 @@ export async function PATCH(req: Request) {
       if (field in body && body[field] !== undefined) {
         // Handle date fields
         if (field === "birthday" && body[field]) {
-          (user as User)[field] = new Date(body[field]);
+          (user as any)[field] = new Date(body[field]);
         } else {
-          (user as User)[field] = body[field];
+          (user as any)[field] = body[field];
         }
       }
     }

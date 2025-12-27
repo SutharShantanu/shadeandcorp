@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -40,7 +40,7 @@ const VALID_TABS = [
   "notifications",
 ] as const;
 
-export default function EditProfilePage() {
+function EditProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -245,5 +245,13 @@ export default function EditProfilePage() {
         </Card>
       </motion.div>
     </div>
+  );
+}
+
+export default function EditProfilePage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <EditProfileContent />
+    </Suspense>
   );
 }

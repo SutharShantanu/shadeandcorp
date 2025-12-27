@@ -1,6 +1,6 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import * as z from "zod";
 import { motion } from "framer-motion";
 import Image from "next/image";
@@ -29,7 +29,7 @@ const resetSchema = z
         message: "Passwords do not match",
     });
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
     const params = useSearchParams();
     const token = params.get("token");
     const router = useRouter();
@@ -179,5 +179,17 @@ export default function ResetPasswordPage() {
                 </div>
             </Card>
         </motion.div>
+    );
+}
+
+export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-svh items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+        }>
+            <ResetPasswordContent />
+        </Suspense>
     );
 }

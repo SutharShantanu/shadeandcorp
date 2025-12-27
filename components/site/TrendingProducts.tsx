@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import ProductCard, { Product } from "./ProductCard";
+import ProductCard from "./ProductCard";
+import { Product } from "@/types/ProductCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -303,7 +304,6 @@ const CountdownTimer = ({ endDate }: { endDate: Date }) => {
             <NumberFlow
               className="text-2xl font-bold font-mono"
               value={item.value}
-              format={{ format: (n) => n.toFixed(0).padStart(2, "0") }}
             />
           </div>
           <span className="text-sm text-gray-600 mt-2 font-medium">

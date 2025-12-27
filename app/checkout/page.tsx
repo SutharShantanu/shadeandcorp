@@ -63,7 +63,7 @@ const informationSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   phone: z.string().optional(),
-  subscribeToNews: z.boolean().default(false),
+  subscribeToNews: z.boolean().optional(),
 });
 
 const shippingSchema = z.object({
