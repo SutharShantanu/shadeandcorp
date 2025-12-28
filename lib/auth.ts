@@ -21,6 +21,8 @@ interface GeoData {
 }
 
 export const authOptions: NextAuthOptions = {
+  // @ts-expect-error: trustHost is a valid option but missing in strict type definitions
+  trustHost: true,
   providers: [
     CredentialsProvider({
       id: "credentials",

@@ -579,7 +579,8 @@ export default function ProductCard({
   onAddToCart,
   onAddToWishlist,
   onQuickView,
-}: ProductCardProps) {
+  layout = "grid",
+}: ProductCardProps & { layout?: "grid" | "list" }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] || "");
   const [selectedColor, setSelectedColor] = useState(
@@ -626,7 +627,7 @@ export default function ProductCard({
     setCurrentImageIndex(0);
   };
 
-  // Action handlers - now they open the modal first
+  // Action handlers
   const handleAddToCart = () => {
     setPendingAction("addToBag");
     setShowSizeModal(true);
@@ -689,6 +690,109 @@ export default function ProductCard({
 
   // Stock status
   const isOutOfStock = !product.inStock || product.stockQuantity === 0;
+
+  if (layout === "list") {
+      return (
+        <TooltipProvider>
+            <div className={`group relative bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-row ${className}`}>
+                 {/* Image Section - Fixed Width */}
+                 <div className="w-48 sm:w-64 shrink-0 relative">
+                     <ProductImageSection
+                        product={product}
+                        currentImageIndex={currentImageIndex}
+                        isWishlisted={isWishlisted}
+                        isOutOfStock={isOutOfStock}
+                        discountPercentage={discountPercentage}
+                        onImageHover={handleImageHover}
+                        onImageLeave={handleImageLeave}
+                        onAddToWishlist={handleAddToWishlist}
+                        onQuickView={handleQuickView}
+                      />
+                 </div>
+                 
+                 {/* Content Section */}
+                 <div className="p-6 flex flex-col flex-1 justify-between">
+                     <div className="space-y-3">
+                         <div className="flex justify-between items-start">
+                             <div className="space-y-1">
+                                 <p className="text-sm font-semibold text-gray-500">{product.brand}</p>
+                                 <Link href={`/products/${product.slug}`}>
+                                     <h3 className="font-bold text-lg group-hover:text-black transition-colors">{product.title}</h3>
+                                 </Link>
+                             </div>
+                             <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-md">
+                                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                 <span className="text-sm font-bold">{product.rating}</span>
+                                 <span className="text-xs text-gray-400">({product.reviewCount})</span>
+                             </div>
+                         </div>
+                         
+                         <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
+                         
+                         <PriceSection product={product} savings={savings} />
+
+                         <div className="flex gap-6 pt-2">
+                             <div className="space-y-1">
+                                <ColorOptions
+                                    product={product}
+                                    selectedColor={selectedColor}
+                                    onColorSelect={handleColorSelect}
+                                />
+                             </div>
+                             {/* Size could go here if needed in list view */}
+                         </div>
+                     </div>
+                     
+                     <div className="flex gap-3 pt-6 mt-auto border-t border-gray-100">
+                         <Button className="flex-1" onClick={handleAddToCart} disabled={isOutOfStock}>
+                             <ShoppingCart className="w-4 h-4 mr-2" />
+                             Add to Bag
+                         </Button>
+                         <Button variant="outline" className="flex-1" onClick={handleBuyNow} disabled={isOutOfStock}>
+                             <Zap className="w-4 h-4 mr-2" />
+                             Buy Now
+                         </Button>
+                         <Button variant="ghost" size="icon" onClick={handleAddToWishlist} className="shrink-0 text-gray-400 hover:text-red-500">
+                             <Heart className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+                         </Button>
+                     </div>
+                 </div>
+
+                 {/* Modals reuse */}
+                 <SizeSelectionModal
+                    product={product}
+                    selectedSize={selectedSize}
+                    selectedColor={selectedColor}
+                    sizeError={sizeError}
+                    onSizeSelect={handleSizeSelect}
+                    onColorSelect={handleColorSelect}
+                    isSizeAvailable={isSizeAvailable}
+                    onClose={() => {
+                        setShowSizeModal(false);
+                        setPendingAction(null);
+                    }}
+                    onProceed={handleProceed}
+                    open={showSizeModal}
+                    pendingAction={pendingAction}
+                    onOpenSizeChart={() => setSizeChartOpen(true)}
+                 />
+                 <QuickCheckoutModal
+                    open={showCheckoutModal}
+                    onOpenChange={setShowCheckoutModal}
+                    product={product}
+                    selectedSize={selectedSize}
+                    selectedColor={selectedColor}
+                    quantity={1}
+                 />
+                 <SizeChartDrawer
+                    product={product}
+                    open={sizeChartOpen}
+                    onOpenChange={setSizeChartOpen}
+                 />
+            </div>
+        </TooltipProvider>
+      );
+  }
 
   return (
     <TooltipProvider>
