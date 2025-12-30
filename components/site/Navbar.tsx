@@ -64,76 +64,76 @@ const categories = [
   {
     title: "Men",
     items: [
-      { title: "T-Shirts", href: "/products?category=Men&subCategory=T-Shirts" },
-      { title: "Casual Shirts", href: "/products?category=Men&subCategory=Casual Shirts" },
-      { title: "Formal Shirts", href: "/products?category=Men&subCategory=Formal Shirts" },
-      { title: "Jeans", href: "/products?category=Men&subCategory=Jeans" },
-      { title: "Casual Trousers", href: "/products?category=Men&subCategory=Casual Trousers" },
-      { title: "Formal Trousers", href: "/products?category=Men&subCategory=Formal Trousers" },
-      { title: "Shorts", href: "/products?category=Men&subCategory=Shorts" },
-      { title: "Jackets", href: "/products?category=Men&subCategory=Jackets" },
-      { title: "Blazers", href: "/products?category=Men&subCategory=Blazers" },
-      { title: "Sweaters", href: "/products?category=Men&subCategory=Sweaters" },
-      { title: "Sweatshirts", href: "/products?category=Men&subCategory=Sweatshirts" },
-      { title: "Activewear", href: "/products?category=Men&subCategory=Activewear" },
+      { title: "T-Shirts", href: "/products/men/clothing/t-shirts" },
+      { title: "Casual Shirts", href: "/products/men/clothing/casual-shirts" },
+      { title: "Formal Shirts", href: "/products/men/clothing/formal-shirts" },
+      { title: "Jeans", href: "/products/men/clothing/jeans" },
+      { title: "Casual Trousers", href: "/products/men/clothing/casual-trousers" },
+      { title: "Formal Trousers", href: "/products/men/clothing/formal-trousers" },
+      { title: "Shorts", href: "/products/men/clothing/shorts" },
+      { title: "Jackets", href: "/products/men/clothing/jackets" },
+      { title: "Blazers", href: "/products/men/clothing/blazers" },
+      { title: "Sweaters", href: "/products/men/clothing/sweaters" },
+      { title: "Sweatshirts", href: "/products/men/clothing/sweatshirts" },
+      { title: "Activewear", href: "/products/men/clothing/activewear" },
     ],
     image: "/images/men-category.jpg",
   },
   {
     title: "Women",
     items: [
-      { title: "Dresses", href: "/products?category=Women&subCategory=Dresses" },
-      { title: "Tops", href: "/products?category=Women&subCategory=Tops" },
-      { title: "T-Shirts", href: "/products?category=Women&subCategory=T-Shirts" },
-      { title: "Jeans", href: "/products?category=Women&subCategory=Jeans" },
-      { title: "Trousers", href: "/products?category=Women&subCategory=Trousers" },
-      { title: "Skirts", href: "/products?category=Women&subCategory=Skirts" },
-      { title: "Jumpsuits", href: "/products?category=Women&subCategory=Jumpsuits" },
-      { title: "Blouses", href: "/products?category=Women&subCategory=Blouses" },
-      { title: "Sweaters", href: "/products?category=Women&subCategory=Sweaters" },
-      { title: "Jackets", href: "/products?category=Women&subCategory=Jackets" },
-      { title: "Activewear", href: "/products?category=Women&subCategory=Activewear" },
-      { title: "Lingerie", href: "/products?category=Women&subCategory=Lingerie" },
+      { title: "Dresses", href: "/products/women/clothing/dresses" },
+      { title: "Tops", href: "/products/women/clothing/tops" },
+      { title: "T-Shirts", href: "/products/women/clothing/t-shirts" },
+      { title: "Jeans", href: "/products/women/clothing/jeans" },
+      { title: "Trousers", href: "/products/women/clothing/trousers" },
+      { title: "Skirts", href: "/products/women/clothing/skirts" },
+      { title: "Jumpsuits", href: "/products/women/clothing/jumpsuits" },
+      { title: "Blouses", href: "/products/women/clothing/blouses" },
+      { title: "Sweaters", href: "/products/women/clothing/sweaters" },
+      { title: "Jackets", href: "/products/women/clothing/jackets" },
+      { title: "Activewear", href: "/products/women/clothing/activewear" },
+      { title: "Lingerie", href: "/products/women/clothing/lingerie" },
     ],
     image: "/images/women-category.jpg",
   },
   {
     title: "Kids",
     items: [
-      { title: "Boys Clothing", href: "/products?category=Kids&subCategory=Boys" },
-      { title: "Girls Clothing", href: "/products?category=Kids&subCategory=Girls" },
-      { title: "Infants", href: "/products?category=Kids&subCategory=Infants" },
-      { title: "School Uniforms", href: "/products?category=Kids&subCategory=Uniforms" },
-      { title: "Party Wear", href: "/products?category=Kids&subCategory=Party Wear" },
-      { title: "Footwear", href: "/products?category=Kids&subCategory=Footwear" },
-      { title: "Accessories", href: "/products?category=Kids&subCategory=Accessories" },
-      { title: "Winter Wear", href: "/products?category=Kids&subCategory=Winter Wear" },
+      { title: "Boys Clothing", href: "/products/kids/clothing/boys" },
+      { title: "Girls Clothing", href: "/products/kids/clothing/girls" },
+      { title: "Infants", href: "/products/kids/clothing/infants" },
+      { title: "School Uniforms", href: "/products/kids/clothing/uniforms" },
+      { title: "Party Wear", href: "/products/kids/clothing/party-wear" },
+      { title: "Footwear", href: "/products/kids/clothing/footwear" },
+      { title: "Accessories", href: "/products/kids/clothing/accessories" },
+      { title: "Winter Wear", href: "/products/kids/clothing/winter-wear" },
     ],
     image: "/images/kids-category.jpg",
   },
   {
     title: "Collections",
     items: [
-      { title: "Summer 2025", href: "/products?category=Collections&subCategory=Summer 2025" },
-      { title: "Winter Essentials", href: "/products?category=Collections&subCategory=Winter" },
-      { title: "Active Wear", href: "/products?category=Collections&subCategory=Active" },
-      { title: "Loungewear", href: "/products?category=Collections&subCategory=Lounge" },
-      { title: "Festive Collection", href: "/products?category=Collections&subCategory=Festive" },
-      { title: "Premium Collection", href: "/products?category=Collections&subCategory=Premium" },
+      { title: "Summer 2025", href: "/products/collections/summer-2025" },
+      { title: "Winter Essentials", href: "/products/collections/winter" },
+      { title: "Active Wear", href: "/products/collections/active" },
+      { title: "Loungewear", href: "/products/collections/lounge" },
+      { title: "Festive Collection", href: "/products/collections/festive" },
+      { title: "Premium Collection", href: "/products/collections/premium" },
     ],
     image: "/images/collections.jpg",
   },
   {
     title: "Accessories",
     items: [
-      { title: "Bags & Backpacks", href: "/products?category=Accessories&subCategory=Bags" },
-      { title: "Watches", href: "/products?category=Accessories&subCategory=Watches" },
-      { title: "Sunglasses", href: "/products?category=Accessories&subCategory=Sunglasses" },
-      { title: "Belts", href: "/products?category=Accessories&subCategory=Belts" },
-      { title: "Wallets", href: "/products?category=Accessories&subCategory=Wallets" },
-      { title: "Jewelry", href: "/products?category=Accessories&subCategory=Jewelry" },
-      { title: "Hats & Caps", href: "/products?category=Accessories&subCategory=Hats" },
-      { title: "Scarves", href: "/products?category=Accessories&subCategory=Scarves" },
+      { title: "Bags & Backpacks", href: "/products/accessories/bags" },
+      { title: "Watches", href: "/products/accessories/watches" },
+      { title: "Sunglasses", href: "/products/accessories/sunglasses" },
+      { title: "Belts", href: "/products/accessories/belts" },
+      { title: "Wallets", href: "/products/accessories/wallets" },
+      { title: "Jewelry", href: "/products/accessories/jewelry" },
+      { title: "Hats & Caps", href: "/products/accessories/hats" },
+      { title: "Scarves", href: "/products/accessories/scarves" },
     ],
     image: "/images/accessories.jpg",
   },
@@ -236,9 +236,17 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
               <div className="w-[800px] p-6">
                 <div className="grid grid-cols-2 gap-8">
                   <div className="space-y-6">
-                    <h3 className="text-lg font-semibold">
-                      {category.title} Collection
-                    </h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold">
+                        {category.title}
+                      </h3>
+                      <Link
+                        href={`/products/${category.title.toLowerCase()}`}
+                        className="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+                      >
+                        View All
+                      </Link>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       {category.items.map((item) => (
                         <Link
@@ -269,7 +277,7 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                                   {subcat.items.map((item) => (
                                     <Link
                                       key={item}
-                                      href={`/products?category=${encodeURIComponent(category.title)}&subCategory=${encodeURIComponent(item)}`}
+                                      href={`/products/${category.title.toLowerCase()}/${subcat.title.toLowerCase()}/${item.toLowerCase().replace(/ /g, '-')}`}
                                       className="block text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
                                     >
                                       {item}
@@ -286,14 +294,14 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                   <div className="relative rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800">
                     <Image
                       src={category.image}
-                      alt={`${category.title} Collection`}
+                      alt={category.title}
                       width={400}
                       height={300}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute bottom-4 left-4">
                       <Link
-                        href={`/products?category=${encodeURIComponent(category.title)}`}
+                        href={`/products/${category.title.toLowerCase()}`}
                         className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
                       >
                         Shop {category.title}

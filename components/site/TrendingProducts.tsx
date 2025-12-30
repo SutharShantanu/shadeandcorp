@@ -431,11 +431,6 @@ export default function TrendingProducts() {
     // Implement your wishlist logic here
   };
 
-  const handleQuickView = (product: Product) => {
-    console.log("Quick view:", product.title);
-    // Implement your quick view logic here
-  };
-
   return (
     <section className="py-16 md:py-24">
       <div className="max-w-7xl mx-auto">
@@ -499,7 +494,6 @@ export default function TrendingProducts() {
               product={product}
               onAddToCart={handleAddToCart}
               onAddToWishlist={handleAddToWishlist}
-              onQuickView={handleQuickView}
             />
           ))}
         </motion.div>

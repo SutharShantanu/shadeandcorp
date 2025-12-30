@@ -11,7 +11,7 @@ import {
     TableBody,
     TableCell,
 } from "@/components/ui/table";
-import { Ruler, Baby, Venus, Mars } from "lucide-react";
+import { Baby, Venus, Mars } from "lucide-react";
 
 export type SizeChartRow = {
     label: string;

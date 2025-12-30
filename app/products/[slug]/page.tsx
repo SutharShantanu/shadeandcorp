@@ -1,4 +1,4 @@
-import { ActionButtons, MobileMenu, SearchBar, UserMenu, CategoryNavigation } from "@/components/site/Navbar";
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Check, Heart, Minus, Plus, Share2, ShoppingCart, Star } from "lucide-react";
@@ -21,7 +21,7 @@ async function getProduct(slug: string) {
     const res = await fetch(`${baseUrl}/api/products/${slug}`, {
       cache: "no-store",
     });
-    
+
     if (!res.ok) {
         if (res.status === 404) return null;
         throw new Error(`Failed to fetch product: ${res.status}`);
@@ -54,7 +54,7 @@ export default async function ProductPage({
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-12">
-          
+
           {/* Breadcrumbs */}
           <nav className="flex items-center text-sm text-muted-foreground mb-8">
             <Link href="/" className="hover:text-foreground">Home</Link>

@@ -1,21 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   Heart,
   ShoppingCart,
   Zap,
-  Eye,
   Share2,
   AlertCircle,
   Star,
   Ruler,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
+import { DotButton, useDotButton } from "../ui/embla-carousel-dot-button";
 import {
   Tooltip,
   TooltipContent,
@@ -128,7 +138,7 @@ function SizeSelectionModal({
 
           {/* Color Selection */}
           <div>
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between">
               <span className="font-medium">Color</span>
               {selectedColorObj && (
                 <span className="text-sm">
@@ -229,58 +239,113 @@ function SizeSelectionModal({
 
 function ProductImageSection({
   product,
-  currentImageIndex,
   isWishlisted,
   isOutOfStock,
   discountPercentage,
-  onImageHover,
-  onImageLeave,
   onAddToWishlist,
-  onQuickView,
+  selectedColorName,
 }: ProductImageSectionProps) {
+  const [api, setApi] = useState<CarouselApi>();
+  const { selectedIndex, scrollSnaps, onDotButtonClick } = useDotButton(api);
+
+  // Filter images based on selected color name
+  const filteredImages = useMemo(() => {
+    if (!selectedColorName) return product.images;
+
+    const filtered = product.images.filter((img) =>
+      img.toLowerCase().includes(selectedColorName.toLowerCase())
+    );
+
+    return filtered.length > 0 ? filtered : product.images;
+  }, [product.images, selectedColorName]);
+
+  // Reset carousel to first slide when filtered images change
+  useEffect(() => {
+    if (api) {
+      api.scrollTo(0);
+    }
+  }, [api, filteredImages]);
+
   return (
-    <Link href={`/products/${product.slug}`} className="block">
-      <div
-        className="relative aspect-square overflow-hidden rounded-t-xl cursor-pointer"
-        onMouseEnter={onImageHover}
-        onMouseLeave={onImageLeave}
+    <div className="relative group">
+      <Carousel
+        setApi={setApi}
+        opts={{
+          align: "start",
+          loop: true,
+        }}
+        className="w-full"
       >
-        <Image
-          src={product.images[currentImageIndex]}
-          alt={product.title}
-          fill
-          className="object-cover transition-all duration-500"
-          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-        />
+        <CarouselContent className="ml-0">
+          {filteredImages.map((image, index) => (
+            <CarouselItem key={`${image}-${index}`} className="pl-0">
+              <Link href={`/products/${product.slug}`} className="block">
+                <div className="relative aspect-square overflow-hidden rounded-t-xl cursor-pointer">
+                  <Image
+                    src={image}
+                    alt={`${product.title} - Image ${index + 1}`}
+                    fill
+                    className="object-cover transition-all duration-500"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                    priority={index === 0}
+                  />
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+              </Link>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-        {/* Badges */}
-        <ProductBadges
-          product={product}
-          discountPercentage={discountPercentage}
-        />
-
-        {/* Quick Actions */}
-        <QuickActionButtons
-          isWishlisted={isWishlisted}
-          onAddToWishlist={onAddToWishlist}
-          onQuickView={onQuickView}
-        />
-
-        {isOutOfStock && (
-          <div className="absolute top-3 left-1/2 transform -translate-x-1/2">
-            <Badge
-              variant="secondary"
-              className="bg-gray-100 text-gray-700 border-0 text-xs"
-            >
-              Out of Stock
-            </Badge>
+        {/* Carousel Navigation */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="relative h-full w-full">
+            <CarouselPrevious variant="ghost" className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-auto h-8 w-8 border-0 shadow-sm" />
+            <CarouselNext variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-auto h-8 w-8 border-0 shadow-sm" />
           </div>
-        )}
-      </div>
-    </Link>
+        </div>
+
+        {/* Dots/Indicator */}
+        <div className="absolute bottom-3 left-0 right-0 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="flex gap-1.5 bg-black/20 backdrop-blur-[2px] rounded-full px-2 py-1">
+            {scrollSnaps.map((_, index) => (
+              <DotButton
+                key={index}
+                selected={index === selectedIndex}
+                onClick={() => onDotButtonClick(index)}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === selectedIndex
+                  ? "bg-white scale-125"
+                  : "bg-white/50 hover:bg-white/80"
+                  }`}
+              />
+            ))}
+          </div>
+        </div>
+      </Carousel>
+
+      {/* Badges */}
+      <ProductBadges
+        product={product}
+        discountPercentage={discountPercentage}
+      />
+
+      {/* Quick Actions */}
+      <QuickActionButtons
+        isWishlisted={isWishlisted}
+        onAddToWishlist={onAddToWishlist}
+      />
+
+      {isOutOfStock && (
+        <div className="absolute top-3 left-1/2 transform -translate-x-1/2">
+          <Badge
+            variant="secondary"
+            className="bg-gray-100 text-gray-700 border-0 text-xs"
+          >
+            Out of Stock
+          </Badge>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -322,7 +387,6 @@ function ProductBadges({ product, discountPercentage }: ProductBadgesProps) {
 function QuickActionButtons({
   isWishlisted,
   onAddToWishlist,
-  onQuickView,
 }: QuickActionButtonsProps) {
   return (
     <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
@@ -347,26 +411,6 @@ function QuickActionButtons({
           <p>{isWishlisted ? "Remove from wishlist" : "Add to wishlist"}</p>
         </TooltipContent>
       </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="rounded-full backdrop-blur-sm p-0"
-            onClick={(e) => {
-              e.preventDefault();
-              onQuickView();
-            }}
-          >
-            <Eye className="w-4 h-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          <p>Quick View</p>
-        </TooltipContent>
-      </Tooltip>
-
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -380,8 +424,8 @@ function QuickActionButtons({
         <TooltipContent side="right">
           <p>Share</p>
         </TooltipContent>
-      </Tooltip>
-    </div>
+      </Tooltip >
+    </div >
   );
 }
 
@@ -389,13 +433,20 @@ function QuickActionButtons({
 
 function ProductInfoHeader({ product }: ProductInfoHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
-      <p className="text-sm font-semibold text-gray-600">{product.brand}</p>
-      <div className="flex items-center gap-1">
-        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-        <span className="text-sm font-medium">{product.rating}</span>
-        <span className="text-xs text-gray-500">({product.reviewCount})</span>
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-muted-foreground">{product.brand}</p>
+        <div className="flex items-center gap-1">
+          <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+          <span className="text-xs font-medium">{product.rating}</span>
+          <span className="text-xs">({product.reviewCount})</span>
+        </div>
       </div>
+      <Link href={`/products/${product.slug}`}>
+        <h3 className="font-semibold line-clamp-2 transition-all ease-in-out cursor-pointer">
+          {product.title}
+        </h3>
+      </Link>
     </div>
   );
 }
@@ -408,12 +459,12 @@ function PriceSection({ product, savings }: PriceSectionProps) {
       <div className="flex items-center gap-2">
         <span className="text-xl font-bold ">${product.price}</span>
         {product.originalPrice && (
-          <span className="text-sm text-gray-500 line-through">
+          <span className="text-sm text-muted-foreground line-through">
             ${product.originalPrice}
           </span>
         )}
         {savings > 0 && (
-          <p className="text-xs text-green-600 font-medium">
+          <p className="text-xs font-medium">
             You save ${savings.toFixed(2)}
           </p>
         )}
@@ -470,7 +521,7 @@ function SizeSelector({
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium ">SELECT SIZE</span>
         {selectedSize && (
-          <span className="text-xs text-gray-500">{selectedSize}</span>
+          <span className="text-xs text-muted-foreground">{selectedSize}</span>
         )}
       </div>
       <RadioGroup
@@ -557,31 +608,14 @@ function ActionButtons({
   );
 }
 
-// ==================== COMPONENT: AdditionalInfo ====================
-
-function AdditionalInfo({ product }: AdditionalInfoProps) {
-  return (
-    <div className="pt-2 border-t border-gray-100">
-      <div className="flex justify-between text-xs text-gray-500">
-        <span>SKU: {product.sku}</span>
-        {product.tags && product.tags.length > 0 && (
-          <span>Tags: {product.tags.slice(0, 2).join(", ")}</span>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ==================== MAIN PRODUCT CARD COMPONENT ====================
 export default function ProductCard({
   product,
   className = "",
   onAddToCart,
   onAddToWishlist,
-  onQuickView,
   layout = "grid",
 }: ProductCardProps & { layout?: "grid" | "list" }) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] || "");
   const [selectedColor, setSelectedColor] = useState(
     product.colors[0]?.value || ""
@@ -616,17 +650,6 @@ export default function ProductCard({
     setSelectedColor(color);
   };
 
-  // Handle image hover for multiple images
-  const handleImageHover = () => {
-    if (product.images.length > 1) {
-      setCurrentImageIndex(1);
-    }
-  };
-
-  const handleImageLeave = () => {
-    setCurrentImageIndex(0);
-  };
-
   // Action handlers
   const handleAddToCart = () => {
     setPendingAction("addToBag");
@@ -642,10 +665,6 @@ export default function ProductCard({
     } else {
       toast.success(`${product.title} has been added to your wishlist.`);
     }
-  };
-
-  const handleQuickView = () => {
-    onQuickView?.(product);
   };
 
   const handleBuyNow = () => {
@@ -692,135 +711,122 @@ export default function ProductCard({
   const isOutOfStock = !product.inStock || product.stockQuantity === 0;
 
   if (layout === "list") {
-      return (
-        <TooltipProvider>
-            <div className={`group relative bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-row ${className}`}>
-                 {/* Image Section - Fixed Width */}
-                 <div className="w-48 sm:w-64 shrink-0 relative">
-                     <ProductImageSection
-                        product={product}
-                        currentImageIndex={currentImageIndex}
-                        isWishlisted={isWishlisted}
-                        isOutOfStock={isOutOfStock}
-                        discountPercentage={discountPercentage}
-                        onImageHover={handleImageHover}
-                        onImageLeave={handleImageLeave}
-                        onAddToWishlist={handleAddToWishlist}
-                        onQuickView={handleQuickView}
-                      />
-                 </div>
-                 
-                 {/* Content Section */}
-                 <div className="p-6 flex flex-col flex-1 justify-between">
-                     <div className="space-y-3">
-                         <div className="flex justify-between items-start">
-                             <div className="space-y-1">
-                                 <p className="text-sm font-semibold text-gray-500">{product.brand}</p>
-                                 <Link href={`/products/${product.slug}`}>
-                                     <h3 className="font-bold text-lg group-hover:text-black transition-colors">{product.title}</h3>
-                                 </Link>
-                             </div>
-                             <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-md">
-                                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                                 <span className="text-sm font-bold">{product.rating}</span>
-                                 <span className="text-xs text-gray-400">({product.reviewCount})</span>
-                             </div>
-                         </div>
-                         
-                         <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
-                         
-                         <PriceSection product={product} savings={savings} />
+    return (
+      <TooltipProvider>
+        <div className={`group relative rounded-xl border border-border hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-row ${className}`}>
+          {/* Image Section - Fixed Width */}
+          <div className="w-48 sm:w-64 shrink-0 relative">
+            <ProductImageSection
+              product={product}
+              isWishlisted={isWishlisted}
+              isOutOfStock={isOutOfStock}
+              discountPercentage={discountPercentage}
+              onAddToWishlist={handleAddToWishlist}
+              selectedColorName={product.colors.find(c => c.value === selectedColor)?.name}
+            />
+          </div>
 
-                         <div className="flex gap-6 pt-2">
-                             <div className="space-y-1">
-                                <ColorOptions
-                                    product={product}
-                                    selectedColor={selectedColor}
-                                    onColorSelect={handleColorSelect}
-                                />
-                             </div>
-                             {/* Size could go here if needed in list view */}
-                         </div>
-                     </div>
-                     
-                     <div className="flex gap-3 pt-6 mt-auto border-t border-gray-100">
-                         <Button className="flex-1" onClick={handleAddToCart} disabled={isOutOfStock}>
-                             <ShoppingCart className="w-4 h-4 mr-2" />
-                             Add to Bag
-                         </Button>
-                         <Button variant="outline" className="flex-1" onClick={handleBuyNow} disabled={isOutOfStock}>
-                             <Zap className="w-4 h-4 mr-2" />
-                             Buy Now
-                         </Button>
-                         <Button variant="ghost" size="icon" onClick={handleAddToWishlist} className="shrink-0 text-gray-400 hover:text-red-500">
-                             <Heart className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
-                         </Button>
-                     </div>
-                 </div>
+          {/* Content Section */}
+          <div className="p-6 flex flex-col flex-1 justify-between">
+            <div className="space-y-3">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-muted">{product.brand}</p>
+                  <Link href={`/products/${product.slug}`}>
+                    <h3 className="font-bold text-lg transition-colors">{product.title}</h3>
+                  </Link>
+                </div>
+                <div className="flex items-center gap-1 px-2 py-1 rounded-md">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <span className="text-sm font-bold">{product.rating}</span>
+                  <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
+                </div>
+              </div>
 
-                 {/* Modals reuse */}
-                 <SizeSelectionModal
+              <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
+
+              <PriceSection product={product} savings={savings} />
+
+              <div className="flex gap-6 pt-2">
+                <div className="space-y-1">
+                  <ColorOptions
                     product={product}
-                    selectedSize={selectedSize}
                     selectedColor={selectedColor}
-                    sizeError={sizeError}
-                    onSizeSelect={handleSizeSelect}
                     onColorSelect={handleColorSelect}
-                    isSizeAvailable={isSizeAvailable}
-                    onClose={() => {
-                        setShowSizeModal(false);
-                        setPendingAction(null);
-                    }}
-                    onProceed={handleProceed}
-                    open={showSizeModal}
-                    pendingAction={pendingAction}
-                    onOpenSizeChart={() => setSizeChartOpen(true)}
-                 />
-                 <QuickCheckoutModal
-                    open={showCheckoutModal}
-                    onOpenChange={setShowCheckoutModal}
-                    product={product}
-                    selectedSize={selectedSize}
-                    selectedColor={selectedColor}
-                    quantity={1}
-                 />
-                 <SizeChartDrawer
-                    product={product}
-                    open={sizeChartOpen}
-                    onOpenChange={setSizeChartOpen}
-                 />
+                  />
+                </div>
+                {/* Size could go here if needed in list view */}
+              </div>
             </div>
-        </TooltipProvider>
-      );
+
+            <div className="flex gap-3 pt-6 mt-auto border-t border-gray-100">
+              <Button className="flex-1" onClick={handleAddToCart} disabled={isOutOfStock}>
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Add to Bag
+              </Button>
+              <Button variant="outline" className="flex-1" onClick={handleBuyNow} disabled={isOutOfStock}>
+                <Zap className="w-4 h-4 mr-2" />
+                Buy Now
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleAddToWishlist} className="shrink-0 text-gray-400 hover:text-red-500">
+                <Heart className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+              </Button>
+            </div>
+          </div>
+
+          {/* Modals reuse */}
+          <SizeSelectionModal
+            product={product}
+            selectedSize={selectedSize}
+            selectedColor={selectedColor}
+            sizeError={sizeError}
+            onSizeSelect={handleSizeSelect}
+            onColorSelect={handleColorSelect}
+            isSizeAvailable={isSizeAvailable}
+            onClose={() => {
+              setShowSizeModal(false);
+              setPendingAction(null);
+            }}
+            onProceed={handleProceed}
+            open={showSizeModal}
+            pendingAction={pendingAction}
+            onOpenSizeChart={() => setSizeChartOpen(true)}
+          />
+          <QuickCheckoutModal
+            open={showCheckoutModal}
+            onOpenChange={setShowCheckoutModal}
+            product={product}
+            selectedSize={selectedSize}
+            selectedColor={selectedColor}
+            quantity={1}
+          />
+          <SizeChartDrawer
+            product={product}
+            open={sizeChartOpen}
+            onOpenChange={setSizeChartOpen}
+          />
+        </div>
+      </TooltipProvider>
+    );
   }
 
   return (
     <TooltipProvider>
       <div
-        className={`group relative bg-white rounded-xl border border-gray-200 hover:shadow-xl transition-all duration-500 ${className}`}
+        className={`group relative rounded-xl border hover:shadow-xl transition-all duration-500 ${className}`}
       >
         <ProductImageSection
           product={product}
-          currentImageIndex={currentImageIndex}
           isWishlisted={isWishlisted}
           isOutOfStock={isOutOfStock}
           discountPercentage={discountPercentage}
-          onImageHover={handleImageHover}
-          onImageLeave={handleImageLeave}
           onAddToWishlist={handleAddToWishlist}
-          onQuickView={handleQuickView}
+          selectedColorName={product.colors.find(c => c.value === selectedColor)?.name}
         />
 
         {/* Product Info */}
         <div className="p-4 space-y-3">
           <ProductInfoHeader product={product} />
-
-          {/* Product Title */}
-          <Link href={`/products/${product.slug}`}>
-            <h3 className="font-semibold  line-clamp-2 group-hover:text-black transition-colors cursor-pointer">
-              {product.title}
-            </h3>
-          </Link>
 
           <PriceSection product={product} savings={savings} />
 
@@ -837,8 +843,6 @@ export default function ProductCard({
             onAddToCart={handleAddToCart}
             onBuyNow={handleBuyNow}
           />
-
-          <AdditionalInfo product={product} />
         </div>
 
         {/* Size Selection Modal */}

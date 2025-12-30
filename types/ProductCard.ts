@@ -35,21 +35,18 @@ export type Product = {
 
 export interface ProductImageSectionProps {
   product: Product;
-  currentImageIndex: number;
+  // currentImageIndex: number;
   // isImageHovered: boolean;
   isWishlisted: boolean;
   isOutOfStock: boolean;
   discountPercentage: number;
-  onImageHover: () => void;
-  onImageLeave: () => void;
   onAddToWishlist: () => void;
-  onQuickView: () => void;
+  selectedColorName?: string;
 }
 
 export interface QuickActionButtonsProps {
   isWishlisted: boolean;
   onAddToWishlist: () => void;
-  onQuickView: () => void;
 }
 export interface ProductInfoHeaderProps {
   product: Product;
@@ -100,7 +97,6 @@ export interface ProductCardProps {
     color: string
   ) => void;
   onAddToWishlist?: (product: Product) => void;
-  onQuickView?: (product: Product) => void;
 }
 
 export interface CompactProductCardProps {

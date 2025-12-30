@@ -136,10 +136,6 @@ export default function WishlistPage() {
         toast.success(`${product.title} added to bag`);
     };
 
-    const onQuickView = (product: Product) => {
-        // Stub: could open modal from ProductCard
-        toast.message(product.title, { description: "Quick view coming soon" });
-    };
 
     return (
         <section className="py-10">
@@ -249,7 +245,6 @@ export default function WishlistPage() {
                                 <ProductCard
                                     product={product}
                                     onAddToCart={addToCart}
-                                    onQuickView={onQuickView}
                                     onAddToWishlist={() => {
                                         // Toggle: if present, remove; if absent, add
                                         const exists = items.some((p) => p.id === product.id);
