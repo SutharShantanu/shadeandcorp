@@ -1,9 +1,9 @@
 import ActiveFilters from "@/components/site/ActiveFilters";
 import ViewToggle from "@/components/site/ViewToggle";
-import ProductCard from "@/components/site/ProductCard";
 import ProductFilters from "@/components/site/ProductFilters";
 import ProductSort from "@/components/site/ProductSort";
 import ProductPagination from "@/components/site/Pagination";
+import ProductGrid from "@/components/site/ProductGrid";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { AlertCircle, Filter, Search, X } from "lucide-react";
@@ -29,7 +29,7 @@ export default async function ProductsPage({
 
   // Map slug to filters
   const category = slug[0]; // e.g., 'men'
-  const subCategory = slug[2] || slug[1]; // e.g., 't-shirts' from /men/clothing/t-shirts or /accessories/belts
+  const potentialSubCategory = slug[2] || slug[1]; // e.g., 't-shirts' from /men/clothing/t-shirts or /accessories/belts
 
   // Helper to capitalize first letter and handle special cases
   const formatValue = (val: string) => {
@@ -49,10 +49,17 @@ export default async function ProductsPage({
     return val.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
+  // Ignore intermediate navigation segments like "clothing", "footwear" etc.
+  // Only use subcategory if it's a specific product type
+  const intermediateSegments = ["clothing", "footwear", "accessories"];
+  const subCategory = intermediateSegments.includes(potentialSubCategory?.toLowerCase())
+    ? undefined
+    : potentialSubCategory;
+
   const filters: any = {
     ...resolvedSearchParams,
     category: formatValue(category) || resolvedSearchParams.category,
-    subCategory: formatValue(subCategory) || resolvedSearchParams.subCategory,
+    subCategory: subCategory ? formatValue(subCategory) : resolvedSearchParams.subCategory,
   };
 
   const { data: products, success, error, totalPages } = await getProductsFromLib(filters as any);
@@ -86,8 +93,11 @@ export default async function ProductsPage({
               </Sheet>
             </div>
 
-            {/* Sort Dropdown */}
-            <ProductSort />
+            {/* Layout & Sort */}
+            <div className="flex items-center gap-3">
+              <ViewToggle />
+              <ProductSort />
+            </div>
           </div>
         </div>
 
@@ -114,7 +124,7 @@ export default async function ProductsPage({
                 </div>
                 <h3 className="text-lg font-semibold">No products found</h3>
                 <p className="text-muted-foreground max-w-sm mt-2">
-                  Try adjusting your filters or search terms to find what you're looking for.
+                  Try adjusting your filters or search terms to find what you&apos;re looking for.
                 </p>
                 <Button asChild variant="secondary" size="sm" className="mt-6 gap-1 rounded-full text-xs">
                   <Link href={`/products${slug.length > 0 ? `/${slug.join('/')}` : ''}`}>
@@ -126,15 +136,7 @@ export default async function ProductsPage({
               </div>
             ) : (
               <div className="space-y-8">
-                <div className={filters.view === "list" ? "flex flex-col gap-4" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"}>
-                  {products.map((product: any) => (
-                    <ProductCard
-                      key={product._id || product.id}
-                      product={product}
-                      layout={filters.view as "grid" | "list" || "grid"}
-                    />
-                  ))}
-                </div>
+                <ProductGrid products={products} filters={filters} />
 
                 <ProductPagination totalPages={totalPages} />
               </div>

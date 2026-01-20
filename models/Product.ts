@@ -4,16 +4,9 @@ export interface IProduct extends Document {
   title: string;
   description: string;
   brand: string;
-  price: number;
-  originalPrice?: number;
-  discount?: number;
-  images: string[];
+  basePrice: number;
   category: string;
   subCategory?: string;
-  sizes: string[];
-  colors: { name: string; value: string }[];
-  inStock: boolean;
-  stockQuantity: number;
   isNew: boolean;
   isFeatured: boolean;
   isTrending: boolean;
@@ -22,7 +15,7 @@ export interface IProduct extends Document {
   rating: number;
   reviewCount: number;
   tags: string[];
-  sku: string;
+  sku: string; // Base SKU
   slug: string;
   weight?: number;
   dimensions?: {
@@ -30,7 +23,6 @@ export interface IProduct extends Document {
     width: number;
     height: number;
   };
-  sizeAvailability?: Map<string, boolean>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -40,21 +32,9 @@ const ProductSchema: Schema = new Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     brand: { type: String, required: true },
-    price: { type: Number, required: true },
-    originalPrice: { type: Number },
-    discount: { type: Number },
-    images: [{ type: String, required: true }],
+    basePrice: { type: Number, required: true },
     category: { type: String, required: true, index: true },
     subCategory: { type: String, index: true },
-    sizes: [{ type: String }],
-    colors: [
-      {
-        name: { type: String, required: true },
-        value: { type: String, required: true },
-      },
-    ],
-    inStock: { type: Boolean, default: true },
-    stockQuantity: { type: Number, required: true, default: 0 },
     isNew: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
     isTrending: { type: Boolean, default: false },
@@ -70,11 +50,6 @@ const ProductSchema: Schema = new Schema(
       length: { type: Number },
       width: { type: Number },
       height: { type: Number },
-    },
-    sizeAvailability: {
-      type: Map,
-      of: Boolean,
-      default: {},
     },
   },
   {

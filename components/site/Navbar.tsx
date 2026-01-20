@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useRef, useState } from "react";
-import { Menu } from "lucide-react";
+import { MenuIcon } from "@/components/ui/menu";
 import {
   Sheet,
   SheetContent,
@@ -647,7 +647,7 @@ export function MobileMenu({ categories }: MobileMenuProps) {
           className="-ml-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 md:hidden"
           aria-label="menu"
         >
-          <Menu className="h-5 w-5" />
+          <MenuIcon className="h-5 w-5" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[300px] sm:w-[400px]">

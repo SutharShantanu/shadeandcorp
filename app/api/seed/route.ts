@@ -1,98 +1,112 @@
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectDB from "@/lib/mongoDB";
 import Product from "@/models/Product";
+import Variant from "@/models/Variant";
+import Asset from "@/models/Asset";
+import { fetchUnsplashImages } from "@/lib/unsplash";
+import { uploadImageToBlob } from "@/lib/blob-upload";
 
 export async function GET() {
   try {
     await connectDB();
 
-    const existingProducts = await Product.countDocuments();
-    if (existingProducts > 0) {
-      return NextResponse.json({ message: "Database already seeded" });
-    }
+    // Clear existing data
+    await Product.deleteMany({});
+    await Variant.deleteMany({});
+    await Asset.deleteMany({});
 
-    const products = [
+    const productsData = [
       {
-        title: "Classic White T-Shirt",
-        description: "A timeless classic. This white t-shirt is made from 100% organic cotton for ultimate comfort and durability. Perfect for any casual occasion.",
+        title: "Premium Cotton Hoodie",
+        description: "Experience ultimate warmth and comfort with our premium hoodie. Made from heavy-weight brush-back fleece.",
         brand: "Shade & Co",
-        price: 29.99,
-        originalPrice: 39.99,
-        discount: 25,
-        images: ["https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
+        basePrice: 59.99,
         category: "Men",
-        subCategory: "T-Shirts",
-        sizes: ["S", "M", "L", "XL"],
-        colors: [{ name: "White", value: "#ffffff" }],
-        inStock: true,
-        stockQuantity: 50,
+        subCategory: "Hoodies",
         isNew: true,
         isFeatured: true,
-        rating: 4.5,
-        reviewCount: 120,
-        tags: ["casual", "cotton", "basics"],
-        sku: "M-TS-001",
-        slug: "classic-white-t-shirt",
-      },
-      {
-        title: "Slim Fit Navy Jeans",
-        description: "Modern slim fit jeans in a deep navy wash. Features a comfortable stretch denim and classic five-pocket styling.",
-        brand: "Denim Co",
-        price: 59.99,
-        originalPrice: 79.99,
-        discount: 25,
-        images: ["https://images.unsplash.com/photo-1542272617-08f083157f5d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-        category: "Men",
-        subCategory: "Jeans",
-        sizes: ["30", "32", "34", "36"],
-        colors: [{ name: "Navy", value: "#000080" }],
-        inStock: true,
-        stockQuantity: 30,
         rating: 4.8,
-        reviewCount: 85,
-        tags: ["denim", "pants", "casual"],
-        sku: "M-JN-001",
-        slug: "slim-fit-navy-jeans",
+        reviewCount: 156,
+        tags: ["casual", "winter", "essentials"],
+        sku: "M-HD-001",
+        slug: "premium-cotton-hoodie",
+        colors: [
+          { name: "Black", hex: "#000000" },
+          { name: "Grey", hex: "#808080" }
+        ]
       },
       {
-        title: "Floral Summer Dress",
-        description: "Lightweight and breezy floral dress perfect for summer days. Features a flattering A-line silhouette and adjustable straps.",
-        brand: "Bloom",
-        price: 45.00,
-        images: ["https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-        category: "Women",
-        subCategory: "Dresses",
-        sizes: ["XS", "S", "M", "L"],
-        colors: [{ name: "Pink Floral", value: "#ffc0cb" }],
-        inStock: true,
-        stockQuantity: 20,
-        isFeatured: true,
-        rating: 4.9,
-        reviewCount: 200,
-        tags: ["summer", "floral", "dress"],
-        sku: "W-DR-001",
-        slug: "floral-summer-dress",
-      },
-       {
-        title: "Designer Sunglasses",
-        description: "Premium aviator sunny with UV400 protection.",
-        brand: "RayBan",
-        price: 150.00,
-        images: ["https://images.unsplash.com/photo-1511499767150-a48a237f0083?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"],
-        category: "Accessories",
-        subCategory: "Sunglasses",
-        sizes: ["One Size"],
-        colors: [{ name: "Gold", value: "#FFD700" }],
-        inStock: true,
-        stockQuantity: 10,
-        sku: "A-SG-001",
-        slug: "designer-sunglasses",
+        title: "Classic Canvas Sneakers",
+        description: "Lightweight and durable canvas sneakers for everyday wear.",
+        brand: "WalkEase",
+        basePrice: 45.00,
+        category: "Men",
+        subCategory: "Shoes",
+        isNew: true,
+        rating: 4.5,
+        reviewCount: 42,
+        tags: ["canvas", "shoes", "casual"],
+        sku: "M-SH-002",
+        slug: "classic-canvas-sneakers",
+        colors: [
+          { name: "White", hex: "#ffffff" },
+          { name: "Navy Blue", hex: "#000080" }
+        ]
       }
     ];
 
-    await Product.insertMany(products);
+    for (const data of productsData) {
+      const { colors, ...productBase } = data as any;
+      const product = await Product.create(productBase) as any;
 
-    return NextResponse.json({ success: true, message: "Products seeded successfully", count: products.length });
+      for (const color of colors) {
+        // Create 2 variants per color (M, L)
+        const sizes = ["M", "L"];
+        for (const size of sizes) {
+          const variantId = new mongoose.Types.ObjectId();
+          const variant = await Variant.create({
+            _id: variantId,
+            productId: product._id,
+            color: color,
+            size: size,
+            sku: `${productBase.sku}-${color.name.substring(0, 3).toUpperCase()}-${size}`,
+            price: productBase.basePrice,
+            stockQuantity: 20,
+            isDefault: color.name === colors[0].name && size === "M",
+          }) as any;
+
+          // Fetch images for this color
+          const query = `${color.name} ${productBase.title} isolated product`;
+          const unsplashImages = await fetchUnsplashImages({ query, perPage: 3 });
+
+          for (let i = 0; i < unsplashImages.length; i++) {
+            const img = unsplashImages[i];
+            const blobUrl = await uploadImageToBlob({
+              imageUrl: img.urls.regular,
+              path: `products/${product._id}/variants/${variant._id}/${i + 1}.webp`
+            });
+
+            await Asset.create({
+              productId: product._id,
+              variantId: variant._id,
+              type: "image",
+              role: i === 0 ? "thumbnail" : "gallery",
+              url: blobUrl,
+              alt: img.alt,
+              order: i,
+              metadata: {
+                source: "unsplash",
+                photographerName: img.user.name,
+                photographerUrl: img.user.profileUrl
+              }
+            });
+          }
+        }
+      }
+    }
+
+    return NextResponse.json({ success: true, message: "Database re-seeded with normalized structure" });
   } catch (error) {
     console.error("Seeding error:", error);
     return NextResponse.json({ success: false, error: "Seeding failed" }, { status: 500 });

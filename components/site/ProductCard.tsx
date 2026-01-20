@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -81,9 +82,9 @@ function SizeSelectionModal({
   pendingAction,
   onOpenSizeChart,
 }: SizeSelectionModalProps) {
-  const selectedColorObj = product.colors.find(
-    (color) => color.value === selectedColor
-  );
+  const selectedColorObj = product.variants.find(
+    (v) => v.color.hex === selectedColor
+  )?.color;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -100,7 +101,7 @@ function SizeSelectionModal({
             {/* Product Image */}
             <div className="shrink-0 w-24 h-24 rounded-lg overflow-hidden border">
               <Image
-                src={product.images[0]}
+                src={product.assets.find(a => a.role === "thumbnail")?.url || product.assets[0]?.url || "/placeholder.png"}
                 alt={product.title}
                 width={96}
                 height={96}
@@ -115,13 +116,8 @@ function SizeSelectionModal({
               </h3>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-lg font-bold text-gray-900">
-                  ${product.price}
+                  ${product.variants.find(v => v.isDefault)?.price || product.basePrice}
                 </span>
-                {product.originalPrice && (
-                  <span className="text-sm text-gray-500 line-through">
-                    ${product.originalPrice}
-                  </span>
-                )}
                 {product.isNew && (
                   <Badge className="bg-emerald-500 text-white border-0 text-xs">
                     New
@@ -151,9 +147,9 @@ function SizeSelectionModal({
               onValueChange={onColorSelect}
               className="flex gap-2 items-center"
             >
-              {product?.colors && product.colors.length > 0 && (
+              {product?.variants && product.variants.length > 0 && (
                 <div className="flex gap-2">
-                  {product.colors.map((color) => (
+                  {Array.from(new Set(product.variants.map(v => JSON.stringify(v.color)))).map(s => JSON.parse(s)).map((color) => (
                     <RadioGroupItem
                       key={color.value}
                       value={color.value}
@@ -249,25 +245,26 @@ function ProductImageSection({
   const { selectedIndex, scrollSnaps, onDotButtonClick } = useDotButton(api);
 
   // Filter images based on selected color name
-  const filteredImages = useMemo(() => {
-    if (!selectedColorName) return product.images;
+  const filteredAssets = useMemo(() => {
+    const selectedVariant = product.variants.find(v => v.color.name === selectedColorName);
+    const variantId = selectedVariant?.id;
 
-    const filtered = product.images.filter((img) =>
-      img.toLowerCase().includes(selectedColorName.toLowerCase())
-    );
+    const filtered = product.assets.filter((asset) =>
+      !asset.variantId || asset.variantId === variantId
+    ).sort((a, b) => a.order - b.order);
 
-    return filtered.length > 0 ? filtered : product.images;
-  }, [product.images, selectedColorName]);
+    return filtered.length > 0 ? filtered : product.assets;
+  }, [product.assets, product.variants, selectedColorName]);
 
   // Reset carousel to first slide when filtered images change
   useEffect(() => {
     if (api) {
       api.scrollTo(0);
     }
-  }, [api, filteredImages]);
+  }, [api, filteredAssets]);
 
   return (
-    <div className="relative group">
+    <motion.div layoutId={`product-image-${product.id}`} className="relative group">
       <Carousel
         setApi={setApi}
         opts={{
@@ -277,20 +274,20 @@ function ProductImageSection({
         className="w-full"
       >
         <CarouselContent className="ml-0">
-          {filteredImages.map((image, index) => (
-            <CarouselItem key={`${image}-${index}`} className="pl-0">
-              <Link href={`/products/${product.slug}`} className="block">
-                <div className="relative aspect-square overflow-hidden rounded-t-xl cursor-pointer">
+          {filteredAssets.map((asset, index) => (
+            <CarouselItem key={`${asset.url}-${index}`} className="pl-0">
+              <Link href={`/products/${product.slug}`} className="block h-full">
+                <div className="relative h-full overflow-hidden cursor-pointer">
                   <Image
-                    src={image}
-                    alt={`${product.title} - Image ${index + 1}`}
+                    src={asset.url}
+                    alt={asset.alt || `${product.title} - Image ${index + 1}`}
                     fill
                     className="object-cover transition-all duration-500"
                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     priority={index === 0}
                   />
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* Base Gradient Overlay for readability - subtle */}
+                  <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
                 </div>
               </Link>
             </CarouselItem>
@@ -305,9 +302,9 @@ function ProductImageSection({
           </div>
         </div>
 
-        {/* Dots/Indicator */}
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="flex gap-1.5 bg-black/20 backdrop-blur-[2px] rounded-full px-2 py-1">
+        {/* Dots/Indicator - Repositioned for overlay design */}
+        <div className="absolute bottom-24 left-0 right-0 z-20 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="flex gap-1 bg-white/10 backdrop-blur-sm rounded-full px-1.5 py-1">
             {scrollSnaps.map((_, index) => (
               <DotButton
                 key={index}
@@ -345,7 +342,7 @@ function ProductImageSection({
           </Badge>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -433,7 +430,7 @@ function QuickActionButtons({
 
 function ProductInfoHeader({ product }: ProductInfoHeaderProps) {
   return (
-    <div className="flex flex-col gap-1">
+    <motion.div layoutId={`product-info-${product.id}`} className="flex flex-col gap-1">
       <div className="flex items-center justify-between">
         <p className="text-xs font-semibold text-muted-foreground">{product.brand}</p>
         <div className="flex items-center gap-1">
@@ -447,7 +444,7 @@ function ProductInfoHeader({ product }: ProductInfoHeaderProps) {
           {product.title}
         </h3>
       </Link>
-    </div>
+    </motion.div>
   );
 }
 
@@ -455,21 +452,16 @@ function ProductInfoHeader({ product }: ProductInfoHeaderProps) {
 
 function PriceSection({ product, savings }: PriceSectionProps) {
   return (
-    <div className="space-y-1">
+    <motion.div layoutId={`product-price-${product.id}`} className="space-y-1">
       <div className="flex items-center gap-2">
-        <span className="text-xl font-bold ">${product.price}</span>
-        {product.originalPrice && (
-          <span className="text-sm text-muted-foreground line-through">
-            ${product.originalPrice}
-          </span>
-        )}
+        <span className="text-xl font-bold ">${product.basePrice}</span>
         {savings > 0 && (
           <p className="text-xs font-medium">
             You save ${savings.toFixed(2)}
           </p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -480,7 +472,11 @@ const ColorOptions = ({
   selectedColor,
   onColorSelect,
 }: ColorOptionsProps) => {
-  if (product.colors.length === 0) return null;
+  const colors = useMemo(() => {
+    return Array.from(new Set(product.variants.map(v => JSON.stringify(v.color)))).map(s => JSON.parse(s));
+  }, [product.variants]);
+
+  if (colors.length === 0) return null;
 
   return (
     <RadioGroup
@@ -489,18 +485,16 @@ const ColorOptions = ({
       className="flex gap-2 items-center"
     >
       <span className="text-xs font-medium ">Color</span>
-      {product.colors.length > 0 && (
-        <div className="flex gap-2">
-          {product.colors.map((color) => (
-            <RadioGroupItem
-              key={color.value}
-              value={color.value}
-              style={{ backgroundColor: color.value }}
-              title={color.name}
-            />
-          ))}
-        </div>
-      )}
+      <div className="flex gap-2">
+        {colors.map((color: any) => (
+          <RadioGroupItem
+            key={color.value}
+            value={color.value}
+            style={{ backgroundColor: color.value }}
+            title={color.name}
+          />
+        ))}
+      </div>
     </RadioGroup>
   );
 };
@@ -514,7 +508,11 @@ function SizeSelector({
   onSizeSelect,
   isSizeAvailable,
 }: SizeSelectorProps) {
-  if (product.sizes.length === 0) return null;
+  const sizes = useMemo(() => {
+    return Array.from(new Set(product.variants.map(v => v.size)));
+  }, [product.variants]);
+
+  if (sizes.length === 0) return null;
 
   return (
     <div className="space-y-2">
@@ -529,7 +527,7 @@ function SizeSelector({
         onValueChange={onSizeSelect}
         className="flex flex-wrap gap-2"
       >
-        {product.sizes.map((size) => {
+        {sizes.map((size) => {
           const available = isSizeAvailable(size);
           return (
             <div key={size} className="relative">
@@ -616,10 +614,14 @@ export default function ProductCard({
   onAddToWishlist,
   layout = "grid",
 }: ProductCardProps & { layout?: "grid" | "list" }) {
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] || "");
-  const [selectedColor, setSelectedColor] = useState(
-    product.colors[0]?.value || ""
-  );
+  const [selectedSize, setSelectedSize] = useState(() => {
+    const defaultVariant = product.variants.find(v => v.isDefault);
+    return defaultVariant?.size || product.variants[0]?.size || "";
+  });
+  const [selectedColor, setSelectedColor] = useState(() => {
+    const defaultVariant = product.variants.find(v => v.isDefault);
+    return defaultVariant?.color.hex || product.variants[0]?.color.hex || "";
+  });
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showSizeModal, setShowSizeModal] = useState(false);
@@ -631,10 +633,7 @@ export default function ProductCard({
 
   // Check if a size is available
   const isSizeAvailable = (size: string) => {
-    if (product.sizeAvailability) {
-      return product.sizeAvailability[size] !== false;
-    }
-    return true;
+    return product.variants.some(v => v.size === size && v.stockQuantity > 0);
   };
 
   // Handle size selection
@@ -694,26 +693,26 @@ export default function ProductCard({
     }
   };
 
-  // Calculate savings
-  const savings = product.originalPrice
-    ? product.originalPrice - product.price
-    : 0;
-  const discountPercentage =
-    product.discount ||
-    (product.originalPrice
-      ? Math.round(
-        ((product.originalPrice - product.price) / product.originalPrice) *
-        100
-      )
-      : 0);
+  // Derived data based on selected variant
+  const selectedVariant = useMemo(() => {
+    return product.variants.find(v => v.color.hex === selectedColor && v.size === selectedSize)
+      || product.variants.find(v => v.color.hex === selectedColor)
+      || product.variants[0];
+  }, [product.variants, selectedColor, selectedSize]);
 
-  // Stock status
-  const isOutOfStock = !product.inStock || product.stockQuantity === 0;
+  const currentPrice = selectedVariant?.price || product.basePrice;
+  const originalPrice = selectedVariant?.originalPrice;
+  const savings = originalPrice ? originalPrice - currentPrice : 0;
+  const discountPercentage = selectedVariant?.discount || (originalPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0);
+  const isOutOfStock = product.variants.every(v => v.stockQuantity === 0);
 
   if (layout === "list") {
     return (
       <TooltipProvider>
-        <div className={`group relative rounded-xl border border-border hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-row ${className}`}>
+        <motion.div
+          layout
+          className={`group relative rounded-xl border border-border hover:shadow-xl transition-all duration-500 overflow-hidden flex flex-row ${className}`}
+        >
           {/* Image Section - Fixed Width */}
           <div className="w-48 sm:w-64 shrink-0 relative">
             <ProductImageSection
@@ -722,7 +721,7 @@ export default function ProductCard({
               isOutOfStock={isOutOfStock}
               discountPercentage={discountPercentage}
               onAddToWishlist={handleAddToWishlist}
-              selectedColorName={product.colors.find(c => c.value === selectedColor)?.name}
+              selectedColorName={product.variants.find(v => v.color.hex === selectedColor)?.color.name}
             />
           </div>
 
@@ -805,44 +804,58 @@ export default function ProductCard({
             open={sizeChartOpen}
             onOpenChange={setSizeChartOpen}
           />
-        </div>
+        </motion.div>
       </TooltipProvider>
     );
   }
 
   return (
     <TooltipProvider>
-      <div
-        className={`group relative rounded-xl border hover:shadow-xl transition-all duration-500 ${className}`}
+      <motion.div
+        layout
+        className={`group relative rounded-2xl border bg-background overflow-hidden transition-all duration-700 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ${className}`}
       >
-        <ProductImageSection
-          product={product}
-          isWishlisted={isWishlisted}
-          isOutOfStock={isOutOfStock}
-          discountPercentage={discountPercentage}
-          onAddToWishlist={handleAddToWishlist}
-          selectedColorName={product.colors.find(c => c.value === selectedColor)?.name}
-        />
-
-        {/* Product Info */}
-        <div className="p-4 space-y-3">
-          <ProductInfoHeader product={product} />
-
-          <PriceSection product={product} savings={savings} />
-
-          <ColorOptions
+        <div className="relative aspect-4/5 overflow-hidden">
+          <ProductImageSection
             product={product}
-            selectedColor={selectedColor}
-            onColorSelect={handleColorSelect}
-          />
-
-          {/* Size selector is now hidden and only shown in modal */}
-
-          <ActionButtons
+            isWishlisted={isWishlisted}
             isOutOfStock={isOutOfStock}
-            onAddToCart={handleAddToCart}
-            onBuyNow={handleBuyNow}
+            discountPercentage={discountPercentage}
+            onAddToWishlist={handleAddToWishlist}
+            selectedColorName={product.variants.find(v => v.color.hex === selectedColor)?.color.name}
           />
+
+          {/* User Reference Gradient Overlay */}
+          <div className="absolute inset-0 bg-linear-to-t from-background/90 via-background/20 to-transparent z-10 transition-all duration-700 group-hover:opacity-40" />
+
+          {/* Glassmorphic Info Container */}
+          <div className="absolute bottom-3 left-3 right-3 z-30 p-4 rounded-xl border border-white/10 bg-background/40 dark:bg-black/30 backdrop-blur-lg shadow-xl transform translate-y-1 group-hover:translate-y-0 transition-all duration-500 overflow-hidden">
+            {/* Subtitle/Brand */}
+            <div className="transition-all duration-500 transform group-hover:-translate-y-1">
+              <ProductInfoHeader product={product} />
+            </div>
+
+            <div className="flex items-end justify-between gap-2 mt-2 transition-all duration-500">
+              <PriceSection product={product} savings={savings} />
+
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-500 delay-75 transform translate-x-2 group-hover:translate-x-0">
+                <ColorOptions
+                  product={product}
+                  selectedColor={selectedColor}
+                  onColorSelect={handleColorSelect}
+                />
+              </div>
+            </div>
+
+            {/* Hidden Action Buttons - revealed on hover */}
+            <div className="mt-4 h-0 group-hover:h-10 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
+              <ActionButtons
+                isOutOfStock={isOutOfStock}
+                onAddToCart={handleAddToCart}
+                onBuyNow={handleBuyNow}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Size Selection Modal */}
@@ -880,7 +893,7 @@ export default function ProductCard({
           open={sizeChartOpen}
           onOpenChange={setSizeChartOpen}
         />
-      </div>
+      </motion.div>
     </TooltipProvider>
   );
 }

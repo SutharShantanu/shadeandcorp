@@ -247,7 +247,7 @@ export default function ProductFilters() {
               />
             </AccordionTrigger>
             <AccordionContent className="">
-              <div className="space-y-4 py-2">
+              <div className="space-y-4 py-3 px-1">
                 <Slider
                   defaultValue={[0, 2000]}
                   value={priceRange}
@@ -256,33 +256,26 @@ export default function ProductFilters() {
                   onValueChange={updatePrice}
                   onValueCommit={applyPriceFilter}
                 />
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={2000}
-                      value={priceRange[0]}
-                      onChange={(e) => handlePriceInputChange(0, e.target.value)}
-                      onBlur={applyPriceFilter}
-                      className="pl-6 h-8 text-sm"
-                    />
-                  </div>
-                  <span className="text-muted-foreground">-</span>
-                  <div className="relative flex-1">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={2000}
-                      value={priceRange[1]}
-                      onChange={(e) => handlePriceInputChange(1, e.target.value)}
-                      onBlur={applyPriceFilter}
-                      className="pl-6 h-8 text-sm"
-                    />
-                  </div>
-                </div>
+              </div>
+              <div className="flex flex-row items-center gap-2 px-1 mt-1 justify-between">
+                <Input
+                  type="number"
+                  min={0}
+                  max={2000}
+                  value={priceRange[0]}
+                  onChange={(e) => handlePriceInputChange(0, e.target.value)}
+                  onBlur={applyPriceFilter}
+                  className="text-sm max-w-1/2"
+                />
+                <Input
+                  type="number"
+                  min={0}
+                  max={2000}
+                  value={priceRange[1]}
+                  onChange={(e) => handlePriceInputChange(1, e.target.value)}
+                  onBlur={applyPriceFilter}
+                  className="text-sm max-w-1/2"
+                />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -418,9 +411,7 @@ export default function ProductFilters() {
           <DialogHeader>
             <DialogTitle>Size Guide</DialogTitle>
           </DialogHeader>
-          <div className="mt-4">
-            <SizeChart />
-          </div>
+          <SizeChart />
         </DialogContent>
       </Dialog>
     </div>

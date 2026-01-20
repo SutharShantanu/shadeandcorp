@@ -1,19 +1,42 @@
 
+export type Asset = {
+  id: string;
+  variantId?: string; // null if common
+  type: "image" | "video";
+  role: "thumbnail" | "gallery" | "zoom";
+  url: string;
+  alt: string;
+  order: number;
+  metadata?: {
+    source: string;
+    photographerName?: string;
+    photographerUrl?: string;
+  };
+};
+
+export type Variant = {
+  id: string;
+  color: {
+    name: string;
+    hex: string;
+  };
+  size: string;
+  sku: string;
+  price: number;
+  originalPrice?: number;
+  discount?: number;
+  stockQuantity: number;
+  isDefault: boolean;
+};
+
 export type Product = {
   id: string;
   title: string;
   description?: string;
   brand: string;
-  price: number;
-  originalPrice?: number;
-  discount?: number;
-  images: string[];
+  basePrice: number;
   category: string;
   subCategory?: string;
-  sizes: string[];
-  colors: { name: string; value: string }[];
-  inStock: boolean;
-  stockQuantity: number;
   isNew: boolean;
   isFeatured?: boolean;
   isTrending?: boolean;
@@ -30,7 +53,8 @@ export type Product = {
     width: number;
     height: number;
   };
-  sizeAvailability?: { [size: string]: boolean };
+  variants: Variant[];
+  assets: Asset[];
 };
 
 export interface ProductImageSectionProps {
@@ -58,12 +82,7 @@ export interface PriceSectionProps {
 }
 
 export interface ColorOptionsProps {
-  product: {
-    colors: Array<{
-      value: string;
-      name: string;
-    }>;
-  };
+  product: Product;
   selectedColor: string;
   onColorSelect: (color: string) => void;
 }

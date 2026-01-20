@@ -247,7 +247,11 @@ export default function QuickCheckoutModal({
   );
 
   // Calculate totals
-  const subtotal = product.price * quantity;
+  const selectedVariant = product.variants.find(v => v.color.hex === selectedColor && v.size === selectedSize)
+    || product.variants.find(v => v.color.hex === selectedColor)
+    || product.variants[0];
+
+  const subtotal = (selectedVariant?.price || product.basePrice) * quantity;
   const discount = selectedCouponData
     ? selectedCouponData.type === "percentage"
       ? (subtotal * selectedCouponData.discount) / 100
