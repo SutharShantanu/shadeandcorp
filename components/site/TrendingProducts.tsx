@@ -12,7 +12,7 @@ import { Zap, Clock, TrendingUp, Star, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 // Enhanced product data matching our new Product type
-const trendingProducts: Product[] = [
+const rawTrendingProducts = [
   {
     id: "1",
     title: "Premium Winter Parka Jacket",
@@ -265,6 +265,40 @@ const trendingProducts: Product[] = [
   },
 ];
 
+const trendingProducts: Product[] = rawTrendingProducts.map((p) => {
+  // Create variants from sizes and colors
+  const variants = p.sizes.flatMap((size, sizeIndex) =>
+    p.colors.map((color, colorIndex) => ({
+      id: `${p.id}-v-${size}-${color.name}`,
+      color: { name: color.name, hex: color.value },
+      size: size,
+      sku: `${p.sku}-${size}-${color.name.substring(0, 3).toUpperCase()}`,
+      price: p.price,
+      originalPrice: p.originalPrice,
+      discount: p.discount,
+      stockQuantity: p.stockQuantity,
+      isDefault: sizeIndex === 0 && colorIndex === 0,
+    }))
+  );
+
+  // Create assets
+  const assets = p.images.map((url, index) => ({
+    id: `${p.id}-asset-${index}`,
+    type: "image" as const,
+    role: "gallery" as const,
+    url,
+    alt: p.title,
+    order: index,
+  }));
+
+  return {
+    ...p,
+    basePrice: p.price,
+    variants,
+    assets,
+  } as Product;
+});
+
 const CountdownTimer = ({ endDate }: { endDate: Date }) => {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -298,7 +332,7 @@ const CountdownTimer = ({ endDate }: { endDate: Date }) => {
         { value: timeLeft.hours, label: "Hours" },
         { value: timeLeft.minutes, label: "Minutes" },
         { value: timeLeft.seconds, label: "Seconds" },
-      ].map((item, index) => (
+      ].map((item) => (
         <div key={item.label} className="flex flex-col items-center">
           <div className="bg-linear-to-br from-red-500 to-pink-600 text-white rounded-lg p-3 min-w-[70px] shadow-lg">
             <NumberFlow
@@ -366,21 +400,19 @@ const CategoryFilter = ({
             key={category.id}
             variant={selectedCategory === category.id ? "default" : "outline"}
             onClick={() => onCategoryChange(category.id)}
-            className={`rounded-full px-6 py-3 h-auto transition-all duration-300 ${
-              selectedCategory === category.id
-                ? "bg-black text-white shadow-lg"
-                : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
-            }`}
+            className={`rounded-full px-6 py-3 h-auto transition-all duration-300 ${selectedCategory === category.id
+              ? "bg-black text-white shadow-lg"
+              : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+              }`}
           >
             <span className="mr-2">{category.icon}</span>
             {category.label}
             <Badge
               variant="secondary"
-              className={`ml-2 ${
-                selectedCategory === category.id
-                  ? "bg-white text-black"
-                  : "bg-gray-100 text-gray-600"
-              }`}
+              className={`ml-2 ${selectedCategory === category.id
+                ? "bg-white text-black"
+                : "bg-gray-100 text-gray-600"
+                }`}
             >
               {category.count}
             </Badge>
@@ -401,14 +433,14 @@ export default function TrendingProducts() {
     selectedCategory === "all"
       ? trendingProducts
       : selectedCategory === "trending"
-      ? trendingProducts.filter((product) => product.isTrending)
-      : selectedCategory === "sale"
-      ? trendingProducts.filter((product) => product.isOnSale)
-      : trendingProducts.filter(
-          (product) =>
-            product.category === selectedCategory ||
-            product.tags?.includes(selectedCategory.toLowerCase())
-        );
+        ? trendingProducts.filter((product) => product.isTrending)
+        : selectedCategory === "sale"
+          ? trendingProducts.filter((product) => product.isOnSale)
+          : trendingProducts.filter(
+            (product) =>
+              product.category === selectedCategory ||
+              product.tags?.includes(selectedCategory.toLowerCase())
+          );
 
   // Event handlers for product actions
   const handleAddToCart = (
@@ -488,7 +520,7 @@ export default function TrendingProducts() {
           viewport={{ once: true }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-4"
         >
-          {filteredProducts.map((product, index) => (
+          {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}
               product={product}

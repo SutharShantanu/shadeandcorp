@@ -12,8 +12,6 @@ import {
   Star,
   Ruler,
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -22,16 +20,11 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { DotButton, useDotButton } from "../ui/embla-carousel-dot-button";
 import {
-  Tooltip,
-  TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -39,7 +32,6 @@ import { toast } from "sonner";
 import QuickCheckoutModal from "../modal/QuickCheckoutModal";
 import {
   ActionButtonsProps,
-  AdditionalInfoProps,
   ColorOptionsProps,
   PriceSectionProps,
   Product,
@@ -48,6 +40,7 @@ import {
   ProductInfoHeaderProps,
   QuickActionButtonsProps,
   SizeSelectorProps,
+  Variant,
 } from "@/types/ProductCard";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { SizeChart } from "@/components/ui/size-chart";
@@ -115,7 +108,7 @@ function SizeSelectionModal({
                 {product.title}
               </h3>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg font-bold text-gray-900">
+                <span className="text-lg font-bold">
                   ${product.variants.find(v => v.isDefault)?.price || product.basePrice}
                 </span>
                 {product.isNew && (
@@ -149,14 +142,14 @@ function SizeSelectionModal({
             >
               {product?.variants && product.variants.length > 0 && (
                 <div className="flex gap-2">
-                  {Array.from(new Set(product.variants.map(v => JSON.stringify(v.color)))).map(s => JSON.parse(s)).map((color) => (
+                  {Array.from(new Set(product.variants.map(v => JSON.stringify(v.color)))).map(s => JSON.parse(s)).map((color: Variant['color']) => (
                     <RadioGroupItem
-                      key={color.value}
-                      value={color.value}
-                      id={`color-${product.id}-${color.value}`}
+                      key={color.hex}
+                      value={color.hex}
+                      id={`color-${product.id}-${color.hex}`}
                       aria-label={color.name}
                       className="h-10 w-10 cursor-pointer"
-                      style={{ backgroundColor: color.value }}
+                      style={{ backgroundColor: color.hex }}
                       title={color.name}
                     />
                   ))}
@@ -167,7 +160,7 @@ function SizeSelectionModal({
             {/* Size Selection */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
-                <span className="font-medium text-gray-900">Size</span>
+                <span className="font-medium">Size</span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -189,8 +182,8 @@ function SizeSelectionModal({
             </div>
 
             {/* Additional Info */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h4 className="font-medium text-gray-900 mb-2">Product Details</h4>
+            <div className="rounded-lg p-4 mb-6">
+              <h4 className="font-medium mb-2">Product Details</h4>
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>• Free shipping on orders over $50</li>
                 <li>• 30-day return policy</li>
@@ -276,8 +269,8 @@ function ProductImageSection({
         <CarouselContent className="ml-0">
           {filteredAssets.map((asset, index) => (
             <CarouselItem key={`${asset.url}-${index}`} className="pl-0">
-              <Link href={`/products/${product.slug}`} className="block h-full">
-                <div className="relative h-full overflow-hidden cursor-pointer">
+              <Link href={`/product/${product.slug}`} className="block">
+                <div className="relative aspect-square overflow-hidden cursor-pointer">
                   <Image
                     src={asset.url}
                     alt={asset.alt || `${product.title} - Image ${index + 1}`}
@@ -294,25 +287,19 @@ function ProductImageSection({
           ))}
         </CarouselContent>
 
-        {/* Carousel Navigation */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="relative h-full w-full">
-            <CarouselPrevious variant="ghost" className="absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-auto h-8 w-8 border-0 shadow-sm" />
-            <CarouselNext variant="ghost" className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-auto h-8 w-8 border-0 shadow-sm" />
-          </div>
-        </div>
 
-        {/* Dots/Indicator - Repositioned for overlay design */}
-        <div className="absolute bottom-24 left-0 right-0 z-20 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="flex gap-1 bg-white/10 backdrop-blur-sm rounded-full px-1.5 py-1">
+
+        {/* Dots/Indicator */}
+        <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center">
+          <div className="flex gap-1.5 p-1 rounded-full">
             {scrollSnaps.map((_, index) => (
               <DotButton
                 key={index}
                 selected={index === selectedIndex}
                 onClick={() => onDotButtonClick(index)}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === selectedIndex
-                  ? "bg-white scale-125"
-                  : "bg-white/50 hover:bg-white/80"
+                className={`w-2 h-2 rounded-full transition-all duration-300 border border-white/20 shadow-sm ${index === selectedIndex
+                  ? "bg-white scale-110"
+                  : "bg-white/40 hover:bg-white/60"
                   }`}
               />
             ))}
@@ -320,7 +307,6 @@ function ProductImageSection({
         </div>
       </Carousel>
 
-      {/* Badges */}
       <ProductBadges
         product={product}
         discountPercentage={discountPercentage}
@@ -336,7 +322,7 @@ function ProductImageSection({
         <div className="absolute top-3 left-1/2 transform -translate-x-1/2">
           <Badge
             variant="secondary"
-            className="bg-gray-100 text-gray-700 border-0 text-xs"
+            className="text-xs"
           >
             Out of Stock
           </Badge>
@@ -356,22 +342,22 @@ function ProductBadges({ product, discountPercentage }: ProductBadgesProps) {
   return (
     <div className="absolute top-3 left-3 flex flex-col gap-2">
       {product.isNew && (
-        <Badge className="bg-emerald-500 hover:bg-emerald-600 border-0 text-xs uppercase font-semibold py-1">
+        <Badge color="default" className="border-0 text-xs uppercase font-semibold py-1">
           New
         </Badge>
       )}
       {product.isBestSeller && (
-        <Badge className="bg-amber-500 hover:bg-amber-600 border-0 text-xs uppercase font-semibold py-1">
+        <Badge color="warning" className="border-0 text-xs uppercase font-semibold py-1">
           Bestseller
         </Badge>
       )}
       {discountPercentage > 0 && (
-        <Badge className="bg-red-500 hover:bg-red-600 border-0 text-xs uppercase font-semibold py-1">
+        <Badge color="danger" className="border-0 text-xs uppercase font-semibold py-1">
           -{discountPercentage}%
         </Badge>
       )}
       {product.isFeatured && (
-        <Badge className="bg-purple-500 hover:bg-purple-600 border-0 text-xs uppercase font-semibold py-1">
+        <Badge color="info" className="border-0 text-xs uppercase font-semibold py-1">
           Featured
         </Badge>
       )}
@@ -379,50 +365,33 @@ function ProductBadges({ product, discountPercentage }: ProductBadgesProps) {
   );
 }
 
-// ==================== COMPONENT: QuickActionButtons ====================
-
 function QuickActionButtons({
   isWishlisted,
   onAddToWishlist,
 }: QuickActionButtonsProps) {
   return (
-    <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="rounded-full backdrop-blur-sm p-0"
-            onClick={(e) => {
-              e.preventDefault();
-              onAddToWishlist();
-            }}
-          >
-            <Heart
-              className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""
-                }`}
-            />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          <p>{isWishlisted ? "Remove from wishlist" : "Add to wishlist"}</p>
-        </TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="rounded-full backdrop-blur-sm p-0"
-          >
-            <Share2 className="w-4 h-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="right">
-          <p>Share</p>
-        </TooltipContent>
-      </Tooltip >
-    </div >
+    <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
+      <Button
+        size="icon"
+        variant="ghost"
+        className="h-9 w-9 rounded-full backdrop-blur-md shadow-none transition-all ease-in-out duration-300"
+        onClick={(e) => {
+          e.preventDefault();
+          onAddToWishlist();
+        }}
+      >
+        <Heart
+          className={`w-4 h-4 transition-all ease-in-out duration-300 ${isWishlisted && "fill-red-500 text-red-500"}`}
+        />
+      </Button>
+      <Button
+        size="icon"
+        variant="ghost"
+        className="h-9 w-9 rounded-full backdrop-blur-md shadow-none transition-all ease-in-out duration-300"
+      >
+        <Share2 className="w-4 h-4" />
+      </Button>
+    </div>
   );
 }
 
@@ -439,7 +408,7 @@ function ProductInfoHeader({ product }: ProductInfoHeaderProps) {
           <span className="text-xs">({product.reviewCount})</span>
         </div>
       </div>
-      <Link href={`/products/${product.slug}`}>
+      <Link href={`/product/${product.slug}`}>
         <h3 className="font-semibold line-clamp-2 transition-all ease-in-out cursor-pointer">
           {product.title}
         </h3>
@@ -486,11 +455,11 @@ const ColorOptions = ({
     >
       <span className="text-xs font-medium ">Color</span>
       <div className="flex gap-2">
-        {colors.map((color: any) => (
+        {colors.map((color: Variant['color']) => (
           <RadioGroupItem
-            key={color.value}
-            value={color.value}
-            style={{ backgroundColor: color.value }}
+            key={color.hex}
+            value={color.hex}
+            style={{ backgroundColor: color.hex }}
             title={color.name}
           />
         ))}
@@ -615,12 +584,14 @@ export default function ProductCard({
   layout = "grid",
 }: ProductCardProps & { layout?: "grid" | "list" }) {
   const [selectedSize, setSelectedSize] = useState(() => {
-    const defaultVariant = product.variants.find(v => v.isDefault);
-    return defaultVariant?.size || product.variants[0]?.size || "";
+    const variants = product.variants || [];
+    const defaultVariant = variants.find(v => v.isDefault);
+    return defaultVariant?.size || variants[0]?.size || "";
   });
   const [selectedColor, setSelectedColor] = useState(() => {
-    const defaultVariant = product.variants.find(v => v.isDefault);
-    return defaultVariant?.color.hex || product.variants[0]?.color.hex || "";
+    const variants = product.variants || [];
+    const defaultVariant = variants.find(v => v.isDefault);
+    return defaultVariant?.color.hex || variants[0]?.color.hex || "";
   });
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
@@ -731,7 +702,7 @@ export default function ProductCard({
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-muted">{product.brand}</p>
-                  <Link href={`/products/${product.slug}`}>
+                  <Link href={`/product/${product.slug}`}>
                     <h3 className="font-bold text-lg transition-colors">{product.title}</h3>
                   </Link>
                 </div>
@@ -813,7 +784,7 @@ export default function ProductCard({
     <TooltipProvider>
       <motion.div
         layout
-        className={`group relative rounded-2xl border bg-background overflow-hidden transition-all duration-700 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] dark:hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ${className}`}
+        className={`group relative rounded-2xl border bg-background overflow-hidden transition-all duration-700 ${className}`}
       >
         <div className="relative aspect-4/5 overflow-hidden">
           <ProductImageSection
@@ -824,12 +795,8 @@ export default function ProductCard({
             onAddToWishlist={handleAddToWishlist}
             selectedColorName={product.variants.find(v => v.color.hex === selectedColor)?.color.name}
           />
-
-          {/* User Reference Gradient Overlay */}
-          <div className="absolute inset-0 bg-linear-to-t from-background/90 via-background/20 to-transparent z-10 transition-all duration-700 group-hover:opacity-40" />
-
           {/* Glassmorphic Info Container */}
-          <div className="absolute bottom-3 left-3 right-3 z-30 p-4 rounded-xl border border-white/10 bg-background/40 dark:bg-black/30 backdrop-blur-lg shadow-xl transform translate-y-1 group-hover:translate-y-0 transition-all duration-500 overflow-hidden">
+          <div className="absolute bottom-0 left-0 right-0 z-30 p-4 backdrop-blur-lg shadow-xl transform translate-y-1 group-hover:translate-y-0 transition-all duration-500 overflow-hidden">
             {/* Subtitle/Brand */}
             <div className="transition-all duration-500 transform group-hover:-translate-y-1">
               <ProductInfoHeader product={product} />
@@ -837,18 +804,15 @@ export default function ProductCard({
 
             <div className="flex items-end justify-between gap-2 mt-2 transition-all duration-500">
               <PriceSection product={product} savings={savings} />
-
-              <div className="opacity-0 group-hover:opacity-100 transition-all duration-500 delay-75 transform translate-x-2 group-hover:translate-x-0">
-                <ColorOptions
-                  product={product}
-                  selectedColor={selectedColor}
-                  onColorSelect={handleColorSelect}
-                />
-              </div>
+              <ColorOptions
+                product={product}
+                selectedColor={selectedColor}
+                onColorSelect={handleColorSelect}
+              />
             </div>
 
             {/* Hidden Action Buttons - revealed on hover */}
-            <div className="mt-4 h-0 group-hover:h-10 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
+            <div className="group-hover:mt-4 h-0 group-hover:h-10 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
               <ActionButtons
                 isOutOfStock={isOutOfStock}
                 onAddToCart={handleAddToCart}

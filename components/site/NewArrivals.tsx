@@ -9,7 +9,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import ProductCard from "@/components/site/ProductCard";
 import type { Product } from "@/types/ProductCard";
 
-const newArrivals: Product[] = [
+const rawProducts = [
   {
     id: "1",
     title: "Slim Fit Cotton Shirt",
@@ -62,6 +62,7 @@ const newArrivals: Product[] = [
     title: "Premium Wool Sweater",
     brand: "Massimo Dutti",
     price: 75.5,
+    originalPrice: 75.5,
     images: ["/products/sweater-1.jpg", "/products/sweater-2.jpg"],
     category: "Sweaters",
     slug: "premium-wool-sweater",
@@ -106,6 +107,7 @@ const newArrivals: Product[] = [
     title: "Casual Summer Dress",
     brand: "Mango",
     price: 55.99,
+    originalPrice: 55.99,
     images: ["/products/dress-1.jpg", "/products/dress-2.jpg"],
     category: "Dresses",
     slug: "casual-summer-dress",
@@ -151,6 +153,7 @@ const newArrivals: Product[] = [
     title: "Formal Blazer",
     brand: "Hugo Boss",
     price: 199.99,
+    originalPrice: 199.99,
     images: ["/products/blazer-1.jpg", "/products/blazer-2.jpg"],
     category: "Blazers",
     slug: "formal-blazer",
@@ -190,6 +193,40 @@ const newArrivals: Product[] = [
     sku: "ADIDAS-SNK-008",
   },
 ];
+
+const newArrivals: Product[] = rawProducts.map((p) => {
+  // Create variants from sizes and colors
+  const variants = p.sizes.flatMap((size, sizeIndex) =>
+    p.colors.map((color, colorIndex) => ({
+      id: `${p.id}-v-${size}-${color.name}`,
+      color: { name: color.name, hex: color.value },
+      size: size,
+      sku: `${p.sku}-${size}-${color.name.substring(0, 3).toUpperCase()}`,
+      price: p.price,
+      originalPrice: p.originalPrice,
+      discount: p.discount,
+      stockQuantity: p.stockQuantity,
+      isDefault: sizeIndex === 0 && colorIndex === 0,
+    }))
+  );
+
+  // Create assets
+  const assets = p.images.map((url, index) => ({
+    id: `${p.id}-asset-${index}`,
+    type: "image" as const,
+    role: "gallery" as const,
+    url,
+    alt: p.title,
+    order: index,
+  }));
+
+  return {
+    ...p,
+    basePrice: p.price,
+    variants,
+    assets,
+  };
+});
 
 
 // Filter Tabs Component
@@ -237,9 +274,13 @@ export default function NewArrivals() {
       case "bestsellers":
         return product.isBestSeller;
       case "discount":
-        return product.discount;
+        return product.variants.some((v) => (v.discount || 0) > 0);
       case "low-stock":
-        return product.stockQuantity < 10;
+        const totalStock = product.variants.reduce(
+          (acc, v) => acc + v.stockQuantity,
+          0
+        );
+        return totalStock < 10;
       default:
         return true;
     }

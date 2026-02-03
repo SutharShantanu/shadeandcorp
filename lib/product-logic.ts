@@ -85,12 +85,24 @@ export async function fetchProducts(searchParams: any) {
                     as: "variants"
                 }
             },
-            // Lookup Assets
+            // Lookup Assets (both product-level and variant-level)
             {
                 $lookup: {
                     from: "assets",
-                    localField: "_id",
-                    foreignField: "productId",
+                    let: { productId: "$_id", variantIds: "$variants._id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $or: [
+                                        { $eq: ["$productId", "$$productId"] },
+                                        { $in: ["$variantId", "$$variantIds"] }
+                                    ]
+                                }
+                            }
+                        },
+                        { $sort: { order: 1 } }
+                    ],
                     as: "assets"
                 }
             },
@@ -98,6 +110,33 @@ export async function fetchProducts(searchParams: any) {
             {
                 $addFields: {
                     id: { $toString: "$_id" },
+                    variants: {
+                        $map: {
+                            input: "$variants",
+                            as: "variant",
+                            in: {
+                                $mergeObjects: [
+                                    "$$variant",
+                                    { id: { $toString: "$$variant._id" } }
+                                ]
+                            }
+                        }
+                    },
+                    assets: {
+                        $map: {
+                            input: "$assets",
+                            as: "asset",
+                            in: {
+                                $mergeObjects: [
+                                    "$$asset",
+                                    {
+                                        productId: { $toString: "$$asset.productId" },
+                                        variantId: { $toString: "$$asset.variantId" }
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 }
             },
             {
