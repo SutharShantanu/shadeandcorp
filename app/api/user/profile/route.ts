@@ -45,6 +45,7 @@ export async function GET() {
         role: user.role,
         accountStatus: user.accountStatus,
         joinDate: user.joinDate,
+        sessions: user.sessions || [],
         lastLogin: user.lastLogin,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -53,11 +54,15 @@ export async function GET() {
   } catch (error) {
     console.error("Get profile error:", error);
     return NextResponse.json(
-      { ok: false, error: "Server error. Please try again later." },
+      { 
+        ok: false, 
+        error: error instanceof Error ? error.message : "Unknown error"
+      },
       { status: 500 }
     );
   }
 }
+
 
 // PATCH - Update user profile
 export async function PATCH(req: Request) {

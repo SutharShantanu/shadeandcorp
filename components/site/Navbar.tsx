@@ -77,7 +77,7 @@ const categories = [
       { title: "Sweatshirts", href: "/products/men/clothing/sweatshirts" },
       { title: "Activewear", href: "/products/men/clothing/activewear" },
     ],
-    image: "/images/men-category.jpg",
+    image: "https://images.unsplash.com/photo-1488161628813-99425260dead?w=400&h=300&fit=crop",
   },
   {
     title: "Women",
@@ -95,7 +95,7 @@ const categories = [
       { title: "Activewear", href: "/products/women/clothing/activewear" },
       { title: "Lingerie", href: "/products/women/clothing/lingerie" },
     ],
-    image: "/images/women-category.jpg",
+    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=300&fit=crop",
   },
   {
     title: "Kids",
@@ -109,7 +109,7 @@ const categories = [
       { title: "Accessories", href: "/products/kids/clothing/accessories" },
       { title: "Winter Wear", href: "/products/kids/clothing/winter-wear" },
     ],
-    image: "/images/kids-category.jpg",
+    image: "https://images.unsplash.com/photo-1540331547168-8b6310d425f9?w=400&h=300&fit=crop",
   },
   {
     title: "Collections",
@@ -121,7 +121,7 @@ const categories = [
       { title: "Festive Collection", href: "/products/collections/festive" },
       { title: "Premium Collection", href: "/products/collections/premium" },
     ],
-    image: "/images/collections.jpg",
+    image: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&h=300&fit=crop",
   },
   {
     title: "Accessories",
@@ -135,7 +135,7 @@ const categories = [
       { title: "Hats & Caps", href: "/products/accessories/hats" },
       { title: "Scarves", href: "/products/accessories/scarves" },
     ],
-    image: "/images/accessories.jpg",
+    image: "https://images.unsplash.com/photo-1576053139778-7e32f5f09437?w=400&h=300&fit=crop",
   },
 ];
 

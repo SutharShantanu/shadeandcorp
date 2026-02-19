@@ -1,18 +1,60 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CircleCheck, CreditCard, Plus, Edit, Trash2, Check, X, BadgeCheck, User, Wallet, Building2, Smartphone } from "lucide-react";
+import {
+  CircleCheck,
+  CreditCard,
+  Plus,
+  Edit,
+  Trash2,
+  Check,
+  X,
+  BadgeCheck,
+  User,
+  Wallet,
+  Building2,
+  Smartphone,
+} from "lucide-react";
 import { IconBadge } from "../ui/icon-badge";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
@@ -20,7 +62,10 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Alert, AlertDescription } from "../ui/alert";
 import { CardInput } from "@/components/ui/card-input";
 import { UpiInput } from "@/components/ui/upi-input";
-import { paymentMethodSchema, type PaymentMethodFormData } from "@/lib/validations/payment";
+import {
+  paymentMethodSchema,
+  type PaymentMethodFormData,
+} from "@/lib/validations/payment";
 
 interface BillingTabProps {
   userProfile: UserProfile | null;
@@ -40,28 +85,36 @@ interface PaymentMethod {
   isDefault: boolean;
 }
 
-export default function BillingTab({ userProfile, shouldOpenModal, onModalClose }: BillingTabProps) {
+export default function BillingTab({
+  userProfile,
+  shouldOpenModal,
+  onModalClose,
+}: BillingTabProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(
-    (userProfile?.paymentMethods || []).map((method: PaymentMethod & { _id?: string }, index: number) => ({
-      id: method._id || `pm-${index}`,
-      type: method.type || "credit-card",
-      cardNumber: method.cardNumber,
-      expiryDate: method.expiryDate,
-      cvc: method.cvc,
-      cardHolderName: method.cardHolderName || "",
-      upiId: method.upiId,
-      accountNumber: method.accountNumber,
-      isDefault: method.isDefault ?? false,
-    }))
+    (userProfile?.paymentMethods || []).map(
+      (method: PaymentMethod & { _id?: string }, index: number) => ({
+        id: method._id || `pm-${index}`,
+        type: method.type || "credit-card",
+        cardNumber: method.cardNumber,
+        expiryDate: method.expiryDate,
+        cvc: method.cvc,
+        cardHolderName: method.cardHolderName || "",
+        upiId: method.upiId,
+        accountNumber: method.accountNumber,
+        isDefault: method.isDefault ?? false,
+      }),
+    ),
   );
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(
+    null,
+  );
   const [alertDismissed, setAlertDismissed] = useState(false);
 
   // Form for adding payment method
@@ -161,7 +214,7 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
       paymentMethods.map((method) => ({
         ...method,
         isDefault: method.id === id,
-      }))
+      })),
     );
     toast.success("Default payment method updated");
   };
@@ -195,8 +248,11 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
 
       setPaymentMethods(
         data.isDefault
-          ? [...paymentMethods.map(m => ({ ...m, isDefault: false })), newMethod]
-          : [...paymentMethods, newMethod]
+          ? [
+              ...paymentMethods.map((m) => ({ ...m, isDefault: false })),
+              newMethod,
+            ]
+          : [...paymentMethods, newMethod],
       );
 
       toast.success("Payment method added successfully");
@@ -207,7 +263,9 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
       const params = new URLSearchParams(searchParams?.toString() || "");
       params.delete("action");
       const query = params.toString();
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      });
     } catch (error) {
       console.error("Error adding payment method:", error);
       toast.error("An error occurred while adding payment method");
@@ -223,8 +281,8 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
           ? { ...method, ...data }
           : data.isDefault
             ? { ...method, isDefault: false }
-            : method
-      )
+            : method,
+      ),
     );
 
     toast.success("Payment method updated successfully");
@@ -236,7 +294,9 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
   const handleDeleteMethod = () => {
     if (!selectedMethod) return;
 
-    const newMethods = paymentMethods.filter((method) => method.id !== selectedMethod.id);
+    const newMethods = paymentMethods.filter(
+      (method) => method.id !== selectedMethod.id,
+    );
 
     // If deleted method was default, set first remaining method as default
     if (selectedMethod.isDefault && newMethods.length > 0) {
@@ -280,7 +340,9 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
       if (params.has("action")) {
         params.delete("action");
         const query = params.toString();
-        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+        router.replace(query ? `${pathname}?${query}` : pathname, {
+          scroll: false,
+        });
       }
     }
   };
@@ -294,34 +356,27 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
             Manage your payment methods and billing information.
           </p>
         </div>
-        <Button onClick={openAddDialog}>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button onClick={openAddDialog} variant="outline">
+          <Plus className="h-4 w-4" />
           Add Payment Method
         </Button>
       </div>
 
       {paymentMethods.length === 0 && !alertDismissed && (
-        <Alert className="border-blue-500/50 bg-blue-50 dark:bg-blue-950/20">
-          <CreditCard className="h-4 w-4 text-blue-600 dark:text-blue-500" />
+        <Alert color="info" className="">
+          <CreditCard className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="font-medium text-blue-800 dark:text-blue-300 mb-1">No payment methods added yet</p>
-              <p className="text-sm text-blue-700 dark:text-blue-400">Add a payment method for faster and secure checkout</p>
+              <p className="font-medium mb-1">No payment methods added yet</p>
+              <p className="text-xs">
+                Add a payment method for faster and secure checkout
+              </p>
             </div>
             <div className="flex items-center gap-2 ml-4">
-              <Button
-                size="sm"
-                onClick={openAddDialog}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Payment
-              </Button>
               <Button
                 size="icon"
                 variant="ghost"
                 onClick={() => setAlertDismissed(true)}
-                className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900/20"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -330,10 +385,14 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
         </Alert>
       )}
 
-      {paymentMethods.length === 0 && alertDismissed ? null : paymentMethods.length > 0 ? (
+      {paymentMethods.length === 0 &&
+      alertDismissed ? null : paymentMethods.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
           {paymentMethods.map((method) => (
-            <Card key={method.id} className={method.isDefault ? "border-primary" : ""}>
+            <Card
+              key={method.id}
+              className={method.isDefault ? "border-primary" : ""}
+            >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base flex items-center gap-2">
@@ -343,7 +402,9 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                     {method.cardHolderName}
                   </CardTitle>
                   {method.isDefault && (
-                    <Badge variant="default">Default <BadgeCheck className="h-4 w-4" /></Badge>
+                    <Badge variant="default">
+                      Default <BadgeCheck className="h-4 w-4" />
+                    </Badge>
                   )}
                 </div>
               </CardHeader>
@@ -351,8 +412,13 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                 <div className="space-y-3">
                   <div className="text-sm">
                     <div className="flex items-center gap-2 mb-2">
-                      <IconBadge variant="default" size="sm" className="rounded-md h-auto py-0.5 px-1.5 border border-muted-foreground/10 bg-muted/50">
-                        {method.type === "credit-card" || method.type === "debit-card" ? (
+                      <IconBadge
+                        variant="default"
+                        size="sm"
+                        className="rounded-md h-auto py-0.5 px-1.5 border border-muted-foreground/10 bg-muted/50"
+                      >
+                        {method.type === "credit-card" ||
+                        method.type === "debit-card" ? (
                           <Wallet className="h-2.5 w-2.5 text-muted-foreground" />
                         ) : method.type === "upi" ? (
                           <Smartphone className="h-2.5 w-2.5 text-muted-foreground" />
@@ -367,14 +433,22 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                     {method.type === "upi" && method.upiId && (
                       <p className="font-medium">{method.upiId}</p>
                     )}
-                    {(method.type === "credit-card" || method.type === "debit-card") && method.cardNumber && (
-                      <>
-                        <p className="font-medium font-mono">{maskCardNumber(method.cardNumber)}</p>
-                        <p className="text-muted-foreground">Expires: {method.expiryDate}</p>
-                      </>
-                    )}
+                    {(method.type === "credit-card" ||
+                      method.type === "debit-card") &&
+                      method.cardNumber && (
+                        <>
+                          <p className="font-medium font-mono">
+                            {maskCardNumber(method.cardNumber)}
+                          </p>
+                          <p className="text-muted-foreground">
+                            Expires: {method.expiryDate}
+                          </p>
+                        </>
+                      )}
                     {method.type === "net-banking" && method.accountNumber && (
-                      <p className="font-medium font-mono">****{method.accountNumber.slice(-4)}</p>
+                      <p className="font-medium font-mono">
+                        ****{method.accountNumber.slice(-4)}
+                      </p>
                     )}
                   </div>
                   <div className="flex gap-2 pt-2">
@@ -388,7 +462,11 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                         Set as Default
                       </Button>
                     )}
-                    <Button variant="outline" size="sm" onClick={() => openEditDialog(method)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditDialog(method)}
+                    >
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
@@ -413,14 +491,20 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
           {/* Sticky Header (contains close button automatically) */}
           <DialogHeader className="px-6 pt-6 pb-4 border-b bg-background sticky top-0 z-50">
             <DialogTitle>Add Payment Method</DialogTitle>
-            <DialogDescription>Add a new payment method for faster checkout.</DialogDescription>
+            <DialogDescription>
+              Add a new payment method for faster checkout.
+            </DialogDescription>
           </DialogHeader>
 
           {/* Scrollable Content */}
           <div className="px-6 py-4 overflow-y-auto">
             <Form {...addForm}>
               {/* Give the form an id so footer outside can submit it */}
-              <form id="add-payment-form" onSubmit={addForm.handleSubmit(onAddSubmit)} className="flex flex-col gap-4">
+              <form
+                id="add-payment-form"
+                onSubmit={addForm.handleSubmit(onAddSubmit)}
+                className="flex flex-col gap-4"
+              >
                 {/* Payment Type Selection */}
                 <FormField
                   control={addForm.control}
@@ -428,17 +512,24 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Payment Type *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select payment type" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="credit-card">Credit Card</SelectItem>
+                          <SelectItem value="credit-card">
+                            Credit Card
+                          </SelectItem>
                           <SelectItem value="debit-card">Debit Card</SelectItem>
                           <SelectItem value="upi">UPI</SelectItem>
-                          <SelectItem value="net-banking">Net Banking</SelectItem>
+                          <SelectItem value="net-banking">
+                            Net Banking
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -447,7 +538,8 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                 />
 
                 {/* Card Payment Fields */}
-                {(watchAddType === "credit-card" || watchAddType === "debit-card") && (
+                {(watchAddType === "credit-card" ||
+                  watchAddType === "debit-card") && (
                   <CardInput
                     key={watchAddType}
                     form={addForm}
@@ -485,7 +577,11 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                         <FormItem>
                           <FormLabel>UPI ID *</FormLabel>
                           <FormControl>
-                            <UpiInput value={field.value || ""} onChange={field.onChange} placeholder="username@paytm" />
+                            <UpiInput
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              placeholder="username@paytm"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -533,7 +629,9 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                   name="isDefault"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-base font-medium">Default Payment Method</FormLabel>
+                      <FormLabel className="text-base font-medium">
+                        Default Payment Method
+                      </FormLabel>
                       <FormControl>
                         <div
                           onClick={() => field.onChange(!field.value)}
@@ -541,15 +639,27 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                           aria-pressed={field.value}
                         >
                           <div className="flex items-start gap-3">
-                            <span className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-lg ${field.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                            <span
+                              className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-lg ${field.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                            >
                               <CircleCheck className="h-5 w-5" />
                             </span>
                             <div className="space-y-1 flex-1">
-                              <div className={`text-sm font-semibold ${field.value ? "text-primary" : "text-foreground"}`}>Use as default</div>
-                              <p className="text-xs text-muted-foreground">Use this as your primary payment option for faster checkout</p>
+                              <div
+                                className={`text-sm font-semibold ${field.value ? "text-primary" : "text-foreground"}`}
+                              >
+                                Use as default
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Use this as your primary payment option for
+                                faster checkout
+                              </p>
                             </div>
                             <div onClick={(e) => e.stopPropagation()}>
-                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
                             </div>
                           </div>
                         </div>
@@ -564,8 +674,20 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
 
           {/* Footer — outside scrollable area but submits the form via form="add-payment-form" */}
           <DialogFooter className="px-6 py-4 border-t flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" form="add-payment-form" disabled={!addForm.formState.isValid}>Add Payment Method</Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsAddDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="add-payment-form"
+              disabled={!addForm.formState.isValid}
+            >
+              Add Payment Method
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -577,13 +699,19 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
           {/* Sticky Header */}
           <DialogHeader className="px-6 pt-6 pb-4 border-b bg-background sticky top-0 z-50">
             <DialogTitle>Edit Payment Method</DialogTitle>
-            <DialogDescription>Update your payment method details.</DialogDescription>
+            <DialogDescription>
+              Update your payment method details.
+            </DialogDescription>
           </DialogHeader>
 
           {/* Scrollable Content */}
           <div className="px-6 py-4 overflow-y-auto">
             <Form {...editForm}>
-              <form id="edit-payment-form" onSubmit={editForm.handleSubmit(onEditSubmit)} className="flex flex-col gap-4">
+              <form
+                id="edit-payment-form"
+                onSubmit={editForm.handleSubmit(onEditSubmit)}
+                className="flex flex-col gap-4"
+              >
                 {/* Payment Type Selection */}
                 <FormField
                   control={editForm.control}
@@ -591,17 +719,24 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Payment Type *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select payment type" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="credit-card">Credit Card</SelectItem>
+                          <SelectItem value="credit-card">
+                            Credit Card
+                          </SelectItem>
                           <SelectItem value="debit-card">Debit Card</SelectItem>
                           <SelectItem value="upi">UPI</SelectItem>
-                          <SelectItem value="net-banking">Net Banking</SelectItem>
+                          <SelectItem value="net-banking">
+                            Net Banking
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -610,7 +745,8 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                 />
 
                 {/* Card Payment Fields */}
-                {(watchEditType === "credit-card" || watchEditType === "debit-card") && (
+                {(watchEditType === "credit-card" ||
+                  watchEditType === "debit-card") && (
                   <CardInput
                     key={watchEditType}
                     form={editForm}
@@ -647,7 +783,11 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                         <FormItem>
                           <FormLabel>UPI ID *</FormLabel>
                           <FormControl>
-                            <UpiInput value={field.value || ""} onChange={field.onChange} placeholder="username@paytm" />
+                            <UpiInput
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              placeholder="username@paytm"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -694,7 +834,9 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                   name="isDefault"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-base font-medium">Default Payment Method</FormLabel>
+                      <FormLabel className="text-base font-medium">
+                        Default Payment Method
+                      </FormLabel>
                       <FormControl>
                         <div
                           onClick={() => field.onChange(!field.value)}
@@ -702,15 +844,27 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
                           aria-pressed={field.value}
                         >
                           <div className="flex items-start gap-3">
-                            <span className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-lg ${field.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                            <span
+                              className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-lg ${field.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
+                            >
                               <CircleCheck className="h-5 w-5" />
                             </span>
                             <div className="space-y-1 flex-1">
-                              <div className={`text-sm font-semibold ${field.value ? "text-primary" : "text-foreground"}`}>Use as default</div>
-                              <p className="text-xs text-muted-foreground">Use this as your primary payment option for faster checkout</p>
+                              <div
+                                className={`text-sm font-semibold ${field.value ? "text-primary" : "text-foreground"}`}
+                              >
+                                Use as default
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Use this as your primary payment option for
+                                faster checkout
+                              </p>
                             </div>
                             <div onClick={(e) => e.stopPropagation()}>
-                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
                             </div>
                           </div>
                         </div>
@@ -725,29 +879,45 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
 
           {/* Footer — outside scrollable area but submits the edit form */}
           <DialogFooter className="px-6 py-4 border-t flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" form="edit-payment-form">Save Changes</Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" form="edit-payment-form">
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      < AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} >
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Payment Method</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this payment method? This action cannot be undone.
+              Are you sure you want to delete this payment method? This action
+              cannot be undone.
               {selectedMethod?.isDefault && paymentMethods.length > 1 && (
                 <span className="block mt-2 text-amber-600 dark:text-amber-500">
-                  Note: The first remaining payment method will be set as your new default.
+                  Note: The first remaining payment method will be set as your
+                  new default.
                 </span>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteMethod} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleDeleteMethod}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -756,4 +926,3 @@ export default function BillingTab({ userProfile, shouldOpenModal, onModalClose 
     </div>
   );
 }
-

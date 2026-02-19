@@ -209,7 +209,7 @@ const rawTrendingProducts = [
     originalPrice: 220.0,
     discount: 28,
     images: [
-      "https://images.unsplash.com/photo-1566479179816-d53e6d03f359?w=500&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=500&h=600&fit=crop",
       "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=500&h=600&fit=crop",
     ],
     category: "Dresses",

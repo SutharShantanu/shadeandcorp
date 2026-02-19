@@ -67,6 +67,13 @@ export interface UserProfile {
   isPhoneVerified: boolean;
   role: string;
   accountStatus?: string;
+  sessions?: {
+    ipAddress?: string;
+    city?: string;
+    country?: string;
+    deviceInfo?: string;
+    loggedInAt?: string;
+  }[];
   joinDate: string;
   lastLogin?: string;
   createdAt?: string;

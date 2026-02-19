@@ -26,12 +26,7 @@ import {
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import {
   CommandDialog,
   CommandEmpty,
@@ -65,15 +60,78 @@ const VALID_TABS = [
 ] as const;
 
 const SEARCH_ITEMS = [
-  { tab: "profile", keywords: ["name", "bio", "picture", "avatar", "personal", "info"], label: "Profile Information", icon: UserCircle, category: "Account", description: "Update your name, bio, and profile picture" },
-  { tab: "account", keywords: ["phone", "email", "gender", "birthday", "contact"], label: "Account Details", icon: Shield, category: "Account", description: "Manage email, phone, and personal details" },
-  { tab: "security", keywords: ["password", "login", "sessions", "security", "delete", "remove"], label: "Security & Password", icon: Lock, category: "Security", description: "Change password and manage active sessions" },
-  { tab: "security", keywords: ["connected", "oauth", "google", "revoke", "disconnect"], label: "Connected Accounts", icon: Link2, category: "Security", description: "Manage third-party account connections" },
-  { tab: "orders", keywords: ["orders", "purchases", "history", "buy"], label: "Order History", icon: Package, category: "Shopping", description: "View and track your orders" },
-  { tab: "addresses", keywords: ["address", "shipping", "delivery", "location"], label: "Shipping Addresses", icon: MapPin, category: "Shopping", description: "Manage delivery addresses" },
-  { tab: "billing", keywords: ["payment", "card", "billing", "method"], label: "Payment Methods", icon: CreditCard, category: "Shopping", description: "Add or remove payment methods" },
-  { tab: "notifications", keywords: ["notifications", "alerts", "email", "preferences"], label: "Notification Settings", icon: Bell, category: "Preferences", description: "Configure email and push notifications" },
-  { tab: "notifications", keywords: ["appearance", "theme", "display", "dark", "light"], label: "Appearance & Theme", icon: Palette, category: "Preferences", description: "Customize theme and display settings" },
+  {
+    tab: "profile",
+    keywords: ["name", "bio", "picture", "avatar", "personal", "info"],
+    label: "Profile Information",
+    icon: UserCircle,
+    category: "Account",
+    description: "Update your name, bio, and profile picture",
+  },
+  {
+    tab: "account",
+    keywords: ["phone", "email", "gender", "birthday", "contact"],
+    label: "Account Details",
+    icon: Shield,
+    category: "Account",
+    description: "Manage email, phone, and personal details",
+  },
+  {
+    tab: "security",
+    keywords: ["password", "login", "sessions", "security", "delete", "remove"],
+    label: "Security & Password",
+    icon: Lock,
+    category: "Security",
+    description: "Change password and manage active sessions",
+  },
+  {
+    tab: "security",
+    keywords: ["connected", "oauth", "google", "revoke", "disconnect"],
+    label: "Connected Accounts",
+    icon: Link2,
+    category: "Security",
+    description: "Manage third-party account connections",
+  },
+  {
+    tab: "orders",
+    keywords: ["orders", "purchases", "history", "buy"],
+    label: "Order History",
+    icon: Package,
+    category: "Shopping",
+    description: "View and track your orders",
+  },
+  {
+    tab: "addresses",
+    keywords: ["address", "shipping", "delivery", "location"],
+    label: "Shipping Addresses",
+    icon: MapPin,
+    category: "Shopping",
+    description: "Manage delivery addresses",
+  },
+  {
+    tab: "billing",
+    keywords: ["payment", "card", "billing", "method"],
+    label: "Payment Methods",
+    icon: CreditCard,
+    category: "Shopping",
+    description: "Add or remove payment methods",
+  },
+  {
+    tab: "notifications",
+    keywords: ["notifications", "alerts", "email", "preferences"],
+    label: "Notification Settings",
+    icon: Bell,
+    category: "Preferences",
+    description: "Configure email and push notifications",
+  },
+  {
+    tab: "notifications",
+    keywords: ["appearance", "theme", "display", "dark", "light"],
+    label: "Appearance & Theme",
+    icon: Palette,
+    category: "Preferences",
+    description: "Customize theme and display settings",
+  },
 ] as const;
 
 function ProfileContent() {
@@ -96,9 +154,9 @@ function ProfileContent() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [alertDismissed, setAlertDismissed] = useState(false);
-  const [shouldOpenModal, setShouldOpenModal] = useState(actionFromUrl === "add");
-
-
+  const [shouldOpenModal, setShouldOpenModal] = useState(
+    actionFromUrl === "add",
+  );
 
   // Check for missing profile information
   const missingInfo = useMemo(() => {
@@ -106,7 +164,10 @@ function ProfileContent() {
     if (!userProfile?.addresses || userProfile.addresses.length === 0) {
       missing.push({ label: "shipping address", tab: "addresses" });
     }
-    if (!userProfile?.paymentMethods || userProfile.paymentMethods.length === 0) {
+    if (
+      !userProfile?.paymentMethods ||
+      userProfile.paymentMethods.length === 0
+    ) {
       missing.push({ label: "payment method", tab: "billing" });
     }
     if (!userProfile?.phone) {
@@ -140,7 +201,7 @@ function ProfileContent() {
 
   // Group items by category
   const groupedItems = useMemo(() => {
-    const groups: Record<string, Array<typeof SEARCH_ITEMS[number]>> = {};
+    const groups: Record<string, Array<(typeof SEARCH_ITEMS)[number]>> = {};
     filteredSearchItems.forEach((item) => {
       if (!groups[item.category]) {
         groups[item.category] = [];
@@ -164,7 +225,10 @@ function ProfileContent() {
   // Sync activeTab with URL parameters
   useEffect(() => {
     const currentTab = searchParams.get("tab");
-    if (currentTab && VALID_TABS.includes(currentTab as (typeof VALID_TABS)[number])) {
+    if (
+      currentTab &&
+      VALID_TABS.includes(currentTab as (typeof VALID_TABS)[number])
+    ) {
       setActiveTab(currentTab);
     }
   }, [searchParams]);
@@ -204,7 +268,10 @@ function ProfileContent() {
       if (diffMins < 60) return `${diffMins}m ago`;
       if (diffHours < 24) return `${diffHours}h ago`;
       if (diffDays < 30) return `${diffDays}d ago`;
-      return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
     } catch {
       return null;
     }
@@ -236,29 +303,18 @@ function ProfileContent() {
                 <Search className="h-4 w-4" />
                 Search settings
                 <KbdGroup className="ml-2">
-                  <Kbd>
-                    Ctrl
-                  </Kbd>
-                  +
-                  <Kbd>
-                    K
-                  </Kbd>
+                  <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
                 </KbdGroup>
               </Button>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="outline" onClick={() => router.push(`/edit-profile?tab=${activeTab}`)} size="icon" className="rounded-full">
-                      <PencilLine className="size-3" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Edit Profile</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Button
+                variant="outline"
+                onClick={() => router.push(`/edit-profile?tab=${activeTab}`)}
+                className=""
+              >
+                <PencilLine className="size-4" />
+                <span>Edit Profile</span>
+              </Button>
             </div>
-            {/* Last Updated Badge */}
             {lastUpdated && (
               <Badge variant="secondary" className="text-xs justify-self-end">
                 Last updated: {lastUpdated}
@@ -287,7 +343,7 @@ function ProfileContent() {
                           <button
                             onClick={() =>
                               router.push(
-                                `/edit-profile?tab=${item.tab}&action=add`
+                                `/edit-profile?tab=${item.tab}&action=add`,
                               )
                             }
                             className="hover:underline capitalize inline cursor-pointer"
@@ -308,6 +364,7 @@ function ProfileContent() {
               value={activeTab}
               onValueChange={handleTabChange}
               className="w-full"
+              layout="vertical"
             >
               <TabsList className="relative z-10">
                 <TabsTrigger
@@ -358,31 +415,31 @@ function ProfileContent() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="profile" className="mt-2">
+              <TabsContent value="profile">
                 <ProfileDisplayTab userProfile={userProfile} />
               </TabsContent>
 
-              <TabsContent value="account" className="mt-2">
+              <TabsContent value="account">
                 <AccountDisplayTab userProfile={userProfile} />
               </TabsContent>
 
-              <TabsContent value="security" className="mt-2">
+              <TabsContent value="security">
                 <SecurityTab userProfile={userProfile} />
               </TabsContent>
 
-              <TabsContent value="orders" className="mt-2">
+              <TabsContent value="orders">
                 <OrdersTab userProfile={userProfile} />
               </TabsContent>
 
-              <TabsContent value="addresses" className="mt-2">
+              <TabsContent value="addresses">
                 <AddressesTab userProfile={userProfile} />
               </TabsContent>
 
-              <TabsContent value="billing" className="mt-2">
+              <TabsContent value="billing">
                 <BillingTab userProfile={userProfile} />
               </TabsContent>
 
-              <TabsContent value="notifications" className="mt-2">
+              <TabsContent value="notifications">
                 <NotificationsTab userProfile={userProfile} />
               </TabsContent>
             </Tabs>
@@ -390,7 +447,11 @@ function ProfileContent() {
         </Card>
 
         {/* Search Command Dialog */}
-        <CommandDialog open={searchOpen} onOpenChange={setSearchOpen} className="max-w-2xl">
+        <CommandDialog
+          open={searchOpen}
+          onOpenChange={setSearchOpen}
+          className="max-w-2xl"
+        >
           <CommandInput
             placeholder="Search settings..."
             value={searchQuery}
@@ -454,7 +515,7 @@ function ProfileContent() {
 
             {!searchQuery && <CommandSeparator />}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 p-2">
-              {Object.entries(groupedItems).map(([category, items],) => (
+              {Object.entries(groupedItems).map(([category, items]) => (
                 <div key={category}>
                   <CommandGroup heading={category} className="p-0!">
                     {items.map((item, index) => {

@@ -33,7 +33,7 @@ type PropType = {
 // Fashion-focused slides with compelling content
 const slides: SlideType[] = [
   {
-    image: "/hero/summer-collection.jpg",
+    image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1200&h=800&fit=crop",
     alt: "Summer Fashion Collection",
     title: "Summer Collection 2024",
     subtitle: "Discover the latest trends in warm-weather fashion",
@@ -42,7 +42,7 @@ const slides: SlideType[] = [
     theme: "light"
   },
   {
-    image: "/hero/new-arrivals.jpg",
+    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&h=800&fit=crop",
     alt: "New Arrivals",
     title: "New Arrivals",
     subtitle: "Fresh styles just dropped. Be the first to shop",
@@ -51,7 +51,7 @@ const slides: SlideType[] = [
     theme: "dark"
   },
   {
-    image: "/hero/sale-banner.jpg",
+    image: "https://images.unsplash.com/photo-1506152983158-b4a74a01c721?w=1200&h=800&fit=crop",
     alt: "Seasonal Sale",
     title: "Up to 50% Off",
     subtitle: "Limited time offer on selected items",
@@ -60,7 +60,7 @@ const slides: SlideType[] = [
     theme: "light"
   },
   {
-    image: "/hero/designer-collab.jpg", 
+    image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&h=800&fit=crop", 
     alt: "Designer Collaboration",
     title: "Designer Collaboration",
     subtitle: "Exclusive collection with leading designers",

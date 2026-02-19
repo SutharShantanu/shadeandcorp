@@ -62,7 +62,9 @@ function EditProfileContent() {
       : "profile";
   const [activeTab, setActiveTab] = useState(initialTab);
   const [showErrors, setShowErrors] = useState(false);
-  const [shouldOpenModal, setShouldOpenModal] = useState(actionFromUrl === "add");
+  const [shouldOpenModal, setShouldOpenModal] = useState(
+    actionFromUrl === "add",
+  );
 
   // Update activeTab when URL changes (using useEffect for URL param changes)
   // This is necessary to sync state with URL params (e.g., browser back/forward)
@@ -137,20 +139,22 @@ function EditProfileContent() {
               Update your account settings and preferences.
             </p>
           </div>
-          <Link href={`/profile?tab=${activeTab}`}>
-            <Button variant="outline">
-              <ArrowLeft className="size-4 mr-2" />
-              Back to Profile
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/profile?tab=${activeTab}`)}
+          >
+            <ArrowLeft className="size-4" />
+            Back to Profile
+          </Button>
         </div>
 
-        <Card>
-          <CardContent className="p-6">
+        <Card className="p-0">
+          <CardContent className="p-0">
             <Tabs
               value={activeTab}
               onValueChange={handleTabChange}
               className="w-full"
+              layout="vertical"
             >
               <TabsList className="relative z-10">
                 <TabsTrigger
@@ -201,7 +205,7 @@ function EditProfileContent() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="profile" className="mt-6">
+              <TabsContent value="profile" >
                 <ProfileTab
                   form={profileForm}
                   loading={loading}
@@ -211,7 +215,7 @@ function EditProfileContent() {
                 />
               </TabsContent>
 
-              <TabsContent value="account" className="mt-6">
+              <TabsContent value="account" >
                 <AccountTab
                   form={accountForm}
                   loading={loading}
@@ -221,23 +225,31 @@ function EditProfileContent() {
                 />
               </TabsContent>
 
-              <TabsContent value="security" className="mt-6">
+              <TabsContent value="security" >
                 <SecurityTab userProfile={userProfile} />
               </TabsContent>
 
-              <TabsContent value="orders" className="mt-6">
+              <TabsContent value="orders" >
                 <OrdersTab userProfile={userProfile} />
               </TabsContent>
 
-              <TabsContent value="addresses" className="mt-6">
-                <AddressesTab userProfile={userProfile} shouldOpenModal={shouldOpenModal} onModalClose={() => setShouldOpenModal(false)} />
+              <TabsContent value="addresses" >
+                <AddressesTab
+                  userProfile={userProfile}
+                  shouldOpenModal={shouldOpenModal}
+                  onModalClose={() => setShouldOpenModal(false)}
+                />
               </TabsContent>
 
-              <TabsContent value="billing" className="mt-6">
-                <BillingTab userProfile={userProfile} shouldOpenModal={shouldOpenModal} onModalClose={() => setShouldOpenModal(false)} />
+              <TabsContent value="billing" >
+                <BillingTab
+                  userProfile={userProfile}
+                  shouldOpenModal={shouldOpenModal}
+                  onModalClose={() => setShouldOpenModal(false)}
+                />
               </TabsContent>
 
-              <TabsContent value="notifications" className="mt-6">
+              <TabsContent value="notifications" >
                 <NotificationsTab userProfile={userProfile} />
               </TabsContent>
             </Tabs>

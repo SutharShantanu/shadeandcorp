@@ -1,6 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
+import mongoose from "mongoose";
 import { type NextAuthOptions } from "next-auth";
 import { getDeviceInfo } from "@/lib/deviceUtils";
 import connectDB from "@/lib/mongoDB";
@@ -197,9 +198,9 @@ export const authOptions: NextAuthOptions = {
             const firstName = typeof user.firstName === 'string'
               ? user.firstName
               : (typeof user.name === 'string' ? user.name.split(' ')[0] : 'User');
-            const lastName = typeof user.lastName === 'string'
+            const lastName = typeof user.lastName === 'string' && user.lastName.trim().length > 0
               ? user.lastName
-              : (typeof user.name === 'string' ? user.name.split(' ').slice(1).join(' ') : '');
+              : (typeof user.name === 'string' && user.name.split(' ').length > 1 ? user.name.split(' ').slice(1).join(' ') : '');
 
             const newUserData: Partial<IUser> = {
               firstName,
@@ -247,6 +248,7 @@ export const authOptions: NextAuthOptions = {
                 connectedProviders
               });
             } else {
+              console.error("SignIn error: Invalid user ID for update", existingUser);
               throw new Error('Invalid user ID for update');
             }
           }
@@ -255,6 +257,11 @@ export const authOptions: NextAuthOptions = {
         return true;
       } catch (error) {
         console.error("SignIn error:", error);
+        // Log the validation errors if they exist
+        if (error instanceof Error && (error as any).errors) {
+            console.error("Validation errors:", JSON.stringify((error as any).errors, null, 2));
+            return `/error?error=OAuthCreateError`; 
+        }
         return false;
       }
     },
@@ -262,24 +269,46 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account, trigger, session }) {
       // Initial sign in
       if (user) {
-        token.id = user.id;
+        // Ensure we have the database ID, not the provider ID
+        await connectDB();
+        const dbUser = await User.findOne({ email: user.email });
+        
+        if (dbUser) {
+          token.id = dbUser._id.toString();
+          token.role = dbUser.role;
+          token.connectedProviders = dbUser.connectedProviders;
+          token.firstName = dbUser.firstName;
+          token.lastName = dbUser.lastName;
+          token.image = dbUser.profilePicture;
+          token.isEmailVerified = dbUser.isEmailVerified;
+          token.isPhoneVerified = dbUser.isPhoneVerified;
+        } else {
+           // Fallback (should ideally not happen if signIn created the user)
+           token.id = user.id;
+           token.role = "customer";
+        }
+
         token.email = user.email;
         token.name = user.name;
-        token.image = user.image;
-        // Use type guard for extra fields that only exist on IUser
-        if ('firstName' in user) token.firstName = user.firstName;
-        if ('lastName' in user) token.lastName = user.lastName;
-        if ('isEmailVerified' in user) token.isEmailVerified = user.isEmailVerified;
-        if ('role' in user) token.role = user.role;
+        // token.image is set above from dbUser if found
+        if (!token.image && user.image) token.image = user.image;
+
+        // Use type guard for extra fields that only exist on IUser (fallback)
+        if ('firstName' in user && !token.firstName) token.firstName = user.firstName;
+        if ('lastName' in user && !token.lastName) token.lastName = user.lastName;
+        
         const provider = account?.provider || token.provider || "credentials";
         token.provider = provider;
 
-        const previousProviders = token.connectedProviders ?? {};
-        token.connectedProviders = {
-          credentials: previousProviders.credentials || provider === "credentials",
-          google: previousProviders.google || provider === "google",
-          github: previousProviders.github || provider === "github",
-        };
+        // Initialize connectedProviders if not set from DB
+        if (!token.connectedProviders) {
+            const previousProviders = (token.connectedProviders ?? {}) as Record<string, boolean>;
+            token.connectedProviders = {
+            credentials: previousProviders.credentials || provider === "credentials",
+            google: previousProviders.google || provider === "google",
+            github: previousProviders.github || provider === "github",
+            };
+        }
       }
 
       // Refresh user data on session update
@@ -311,7 +340,21 @@ export const authOptions: NextAuthOptions = {
         // Fetch fresh user data from database to ensure we have latest values
         try {
           await connectDB();
-          const dbUser = await User.findById(token.id);
+          let dbUser;
+
+          // Check if token.id is a valid MongoDB ObjectId
+          if (mongoose.Types.ObjectId.isValid(token.id as string)) {
+             dbUser = await User.findById(token.id);
+          } 
+
+          // If not valid ObjectId or not found, try finding by email
+          if (!dbUser && token.email) {
+             dbUser = await User.findOne({ email: token.email });
+             // If found by email, update the session ID to the correct MongoDB ID
+             if (dbUser) {
+                session.user.id = dbUser._id.toString();
+             }
+          }
 
           if (dbUser) {
             // Use fresh database values for critical fields
@@ -321,6 +364,7 @@ export const authOptions: NextAuthOptions = {
             session.user.lastName = dbUser.lastName;
             session.user.role = dbUser.role;
             session.user.provider = token.provider as string;
+
             const dbConnected = dbUser.connectedProviders ?? {
               credentials: dbUser.password?.length > 0,
               google: false,

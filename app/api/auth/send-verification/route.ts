@@ -127,7 +127,12 @@ export async function POST(req: Request) {
             );
         }
 
-        const body = await req.json();
+        let body;
+        try {
+            body = await req.json();
+        } catch (e) {
+            body = {};
+        }
         const { type, recaptchaToken } = body; // 'email' or 'phone'
 
         await connectDB();

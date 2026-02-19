@@ -229,9 +229,6 @@ UserSchema.methods.comparePassword = async function (candidatePassword: string):
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-// Create and export the model (ensure schema updates apply in dev/hot-reload)
-if (mongoose.models.User) {
-  delete mongoose.models.User;
-}
-const User: Model<IUser> = mongoose.model<IUser>('User', UserSchema);
+// Create and export the model
+const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
 export default User;

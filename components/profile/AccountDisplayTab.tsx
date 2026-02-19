@@ -4,7 +4,22 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
-import { ArrowUpRight, BadgeAlert, BadgeCheck, CalendarClock, CalendarDays, History, Mail, Mars, Phone, ShieldAlert, ShieldCheck, Transgender, Trash2, Venus } from "lucide-react";
+import {
+  ArrowUpRight,
+  BadgeAlert,
+  BadgeCheck,
+  CalendarClock,
+  CalendarDays,
+  History,
+  Mail,
+  Mars,
+  Phone,
+  ShieldAlert,
+  ShieldCheck,
+  Transgender,
+  Trash2,
+  Venus,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import VerifyEmailModal from "@/components/modal/VerifyEmailModal";
@@ -23,7 +38,9 @@ interface AccountDisplayTabProps {
   userProfile: UserProfile | null;
 }
 
-export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProps) {
+export default function AccountDisplayTab({
+  userProfile,
+}: AccountDisplayTabProps) {
   const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [isVerifyingPhone, setIsVerifyingPhone] = useState(false);
@@ -33,16 +50,20 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
 
   // Check URL parameter on mount to restore modal state
   useEffect(() => {
-    const isVerifyingEmail = searchParams.get('verifying-email') === 'true';
+    const isVerifyingEmail = searchParams.get("verifying-email") === "true";
     if (isVerifyingEmail && !userProfile?.isEmailVerified) {
       setShowOTPModal(true);
     }
 
-    const isVerifyingPhone = searchParams.get('verifying-phone') === 'true';
+    const isVerifyingPhone = searchParams.get("verifying-phone") === "true";
     if (isVerifyingPhone && !userProfile?.isPhoneVerified) {
       setShowPhoneOTPModal(true);
     }
-  }, [searchParams, userProfile?.isEmailVerified, userProfile?.isPhoneVerified]);
+  }, [
+    searchParams,
+    userProfile?.isEmailVerified,
+    userProfile?.isPhoneVerified,
+  ]);
 
   const handleVerifyEmail = async () => {
     setIsVerifyingEmail(true);
@@ -52,21 +73,28 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
       const response = await fetch("/api/auth/send-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "email" }),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        toast.error(data.message || "Failed to send verification email", { id: toastId });
+        toast.error(data.message || "Failed to send verification email", {
+          id: toastId,
+        });
         return;
       }
 
-      toast.success("Verification email sent! Check your inbox.", { id: toastId });
+      toast.success("Verification email sent! Check your inbox.", {
+        id: toastId,
+      });
       // Open the OTP modal after successfully sending the email
       setShowOTPModal(true);
     } catch (error) {
       console.error("Email verification error:", error);
-      toast.error("An unexpected error occurred. Please try again.", { id: toastId });
+      toast.error("An unexpected error occurred. Please try again.", {
+        id: toastId,
+      });
     } finally {
       setIsVerifyingEmail(false);
     }
@@ -78,11 +106,11 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
 
     try {
       // 1. Setup reCAPTCHA container if not exists
-      let recaptchaContainer = document.getElementById('recaptcha-container');
+      let recaptchaContainer = document.getElementById("recaptcha-container");
       if (!recaptchaContainer) {
-        recaptchaContainer = document.createElement('div');
-        recaptchaContainer.id = 'recaptcha-container';
-        recaptchaContainer.style.display = 'none';
+        recaptchaContainer = document.createElement("div");
+        recaptchaContainer.id = "recaptcha-container";
+        recaptchaContainer.style.display = "none";
         document.body.appendChild(recaptchaContainer);
       }
 
@@ -96,7 +124,7 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
       // 2. Clear previous reCAPTCHA if any
       try {
         appVerifier.clear();
-      } catch (e) { }
+      } catch (e) {}
 
       // 3. Render reCAPTCHA and get token
       const recaptchaToken = await appVerifier.verify();
@@ -109,25 +137,32 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "phone",
-          recaptchaToken: recaptchaToken
+          recaptchaToken: recaptchaToken,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        toast.error(data.message || "Failed to send verification SMS", { id: toastId });
+        toast.error(data.message || "Failed to send verification SMS", {
+          id: toastId,
+        });
         return;
       }
 
-      toast.success("Verification SMS sent! Check your phone.", { id: toastId });
+      toast.success("Verification SMS sent! Check your phone.", {
+        id: toastId,
+      });
 
       // 5. Store sessionInfo and open modal
       setPhoneSessionInfo(data.sessionInfo);
       setShowPhoneOTPModal(true);
     } catch (error: any) {
       console.error("Phone verification error:", error);
-      toast.error(error.message || "An unexpected error occurred. Please try again.", { id: toastId });
+      toast.error(
+        error.message || "An unexpected error occurred. Please try again.",
+        { id: toastId },
+      );
     } finally {
       setIsVerifyingPhone(false);
     }
@@ -154,11 +189,13 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
       <VerifyPhoneModal
         open={showPhoneOTPModal}
         onOpenChange={setShowPhoneOTPModal}
-        phone={userProfile?.phone
-          ? userProfile.phone.startsWith('+')
-            ? userProfile.phone
-            : `+${userProfile.countryCode} ${userProfile.phone}`
-          : ""}
+        phone={
+          userProfile?.phone
+            ? userProfile.phone.startsWith("+")
+              ? userProfile.phone
+              : `+${userProfile.countryCode} ${userProfile.phone}`
+            : ""
+        }
         sessionInfo={phoneSessionInfo}
         onSessionInfoUpdate={setPhoneSessionInfo}
       />
@@ -171,7 +208,13 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
             <p className="text-xs text-muted-foreground">Gender</p>
             <div className="flex items-center gap-2 mt-1">
               <IconBadge>
-                {userProfile?.gender === "male" ? <Mars className="h-4 w-4 text-muted-foreground" /> : userProfile?.gender === "female" ? <Venus className="h-4 w-4 text-muted-foreground" /> : <Transgender className="h-4 w-4 text-muted-foreground" />}
+                {userProfile?.gender === "male" ? (
+                  <Mars className="h-4 w-4 text-muted-foreground" />
+                ) : userProfile?.gender === "female" ? (
+                  <Venus className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <Transgender className="h-4 w-4 text-muted-foreground" />
+                )}
               </IconBadge>
 
               <p className="text-sm font-medium capitalize">
@@ -191,7 +234,7 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                   {format(new Date(userProfile.birthday), "MMM do, yyyy")}
                 </span>
               ) : (
-                <span className="text-sm text-muted-foreground">Not set</span>
+                <span className="text-sm font-medium capitalize">Not set</span>
               )}
             </div>
           </div>
@@ -249,7 +292,9 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                   <AlertDescription className="flex items-center justify-between gap-2">
                     <div className="flex-1">
                       <p className="text-xs font-medium">Email not verified</p>
-                      <p className="text-[10px] opacity-90">Verify to secure your account.</p>
+                      <p className="text-[10px] opacity-90">
+                        Verify to secure your account.
+                      </p>
                     </div>
                     <Button
                       size="sm"
@@ -258,7 +303,11 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                       disabled={isVerifyingEmail || showOTPModal}
                       className="h-7 text-xs shrink-0"
                     >
-                      {isVerifyingEmail ? "Sending..." : showOTPModal ? "Enter OTP" : "Verify Now"}
+                      {isVerifyingEmail
+                        ? "Sending..."
+                        : showOTPModal
+                          ? "Enter OTP"
+                          : "Verify Now"}
                     </Button>
                   </AlertDescription>
                 </Alert>
@@ -269,7 +318,6 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
       </div>
 
       <Separator />
-
 
       {/* Account Status */}
       <div>
@@ -285,13 +333,16 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                 {userProfile?.phone ? (
                   <>
                     <p className="text-sm font-medium">
-                      {userProfile.phone.startsWith('+')
+                      {userProfile.phone.startsWith("+")
                         ? userProfile.phone
-                        : `+${userProfile.countryCode} ${userProfile.phone}`
-                      }
+                        : `+${userProfile.countryCode} ${userProfile.phone}`}
                     </p>
                     {userProfile?.isPhoneVerified ? (
-                      <Badge variant="secondary" color="success" className="h-6">
+                      <Badge
+                        variant="secondary"
+                        color="success"
+                        className="h-6"
+                      >
                         <BadgeCheck className="w-3 h-3" />
                         Verified
                       </Badge>
@@ -315,7 +366,9 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                   <AlertDescription className="flex items-center justify-between gap-2">
                     <div className="flex-1">
                       <p className="text-xs font-medium">Phone not verified</p>
-                      <p className="text-[10px] opacity-90">Verify to secure your account.</p>
+                      <p className="text-[10px] opacity-90">
+                        Verify to secure your account.
+                      </p>
                     </div>
                     <Button
                       size="sm"
@@ -324,7 +377,11 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                       disabled={isVerifyingPhone || showPhoneOTPModal}
                       className="h-7 text-xs shrink-0"
                     >
-                      {isVerifyingPhone ? "Sending..." : showPhoneOTPModal ? "Enter OTP" : "Verify Now"}
+                      {isVerifyingPhone
+                        ? "Sending..."
+                        : showPhoneOTPModal
+                          ? "Enter OTP"
+                          : "Verify Now"}
                     </Button>
                   </AlertDescription>
                 </Alert>
@@ -363,7 +420,9 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                   {userProfile.accountStatus === "deleted" && (
                     <Trash2 className="w-3 h-3" />
                   )}
-                  <span className="capitalize">{userProfile.accountStatus}</span>
+                  <span className="capitalize">
+                    {userProfile.accountStatus}
+                  </span>
                 </Badge>
               </div>
             </div>
@@ -380,10 +439,8 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
               </Badge>
             </div>
           )} */}
-
         </div>
       </div>
-
 
       <Separator />
 
@@ -402,7 +459,6 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                   {formatDate(userProfile.joinDate)}
                 </p>
               </div>
-
             </div>
           )}
           {userProfile?.lastLogin && (
@@ -414,7 +470,7 @@ export default function AccountDisplayTab({ userProfile }: AccountDisplayTabProp
                 </IconBadge>
                 <Link
                   href="/profile?tab=security"
-                  className="group flex items-center gap-1 text-sm text-muted-foreground hover:underline underline-offset-2 hover:text-foreground transition-all"
+                  className="group flex items-center gap-1 text-sm font-medium capitalize hover:underline underline-offset-2 hover:text-foreground transition-all"
                 >
                   {formatDate(userProfile.lastLogin)}
                   <ArrowUpRight

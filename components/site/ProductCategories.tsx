@@ -24,7 +24,7 @@ const categories: CategoryType[] = [
   {
     id: "1",
     name: "Men's Clothing",
-    image: "/categories/mens-fashion.jpg",
+    image: "https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=500&h=600&fit=crop",
     description: "Contemporary styles for modern men",
     link: "/category/mens",
     itemsCount: 1247,
@@ -34,7 +34,7 @@ const categories: CategoryType[] = [
   {
     id: "2",
     name: "Women's Fashion",
-    image: "/categories/womens-fashion.jpg",
+    image: "https://images.unsplash.com/photo-1503342394128-c104d54dba01?w=500&h=600&fit=crop",
     description: "Trend-setting pieces for every occasion",
     link: "/category/womens",
     itemsCount: 2156,
@@ -44,7 +44,7 @@ const categories: CategoryType[] = [
   {
     id: "3",
     name: "Accessories",
-    image: "/categories/accessories.jpg",
+    image: "https://images.unsplash.com/photo-1511556820780-d912e42b4980?w=500&h=600&fit=crop",
     description: "Complete your look with our accessories",
     link: "/category/accessories",
     itemsCount: 843,
@@ -53,7 +53,7 @@ const categories: CategoryType[] = [
   {
     id: "4",
     name: "Footwear",
-    image: "/categories/footwear.jpg",
+    image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&h=600&fit=crop",
     description: "Step out in style with our shoe collection",
     link: "/category/footwear",
     itemsCount: 692,
@@ -62,7 +62,7 @@ const categories: CategoryType[] = [
   {
     id: "5",
     name: "Summer Collection",
-    image: "/categories/summer.jpg",
+    image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=500&h=600&fit=crop",
     description: "Light and breezy styles for warm days",
     link: "/collection/summer",
     itemsCount: 534,
@@ -71,7 +71,7 @@ const categories: CategoryType[] = [
   {
     id: "6",
     name: "Winter Wear",
-    image: "/categories/winter.jpg",
+    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=500&h=600&fit=crop",
     description: "Stay warm and stylish",
     link: "/collection/winter",
     itemsCount: 387,
@@ -93,7 +93,7 @@ const CategoryCard: React.FC<{ category: CategoryType; index: number }> = ({
     >
       <Card className="overflow-hidden border-0 shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl bg-white">
         <Link href={category.link} className="block">
-          <div className="relative aspect-[3/4] overflow-hidden">
+          <div className="relative aspect-3/4 overflow-hidden">
             {/* Background Image */}
             <Image
               src={category.image}
@@ -104,7 +104,7 @@ const CategoryCard: React.FC<{ category: CategoryType; index: number }> = ({
             />
 
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/10 to-transparent" />
 
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-2">

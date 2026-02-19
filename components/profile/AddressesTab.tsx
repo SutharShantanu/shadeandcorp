@@ -1,19 +1,37 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Home, BriefcaseBusiness, MapPinHouse } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Home,
+  BriefcaseBusiness,
+  MapPinHouse,
+  X,
+} from "lucide-react";
 import { IconBadge } from "../ui/icon-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type AddressFormData } from "@/lib/validations/address";
 import { AddressDialog } from "./AddressDialog";
+import { Alert, AlertDescription } from "../ui/alert";
 
 interface AddressesTabProps {
   userProfile: UserProfile | null;
@@ -34,7 +52,11 @@ interface Address {
   isDefault: boolean;
 }
 
-export default function AddressesTab({ userProfile, shouldOpenModal, onModalClose }: AddressesTabProps) {
+export default function AddressesTab({
+  userProfile,
+  shouldOpenModal,
+  onModalClose,
+}: AddressesTabProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -51,13 +73,14 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
       country: addr.country || "India",
       addressType: (addr.addressType || "home") as "home" | "work" | "other",
       isDefault: addr.isDefault || false,
-    }))
+    })),
   );
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [alertDismissed, setAlertDismissed] = useState(false);
 
   useEffect(() => {
     if (searchParams?.get("action") === "add") {
@@ -83,7 +106,7 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
       addresses.map((addr) => ({
         ...addr,
         isDefault: addr.id === id,
-      }))
+      })),
     );
     toast.success("Default address updated");
   };
@@ -97,8 +120,11 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
 
     setAddresses(
       data.isDefault
-        ? [...addresses.map(addr => ({ ...addr, isDefault: false })), newAddress]
-        : [...addresses, newAddress]
+        ? [
+            ...addresses.map((addr) => ({ ...addr, isDefault: false })),
+            newAddress,
+          ]
+        : [...addresses, newAddress],
     );
 
     toast.success("Address added successfully");
@@ -107,7 +133,9 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
     const params = new URLSearchParams(searchParams?.toString() || "");
     params.delete("action");
     const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
   };
 
   const handleEditAddress = (data: AddressFormData) => {
@@ -119,8 +147,8 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
           ? { ...addr, ...data }
           : data.isDefault
             ? { ...addr, isDefault: false }
-            : addr
-      )
+            : addr,
+      ),
     );
 
     toast.success("Address updated successfully");
@@ -131,7 +159,9 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
   const handleDeleteAddress = () => {
     if (!selectedAddress) return;
 
-    const newAddresses = addresses.filter((addr) => addr.id !== selectedAddress.id);
+    const newAddresses = addresses.filter(
+      (addr) => addr.id !== selectedAddress.id,
+    );
 
     if (selectedAddress.isDefault && newAddresses.length > 0) {
       newAddresses[0].isDefault = true;
@@ -166,21 +196,53 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
             Manage your shipping addresses for faster checkout.
           </p>
         </div>
-        <Button onClick={openAddDialog}>
-          <Plus className="h-4 w-4" />
+        <Button variant="outline" onClick={openAddDialog}>
+          <Plus className="size-4" />
           Add New Address
         </Button>
       </div>
 
+      {addresses.length === 0 && !alertDismissed && (
+        <Alert color="info" className="">
+          <MapPinHouse className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <div className="flex-1">
+              <p className="font-medium mb-1">No addresses added yet</p>
+              <p className="text-xs">
+                Add a shipping address for faster, secure checkout
+              </p>
+            </div>
+            <div className="flex items-center gap-2 ml-4">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setAlertDismissed(true)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {addresses.length > 0 && (
         <div className="grid gap-4 md:grid-cols-2">
           {addresses.map((address) => (
-            <Card key={address.id} className={address.isDefault ? "border-primary" : ""}>
+            <Card
+              key={address.id}
+              className={address.isDefault ? "border-primary" : ""}
+            >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base flex items-center gap-2">
                     <IconBadge
-                      variant={address.addressType === "home" ? "info" : address.addressType === "work" ? "warning" : "success"}
+                      variant={
+                        address.addressType === "home"
+                          ? "info"
+                          : address.addressType === "work"
+                            ? "warning"
+                            : "success"
+                      }
                       size="sm"
                     >
                       {address.addressType === "home" ? (
@@ -203,10 +265,14 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
                   <div className="text-sm">
                     <p className="font-medium">{address.address1}</p>
                     {address.address2 && (
-                      <p className="text-muted-foreground">{address.address2}</p>
+                      <p className="text-muted-foreground">
+                        {address.address2}
+                      </p>
                     )}
                     {address.landmark && (
-                      <p className="text-muted-foreground">Landmark: {address.landmark}</p>
+                      <p className="text-muted-foreground">
+                        Landmark: {address.landmark}
+                      </p>
                     )}
                     <p className="text-muted-foreground">
                       {address.city}, {address.state} {address.zipCode}
@@ -215,16 +281,27 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
                   </div>
                   <div className="flex gap-2 pt-2">
                     {!address.isDefault && (
-                      <div className="flex items-center space-x-2 border rounded-md px-3 py-1.5 hover:bg-accent cursor-pointer transition-colors"
+                      <div
+                        className="flex items-center space-x-2 border rounded-md px-3 py-1.5 hover:bg-accent cursor-pointer transition-colors"
                         onClick={() => handleSetDefault(address.id)}
                       >
-                        <Checkbox id={`default-${address.id}`} checked={false} />
-                        <Label htmlFor={`default-${address.id}`} className="text-sm font-medium cursor-pointer">
+                        <Checkbox
+                          id={`default-${address.id}`}
+                          checked={false}
+                        />
+                        <Label
+                          htmlFor={`default-${address.id}`}
+                          className="text-sm font-medium cursor-pointer"
+                        >
                           Set as Default
                         </Label>
                       </div>
                     )}
-                    <Button variant="outline" size="sm" onClick={() => openEditDialog(address)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditDialog(address)}
+                    >
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
@@ -252,7 +329,9 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
             const params = new URLSearchParams(searchParams.toString());
             params.delete("action");
             const query = params.toString();
-            router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+            router.replace(query ? `${pathname}?${query}` : pathname, {
+              scroll: false,
+            });
           }
         }}
         onSubmit={handleAddAddress}
@@ -274,22 +353,30 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
         submitLabel="Save Changes"
       />
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Address</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this address? This action cannot be undone.
+              Are you sure you want to delete this address? This action cannot
+              be undone.
               {selectedAddress?.isDefault && addresses.length > 1 && (
                 <span className="block mt-2 text-amber-600 dark:text-amber-500">
-                  Note: The first remaining address will be set as your new default.
+                  Note: The first remaining address will be set as your new
+                  default.
                 </span>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteAddress} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction
+              onClick={handleDeleteAddress}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -298,4 +385,3 @@ export default function AddressesTab({ userProfile, shouldOpenModal, onModalClos
     </div>
   );
 }
-
