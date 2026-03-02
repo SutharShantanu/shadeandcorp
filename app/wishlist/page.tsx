@@ -181,19 +181,39 @@ export default function WishlistPage() {
     // Price filter
     const min = priceMin ? parseFloat(priceMin) : undefined;
     const max = priceMax ? parseFloat(priceMax) : undefined;
-    if (min !== undefined) list = list.filter((p) => (p.price ?? 0) >= min);
-    if (max !== undefined) list = list.filter((p) => (p.price ?? 0) <= max);
+
+    const getPrice = (p: Product) =>
+      p.variants?.find((v) => v.isDefault)?.price ?? p.basePrice ?? 0;
+    const getDiscount = (p: Product) => {
+      const variant = p.variants?.find((v) => v.isDefault) || p.variants?.[0];
+      if (!variant) return 0;
+      if (variant.discount) return variant.discount;
+      if (variant.originalPrice && variant.price) {
+        return Math.round(
+          ((variant.originalPrice - variant.price) / variant.originalPrice) *
+            100,
+        );
+      }
+      return 0;
+    };
+
+    if (min !== undefined)
+      list = list.filter((p) => getPrice(p as Product) >= min);
+    if (max !== undefined)
+      list = list.filter((p) => getPrice(p as Product) <= max);
 
     // Sort
     switch (sort) {
       case "price-asc":
-        list.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+        list.sort((a, b) => getPrice(a as Product) - getPrice(b as Product));
         break;
       case "price-desc":
-        list.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+        list.sort((a, b) => getPrice(b as Product) - getPrice(a as Product));
         break;
       case "discount":
-        list.sort((a, b) => (b.discount ?? 0) - (a.discount ?? 0));
+        list.sort(
+          (a, b) => getDiscount(b as Product) - getDiscount(a as Product),
+        );
         break;
       default:
         // recent: assume original order
