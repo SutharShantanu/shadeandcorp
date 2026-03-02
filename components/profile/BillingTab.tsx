@@ -56,6 +56,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { toast } from "sonner";
 import type { UserProfile } from "@/app/(auth)/hook/useProfile";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -838,12 +839,14 @@ export default function BillingTab({
                         Default Payment Method
                       </FormLabel>
                       <FormControl>
-                        <div
-                          onClick={() => field.onChange(!field.value)}
+                        <Field
+                          orientation="horizontal"
                           className={`border p-4 rounded-lg cursor-pointer shadow-sm transition-all ${field.value ? "border-primary bg-primary/5 ring-2 ring-primary/40" : "border-border bg-muted/40"}`}
-                          aria-pressed={field.value}
                         >
-                          <div className="flex items-start gap-3">
+                          <FieldLabel
+                            htmlFor="edit-is-default"
+                            className="flex items-start gap-3 flex-1 cursor-pointer font-normal m-0 p-0"
+                          >
                             <span
                               className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-lg ${field.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
                             >
@@ -860,14 +863,13 @@ export default function BillingTab({
                                 faster checkout
                               </p>
                             </div>
-                            <div onClick={(e) => e.stopPropagation()}>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </div>
-                          </div>
-                        </div>
+                          </FieldLabel>
+                          <Checkbox
+                            id="edit-is-default"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </Field>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -15,6 +15,7 @@ import {
   MapPin,
   Bell,
   BadgeInfo,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useRef, useState } from "react";
@@ -57,8 +58,13 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "../ui/input-group";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "../ui/input-group";
 import { Dot } from "../ui/dot";
+import { Separator } from "../ui/separator";
 
 const categories = [
   {
@@ -68,8 +74,14 @@ const categories = [
       { title: "Casual Shirts", href: "/products/men/clothing/casual-shirts" },
       { title: "Formal Shirts", href: "/products/men/clothing/formal-shirts" },
       { title: "Jeans", href: "/products/men/clothing/jeans" },
-      { title: "Casual Trousers", href: "/products/men/clothing/casual-trousers" },
-      { title: "Formal Trousers", href: "/products/men/clothing/formal-trousers" },
+      {
+        title: "Casual Trousers",
+        href: "/products/men/clothing/casual-trousers",
+      },
+      {
+        title: "Formal Trousers",
+        href: "/products/men/clothing/formal-trousers",
+      },
       { title: "Shorts", href: "/products/men/clothing/shorts" },
       { title: "Jackets", href: "/products/men/clothing/jackets" },
       { title: "Blazers", href: "/products/men/clothing/blazers" },
@@ -77,7 +89,8 @@ const categories = [
       { title: "Sweatshirts", href: "/products/men/clothing/sweatshirts" },
       { title: "Activewear", href: "/products/men/clothing/activewear" },
     ],
-    image: "https://images.unsplash.com/photo-1488161628813-99425260dead?w=400&h=300&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1488161628813-99425260dead?w=400&h=300&fit=crop",
   },
   {
     title: "Women",
@@ -95,7 +108,8 @@ const categories = [
       { title: "Activewear", href: "/products/women/clothing/activewear" },
       { title: "Lingerie", href: "/products/women/clothing/lingerie" },
     ],
-    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=300&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=300&fit=crop",
   },
   {
     title: "Kids",
@@ -109,7 +123,8 @@ const categories = [
       { title: "Accessories", href: "/products/kids/clothing/accessories" },
       { title: "Winter Wear", href: "/products/kids/clothing/winter-wear" },
     ],
-    image: "https://images.unsplash.com/photo-1540331547168-8b6310d425f9?w=400&h=300&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1540331547168-8b6310d425f9?w=400&h=300&fit=crop",
   },
   {
     title: "Collections",
@@ -121,7 +136,8 @@ const categories = [
       { title: "Festive Collection", href: "/products/collections/festive" },
       { title: "Premium Collection", href: "/products/collections/premium" },
     ],
-    image: "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&h=300&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&h=300&fit=crop",
   },
   {
     title: "Accessories",
@@ -135,7 +151,8 @@ const categories = [
       { title: "Hats & Caps", href: "/products/accessories/hats" },
       { title: "Scarves", href: "/products/accessories/scarves" },
     ],
-    image: "https://images.unsplash.com/photo-1576053139778-7e32f5f09437?w=400&h=300&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1576053139778-7e32f5f09437?w=400&h=300&fit=crop",
   },
 ];
 
@@ -226,93 +243,128 @@ interface CategoryNavigationProps {
 }
 
 export function CategoryNavigation({ className }: CategoryNavigationProps) {
+  const router = useRouter();
   return (
     <NavigationMenu className={className}>
       <NavigationMenuList>
-        {categories.map((category) => (
-          <NavigationMenuItem key={category.title}>
-            <NavigationMenuTrigger className="bg-transparent">{category.title}</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <div className="w-[800px] p-6">
-                <div className="grid grid-cols-2 gap-8">
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold">
-                        {category.title}
-                      </h3>
-                      <Link
-                        href={`/products/${category.title.toLowerCase()}`}
-                        className="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
-                      >
-                        View All
-                      </Link>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      {category.items.map((item) => (
-                        <Link
-                          key={item.title}
-                          href={item.href}
-                          className="group flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+        {categories.map((category) => {
+          const hasDetailedCategories =
+            category.title === "Men" ||
+            category.title === "Women" ||
+            category.title === "Kids";
+          return (
+            <NavigationMenuItem key={category.title}>
+              <NavigationMenuTrigger className="bg-transparent h-9 px-4 py-2">
+                {category.title}
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <div
+                  className={`p-2 lg:p-4 ${hasDetailedCategories ? "w-3xl lg:w-5xl" : "w-xl lg:w-3xl"}`}
+                >
+                  <div
+                    className={`grid gap-4 lg:gap-8 ${hasDetailedCategories ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-2"}`}
+                  >
+                    {/* First Column: Featured Links */}
+                    <div className="flex flex-col gap-6">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-semibold tracking-tight">
+                          {category.title}
+                        </h3>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() =>
+                            router.push(
+                              `/products/${category.title.toLowerCase()}`,
+                            )
+                          }
+                          className="text-sm flex items-center gap-1 font-medium text-primary hover:text-primary/80 transition-colors"
                         >
-                          <div className="h-2 w-2 rounded-full bg-zinc-300 group-hover:bg-zinc-600" />
-                          <span className="text-sm">{item.title}</span>
-                        </Link>
-                      ))}
+                          View All <ChevronRight size="16" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                        {category.items.map((item) => (
+                          <Link
+                            key={item.title}
+                            href={item.href}
+                            className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                          >
+                            <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 group-hover:bg-primary transition-colors" />
+                            <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors font-medium">
+                              {item.title}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
 
-                    {(category.title === "Men" ||
-                      category.title === "Women" ||
-                      category.title === "Kids") && (
-                        <div className="pt-4 border-t">
-                          <h4 className="font-medium mb-3">Shop by Category</h4>
-                          <div className="grid grid-cols-2 gap-4">
+                    {/* Second Column: Detailed Categories (Conditional) */}
+                    {hasDetailedCategories && (
+                      <div className="flex items-center gap-1">
+                        <Separator orientation="vertical" className="h-full" />
+                        <div className="flex flex-col gap-4 pl-2">
+                          <h3 className="text-lg font-semibold tracking-tight">
+                            Shop by Category
+                          </h3>
+                          <div className="grid grid-cols-2 gap-x-8 gap-y-6">
                             {detailedCategories[
                               category.title.toLowerCase() as keyof typeof detailedCategories
                             ]?.map((subcat) => (
-                              <div key={subcat.title}>
-                                <h5 className="text-sm font-medium mb-2">
+                              <div key={subcat.title} className="space-y-3">
+                                <h5 className="text-sm font-semibold text-foreground/90">
                                   {subcat.title}
                                 </h5>
-                                <div className="space-y-1">
+                                <ul className="space-y-2">
                                   {subcat.items.map((item) => (
-                                    <Link
-                                      key={item}
-                                      href={`/products/${category.title.toLowerCase()}/${subcat.title.toLowerCase()}/${item.toLowerCase().replace(/ /g, '-')}`}
-                                      className="block text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-                                    >
-                                      {item}
-                                    </Link>
+                                    <li key={item}>
+                                      <Link
+                                        href={`/products/${category.title.toLowerCase()}/${subcat.title.toLowerCase()}/${item.toLowerCase().replace(/ /g, "-")}`}
+                                        className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                                      >
+                                        {item}
+                                      </Link>
+                                    </li>
                                   ))}
-                                </div>
+                                </ul>
                               </div>
                             ))}
                           </div>
                         </div>
-                      )}
-                  </div>
+                      </div>
+                    )}
 
-                  <div className="relative rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-800">
-                    <Image
-                      src={category.image}
-                      alt={category.title}
-                      width={400}
-                      height={300}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-4 left-4">
-                      <Link
-                        href={`/products/${category.title.toLowerCase()}`}
-                        className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                      >
-                        Shop {category.title}
-                      </Link>
+                    {/* Third Column: Image Banner */}
+                    <div className="relative rounded-xl overflow-hidden group h-full min-h-[300px]">
+                      <Image
+                        width={400}
+                        height={300}
+                        src={category.image}
+                        alt={category.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 p-5 flex flex-col justify-end">
+                        <h4 className="text-white font-semibold text-lg mb-1.5 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                          {category.title}
+                        </h4>
+                        <p className="text-white/80 text-xs mb-3 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100 line-clamp-2">
+                          Discover the latest trends and essential styles.
+                        </p>
+                        <Link
+                          href={`/products/${category.title.toLowerCase()}`}
+                          className="inline-flex w-fit items-center justify-center whitespace-nowrap rounded-md text-xs font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-black hover:bg-white/90 h-8 px-3 py-1 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 duration-500 delay-150"
+                        >
+                          Shop Now
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </NavigationMenuContent>
-          </NavigationMenuItem>
-        ))}
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          );
+        })}
       </NavigationMenuList>
     </NavigationMenu>
   );
@@ -371,9 +423,7 @@ export function SearchBar({ className }: SearchBarProps) {
         </InputGroupAddon>
         <InputGroupAddon align="inline-end">
           <KbdGroup>
-            <Kbd>Ctrl</Kbd>
-            +
-            <Kbd>K</Kbd>
+            <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
           </KbdGroup>
         </InputGroupAddon>
       </InputGroup>
@@ -475,9 +525,18 @@ export function UserMenu({ className }: UserMenuProps) {
 
   const notifications = session.user?.notifications || [];
 
-  const profileNotifications = getNotificationsByCategory(notifications, "profile");
-  const orderNotifications = getNotificationsByCategory(notifications, "orders");
-  const settingsNotifications = getNotificationsByCategory(notifications, "settings");
+  const profileNotifications = getNotificationsByCategory(
+    notifications,
+    "profile",
+  );
+  const orderNotifications = getNotificationsByCategory(
+    notifications,
+    "orders",
+  );
+  const settingsNotifications = getNotificationsByCategory(
+    notifications,
+    "settings",
+  );
 
   return (
     <DropdownMenu>
@@ -532,10 +591,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <User className="size-4" />
             <span>Profile</span>
             {profileNotifications.length > 0 && (
-              <Dot
-                className="ml-auto"
-                variant="info"
-              />
+              <Dot className="ml-auto" variant="info" />
             )}
           </DropdownMenuItem>
 
@@ -546,10 +602,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <ShoppingBag className="size-4" />
             <span>My Orders</span>
             {orderNotifications.length > 0 && (
-              <Dot
-                className="ml-auto"
-                variant="success"
-              />
+              <Dot className="ml-auto" variant="success" />
             )}
           </DropdownMenuItem>
 
@@ -572,10 +625,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <MapPin className="size-4" />
             <span>Addresses</span>
             {session.user?.hasMissingAddress && (
-              <Dot
-                className="ml-auto"
-                variant="warning"
-              />
+              <Dot className="ml-auto" variant="warning" />
             )}
           </DropdownMenuItem>
 
@@ -586,10 +636,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <CreditCard className="size-4" />
             <span>Payment Methods</span>
             {session.user?.hasMissingPayment && (
-              <Dot
-                className="ml-auto"
-                variant="warning"
-              />
+              <Dot className="ml-auto" variant="warning" />
             )}
           </DropdownMenuItem>
 
@@ -600,10 +647,7 @@ export function UserMenu({ className }: UserMenuProps) {
             <Bell className="size-4" />
             <span>Notifications</span>
             {settingsNotifications.length > 0 && (
-              <Dot
-                className="ml-auto"
-                variant="info"
-              />
+              <Dot className="ml-auto" variant="info" />
             )}
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -615,17 +659,13 @@ export function UserMenu({ className }: UserMenuProps) {
             <Settings className="size-4" />
             <span>Settings</span>
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={handleSignOut}
-            variant="destructive"
-          >
+          <DropdownMenuItem onClick={handleSignOut} variant="destructive">
             <LogOut className="size-4" />
             <span className="text-destructive">Log out</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-
   );
 }
 interface MobileMenuProps {
@@ -686,10 +726,14 @@ export function MobileMenu({ categories }: MobileMenuProps) {
 export default function Navbar({ className }: { className?: string }) {
   const cartCount = 3;
   // Read wishlist count from Redux
-  const wishlistCount = useAppSelector((s: { wishlist: { items: unknown[] } }) => s.wishlist.items.length);
+  const wishlistCount = useAppSelector(
+    (s: { wishlist: { items: unknown[] } }) => s.wishlist.items.length,
+  );
 
   return (
-    <header className={`sticky top-0 z-50 backdrop-blur-sm shadow-sm ${className}`}>
+    <header
+      className={`sticky top-0 z-50 backdrop-blur-sm shadow-sm ${className}`}
+    >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 py-4">
         {/* Left Section - Mobile Menu & Logo */}
         <div className="flex items-center gap-4">

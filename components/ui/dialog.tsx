@@ -7,20 +7,22 @@ import { XIcon } from "./x";
 import { cn } from "@/lib/utils";
 
 // Root
-export function Dialog(props: React.ComponentProps<typeof DialogPrimitive.Root>) {
+export function Dialog(
+  props: React.ComponentProps<typeof DialogPrimitive.Root>,
+) {
   return <DialogPrimitive.Root {...props} />;
 }
 
 // Trigger
 export function DialogTrigger(
-  props: React.ComponentProps<typeof DialogPrimitive.Trigger>
+  props: React.ComponentProps<typeof DialogPrimitive.Trigger>,
 ) {
   return <DialogPrimitive.Trigger {...props} />;
 }
 
 // Portal
 export function DialogPortal(
-  props: React.ComponentProps<typeof DialogPrimitive.Portal>
+  props: React.ComponentProps<typeof DialogPrimitive.Portal>,
 ) {
   return <DialogPrimitive.Portal {...props} />;
 }
@@ -34,7 +36,7 @@ export function DialogOverlay({
     <DialogPrimitive.Overlay
       className={cn(
         "fixed inset-0 z-50 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0",
-        className
+        className,
       )}
       {...props}
     />
@@ -52,8 +54,8 @@ export function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 flex h-fit max-h-[90vh] w-full min-w-sm -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out",
-          className
+          "fixed left-1/2 top-1/2 z-50 flex h-fit max-h-[90vh] w-full min-w-sm -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border bg-background shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+          className,
         )}
         {...props}
       >
@@ -73,7 +75,7 @@ export function DialogHeader({
     <div
       className={cn(
         "sticky top-0 z-50 flex items-center justify-between border-b bg-background px-6 py-4",
-        className
+        className,
       )}
       {...props}
     >
@@ -119,10 +121,7 @@ export function DialogBody({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn(
-        "flex-1 overflow-y-auto px-6 pb-6 pt-2",
-        className
-      )}
+      className={cn("flex-1 overflow-y-auto px-6 pb-6 pt-2", className)}
       {...props}
     />
   );
@@ -137,7 +136,7 @@ export function DialogFooter({
     <div
       className={cn(
         "border-t bg-background px-6 py-4 flex justify-end gap-3",
-        className
+        className,
       )}
       {...props}
     />
