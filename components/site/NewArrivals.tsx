@@ -231,7 +231,7 @@ const newArrivals: Product[] = rawProducts.map((p) => {
       discount: p.discount,
       stockQuantity: p.stockQuantity,
       isDefault: sizeIndex === 0 && colorIndex === 0,
-    }))
+    })),
   );
 
   // Create assets
@@ -251,7 +251,6 @@ const newArrivals: Product[] = rawProducts.map((p) => {
     assets,
   };
 });
-
 
 // Filter Tabs Component
 const FilterTabs: React.FC<{
@@ -274,10 +273,11 @@ const FilterTabs: React.FC<{
             key={filter.id}
             variant={activeFilter === filter.id ? "default" : "outline"}
             onClick={() => onFilterChange(filter.id)}
-            className={`rounded-full px-6 ${activeFilter === filter.id
-              ? "bg-black text-white"
-              : "border-gray-300 text-gray-700 hover:bg-gray-50"
-              }`}
+            className={`rounded-full px-6 ${
+              activeFilter === filter.id
+                ? "bg-black text-white"
+                : "border-gray-300 text-gray-700 hover:bg-gray-50"
+            }`}
           >
             {filter.label}
           </Button>
@@ -302,7 +302,7 @@ export default function NewArrivals() {
       case "low-stock":
         const totalStock = product.variants.reduce(
           (acc, v) => acc + v.stockQuantity,
-          0
+          0,
         );
         return totalStock < 10;
       default:
@@ -351,9 +351,11 @@ export default function NewArrivals() {
         </motion.div>
 
         {/* Products Grid using unified ProductCard */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="columns-1 sm:columns-2 lg:columns-4 gap-6 space-y-6">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <div key={product.id} className="break-inside-avoid">
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
 

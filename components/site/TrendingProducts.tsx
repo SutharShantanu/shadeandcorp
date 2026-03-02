@@ -278,7 +278,7 @@ const trendingProducts: Product[] = rawTrendingProducts.map((p) => {
       discount: p.discount,
       stockQuantity: p.stockQuantity,
       isDefault: sizeIndex === 0 && colorIndex === 0,
-    }))
+    })),
   );
 
   // Create assets
@@ -315,7 +315,7 @@ const CountdownTimer = ({ endDate }: { endDate: Date }) => {
       setTimeLeft({
         days: Math.floor(distance / (1000 * 60 * 60 * 24)),
         hours: Math.floor(
-          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
         ),
         minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
         seconds: Math.floor((distance % (1000 * 60)) / 1000),
@@ -387,7 +387,7 @@ const CategoryFilter = ({
       label: "Festival",
       icon: <span>🎪</span>,
       count: trendingProducts.filter(
-        (p) => p.category === "Dresses" || p.tags?.includes("festival")
+        (p) => p.category === "Dresses" || p.tags?.includes("festival"),
       ).length,
     },
   ];
@@ -400,19 +400,21 @@ const CategoryFilter = ({
             key={category.id}
             variant={selectedCategory === category.id ? "default" : "outline"}
             onClick={() => onCategoryChange(category.id)}
-            className={`rounded-full px-6 py-3 h-auto transition-all duration-300 ${selectedCategory === category.id
-              ? "bg-black text-white shadow-lg"
-              : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
-              }`}
+            className={`rounded-full px-6 py-3 h-auto transition-all duration-300 ${
+              selectedCategory === category.id
+                ? "bg-black text-white shadow-lg"
+                : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+            }`}
           >
             <span className="mr-2">{category.icon}</span>
             {category.label}
             <Badge
               variant="secondary"
-              className={`ml-2 ${selectedCategory === category.id
-                ? "bg-white text-black"
-                : "bg-gray-100 text-gray-600"
-                }`}
+              className={`ml-2 ${
+                selectedCategory === category.id
+                  ? "bg-white text-black"
+                  : "bg-gray-100 text-gray-600"
+              }`}
             >
               {category.count}
             </Badge>
@@ -437,17 +439,17 @@ export default function TrendingProducts() {
         : selectedCategory === "sale"
           ? trendingProducts.filter((product) => product.isOnSale)
           : trendingProducts.filter(
-            (product) =>
-              product.category === selectedCategory ||
-              product.tags?.includes(selectedCategory.toLowerCase())
-          );
+              (product) =>
+                product.category === selectedCategory ||
+                product.tags?.includes(selectedCategory.toLowerCase()),
+            );
 
   // Event handlers for product actions
   const handleAddToCart = (
     product: Product,
     quantity: number,
     size: string,
-    color: string
+    color: string,
   ) => {
     console.log("Add to cart:", {
       product: product.title,
@@ -518,15 +520,16 @@ export default function TrendingProducts() {
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-4"
+          className="columns-1 sm:columns-2 lg:columns-4 gap-4 space-y-4"
         >
           {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={handleAddToCart}
-              onAddToWishlist={handleAddToWishlist}
-            />
+            <div key={product.id} className="break-inside-avoid">
+              <ProductCard
+                product={product}
+                onAddToCart={handleAddToCart}
+                onAddToWishlist={handleAddToWishlist}
+              />
+            </div>
           ))}
         </motion.div>
 

@@ -23,9 +23,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import { DotButton, useDotButton } from "../ui/embla-carousel-dot-button";
-import {
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -76,7 +74,7 @@ function SizeSelectionModal({
   onOpenSizeChart,
 }: SizeSelectionModalProps) {
   const selectedColorObj = product.variants.find(
-    (v) => v.color.hex === selectedColor
+    (v) => v.color.hex === selectedColor,
   )?.color;
 
   return (
@@ -94,7 +92,11 @@ function SizeSelectionModal({
             {/* Product Image */}
             <div className="shrink-0 w-24 h-24 rounded-lg overflow-hidden border">
               <Image
-                src={product.assets.find(a => a.role === "thumbnail")?.url || product.assets[0]?.url || "/placeholder.png"}
+                src={
+                  product.assets.find((a) => a.role === "thumbnail")?.url ||
+                  product.assets[0]?.url ||
+                  "/placeholder.png"
+                }
                 alt={product.title}
                 width={96}
                 height={96}
@@ -109,15 +111,17 @@ function SizeSelectionModal({
               </h3>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-lg font-bold">
-                  ${product.variants.find(v => v.isDefault)?.price || product.basePrice}
+                  $
+                  {product.variants.find((v) => v.isDefault)?.price ||
+                    product.basePrice}
                 </span>
                 {product.isNew && (
-                  <Badge className="bg-emerald-500 text-white border-0 text-xs">
+                  <Badge variant="default" color="success" className="text-xs">
                     New
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center gap-1 text-sm text-gray-600">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                 <span>{product.rating}</span>
                 <span>({product.reviewCount} reviews)</span>
@@ -142,17 +146,23 @@ function SizeSelectionModal({
             >
               {product?.variants && product.variants.length > 0 && (
                 <div className="flex gap-2">
-                  {Array.from(new Set(product.variants.map(v => JSON.stringify(v.color)))).map(s => JSON.parse(s)).map((color: Variant['color']) => (
-                    <RadioGroupItem
-                      key={color.hex}
-                      value={color.hex}
-                      id={`color-${product.id}-${color.hex}`}
-                      aria-label={color.name}
-                      className="h-10 w-10 cursor-pointer"
-                      style={{ backgroundColor: color.hex }}
-                      title={color.name}
-                    />
-                  ))}
+                  {Array.from(
+                    new Set(
+                      product.variants.map((v) => JSON.stringify(v.color)),
+                    ),
+                  )
+                    .map((s) => JSON.parse(s))
+                    .map((color: Variant["color"]) => (
+                      <RadioGroupItem
+                        key={color.hex}
+                        value={color.hex}
+                        id={`color-${product.id}-${color.hex}`}
+                        aria-label={color.name}
+                        className="h-10 w-10 cursor-pointer"
+                        style={{ backgroundColor: color.hex }}
+                        title={color.name}
+                      />
+                    ))}
                 </div>
               )}
             </RadioGroup>
@@ -239,12 +249,17 @@ function ProductImageSection({
 
   // Filter images based on selected color name
   const filteredAssets = useMemo(() => {
-    const selectedVariant = product.variants.find(v => v.color.name === selectedColorName);
+    const selectedVariant = product.variants.find(
+      (v) => v.color.name === selectedColorName,
+    );
     const variantId = selectedVariant?.id;
 
-    const filtered = product.assets.filter((asset) =>
-      !asset.variantId || asset.variantId === variantId
-    ).sort((a, b) => a.order - b.order);
+    // We want to show:
+    // 1. Common assets (variantId is null/undefined)
+    // 2. Assets specific to the selected variant
+    const filtered = product.assets
+      .filter((asset) => !asset.variantId || asset.variantId === variantId)
+      .sort((a, b) => a.order - b.order);
 
     return filtered.length > 0 ? filtered : product.assets;
   }, [product.assets, product.variants, selectedColorName]);
@@ -257,7 +272,10 @@ function ProductImageSection({
   }, [api, filteredAssets]);
 
   return (
-    <motion.div layoutId={`product-image-${product.id}`} className="relative group">
+    <motion.div
+      layoutId={`product-image-${product.id}`}
+      className="relative group"
+    >
       <Carousel
         setApi={setApi}
         opts={{
@@ -287,22 +305,22 @@ function ProductImageSection({
           ))}
         </CarouselContent>
 
-
-
         {/* Dots/Indicator */}
         <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center">
           <div className="flex gap-1.5 p-1 rounded-full">
-            {scrollSnaps.map((_, index) => (
-              <DotButton
-                key={index}
-                selected={index === selectedIndex}
-                onClick={() => onDotButtonClick(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 border border-white/20 shadow-sm ${index === selectedIndex
-                  ? "bg-white scale-110"
-                  : "bg-white/40 hover:bg-white/60"
+            {filteredAssets.length > 1 &&
+              filteredAssets.map((_, index) => (
+                <DotButton
+                  key={index}
+                  selected={index === selectedIndex}
+                  onClick={() => onDotButtonClick(index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 border border-white/20 shadow-sm ${
+                    index === selectedIndex
+                      ? "bg-white scale-110"
+                      : "bg-white/40 hover:bg-white/60"
                   }`}
-              />
-            ))}
+                />
+              ))}
           </div>
         </div>
       </Carousel>
@@ -320,10 +338,7 @@ function ProductImageSection({
 
       {isOutOfStock && (
         <div className="absolute top-3 left-1/2 transform -translate-x-1/2">
-          <Badge
-            variant="secondary"
-            className="text-xs"
-          >
+          <Badge variant="secondary" className="text-xs">
             Out of Stock
           </Badge>
         </div>
@@ -342,22 +357,34 @@ function ProductBadges({ product, discountPercentage }: ProductBadgesProps) {
   return (
     <div className="absolute top-3 left-3 flex flex-col gap-2">
       {product.isNew && (
-        <Badge color="default" className="border-0 text-xs uppercase font-semibold py-1">
+        <Badge
+          color="default"
+          className="border-0 text-xs uppercase font-semibold py-1"
+        >
           New
         </Badge>
       )}
       {product.isBestSeller && (
-        <Badge color="warning" className="border-0 text-xs uppercase font-semibold py-1">
+        <Badge
+          color="warning"
+          className="border-0 text-xs uppercase font-semibold py-1"
+        >
           Bestseller
         </Badge>
       )}
       {discountPercentage > 0 && (
-        <Badge color="danger" className="border-0 text-xs uppercase font-semibold py-1">
+        <Badge
+          color="danger"
+          className="border-0 text-xs uppercase font-semibold py-1"
+        >
           -{discountPercentage}%
         </Badge>
       )}
       {product.isFeatured && (
-        <Badge color="info" className="border-0 text-xs uppercase font-semibold py-1">
+        <Badge
+          color="info"
+          className="border-0 text-xs uppercase font-semibold py-1"
+        >
           Featured
         </Badge>
       )}
@@ -381,7 +408,7 @@ function QuickActionButtons({
         }}
       >
         <Heart
-          className={`w-4 h-4 transition-all ease-in-out duration-300 ${isWishlisted && "fill-red-500 text-red-500"}`}
+          className={`w-4 h-4 transition-all ease-in-out duration-300 ${isWishlisted && "fill-destructive-foreground text-destructive-foreground"}`}
         />
       </Button>
       <Button
@@ -399,9 +426,14 @@ function QuickActionButtons({
 
 function ProductInfoHeader({ product }: ProductInfoHeaderProps) {
   return (
-    <motion.div layoutId={`product-info-${product.id}`} className="flex flex-col gap-1">
+    <motion.div
+      layoutId={`product-info-${product.id}`}
+      className="flex flex-col gap-1"
+    >
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold text-muted-foreground">{product.brand}</p>
+        <p className="text-xs font-semibold text-muted-foreground">
+          {product.brand}
+        </p>
         <div className="flex items-center gap-1">
           <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
           <span className="text-xs font-medium">{product.rating}</span>
@@ -425,9 +457,7 @@ function PriceSection({ product, savings }: PriceSectionProps) {
       <div className="flex items-center gap-2">
         <span className="text-xl font-bold ">${product.basePrice}</span>
         {savings > 0 && (
-          <p className="text-xs font-medium">
-            You save ${savings.toFixed(2)}
-          </p>
+          <p className="text-xs font-medium">You save ${savings.toFixed(2)}</p>
         )}
       </div>
     </motion.div>
@@ -442,7 +472,9 @@ const ColorOptions = ({
   onColorSelect,
 }: ColorOptionsProps) => {
   const colors = useMemo(() => {
-    return Array.from(new Set(product.variants.map(v => JSON.stringify(v.color)))).map(s => JSON.parse(s));
+    return Array.from(
+      new Set(product.variants.map((v) => JSON.stringify(v.color))),
+    ).map((s) => JSON.parse(s));
   }, [product.variants]);
 
   if (colors.length === 0) return null;
@@ -454,8 +486,8 @@ const ColorOptions = ({
       className="flex gap-2 items-center"
     >
       <span className="text-xs font-medium ">Color</span>
-      <div className="flex gap-2">
-        {colors.map((color: Variant['color']) => (
+      <div className="flex gap-2 items-center">
+        {colors.slice(0, 3).map((color: Variant["color"]) => (
           <RadioGroupItem
             key={color.hex}
             value={color.hex}
@@ -463,6 +495,11 @@ const ColorOptions = ({
             title={color.name}
           />
         ))}
+        {colors.length > 3 && (
+          <span className="text-xs text-muted-foreground ml-1">
+            +{colors.length - 3}
+          </span>
+        )}
       </div>
     </RadioGroup>
   );
@@ -478,7 +515,7 @@ function SizeSelector({
   isSizeAvailable,
 }: SizeSelectorProps) {
   const sizes = useMemo(() => {
-    return Array.from(new Set(product.variants.map(v => v.size)));
+    return Array.from(new Set(product.variants.map((v) => v.size)));
   }, [product.variants]);
 
   if (sizes.length === 0) return null;
@@ -510,11 +547,12 @@ function SizeSelector({
                 htmlFor={`size-${product.id}-${size}`}
                 className={`
                   relative flex items-center justify-center w-8 h-8 text-xs font-medium border rounded-full cursor-pointer transition-all
-                  ${selectedSize === size
-                    ? "border-black bg-black text-white"
-                    : available
-                      ? "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
-                      : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                  ${
+                    selectedSize === size
+                      ? "border-black bg-black text-white"
+                      : available
+                        ? "border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                        : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                   }
                 `}
                 title={available ? `Select ${size}` : `${size} - Out of Stock`}
@@ -585,12 +623,12 @@ export default function ProductCard({
 }: ProductCardProps & { layout?: "grid" | "list" }) {
   const [selectedSize, setSelectedSize] = useState(() => {
     const variants = product.variants || [];
-    const defaultVariant = variants.find(v => v.isDefault);
+    const defaultVariant = variants.find((v) => v.isDefault);
     return defaultVariant?.size || variants[0]?.size || "";
   });
   const [selectedColor, setSelectedColor] = useState(() => {
     const variants = product.variants || [];
-    const defaultVariant = variants.find(v => v.isDefault);
+    const defaultVariant = variants.find((v) => v.isDefault);
     return defaultVariant?.color.hex || variants[0]?.color.hex || "";
   });
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -604,7 +642,7 @@ export default function ProductCard({
 
   // Check if a size is available
   const isSizeAvailable = (size: string) => {
-    return product.variants.some(v => v.size === size && v.stockQuantity > 0);
+    return product.variants.some((v) => v.size === size && v.stockQuantity > 0);
   };
 
   // Handle size selection
@@ -652,7 +690,7 @@ export default function ProductCard({
     if (action === "addToBag") {
       onAddToCart?.(product, 1, selectedSize, selectedColor);
       toast.success(
-        `${product.title} (Size: ${selectedSize}) has been added to your bag.`
+        `${product.title} (Size: ${selectedSize}) has been added to your bag.`,
       );
       setShowSizeModal(false);
       setPendingAction(null);
@@ -666,16 +704,24 @@ export default function ProductCard({
 
   // Derived data based on selected variant
   const selectedVariant = useMemo(() => {
-    return product.variants.find(v => v.color.hex === selectedColor && v.size === selectedSize)
-      || product.variants.find(v => v.color.hex === selectedColor)
-      || product.variants[0];
+    return (
+      product.variants.find(
+        (v) => v.color.hex === selectedColor && v.size === selectedSize,
+      ) ||
+      product.variants.find((v) => v.color.hex === selectedColor) ||
+      product.variants[0]
+    );
   }, [product.variants, selectedColor, selectedSize]);
 
   const currentPrice = selectedVariant?.price || product.basePrice;
   const originalPrice = selectedVariant?.originalPrice;
   const savings = originalPrice ? originalPrice - currentPrice : 0;
-  const discountPercentage = selectedVariant?.discount || (originalPrice ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0);
-  const isOutOfStock = product.variants.every(v => v.stockQuantity === 0);
+  const discountPercentage =
+    selectedVariant?.discount ||
+    (originalPrice
+      ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+      : 0);
+  const isOutOfStock = product.variants.every((v) => v.stockQuantity === 0);
 
   if (layout === "list") {
     return (
@@ -692,7 +738,10 @@ export default function ProductCard({
               isOutOfStock={isOutOfStock}
               discountPercentage={discountPercentage}
               onAddToWishlist={handleAddToWishlist}
-              selectedColorName={product.variants.find(v => v.color.hex === selectedColor)?.color.name}
+              selectedColorName={
+                product.variants.find((v) => v.color.hex === selectedColor)
+                  ?.color.name
+              }
             />
           </div>
 
@@ -701,19 +750,27 @@ export default function ProductCard({
             <div className="space-y-3">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
-                  <p className="text-sm font-semibold text-muted">{product.brand}</p>
+                  <p className="text-sm font-semibold text-muted">
+                    {product.brand}
+                  </p>
                   <Link href={`/product/${product.slug}`}>
-                    <h3 className="font-bold text-lg transition-colors">{product.title}</h3>
+                    <h3 className="font-bold text-lg transition-colors">
+                      {product.title}
+                    </h3>
                   </Link>
                 </div>
                 <div className="flex items-center gap-1 px-2 py-1 rounded-md">
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   <span className="text-sm font-bold">{product.rating}</span>
-                  <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
+                  <span className="text-xs text-muted-foreground">
+                    ({product.reviewCount})
+                  </span>
                 </div>
               </div>
 
-              <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {product.description}
+              </p>
 
               <PriceSection product={product} savings={savings} />
 
@@ -729,17 +786,33 @@ export default function ProductCard({
               </div>
             </div>
 
-            <div className="flex gap-3 pt-6 mt-auto border-t border-gray-100">
-              <Button className="flex-1" onClick={handleAddToCart} disabled={isOutOfStock}>
+            <div className="flex gap-3 pt-6 mt-auto border-t border-primary-foreground">
+              <Button
+                className="flex-1"
+                onClick={handleAddToCart}
+                disabled={isOutOfStock}
+              >
                 <ShoppingCart className="w-4 h-4 mr-2" />
                 Add to Bag
               </Button>
-              <Button variant="outline" className="flex-1" onClick={handleBuyNow} disabled={isOutOfStock}>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={handleBuyNow}
+                disabled={isOutOfStock}
+              >
                 <Zap className="w-4 h-4 mr-2" />
                 Buy Now
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleAddToWishlist} className="shrink-0 text-gray-400 hover:text-red-500">
-                <Heart className={`w-5 h-5 ${isWishlisted ? "fill-red-500 text-red-500" : ""}`} />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleAddToWishlist}
+                className="shrink-0 text-muted-foreground hover:text-destructive-foreground"
+              >
+                <Heart
+                  className={`w-5 h-5 ${isWishlisted ? "fill-destructive-foreground text-destructive-foreground" : ""}`}
+                />
               </Button>
             </div>
           </div>
@@ -784,25 +857,31 @@ export default function ProductCard({
     <TooltipProvider>
       <motion.div
         layout
-        className={`group relative rounded-2xl border bg-background overflow-hidden transition-all duration-700 ${className}`}
+        className={`group relative rounded-2xl border bg-background overflow-hidden transition-all duration-700 flex flex-col ${className}`}
       >
-        <div className="relative aspect-4/5 overflow-hidden">
+        <div className="relative w-full overflow-hidden bg-secondary/20">
           <ProductImageSection
             product={product}
             isWishlisted={isWishlisted}
             isOutOfStock={isOutOfStock}
             discountPercentage={discountPercentage}
             onAddToWishlist={handleAddToWishlist}
-            selectedColorName={product.variants.find(v => v.color.hex === selectedColor)?.color.name}
+            selectedColorName={
+              product.variants.find((v) => v.color.hex === selectedColor)?.color
+                .name
+            }
           />
-          {/* Glassmorphic Info Container */}
-          <div className="absolute bottom-0 left-0 right-0 z-30 p-4 backdrop-blur-lg shadow-xl transform translate-y-1 group-hover:translate-y-0 transition-all duration-500 overflow-hidden">
+        </div>
+
+        {/* Info Container */}
+        <div className="p-4 flex flex-col bg-background z-30 transition-all duration-500">
+          <div className="space-y-3">
             {/* Subtitle/Brand */}
             <div className="transition-all duration-500 transform group-hover:-translate-y-1">
               <ProductInfoHeader product={product} />
             </div>
 
-            <div className="flex items-end justify-between gap-2 mt-2 transition-all duration-500">
+            <div className="flex items-end justify-between gap-2 transition-all duration-500">
               <PriceSection product={product} savings={savings} />
               <ColorOptions
                 product={product}
@@ -810,15 +889,15 @@ export default function ProductCard({
                 onColorSelect={handleColorSelect}
               />
             </div>
+          </div>
 
-            {/* Hidden Action Buttons - revealed on hover */}
-            <div className="group-hover:mt-4 h-0 group-hover:h-10 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
-              <ActionButtons
-                isOutOfStock={isOutOfStock}
-                onAddToCart={handleAddToCart}
-                onBuyNow={handleBuyNow}
-              />
-            </div>
+          {/* Hidden Action Buttons - revealed on hover */}
+          <div className="group-hover:mt-4 h-0 group-hover:h-9 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 delay-100">
+            <ActionButtons
+              isOutOfStock={isOutOfStock}
+              onAddToCart={handleAddToCart}
+              onBuyNow={handleBuyNow}
+            />
           </div>
         </div>
 
