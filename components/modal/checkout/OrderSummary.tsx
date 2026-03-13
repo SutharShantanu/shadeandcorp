@@ -38,7 +38,7 @@ export function OrderSummary({
   const defaultImageSrc =
     product.assets?.find((a) => a.role === "thumbnail")?.url ||
     product.assets?.[0]?.url ||
-    "/placeholder.png";
+    "https://placehold.co/600x600/f0f0f0/333333/png?text=Placeholder";
   const availableSizes = Array.from(
     new Set(product.variants?.map((v) => v.size) || []),
   );

@@ -51,82 +51,7 @@ interface ExtendedUser {
   address?: Address[];
 }
 
-interface BankOffer {
-  id: string;
-  bank: string;
-  type: "card" | "upi" | "netbanking";
-  discount: number;
-  description: string;
-  minAmount?: number;
-  code?: string;
-}
-
-interface Coupon {
-  id: string;
-  code: string;
-  discount: number;
-  type: "percentage" | "fixed";
-  description: string;
-  minAmount?: number;
-}
-
-const coupons: Coupon[] = [
-  {
-    id: "1",
-    code: "WELCOME10",
-    discount: 10,
-    type: "percentage",
-    description: "Get 10% off on your first order",
-  },
-];
-
-const bankOffers: BankOffer[] = [
-  {
-    id: "b1",
-    bank: "HDFC Bank",
-    type: "card",
-    discount: 10,
-    description: "10% instant discount on HDFC Credit Cards",
-    minAmount: 1500,
-    code: "HDFCCARD10",
-  },
-  {
-    id: "b2",
-    bank: "SBI",
-    type: "card",
-    discount: 5,
-    description: "5% cashback on SBI Debit Cards",
-    minAmount: 1000,
-    code: "SBIDEBIT5",
-  },
-  {
-    id: "b3",
-    bank: "Paytm",
-    type: "upi",
-    discount: 50,
-    description: "Flat ₹50 off on Paytm UPI",
-    minAmount: 500,
-    code: "PAYTMUPI50",
-  },
-  {
-    id: "b4",
-    bank: "PhonePe",
-    type: "upi",
-    discount: 100,
-    description: "Get ₹100 cashback on PhonePe UPI",
-    minAmount: 2000,
-    code: "PHONEPE100",
-  },
-  {
-    id: "b5",
-    bank: "ICICI Bank",
-    type: "netbanking",
-    discount: 7.5,
-    description: "7.5% off on ICICI Net Banking",
-    minAmount: 3000,
-    code: "ICICINET75",
-  },
-];
+import { BankOffer, Coupon, coupons, bankOffers } from "@/lib/constants";
 
 interface ShippingMethod {
   id: string;
@@ -235,21 +160,24 @@ export default function QuickCheckoutModal({
   });
 
   const selectedCouponData = coupons.find(
-    (coupon) => coupon.id === selectedCoupon
+    (coupon) => coupon.id === selectedCoupon,
   );
 
   const selectedShippingMethod = shippingMethods.find(
-    (method) => method.id === shippingMethod
+    (method) => method.id === shippingMethod,
   );
 
   const selectedAddressData = userAddresses.find(
-    (addr) => addr._id === selectedAddress
+    (addr) => addr._id === selectedAddress,
   );
 
   // Calculate totals
-  const selectedVariant = product.variants.find(v => v.color.hex === selectedColor && v.size === selectedSize)
-    || product.variants.find(v => v.color.hex === selectedColor)
-    || product.variants[0];
+  const selectedVariant =
+    product.variants.find(
+      (v) => v.color.hex === selectedColor && v.size === selectedSize,
+    ) ||
+    product.variants.find((v) => v.color.hex === selectedColor) ||
+    product.variants[0];
 
   const subtotal = (selectedVariant?.price || product.basePrice) * quantity;
   const discount = selectedCouponData
@@ -257,7 +185,10 @@ export default function QuickCheckoutModal({
       ? (subtotal * selectedCouponData.discount) / 100
       : selectedCouponData.discount
     : 0;
-  const shipping = selectedAddressData && selectedShippingMethod ? selectedShippingMethod.price : 0;
+  const shipping =
+    selectedAddressData && selectedShippingMethod
+      ? selectedShippingMethod.price
+      : 0;
   const giftWrapFee = isGift ? 5 : 0;
   const total = Math.max(0, subtotal - discount + shipping + giftWrapFee);
 
@@ -274,12 +205,12 @@ export default function QuickCheckoutModal({
 
   const handleApplyCustomCoupon = () => {
     const coupon = coupons.find(
-      (c) => c.code.toLowerCase() === customCouponCode.toLowerCase()
+      (c) => c.code.toLowerCase() === customCouponCode.toLowerCase(),
     );
     if (coupon) {
       if (coupon.minAmount && subtotal < coupon.minAmount) {
         toast.error(
-          `This coupon requires a minimum purchase of $${coupon.minAmount}`
+          `This coupon requires a minimum purchase of $${coupon.minAmount}`,
         );
         return;
       }
@@ -307,28 +238,37 @@ export default function QuickCheckoutModal({
   };
 
   // Filter coupons based on search and eligibility
-  const allCoupons = [...coupons, ...bankOffers.map(offer => ({
-    id: offer.id,
-    code: offer.code || offer.bank,
-    discount: offer.discount,
-    type: offer.type === "card" || offer.type === "upi" || offer.type === "netbanking" ? "fixed" as const : "percentage" as const,
-    description: offer.description,
-    minAmount: offer.minAmount,
-    category: offer.type,
-  }))];
+  const allCoupons = [
+    ...coupons,
+    ...bankOffers.map((offer) => ({
+      id: offer.id,
+      code: offer.code || offer.bank,
+      discount: offer.discount,
+      type:
+        offer.type === "card" ||
+        offer.type === "upi" ||
+        offer.type === "netbanking"
+          ? ("fixed" as const)
+          : ("percentage" as const),
+      description: offer.description,
+      minAmount: offer.minAmount,
+      category: offer.type,
+    })),
+  ];
 
   const filteredCoupons = allCoupons.filter((coupon) => {
-    const matchesSearch = coupon.code.toLowerCase().includes(couponSearch.toLowerCase()) ||
+    const matchesSearch =
+      coupon.code.toLowerCase().includes(couponSearch.toLowerCase()) ||
       coupon.description.toLowerCase().includes(couponSearch.toLowerCase());
     return matchesSearch;
   });
 
   const eligibleCoupons = filteredCoupons.filter(
-    (coupon) => !coupon.minAmount || subtotal >= coupon.minAmount
+    (coupon) => !coupon.minAmount || subtotal >= coupon.minAmount,
   );
 
   const ineligibleCoupons = filteredCoupons.filter(
-    (coupon) => coupon.minAmount && subtotal < coupon.minAmount
+    (coupon) => coupon.minAmount && subtotal < coupon.minAmount,
   );
 
   const handlePayment = async () => {
@@ -420,7 +360,7 @@ export default function QuickCheckoutModal({
     } catch (error) {
       console.error("Payment error:", error);
       toast.error(
-        "There was an error processing your payment. Please try again."
+        "There was an error processing your payment. Please try again.",
       );
     } finally {
       setIsProcessing(false);
@@ -488,7 +428,6 @@ export default function QuickCheckoutModal({
                   giftMessage={giftMessage}
                   onMessageChange={setGiftMessage}
                 />
-
               </div>
 
               {/* Right Column - Price Summary & Payment */}
@@ -516,14 +455,18 @@ export default function QuickCheckoutModal({
                   />
 
                   {/* Trust Badges Component */}
-                  <TrustBadges showFreeShipping={selectedAddress !== "" && shipping === 0} />
+                  <TrustBadges
+                    showFreeShipping={selectedAddress !== "" && shipping === 0}
+                  />
 
                   {/* Payment Button */}
                   <DialogFooter>
                     <Button
                       className="w-full py-6 text-lg font-semibold"
                       onClick={handlePayment}
-                      disabled={isProcessing || !selectedSize || !selectedAddress}
+                      disabled={
+                        isProcessing || !selectedSize || !selectedAddress
+                      }
                     >
                       {isProcessing ? (
                         <>Processing...</>

@@ -95,7 +95,7 @@ function SizeSelectionModal({
                 src={
                   product.assets.find((a) => a.role === "thumbnail")?.url ||
                   product.assets[0]?.url ||
-                  "/placeholder.png"
+                  "https://placehold.co/600x600/f0f0f0/333333/png?text=Placeholder"
                 }
                 alt={product.title}
                 width={96}
@@ -247,22 +247,9 @@ function ProductImageSection({
   const [api, setApi] = useState<CarouselApi>();
   const { selectedIndex, scrollSnaps, onDotButtonClick } = useDotButton(api);
 
-  // Filter images based on selected color name
   const filteredAssets = useMemo(() => {
-    const selectedVariant = product.variants.find(
-      (v) => v.color.name === selectedColorName,
-    );
-    const variantId = selectedVariant?.id;
-
-    // We want to show:
-    // 1. Common assets (variantId is null/undefined)
-    // 2. Assets specific to the selected variant
-    const filtered = product.assets
-      .filter((asset) => !asset.variantId || asset.variantId === variantId)
-      .sort((a, b) => a.order - b.order);
-
-    return filtered.length > 0 ? filtered : product.assets;
-  }, [product.assets, product.variants, selectedColorName]);
+    return [...product.assets].sort((a, b) => a.order - b.order).slice(0, 4);
+  }, [product.assets]);
 
   // Reset carousel to first slide when filtered images change
   useEffect(() => {
@@ -669,9 +656,13 @@ export default function ProductCard({
     onAddToWishlist?.(product);
 
     if (isWishlisted) {
-      toast.info(`${product.title} has been removed from your wishlist.`);
+      toast.info(`${product.title} has been removed from your wishlist.`, {
+        id: `wishlist-${product.id}`,
+      });
     } else {
-      toast.success(`${product.title} has been added to your wishlist.`);
+      toast.success(`${product.title} has been added to your wishlist.`, {
+        id: `wishlist-${product.id}`,
+      });
     }
   };
 

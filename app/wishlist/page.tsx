@@ -224,9 +224,13 @@ export default function WishlistPage() {
   }, [items, search, collection, priceMin, priceMax, sort]);
 
   // Actions
-  const removeItem = (id: string) => {
+  const removeItem = (id: string, title?: string) => {
     dispatch(remove(id));
-    toast.info("Removed from wishlist");
+    if (title) {
+      toast.info(`${title} removed from wishlist`, { id: `wishlist-${id}` });
+    } else {
+      toast.info("Removed from wishlist", { id: `wishlist-${id}` });
+    }
   };
 
   const clearWishlist = () => {
@@ -370,10 +374,12 @@ export default function WishlistPage() {
                     // Toggle: if present, remove; if absent, add
                     const exists = items.some((p) => p.id === product.id);
                     if (exists) {
-                      removeItem(product.id);
+                      removeItem(product.id, product.title);
                     } else {
                       dispatch(add(product));
-                      toast.success("Added to wishlist");
+                      toast.success(`${product.title} added to wishlist!`, {
+                        id: `wishlist-${product.id}`,
+                      });
                     }
                   }}
                 />
@@ -389,7 +395,7 @@ export default function WishlistPage() {
                   <Button
                     size="sm"
                     variant="secondary"
-                    onClick={() => removeItem(product.id)}
+                    onClick={() => removeItem(product.id, product.title)}
                   >
                     Remove
                   </Button>

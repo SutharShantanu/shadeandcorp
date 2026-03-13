@@ -22,6 +22,13 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { CouponButton } from "@/components/modal/checkout/CouponButton";
+import { CouponList } from "@/components/modal/checkout/CouponList";
+import { coupons, bankOffers } from "@/lib/constants";
+import { toast } from "sonner";
+
+
 interface CartItem {
   id: string;
   name: string;
@@ -80,10 +87,45 @@ const recommendedProducts = [
 export default function CartPage() {
   const router = useRouter();
   const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
+  
+  const [selectedCoupon, setSelectedCoupon] = useState<string>("");
+  const [customCouponCode, setCustomCouponCode] = useState<string>("");
+  const [showCouponUI, setShowCouponUI] = useState(false);
+  const [couponSearch, setCouponSearch] = useState("");
+
+  const allCoupons = [
+    ...coupons,
+    ...bankOffers.map((offer) => ({
+      id: offer.id,
+      code: offer.code || offer.bank,
+      discount: offer.discount,
+      type:
+        offer.type === "card" ||
+        offer.type === "upi" ||
+        offer.type === "netbanking"
+          ? ("fixed" as const)
+          : ("percentage" as const),
+      description: offer.description,
+      minAmount: offer.minAmount,
+      category: offer.type,
+    })),
+  ];
+
+  const selectedCouponData = allCoupons.find(
+    (coupon) => coupon.id === selectedCoupon,
+  );
+
+  const filteredCoupons = allCoupons.filter((coupon) => {
+    const matchesSearch =
+      coupon.code.toLowerCase().includes(couponSearch.toLowerCase()) ||
+      coupon.description.toLowerCase().includes(couponSearch.toLowerCase());
+    return matchesSearch;
+  });
+
   const [selectedItems, setSelectedItems] = useState<Set<string>>(
     new Set(cartItems.map((item) => item.id))
   );
-  const [promoCode, setPromoCode] = useState("");
+
 
   const handleSelectItem = (itemId: string) => {
     const newSelected = new Set(selectedItems);
@@ -146,8 +188,58 @@ export default function CartPage() {
     0
   );
 
-  const tax = subtotal * 0.08; // 8% tax
-  const total = subtotal - totalSavings + tax;
+
+  const eligibleCoupons = filteredCoupons.filter(
+    (coupon) => !coupon.minAmount || subtotal >= coupon.minAmount,
+  );
+
+  const ineligibleCoupons = filteredCoupons.filter(
+    (coupon) => coupon.minAmount && subtotal < coupon.minAmount,
+  );
+
+  const handleApplyCustomCoupon = () => {
+    const coupon = allCoupons.find(
+      (c) => c.code.toLowerCase() === customCouponCode.toLowerCase(),
+    );
+    if (coupon) {
+      if (coupon.minAmount && subtotal < coupon.minAmount) {
+        toast.error(
+          `This coupon requires a minimum purchase of $${coupon.minAmount}`,
+        );
+        return;
+      }
+      setSelectedCoupon(coupon.id);
+      toast.success(`Coupon "${coupon.code}" applied successfully!`);
+      setCustomCouponCode("");
+      setShowCouponUI(false);
+    } else {
+      toast.error("Invalid coupon code");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setSelectedCoupon("");
+    toast.info("Coupon removed");
+  };
+
+  const handleCouponSelect = (couponId: string) => {
+    const coupon = allCoupons.find((c) => c.id === couponId);
+    if (coupon) {
+      setSelectedCoupon(couponId);
+      setShowCouponUI(false);
+      toast.success(`Coupon "${coupon.code}" applied successfully!`);
+    }
+  };
+
+  const couponDiscount = selectedCouponData
+    ? selectedCouponData.type === "percentage"
+      ? (subtotal * selectedCouponData.discount) / 100
+      : selectedCouponData.discount
+    : 0;
+
+  const tax = Math.max(0, (subtotal - totalSavings - couponDiscount) * 0.08); // 8% tax
+  const total = Math.max(0, subtotal - totalSavings - couponDiscount + tax);
+
   const totalItems = selectedCartItems.reduce(
     (sum, item) => sum + item.quantity,
     0
@@ -162,6 +254,8 @@ export default function CartPage() {
       selectedItems.has(item.id)
     );
     localStorage.setItem("checkoutItems", JSON.stringify(selectedCartData));
+    if (selectedCouponData) localStorage.setItem("checkoutCoupon", JSON.stringify(selectedCouponData));
+    else localStorage.removeItem("checkoutCoupon");
     router.push("/checkout");
   };
 
@@ -336,6 +430,12 @@ export default function CartPage() {
                     </span>
                   </div>
 
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Coupon Discount</span>
+                      <span>-${couponDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
                   {totalSavings > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Savings</span>
@@ -362,17 +462,13 @@ export default function CartPage() {
                 </div>
 
                 <div className="mb-6">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Promo code"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button variant="outline" size="icon">
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <CouponButton
+                    selectedCoupon={selectedCouponData}
+                    hasCoupons={allCoupons.length > 0}
+                    hasEligibleCoupons={eligibleCoupons.length > 0}
+                    onOpenCoupons={() => setShowCouponUI(true)}
+                    onRemoveCoupon={handleRemoveCoupon}
+                  />
                 </div>
 
                 <Button
@@ -417,6 +513,41 @@ export default function CartPage() {
           </div>
         </div>
       </div>
+
+      <Dialog open={showCouponUI} onOpenChange={setShowCouponUI}>
+        <DialogContent className="max-w-xl w-[95vw] h-[85vh] sm:h-[600px] p-0 gap-0 overflow-hidden flex flex-col sm:rounded-2xl">
+          <DialogTitle className="sr-only">Available Coupons</DialogTitle>
+          <div className="flex flex-col flex-1 overflow-hidden relative p-4 sm:p-6 pb-0">
+            <div className="flex items-center gap-3 mb-4 shrink-0">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowCouponUI(false)}
+                className="shrink-0 h-8 w-8"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <h2 className="text-xl font-bold">Available Coupons</h2>
+            </div>
+            <div className="flex-1 overflow-y-auto w-full relative sm:px-2 pb-6">
+              <CouponList
+                searchQuery={couponSearch}
+                onSearchChange={setCouponSearch}
+                customCode={customCouponCode}
+                onCustomCodeChange={setCustomCouponCode}
+                onApplyCustomCode={handleApplyCustomCoupon}
+                eligibleCoupons={eligibleCoupons}
+                ineligibleCoupons={ineligibleCoupons}
+                selectedCoupon={selectedCoupon}
+                onSelectCoupon={handleCouponSelect}
+                subtotal={subtotal}
+                onBack={() => setShowCouponUI(false)}
+                onRemoveCoupon={handleRemoveCoupon}
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -96,6 +96,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState<CheckoutStep>("information");
   const [orderItems, setOrderItems] = useState<OrderItem[]>(defaultOrderItems);
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
 
   useEffect(() => {
     // Load items from localStorage if available
@@ -117,6 +118,12 @@ export default function CheckoutPage() {
       } catch (error) {
         console.error("Error parsing stored items:", error);
       }
+    }
+    const storedCoupon = localStorage.getItem("checkoutCoupon");
+    if (storedCoupon) {
+      try {
+        setAppliedCoupon(JSON.parse(storedCoupon));
+      } catch (error) {}
     }
   }, []);
 
@@ -156,8 +163,15 @@ export default function CheckoutPage() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const tax = subtotal * 0.08;
-  const total = subtotal + tax;
+
+  const couponDiscount = appliedCoupon
+    ? appliedCoupon.type === "percentage"
+      ? (subtotal * appliedCoupon.discount) / 100
+      : appliedCoupon.discount
+    : 0;
+
+  const tax = Math.max(0, (subtotal - couponDiscount) * 0.08); // 8% tax
+  const total = Math.max(0, subtotal - couponDiscount + tax);
 
   const stepIndex = steps.findIndex((s) => s.id === currentStep);
 
@@ -180,9 +194,11 @@ export default function CheckoutPage() {
         shipping: shippingForm.getValues(),
         payment: paymentForm.getValues(),
         items: orderItems,
+        coupon: appliedCoupon,
       });
       // Clear checkout items from localStorage
       localStorage.removeItem("checkoutItems");
+      localStorage.removeItem("checkoutCoupon");
       // You can redirect to a success page or show a confirmation
       // router.push("/order-success");
     }
@@ -630,6 +646,13 @@ export default function CheckoutPage() {
                     <span className="text-muted-foreground">Shipping</span>
                     <span className="font-semibold">Free</span>
                   </div>
+
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Coupon Discount</span>
+                      <span className="font-semibold">-${couponDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
 
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Tax</span>

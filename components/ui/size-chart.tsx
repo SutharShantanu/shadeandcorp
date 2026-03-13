@@ -1,153 +1,264 @@
 "use client";
 
-import React from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import React, { useState, useMemo } from "react";
+import Image from "next/image";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
-    Table,
-    TableHeader,
-    TableRow,
-    TableHead,
-    TableBody,
-    TableCell,
+  MoveHorizontal,
+  Link,
+  ArrowUpDown,
+  type LucideIcon,
+} from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
-import { Baby, Venus, Mars } from "lucide-react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Input } from "@/components/ui/input";
 
-export type SizeChartRow = {
-    label: string;
-    chest?: number; // stored as inches
-    waist?: number; // inches
-    hip?: number; // inches
-};
+const REGIONS = ["ASIA", "EUROPE", "US", "UK"] as const;
 
-export type SizeChartData = {
-    gender: "men" | "women" | "kids";
-    rows: SizeChartRow[];
-};
+const SIZE_DATA = [
+  {
+    chest: [34, 36],
+    waist: [28, 30],
+    hip: [34, 36],
+    sizes: { ASIA: "S", EUROPE: "44", US: "XS", UK: "XS" },
+  },
+  {
+    chest: [36, 38],
+    waist: [30, 32],
+    hip: [36, 38],
+    sizes: { ASIA: "M", EUROPE: "46", US: "S", UK: "S" },
+  },
+  {
+    chest: [38, 40],
+    waist: [32, 34],
+    hip: [38, 40],
+    sizes: { ASIA: "L", EUROPE: "48", US: "M", UK: "M" },
+  },
+  {
+    chest: [40, 42],
+    waist: [34, 36],
+    hip: [40, 42],
+    sizes: { ASIA: "XL", EUROPE: "50", US: "L", UK: "L" },
+  },
+  {
+    chest: [42, 44],
+    waist: [36, 38],
+    hip: [42, 44],
+    sizes: { ASIA: "XXL", EUROPE: "52", US: "XL", UK: "XL" },
+  },
+];
 
-function toCm(inches?: number) {
-    if (inches == null) return undefined;
-    return Math.round(inches * 2.54 * 10) / 10; // one decimal
+interface MeasureItemProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  className?: string;
+}
+
+function MeasureItem({
+  icon: Icon,
+  title,
+  description,
+  className = "",
+}: MeasureItemProps) {
+  return (
+    <div className="flex gap-3 items-start">
+      <Icon className={`w-4 h-4 text-primary shrink-0 mt-0.5 ${className}`} />
+      <div>
+        <span className="text-sm font-semibold text-foreground block mb-0.5">
+          {title}
+        </span>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function convert(value: number, unit: "in" | "cm") {
+  if (unit === "in") return value;
+  return Math.round(value * 2.54);
+}
+
+function formatRange(range: number[], unit: "in" | "cm") {
+  const min = convert(range[0], unit);
+  const max = convert(range[1], unit);
+  return `${min}-${max}`;
 }
 
 export interface SizeChartProps {
-    brand?: string;
-    category?: string;
-    charts?: SizeChartData[]; // optional custom charts per gender
+  category?: string;
+  brand?: string;
 }
 
-const defaultCharts: SizeChartData[] = [
-    {
-        gender: "men",
-        rows: [
-            { label: "S", chest: 36, waist: 30 },
-            { label: "M", chest: 40, waist: 34 },
-            { label: "L", chest: 44, waist: 38 },
-            { label: "XL", chest: 48, waist: 42 },
-            { label: "XXL", chest: 52, waist: 46 },
-        ],
-    },
-    {
-        gender: "women",
-        rows: [
-            { label: "XS", chest: 32, waist: 24, hip: 34 },
-            { label: "S", chest: 34, waist: 26, hip: 36 },
-            { label: "M", chest: 36, waist: 28, hip: 38 },
-            { label: "L", chest: 39, waist: 31, hip: 41 },
-            { label: "XL", chest: 42, waist: 34, hip: 44 },
-        ],
-    },
-    {
-        gender: "kids",
-        rows: [
-            { label: "XS", chest: 33, waist: 26 },
-            { label: "S", chest: 36, waist: 29 },
-            { label: "M", chest: 39, waist: 32 },
-            { label: "L", chest: 42, waist: 35 },
-            { label: "XL", chest: 45, waist: 38 },
-        ],
-    },
-];
+export function SizeChart({ category, brand }: SizeChartProps = {}) {
+  const [region, setRegion] = useState<(typeof REGIONS)[number]>("ASIA");
+  const [unit, setUnit] = useState<"in" | "cm">("in");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
 
-export function SizeChart({ brand, category, charts = defaultCharts }: SizeChartProps) {
-    const [unit, setUnit] = React.useState<"in" | "cm">("in");
-    const [gender, setGender] = React.useState<"men" | "women" | "kids">(
-        charts[0]?.gender ?? "kids"
-    );
+  const recommendedSize = useMemo(() => {
+    const h = Number(height);
+    const w = Number(weight);
+    if (!h || !w) return null;
 
-    const current = charts.find((c) => c.gender === gender) ?? defaultCharts[2];
+    if (h < 165 && w < 60) return SIZE_DATA[0];
+    if (h < 172 && w < 70) return SIZE_DATA[1];
+    if (h < 178 && w < 80) return SIZE_DATA[2];
+    if (h < 185 && w < 90) return SIZE_DATA[3];
+    return SIZE_DATA[4];
+  }, [height, weight]);
 
-    const format = (val?: number) => {
-        if (val == null) return "-";
-        return unit === "in" ? `${val}"` : `${toCm(val)} cm`;
-    };
+  return (
+    <div className="flex flex-col md:flex-row gap-8 p-2 sm:p-4">
+      <div className="flex-1 space-y-6 md:w-3/5">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <Tabs
+            value={region}
+            onValueChange={(v) => setRegion(v as (typeof REGIONS)[number])}
+          >
+            <TabsList className="grid grid-cols-4">
+              {REGIONS.map((r) => (
+                <TabsTrigger key={r} value={r}>
+                  {r}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
-    return (
-        <div className="space-y-4 p-4">
-            <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                    {brand && <span>Brand: {brand}</span>} {brand && category && " • "}
-                    {category && <span>Category: {category}</span>}
-                </div>
-                <ToggleGroup variant="outline" type="single" value={unit} onValueChange={(v: string) => v && setUnit(v as "in" | "cm")}>
-                    <ToggleGroupItem className="w-1/2" value="in">
-                        in
-                    </ToggleGroupItem>
-                    <ToggleGroupItem className="w-1/2" value="cm">
-                        cm
-                    </ToggleGroupItem>
-                </ToggleGroup>
-            </div>
-
-            <Tabs value={gender} onValueChange={(v: string) => setGender(v as "men" | "women" | "kids")}>
-                <TabsList>
-                    <TabsTrigger value="men">
-                        <Mars className="mr-1.5 h-4 w-4" />
-                        Men
-                    </TabsTrigger>
-                    <TabsTrigger value="women">
-                        <Venus className="mr-1.5 h-4 w-4" />
-                        Women
-                    </TabsTrigger>
-                    <TabsTrigger value="kids">
-                        <Baby className="mr-1.5 h-4 w-4" />
-                        Kids
-                    </TabsTrigger>
-                </TabsList>
-            </Tabs>
-
-            <div className="overflow-x-auto border rounded-lg">
-                <Table className="">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Size</TableHead>
-                            <TableHead>Chest ({unit})</TableHead>
-                            <TableHead>Waist ({unit})</TableHead>
-                            {current.rows.some((r) => r.hip != null) && (
-                                <TableHead>Hip ({unit})</TableHead>
-                            )}
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {current.rows.map((row) => (
-                            <TableRow key={`${gender}-${row.label}`} striped>
-                                <TableCell className="font-medium">{row.label}</TableCell>
-                                <TableCell>{format(row.chest)}</TableCell>
-                                <TableCell>{format(row.waist)}</TableCell>
-                                {current.rows.some((r) => r.hip != null) && (
-                                    <TableCell>{format(row.hip)}</TableCell>
-                                )}
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
-
-            <div className="text-xs text-muted-foreground">
-                Tip: Measurements are approximate. If between sizes, choose the larger.
-            </div>
+          <ToggleGroup
+            type="single"
+            value={unit}
+            onValueChange={(v) => v && setUnit(v as "in" | "cm")}
+          >
+            <ToggleGroupItem value="in">in</ToggleGroupItem>
+            <ToggleGroupItem value="cm">cm</ToggleGroupItem>
+          </ToggleGroup>
         </div>
-    );
+
+        <div className="border rounded-xl p-4 space-y-3">
+          <div className="text-sm font-semibold">Find Your Size</div>
+
+          <div className="flex gap-3">
+            <Input
+              placeholder="Height (cm)"
+              value={height}
+              onChange={(e) => setHeight(e.target.value)}
+            />
+            <Input
+              placeholder="Weight (kg)"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+            />
+          </div>
+
+          {recommendedSize && (
+            <div className="text-sm text-muted-foreground">
+              Recommended Size:{" "}
+              <span className="font-semibold text-foreground">
+                {
+                  recommendedSize.sizes[
+                    region as keyof typeof recommendedSize.sizes
+                  ]
+                }
+              </span>
+            </div>
+          )}
+        </div>
+
+        <Tabs value={region}>
+          <TabsContent value={region}>
+            <div className="overflow-x-auto min-h-[240px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Size</TableHead>
+                    <TableHead>Chest ({unit})</TableHead>
+                    <TableHead>Waist ({unit})</TableHead>
+                    <TableHead>Hip ({unit})</TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {SIZE_DATA.map((row) => (
+                    <TableRow key={row.chest.join("-")}>
+                      <TableCell className="font-medium">
+                        {row.sizes[region]}
+                      </TableCell>
+
+                      <TableCell>{formatRange(row.chest, unit)}</TableCell>
+
+                      <TableCell>{formatRange(row.waist, unit)}</TableCell>
+
+                      <TableCell>{formatRange(row.hip, unit)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-border/40 text-center">
+              <p className="text-sm text-muted-foreground">
+                Reference this chart to select the perfect fit.
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <div className="md:w-2/5 shrink-0 bg-muted/20 p-5 rounded-2xl border border-border/40 flex flex-col pt-6">
+        <h4 className="text-base font-bold text-foreground mb-2">
+          How to Measure
+        </h4>
+
+        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+          Use a measuring tape and follow these simple steps:
+        </p>
+
+        <div className="space-y-5 mb-8">
+          <MeasureItem
+            icon={MoveHorizontal}
+            title="Chest"
+            description="Measure around the fullest part of your chest."
+          />
+
+          <MeasureItem
+            icon={Link}
+            className="rotate-45"
+            title="Waist"
+            description="Measure around your natural waistline."
+          />
+
+          <MeasureItem
+            icon={ArrowUpDown}
+            title="Hips"
+            description="Measure around the widest part of your hips."
+          />
+        </div>
+
+        <Image
+          src="/images/size_guide_illustration.png"
+          alt="Body measurement guide"
+          width={500}
+          height={500}
+          sizes="(max-width:768px) 100vw, 400px"
+          className="object-contain border border-border rounded-2xl mx-auto"
+        />
+
+        <p className="text-xs text-center text-muted-foreground mt-4">
+          Reference this guide for accurate sizing.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default SizeChart;
