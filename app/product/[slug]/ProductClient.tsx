@@ -13,43 +13,15 @@ import {
   Ruler,
   ArrowLeft,
   Check,
-  AlertCircle,
-  Truck,
-  RefreshCcw,
-  ShieldCheck,
-  Package,
   Tag,
-  Home,
-  ChevronRight,
-  Copy,
-  MapPin,
-  ThumbsUp,
-  BadgeCheck,
-  PercentCircle,
-  Banknote,
-  Gift,
-  ZoomIn,
-  X,
-  Navigation,
-  Clock,
 } from "lucide-react";
-import { formatDistanceToNow, format } from "date-fns";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { SizeChart } from "@/components/ui/size-chart";
 import {
@@ -58,51 +30,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  InputGroup,
-  InputGroupInput,
-  InputGroupButton,
-} from "@/components/ui/input-group";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  type CarouselApi,
-} from "@/components/ui/carousel";
-import {
-  DotButton,
-  useDotButton,
-} from "@/components/ui/embla-carousel-dot-button";
-import {
-  PrevButton,
-  NextButton,
-  usePrevNextButtons,
-} from "@/components/ui/embla-carousel-arrow-button";
+
 import { Product, Variant } from "@/types/ProductCard";
 import { useAppDispatch, useAppSelector } from "@/lib/store";
 import { add, remove } from "@/features/wishlist/wishlistSlice";
 import QuickCheckoutModal from "@/components/modal/QuickCheckoutModal";
-import ProductCard from "@/components/site/ProductCard";
-import { bankOffers, type BankOffer } from "@/lib/constants";
-import { ZoomableImage } from "@/components/ui/zoomable-image";
-import { Spinner } from "@/components/ui/spinner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { cn } from "@/lib/utils";
+import { bankOffers } from "@/lib/constants";
 import { ProductBreadcrumb } from "@/components/product/ProductBreadcrumb";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { SizeSelector } from "@/components/product/SizeSelector";

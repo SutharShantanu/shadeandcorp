@@ -85,7 +85,7 @@ function TableRow({ className, striped, ...props }: TableRowProps) {
     <tr
       data-slot="table-row"
       className={cn(
-        "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors",
+        "hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors *:border-border [&>:not(:last-child)]:border-r odd:bg-muted/50 odd:hover:bg-muted/50 ",
         striped && "odd:bg-muted/50",
         className
       )}

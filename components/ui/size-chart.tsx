@@ -19,6 +19,15 @@ import {
 } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./card";
+import { Badge } from "./badge";
 
 const REGIONS = ["ASIA", "EUROPE", "US", "UK"] as const;
 
@@ -118,11 +127,12 @@ export function SizeChart({ category, brand }: SizeChartProps = {}) {
   }, [height, weight]);
 
   return (
-    <div className="flex flex-col md:flex-row gap-8 p-2 sm:p-4">
+    <div className="flex flex-col md:flex-row gap-8 p-2 sm:p-4 overflow-y-auto">
       <div className="flex-1 space-y-6 md:w-3/5">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center justify-between gap-1">
           <Tabs
             value={region}
+            className="p-0"
             onValueChange={(v) => setRegion(v as (typeof REGIONS)[number])}
           >
             <TabsList className="grid grid-cols-4">
@@ -137,48 +147,56 @@ export function SizeChart({ category, brand }: SizeChartProps = {}) {
           <ToggleGroup
             type="single"
             value={unit}
+            variant="outline"
+            size="default"
             onValueChange={(v) => v && setUnit(v as "in" | "cm")}
           >
-            <ToggleGroupItem value="in">in</ToggleGroupItem>
-            <ToggleGroupItem value="cm">cm</ToggleGroupItem>
+            <ToggleGroupItem className="w-1/2" value="in">
+              in
+            </ToggleGroupItem>
+            <ToggleGroupItem className="w-1/2" value="cm">
+              cm
+            </ToggleGroupItem>
           </ToggleGroup>
         </div>
 
-        <div className="border rounded-xl p-4 space-y-3">
-          <div className="text-sm font-semibold">Find Your Size</div>
-
-          <div className="flex gap-3">
-            <Input
-              placeholder="Height (cm)"
-              value={height}
-              onChange={(e) => setHeight(e.target.value)}
-            />
-            <Input
-              placeholder="Weight (kg)"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-            />
-          </div>
-
-          {recommendedSize && (
-            <div className="text-sm text-muted-foreground">
-              Recommended Size:{" "}
-              <span className="font-semibold text-foreground">
-                {
-                  recommendedSize.sizes[
-                    region as keyof typeof recommendedSize.sizes
-                  ]
-                }
-              </span>
+        <Card>
+          <CardHeader className="w-full flex items-center gap-1 justify-between">
+            <CardTitle>Find Your Size</CardTitle>
+            {recommendedSize && (
+              <div className="text-sm text-muted-foreground">
+                Recommended Size:{" "}
+                <Badge variant="secondary" color="info">
+                  {
+                    recommendedSize.sizes[
+                      region as keyof typeof recommendedSize.sizes
+                    ]
+                  }
+                </Badge>
+              </div>
+            )}
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3">
+              <Input
+                placeholder="Height (cm)"
+                value={height}
+                onChange={(e) => setHeight(e.target.value)}
+              />
+              <Input
+                placeholder="Weight (kg)"
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+              />
             </div>
-          )}
-        </div>
+          </CardContent>
+        </Card>
 
-        <Tabs value={region}>
+        <Tabs value={region} className="p-0">
           <TabsContent value={region}>
-            <div className="overflow-x-auto min-h-[240px]">
+            <div className="border rounded-md overflow-hidden">
               <Table>
-                <TableHeader>
+                <TableHeader sticky>
                   <TableRow>
                     <TableHead>Size</TableHead>
                     <TableHead>Chest ({unit})</TableHead>
@@ -214,16 +232,15 @@ export function SizeChart({ category, brand }: SizeChartProps = {}) {
         </Tabs>
       </div>
 
-      <div className="md:w-2/5 shrink-0 bg-muted/20 p-5 rounded-2xl border border-border/40 flex flex-col pt-6">
-        <h4 className="text-base font-bold text-foreground mb-2">
-          How to Measure
-        </h4>
+      <Card className="md:w-2/5 shrink-0 bg-muted/20 p-0">
+        <CardHeader className="border-b p-4!">
+          <CardTitle>How to Measure</CardTitle>
+          <CardDescription>
+            Use a measuring tape and follow these simple steps:
+          </CardDescription>
+        </CardHeader>
 
-        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-          Use a measuring tape and follow these simple steps:
-        </p>
-
-        <div className="space-y-5 mb-8">
+        <CardContent className="space-y-3">
           <MeasureItem
             icon={MoveHorizontal}
             title="Chest"
@@ -242,21 +259,19 @@ export function SizeChart({ category, brand }: SizeChartProps = {}) {
             title="Hips"
             description="Measure around the widest part of your hips."
           />
-        </div>
+          <Image
+            src="/images/size_guide_illustration.png"
+            alt="Body measurement guide"
+            width={500}
+            height={500}
+            className="max-w-4/5 object-contain border border-border rounded-2xl mx-auto"
+          />
 
-        <Image
-          src="/images/size_guide_illustration.png"
-          alt="Body measurement guide"
-          width={500}
-          height={500}
-          sizes="(max-width:768px) 100vw, 400px"
-          className="object-contain border border-border rounded-2xl mx-auto"
-        />
-
-        <p className="text-xs text-center text-muted-foreground mt-4">
-          Reference this guide for accurate sizing.
-        </p>
-      </div>
+          <CardFooter className="text-xs text-center text-muted-foreground mt-4">
+            Reference this guide for accurate sizing.
+          </CardFooter>
+        </CardContent>
+      </Card>
     </div>
   );
 }

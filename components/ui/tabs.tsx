@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
-
+import {AnimatePresence, motion} from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const TabsContext = React.createContext<{
@@ -80,18 +80,36 @@ function TabsTrigger({
 
 function TabsContent({
   className,
+  value,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   const { layout } = React.useContext(TabsContext);
+
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
+      value={value}
       className={cn(
         `flex-1 outline-none mt-0 ${layout === "horizontal" ? "" : "p-6"}`,
         className,
       )}
       {...props}
-    />
+    >
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={value}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{
+            duration: 0.25,
+            ease: "easeInOut",
+          }}
+        >
+          {props.children}
+        </motion.div>
+      </AnimatePresence>
+    </TabsPrimitive.Content>
   );
 }
 
