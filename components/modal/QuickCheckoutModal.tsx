@@ -462,7 +462,7 @@ export default function QuickCheckoutModal({
                   {/* Payment Button */}
                   <DialogFooter>
                     <Button
-                      className="w-full py-6 text-lg font-semibold"
+                      className="w-full py-6 text-lg font-semibold bg-green-700 hover:bg-green-800 text-white dark:bg-green-600 dark:hover:bg-green-700 dark:text-white"
                       onClick={handlePayment}
                       disabled={
                         isProcessing || !selectedSize || !selectedAddress

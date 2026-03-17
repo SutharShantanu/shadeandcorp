@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Plus, Minus, Trash2 } from "lucide-react";
+import { Plus, Minus, Trash2, Check } from "lucide-react";
 import { Product } from "@/types/ProductCard";
 import { Badge } from "@/components/ui/badge";
 
@@ -72,7 +72,7 @@ export function OrderSummary({
         <div className="flex-1 space-y-3">
           <div>
             <h4 className="font-medium">{product.title}</h4>
-            <p className="text-sm text-gray-600">{product.brand}</p>
+            <p className="text-sm">{product.brand}</p>
           </div>
 
           {/* Size Selection */}
@@ -100,28 +100,40 @@ export function OrderSummary({
               onValueChange={onColorChange}
               className="flex gap-2 items-center"
             >
-              {availableColors.map((color: { hex: string; name: string }) => (
-                <RadioGroupItem
-                  key={color.hex}
-                  value={color.hex}
-                  id={`color-${product.id}-${color.hex}`}
-                  aria-label={color.name}
-                  className="h-8 w-8 cursor-pointer rounded-full border-2 transition-all data-[state=checked]:border-black data-[state=checked]:scale-110"
-                  style={{ backgroundColor: color.hex }}
-                  title={color.name}
-                />
-              ))}
+              {availableColors.map((color: { hex: string; name: string }) => {
+                const isSelected = selectedColor === color.hex;
+                return (
+                  <RadioGroupItem
+                    key={color.hex}
+                    value={color.hex}
+                    id={`color-${product.id}-${color.hex}`}
+                    aria-label={color.name}
+                    className={`h-8 w-8 cursor-pointer rounded-full border-2 transition-all flex items-center justify-center ${isSelected ? "border-green-500 scale-110" : "border-muted-foreground/20 hover:border-muted-foreground/50"}`}
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name}
+                  >
+                    {isSelected && (
+                      <Check
+                        className="w-4 h-4 text-white"
+                        style={{
+                          mixBlendMode: "difference",
+                        }}
+                      />
+                    )}
+                  </RadioGroupItem>
+                );
+              })}
             </RadioGroup>
           </div>
 
           {/* Quantity Controls */}
           <div className="">
             <Label className="text-xs font-medium">Quantity</Label>
-            <ButtonGroup className="mt-1">
+            <ButtonGroup className="mt-1 w-12">
               <Button
-                variant={quantity === 1 ? "destructive" : "outline"}
+                variant={quantity === 1 ? "ghost" : "outline"}
                 size="icon"
-                className="h-8 w-8"
+                className={`h-8 w-16 transition-all ease-in-out ${quantity === 1 ? "text-destructive bg-destructive/10 hover:bg-destructive/20 hover:text-destructive" : ""}`}
                 onClick={onQuantityDecrease}
               >
                 {quantity === 1 ? (
@@ -140,7 +152,7 @@ export function OrderSummary({
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-16"
                 onClick={onQuantityIncrease}
               >
                 <Plus className="h-4 w-4" />
@@ -152,7 +164,7 @@ export function OrderSummary({
           <div className="flex items-center gap-2 pt-1">
             <span className="text-lg font-semibold">${price}</span>
             {originalPrice && (
-              <span className="text-sm text-gray-500 line-through">
+              <span className="text-sm line-through">
                 ${originalPrice}
               </span>
             )}
