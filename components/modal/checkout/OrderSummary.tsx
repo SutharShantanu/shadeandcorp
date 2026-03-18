@@ -1,26 +1,16 @@
 import Image from "next/image";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Plus, Minus, Trash2, Check } from "lucide-react";
 import { Product } from "@/types/ProductCard";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Minus, Plus, Trash2 } from "lucide-react";
+import { ButtonGroup } from "@/components/ui/button-group";
 
 interface OrderSummaryProps {
   product: Product;
   selectedSize: string;
   selectedColor: string;
   quantity: number;
-  onSizeChange: (size: string) => void;
-  onColorChange: (color: string) => void;
+  onSizeChange?: (size: string) => void;
+  onColorChange?: (color: string) => void;
   onQuantityIncrease: () => void;
   onQuantityDecrease: () => void;
 }
@@ -30,8 +20,6 @@ export function OrderSummary({
   selectedSize,
   selectedColor,
   quantity,
-  onSizeChange,
-  onColorChange,
   onQuantityIncrease,
   onQuantityDecrease,
 }: OrderSummaryProps) {
@@ -39,12 +27,6 @@ export function OrderSummary({
     product.assets?.find((a) => a.role === "thumbnail")?.url ||
     product.assets?.[0]?.url ||
     "https://placehold.co/600x600/f0f0f0/333333/png?text=Placeholder";
-  const availableSizes = Array.from(
-    new Set(product.variants?.map((v) => v.size) || []),
-  );
-  const availableColors = Array.from(
-    new Set(product.variants?.map((v) => JSON.stringify(v.color)) || []),
-  ).map((s) => JSON.parse(s));
 
   const selectedVariant =
     product.variants?.find(
@@ -54,122 +36,57 @@ export function OrderSummary({
     product.variants?.[0];
 
   const price = selectedVariant?.price || product.basePrice;
-  const originalPrice = selectedVariant?.originalPrice;
+
+  const colorName = product.variants?.find(v => v.color.hex === selectedColor)?.color.name || "Unknown";
 
   return (
-    <div className="border rounded-lg p-4">
-      <h3 className="font-semibold mb-4">Order Summary</h3>
-      <div className="flex gap-4">
-        <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0">
-          <Image
-            src={defaultImageSrc}
-            alt={product.title}
-            className="w-full h-full object-cover"
-            width={96}
-            height={96}
-          />
-        </div>
-        <div className="flex-1 space-y-3">
-          <div>
-            <h4 className="font-medium">{product.title}</h4>
-            <p className="text-sm">{product.brand}</p>
-          </div>
-
-          {/* Size Selection */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium">Size</Label>
-            <Select value={selectedSize} onValueChange={onSizeChange}>
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder="Select size" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableSizes.map((size) => (
-                  <SelectItem key={size} value={size}>
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Color Selection */}
-          <div className="flex flex-col gap-1">
-            <Label className="text-xs text-muted-foreground">Color</Label>
-            <RadioGroup
-              value={selectedColor}
-              onValueChange={onColorChange}
-              className="flex gap-2 items-center"
-            >
-              {availableColors.map((color: { hex: string; name: string }) => {
-                const isSelected = selectedColor === color.hex;
-                return (
-                  <RadioGroupItem
-                    key={color.hex}
-                    value={color.hex}
-                    id={`color-${product.id}-${color.hex}`}
-                    aria-label={color.name}
-                    className={`h-8 w-8 cursor-pointer rounded-full border-2 transition-all flex items-center justify-center ${isSelected ? "border-green-500 scale-110" : "border-muted-foreground/20 hover:border-muted-foreground/50"}`}
-                    style={{ backgroundColor: color.hex }}
-                    title={color.name}
-                  >
-                    {isSelected && (
-                      <Check
-                        className="w-4 h-4 text-white"
-                        style={{
-                          mixBlendMode: "difference",
-                        }}
-                      />
-                    )}
-                  </RadioGroupItem>
-                );
-              })}
-            </RadioGroup>
-          </div>
-
-          {/* Quantity Controls */}
-          <div className="">
-            <Label className="text-xs font-medium">Quantity</Label>
-            <ButtonGroup className="mt-1 w-12">
+    <div className="flex items-start gap-4 py-4 rounded-xl">
+      <div className="relative h-20 w-20 rounded-lg bg-white border border-border overflow-hidden shrink-0">
+        <Image
+          src={defaultImageSrc}
+          alt={product.title}
+          fill
+          className="object-cover"
+        />
+      </div>
+      <div className="flex-1 space-y-1 mt-1">
+        <h4 className="font-medium text-sm leading-tight text-foreground">{product.title}</h4>
+        <p className="text-xs text-muted-foreground">Size: {selectedSize} • Color: {colorName}</p>
+        
+        <div className="pt-2">
+            <ButtonGroup>
               <Button
-                variant={quantity === 1 ? "ghost" : "outline"}
+                variant={"outline"}
                 size="icon"
-                className={`h-8 w-16 transition-all ease-in-out ${quantity === 1 ? "text-destructive bg-destructive/10 hover:bg-destructive/20 hover:text-destructive" : ""}`}
+                className={`h-7 w-8 transition-all ease-in-out ${quantity === 1 ? "text-destructive bg-destructive/10 hover:bg-destructive/20 hover:text-destructive" : ""}`}
                 onClick={onQuantityDecrease}
               >
                 {quantity === 1 ? (
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3 w-3" />
                 ) : (
-                  <Minus className="h-4 w-4" />
+                  <Minus className="h-3 w-3" />
                 )}
               </Button>
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-16 pointer-events-none"
+                className="h-7 w-8 pointer-events-none"
               >
-                <span className="font-medium text-center">{quantity}</span>
+                <span className="text-xs font-medium text-center">{quantity}</span>
               </Button>
               <Button
                 variant="outline"
                 size="icon"
-                className="h-8 w-16"
+                className="h-7 w-8"
                 onClick={onQuantityIncrease}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3 w-3" />
               </Button>
             </ButtonGroup>
-          </div>
-
-          {/* Price */}
-          <div className="flex items-center gap-2 pt-1">
-            <span className="text-lg font-semibold">${price}</span>
-            {originalPrice && (
-              <span className="text-sm line-through">
-                ${originalPrice}
-              </span>
-            )}
-          </div>
         </div>
+      </div>
+      <div className="text-right mt-1">
+        <p className="font-medium text-sm text-foreground">${(price * quantity).toFixed(2)}</p>
       </div>
     </div>
   );

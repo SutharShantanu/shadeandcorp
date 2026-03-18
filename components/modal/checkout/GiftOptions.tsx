@@ -22,7 +22,7 @@ export function GiftOptions({
     onMessageChange,
 }: GiftOptionsProps) {
     return (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="rounded-xl overflow-hidden border">
             <Collapsible open={isGift} onOpenChange={onGiftToggle}>
                 <div className="p-4 bg-linear-to-r from-pink-50 dark:from-pink-500/10 to-purple-50 dark:to-purple-500/10">
                     <div className="flex items-center justify-between">
@@ -31,7 +31,7 @@ export function GiftOptions({
                             <h3 className="font-semibold text-purple-900 dark:text-purple-300">Make it Special</h3>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-600">+$5</span>
+                            <span className="text-sm text-muted-foreground">+$5</span>
                             <CollapsibleTrigger asChild>
                                 <Button variant="ghost" size="sm" className="h-8">
                                     {isGift ? "Remove" : "Add Gift Wrap"}
@@ -64,7 +64,7 @@ export function GiftOptions({
                                 maxLength={200}
                                 className="mt-2"
                             />
-                            <p className="text-xs text-gray-500 mt-1.5">
+                            <p className="text-xs text-muted-foreground mt-1.5">
                                 {giftMessage.length}/200 characters
                             </p>
                         </div>

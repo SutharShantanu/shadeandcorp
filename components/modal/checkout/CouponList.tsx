@@ -146,7 +146,7 @@ export function CouponList({
                           </Badge>
                         )}
                     </div>
-                    <p className="text-xs text-gray-700">
+                    <p className="text-xs text-foreground">
                       {coupon.description}
                     </p>
                     <p className="text-xs text-green-600 mt-1">
@@ -165,13 +165,13 @@ export function CouponList({
         {/* Ineligible Coupons */}
         {ineligibleCoupons.length > 0 && (
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-600">
+            <h4 className="text-sm font-semibold text-muted-foreground">
               Not Eligible ({ineligibleCoupons.length})
             </h4>
             {ineligibleCoupons.map((coupon) => (
               <div
                 key={coupon.id}
-                className="p-4 border rounded-lg opacity-60 bg-gray-50"
+                className="p-4 border rounded-lg opacity-60 bg-muted/50"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -182,7 +182,7 @@ export function CouponList({
                         {coupon.type === "percentage" ? "%" : "$"}
                       </Badge>
                     </div>
-                    <p className="text-xs text-gray-700">
+                    <p className="text-xs text-foreground">
                       {coupon.description}
                     </p>
                     <p className="text-xs text-red-500 mt-1">
@@ -199,8 +199,8 @@ export function CouponList({
         {/* No Coupons Found */}
         {eligibleCoupons.length === 0 && ineligibleCoupons.length === 0 && (
           <div className="p-12 text-center">
-            <Ticket className="w-16 h-16 text-gray-300 mx-auto mb-3" />
-            <p className="text-sm text-gray-600">
+            <Ticket className="w-16 h-16 text-muted mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">
               No coupons found matching your search
             </p>
           </div>

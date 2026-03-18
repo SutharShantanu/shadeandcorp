@@ -1,71 +1,85 @@
-import { Truck } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+} from "@/components/ui/field";
+import { IconBadge } from "@/components/ui/icon-badge";
 
 interface ShippingMethod {
-    id: string;
-    name: string;
-    price: number;
-    estimatedDays: string;
-    icon: any;
+  id: string;
+  name: string;
+  price: number;
+  estimatedDays: string;
+  icon: any;
 }
 
 interface ShippingMethodSelectorProps {
-    methods: ShippingMethod[];
-    selectedMethod: string;
-    onMethodChange: (methodId: string) => void;
+  methods: ShippingMethod[];
+  selectedMethod: string;
+  onMethodChange: (methodId: string) => void;
 }
 
 export function ShippingMethodSelector({
-    methods,
-    selectedMethod,
-    onMethodChange,
+  methods,
+  selectedMethod,
+  onMethodChange,
 }: ShippingMethodSelectorProps) {
-    return (
-        <div className="border rounded-lg p-4">
-            <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Truck className="w-4 h-4" />
-                Shipping Method
-            </h3>
-            <RadioGroup value={selectedMethod} onValueChange={onMethodChange}>
-                <div className="space-y-3">
-                    {methods.map((method) => {
-                        const Icon = method.icon;
-                        return (
-                            <div
-                                key={method.id}
-                                className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                                <RadioGroupItem
-                                    value={method.id}
-                                    id={`shipping-${method.id}`}
-                                />
-                                <Label
-                                    htmlFor={`shipping-${method.id}`}
-                                    className="flex-1 cursor-pointer"
-                                >
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex items-center gap-2">
-                                            <Icon className="w-4 h-4 text-gray-600" />
-                                            <div>
-                                                <span className="font-medium text-sm">
-                                                    {method.name}
-                                                </span>
-                                                <p className="text-xs text-gray-600">
-                                                    {method.estimatedDays}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <span className="font-medium text-sm">
-                                            {method.price === 0 ? "FREE" : `$${method.price}`}
-                                        </span>
-                                    </div>
-                                </Label>
-                            </div>
-                        );
-                    })}
-                </div>
-            </RadioGroup>
+  return (
+    <div className="space-y-4">
+      <RadioGroup value={selectedMethod} onValueChange={onMethodChange}>
+        <div className="grid gap-3">
+          {methods.map((method) => {
+            const Icon = method.icon;
+            return (
+              <FieldLabel
+                key={method.id}
+                htmlFor={`shipping-${method.id}`}
+                className="block cursor-pointer"
+              >
+                <Field
+                  orientation="horizontal"
+                  className="relative flex items-center gap-4 transition-all 
+                   hover:border-primary hover:shadow-sm 
+                   has-[input:checked]:border-primary 
+                   has-[input:checked]:bg-primary/5 p-4 rounded-xl border-2"
+                >
+                  {/* Selection Radio */}
+                  <RadioGroupItem
+                    value={method.id}
+                    id={`shipping-${method.id}`}
+                    className="shrink-0"
+                  />
+
+                  {/* Icon Badge */}
+                  <div className="flex items-center justify-center size-10 rounded-full bg-muted/50 shrink-0">
+                    <Icon className="size-5 text-muted-foreground" />
+                  </div>
+
+                  {/* Content */}
+                  <FieldContent className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="font-semibold text-sm">
+                          {method.name}
+                        </span>
+                        <FieldDescription className="text-xs text-muted-foreground mt-0.5">
+                          {method.estimatedDays}
+                        </FieldDescription>
+                      </div>
+                      <span className="font-bold text-sm text-primary">
+                        {method.price === 0 ? "FREE" : `$${method.price}`}
+                      </span>
+                    </div>
+                  </FieldContent>
+                </Field>
+              </FieldLabel>
+            );
+          })}
         </div>
-    );
+      </RadioGroup>
+    </div>
+  );
 }

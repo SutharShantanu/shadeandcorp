@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { loadRazorpay } from "@/lib/razorpay";
-import { CreditCard, ArrowLeft, Truck, Package, Zap } from "lucide-react";
+import {
+  CreditCard,
+  ArrowLeft,
+  Truck,
+  Package,
+  Zap,
+  Check,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Product } from "@/types/ProductCard";
 import { useAuthInfo } from "@/hook/useAuthInfo";
@@ -22,6 +29,8 @@ import { CouponButton } from "@/components/modal/checkout/CouponButton";
 import { CouponList } from "@/components/modal/checkout/CouponList";
 import { PriceBreakdown } from "@/components/modal/checkout/PriceBreakdown";
 import { TrustBadges } from "@/components/modal/checkout/TrustBadges";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface QuickCheckoutModalProps {
   open: boolean;
@@ -52,6 +61,7 @@ interface ExtendedUser {
 }
 
 import { BankOffer, Coupon, coupons, bankOffers } from "@/lib/constants";
+import Link from "next/link";
 
 interface ShippingMethod {
   id: string;
@@ -121,6 +131,12 @@ declare global {
   }
 }
 
+const checkoutSteps = [
+  { id: "address", label: "Address" },
+  { id: "shipping", label: "Delivery" },
+  { id: "gift", label: "Options" },
+];
+
 export default function QuickCheckoutModal({
   open,
   onOpenChange,
@@ -147,17 +163,39 @@ export default function QuickCheckoutModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [showCouponUI, setShowCouponUI] = useState(false);
   const [couponSearch, setCouponSearch] = useState("");
+  const [currentStep, setCurrentStep] = useState<string>("address");
 
   // Get user addresses
   const userAddresses: Address[] = (user as ExtendedUser)?.address || [];
-  const defaultAddress = userAddresses.find((addr) => addr.isDefault);
+
+  const [localAddresses, setLocalAddresses] = useState<Address[]>([]);
+
+  useEffect(() => {
+    if (userAddresses.length > 0 && localAddresses.length === 0) {
+      setLocalAddresses(userAddresses);
+    }
+  }, [userAddresses]);
+
+  const displayAddresses =
+    localAddresses.length > 0 ? localAddresses : userAddresses;
+  const defaultAddress = displayAddresses.find((addr) => addr.isDefault);
 
   // Set default address on mount
-  useState(() => {
-    if (defaultAddress?._id) {
+  useEffect(() => {
+    if (defaultAddress?._id && !selectedAddress) {
       setSelectedAddress(defaultAddress._id);
     }
-  });
+  }, [defaultAddress, selectedAddress]);
+
+  const handleAddNewAddress = (data: any) => {
+    const newAddress: Address = {
+      ...data,
+      _id: `temp-${Date.now()}`,
+    };
+    setLocalAddresses((prev) => [...prev, newAddress]);
+    setSelectedAddress(newAddress._id!);
+    toast.success("Address added successfully");
+  };
 
   const selectedCouponData = coupons.find(
     (coupon) => coupon.id === selectedCoupon,
@@ -167,7 +205,7 @@ export default function QuickCheckoutModal({
     (method) => method.id === shippingMethod,
   );
 
-  const selectedAddressData = userAddresses.find(
+  const selectedAddressData = displayAddresses.find(
     (addr) => addr._id === selectedAddress,
   );
 
@@ -237,7 +275,6 @@ export default function QuickCheckoutModal({
     }
   };
 
-  // Filter coupons based on search and eligibility
   const allCoupons = [
     ...coupons,
     ...bankOffers.map((offer) => ({
@@ -280,10 +317,8 @@ export default function QuickCheckoutModal({
     setIsProcessing(true);
 
     try {
-      // Load Razorpay script
       await loadRazorpay();
 
-      // Create order on your backend
       const orderResponse = await fetch("/api/create-razorpay-order", {
         method: "POST",
         headers: {
@@ -309,7 +344,6 @@ export default function QuickCheckoutModal({
         throw new Error(orderData.error || "Failed to create order");
       }
 
-      // Initialize Razorpay checkout
       const options: RazorpayOptions = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: orderData.order.amount,
@@ -318,7 +352,6 @@ export default function QuickCheckoutModal({
         description: `Purchase: ${product.title}`,
         order_id: orderData.order.id,
         handler: async function (response: RazorpayResponse) {
-          // Verify payment on your backend
           const verificationResponse = await fetch("/api/verify-payment", {
             method: "POST",
             headers: {
@@ -341,12 +374,12 @@ export default function QuickCheckoutModal({
           }
         },
         prefill: {
-          name: "Customer Name",
-          email: "customer@example.com",
+          name: user?.name || "Customer Name",
+          email: user?.email || "customer@example.com",
           contact: "9999999999",
         },
         theme: {
-          color: "#000000",
+          color: "#0F172A",
         },
         modal: {
           ondismiss: function () {
@@ -367,152 +400,268 @@ export default function QuickCheckoutModal({
     }
   };
 
+  const getStepIndex = (stepId: string) =>
+    checkoutSteps.findIndex((s) => s.id === stepId);
+  const currentStepIndex = getStepIndex(currentStep);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl w-full max-h-[90vh]">
+      <DialogContent className="sm:max-w-6xl overflow-hidden flex flex-col max-h-[95vh] lg:max-h-[85vh]">
         <DialogHeader>
           <div className="flex items-center gap-3">
             {showCouponUI && (
               <Button
-                variant="outline"
+                variant="secondary"
                 size="icon"
                 onClick={() => setShowCouponUI(false)}
-                className="shrink-0"
+                className="shrink-0 -ml-2 text-muted-foreground hover:text-foreground"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-5 w-5" />
               </Button>
             )}
-            <DialogTitle className="text-2xl">
-              {showCouponUI ? "Available Coupons" : "Quick Checkout"}
+            <DialogTitle>
+              {showCouponUI ? "Available Coupons" : "Secure Checkout"}
             </DialogTitle>
           </div>
         </DialogHeader>
-        <div className="overflow-y-auto p-6">
+
+        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+          {/* Left Column - Checkout Steps */}
           {!showCouponUI && (
-            // Main Checkout View
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Product Details & Customization */}
-              <div className="lg:col-span-2 space-y-4">
-                {/* Order Summary Component */}
-                <OrderSummary
-                  product={product}
-                  selectedSize={selectedSize}
-                  onSizeChange={setSelectedSize}
-                  selectedColor={selectedColor}
-                  onColorChange={setSelectedColor}
-                  quantity={quantity}
-                  onQuantityIncrease={handleIncreaseQuantity}
-                  onQuantityDecrease={handleDecreaseQuantity}
-                />
+            <div className="flex-1 p-4 lg:p-6 lg:w-3/5 overflow-y-auto custom-scrollbar">
+              {/* Stepper Header */}
+              <div className="mb-10 flex w-full justify-between items-center px-4">
+                {checkoutSteps.map((step, index) => {
+                  const isActive = step.id === currentStep;
+                  const isPast = index < currentStepIndex;
+                  const isClickable =
+                    isPast ||
+                    (index === 1 && selectedAddress) ||
+                    (index === 2 && selectedAddress);
 
-                {/* Delivery Address Component */}
-                <DeliveryAddress
-                  addresses={userAddresses}
-                  selectedAddress={selectedAddress}
-                  onAddressChange={setSelectedAddress}
-                />
-
-                {/* Shipping Method Component */}
-                {selectedAddress && (
-                  <ShippingMethodSelector
-                    methods={shippingMethods}
-                    selectedMethod={shippingMethod}
-                    onMethodChange={setShippingMethod}
-                  />
-                )}
-
-                {/* Gift Options Component */}
-                <GiftOptions
-                  isGift={isGift}
-                  onGiftToggle={setIsGift}
-                  giftMessage={giftMessage}
-                  onMessageChange={setGiftMessage}
-                />
+                  return (
+                    <Fragment key={step.id}>
+                      <div className="flex flex-col items-center shrink-0 relative">
+                        <div
+                          className={cn(
+                            "flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ring-4 ring-background z-10 transition-all duration-300",
+                            isActive
+                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110"
+                              : isPast
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground opacity-60",
+                          )}
+                        >
+                          {isPast ? (
+                            <Check className="size-5 stroke-3" />
+                          ) : (
+                            index + 1
+                          )}
+                        </div>
+                        <span
+                          className={cn(
+                            "absolute top-12 mt-2 text-[11px] font-bold uppercase tracking-wider transition-colors duration-300",
+                            isActive ? "text-primary" : "text-muted-foreground",
+                          )}
+                        >
+                          {step.label}
+                        </span>
+                      </div>
+                      {index < checkoutSteps.length - 1 && (
+                        <div
+                          data-slot="field-separator"
+                          className="relative -my-2 h-5 text-sm flex-1 mx-2"
+                        >
+                          <Separator className="absolute inset-x-0 top-1/2" />
+                        </div>
+                      )}
+                    </Fragment>
+                  );
+                })}
               </div>
 
-              {/* Right Column - Price Summary & Payment */}
-              <div className="lg:col-span-1">
-                <div className="sticky top-0 space-y-4">
-                  {/* Coupon Button Component */}
-                  <CouponButton
-                    selectedCoupon={selectedCouponData}
-                    hasCoupons={allCoupons.length > 0}
-                    hasEligibleCoupons={eligibleCoupons.length > 0}
-                    onOpenCoupons={() => setShowCouponUI(true)}
-                    onRemoveCoupon={handleRemoveCoupon}
-                  />
-                  {/* Price Breakdown Component */}
-                  <PriceBreakdown
-                    quantity={quantity}
-                    subtotal={subtotal}
-                    discount={discount}
-                    couponCode={selectedCouponData?.code}
-                    shipping={shipping}
-                    shippingMethodName={selectedShippingMethod?.name}
-                    giftWrapFee={giftWrapFee}
-                    total={total}
-                    hasAddress={selectedAddress !== ""}
-                  />
+              {/* Step Content */}
+              <div className="min-h-[300px]">
+                {currentStep === "address" && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <DeliveryAddress
+                      addresses={displayAddresses}
+                      selectedAddress={selectedAddress}
+                      onAddressChange={(id) => {
+                        setSelectedAddress(id);
+                      }}
+                      onAddAddress={handleAddNewAddress}
+                    />
+                    {selectedAddress && (
+                      <div className="mt-8 flex justify-end">
+                        <Button
+                          size="lg"
+                          className="px-8 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/10"
+                          onClick={() => setCurrentStep("shipping")}
+                        >
+                          Continue to Delivery
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                  {/* Trust Badges Component */}
-                  <TrustBadges
-                    showFreeShipping={selectedAddress !== "" && shipping === 0}
-                  />
+                {currentStep === "shipping" && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-semibold">Delivery Method</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCurrentStep("address")}
+                        className="text-muted-foreground"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                      </Button>
+                    </div>
+                    <ShippingMethodSelector
+                      methods={shippingMethods}
+                      selectedMethod={shippingMethod}
+                      onMethodChange={(id) => {
+                        setShippingMethod(id);
+                      }}
+                    />
+                    {shippingMethod && (
+                      <div className="mt-8 flex justify-end">
+                        <Button
+                          size="lg"
+                          className="px-8 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/10"
+                          onClick={() => setCurrentStep("gift")}
+                        >
+                          Continue to Options
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                  {/* Payment Button */}
-                  <DialogFooter>
-                    <Button
-                      className="w-full py-6 text-lg font-semibold bg-green-700 hover:bg-green-800 text-white dark:bg-green-600 dark:hover:bg-green-700 dark:text-white"
-                      onClick={handlePayment}
-                      disabled={
-                        isProcessing || !selectedSize || !selectedAddress
-                      }
-                    >
-                      {isProcessing ? (
-                        <>Processing...</>
-                      ) : !selectedAddress ? (
-                        "Add Delivery Address"
-                      ) : (
-                        <>
-                          <CreditCard className="w-5 h-5 mr-2" />
-                          Pay ${total.toFixed(2)}
-                        </>
-                      )}
-                    </Button>
-                  </DialogFooter>
-
-                  <p className="text-xs text-center text-gray-500">
-                    By continuing, you agree to our{" "}
-                    <a href="#" className="underline">
-                      Terms of Service
-                    </a>{" "}
-                    and{" "}
-                    <a href="#" className="underline">
-                      Privacy Policy
-                    </a>
-                  </p>
-                </div>
+                {currentStep === "gift" && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-xl font-semibold">
+                        Gift Options{" "}
+                        <span className="text-muted-foreground font-normal text-sm ml-2">
+                          (Optional)
+                        </span>
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setCurrentStep("shipping")}
+                        className="text-muted-foreground"
+                      >
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                      </Button>
+                    </div>
+                    <GiftOptions
+                      isGift={isGift}
+                      onGiftToggle={setIsGift}
+                      giftMessage={giftMessage}
+                      onMessageChange={setGiftMessage}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
-        </div>
-        <div className="overflow-y-auto px-6">
+          {/* Coupon Selection UI */}
           {showCouponUI && (
-            <CouponList
-              searchQuery={couponSearch}
-              onSearchChange={setCouponSearch}
-              customCode={customCouponCode}
-              onCustomCodeChange={setCustomCouponCode}
-              onApplyCustomCode={handleApplyCustomCoupon}
-              eligibleCoupons={eligibleCoupons}
-              ineligibleCoupons={ineligibleCoupons}
-              selectedCoupon={selectedCoupon}
-              onSelectCoupon={handleCouponSelect}
-              subtotal={subtotal}
-              onBack={() => setShowCouponUI(false)}
+            <div className="p-4 lg:p-6 w-full lg:w-3/5 mx-auto overflow-y-auto custom-scrollbar">
+              <CouponList
+                searchQuery={couponSearch}
+                onSearchChange={setCouponSearch}
+                customCode={customCouponCode}
+                onCustomCodeChange={setCustomCouponCode}
+                onApplyCustomCode={handleApplyCustomCoupon}
+                eligibleCoupons={eligibleCoupons}
+                ineligibleCoupons={ineligibleCoupons}
+                selectedCoupon={selectedCoupon}
+                onSelectCoupon={handleCouponSelect}
+                subtotal={subtotal}
+                onBack={() => setShowCouponUI(false)}
+                onRemoveCoupon={handleRemoveCoupon}
+              />
+            </div>
+          )}
+
+          {/* Right Column - Order Summary Sidebar */}
+          <div className="w-full lg:w-2/5 bg-muted/30 p-6 lg:p-8 border-t lg:border-t-0 lg:border-l overflow-y-auto custom-scrollbar shrink-0">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4 tracking-tight">
+                Order Summary
+              </h3>
+
+              <OrderSummary
+                product={product}
+                selectedSize={selectedSize}
+                selectedColor={selectedColor}
+                quantity={quantity}
+                onQuantityIncrease={handleIncreaseQuantity}
+                onQuantityDecrease={handleDecreaseQuantity}
+              />
+            </div>
+
+            <CouponButton
+              selectedCoupon={selectedCouponData}
+              hasCoupons={allCoupons.length > 0}
+              hasEligibleCoupons={eligibleCoupons.length > 0}
+              onOpenCoupons={() => setShowCouponUI(true)}
               onRemoveCoupon={handleRemoveCoupon}
             />
-          )}
+
+            <PriceBreakdown
+              quantity={quantity}
+              subtotal={subtotal}
+              discount={discount}
+              couponCode={selectedCouponData?.code}
+              shipping={shipping}
+              shippingMethodName={selectedShippingMethod?.name}
+              giftWrapFee={giftWrapFee}
+              total={total}
+              hasAddress={selectedAddress !== ""}
+            />
+
+            <Button
+              className="w-full h-14 text-lg font-medium shadow-md transition-all hover:-translate-y-px active:translate-y-px"
+              onClick={handlePayment}
+              disabled={isProcessing || !selectedSize || !selectedAddress}
+            >
+              {isProcessing ? (
+                <>Processing...</>
+              ) : !selectedAddress ? (
+                "Add Delivery Address"
+              ) : (
+                <>Pay ${total.toFixed(2)}</>
+              )}
+            </Button>
+
+            <TrustBadges
+              showFreeShipping={selectedAddress !== "" && shipping === 0}
+            />
+
+            <p className="text-xs text-center text-muted-foreground">
+              By completing this purchase you agree to our{" "}
+              <Link
+                href="#"
+                className="underline hover:text-foreground transition-colors"
+              >
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="#"
+                className="underline hover:text-foreground transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
