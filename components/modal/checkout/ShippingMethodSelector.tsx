@@ -44,7 +44,7 @@ export function ShippingMethodSelector({
                   className="relative flex items-center gap-4 transition-all 
                    hover:border-primary hover:shadow-sm 
                    has-[input:checked]:border-primary 
-                   has-[input:checked]:bg-primary/5 p-4 rounded-xl border-2"
+                   has-[input:checked]:bg-primary/5 p-4"
                 >
                   {/* Selection Radio */}
                   <RadioGroupItem
@@ -54,9 +54,9 @@ export function ShippingMethodSelector({
                   />
 
                   {/* Icon Badge */}
-                  <div className="flex items-center justify-center size-10 rounded-full bg-muted/50 shrink-0">
-                    <Icon className="size-5 text-muted-foreground" />
-                  </div>
+                  <IconBadge variant="info" size="sm" className="shrink-0">
+                    <Icon className="size-4" />
+                  </IconBadge>
 
                   {/* Content */}
                   <FieldContent className="flex-1">

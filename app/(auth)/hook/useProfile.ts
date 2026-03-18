@@ -204,6 +204,110 @@ export function useProfile() {
     }
   }
 
+  // Add a new address
+  async function addAddress(data: Record<string, any>) {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/user/profile/addresses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (result.ok) {
+        // Refresh full profile to get the MongoDB _id of the new address
+        const profileRes = await fetch("/api/user/profile");
+        const profileData = await profileRes.json();
+        if (profileData.ok && profileData.user) {
+          setUserProfile(profileData.user);
+        }
+        return { success: true, message: result.message };
+      } else {
+        setError(result.error || "Failed to add address");
+        return { success: false, error: result.error };
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to add address";
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Update an existing address
+  async function updateAddress(addressId: string, data: Record<string, any>) {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/user/profile/addresses", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ addressId, ...data }),
+      });
+      const result = await response.json();
+      if (result.ok) {
+        // Refresh profile to get latest addresses
+        const profileRes = await fetch("/api/user/profile");
+        const profileData = await profileRes.json();
+        if (profileData.ok && profileData.user) {
+          setUserProfile(profileData.user);
+        }
+        return { success: true, message: result.message };
+      } else {
+        setError(result.error || "Failed to update address");
+        return { success: false, error: result.error };
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to update address";
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Delete an address
+  async function deleteAddress(addressId: string) {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `/api/user/profile/addresses?addressId=${addressId}`,
+        { method: "DELETE" }
+      );
+      const result = await response.json();
+      if (result.ok) {
+        setUserProfile((prev) =>
+          prev
+            ? {
+                ...prev,
+                addresses: (prev.addresses || []).filter(
+                  (a: any) => a._id?.toString() !== addressId
+                ),
+              }
+            : prev
+        );
+        return { success: true, message: result.message };
+      } else {
+        setError(result.error || "Failed to delete address");
+        return { success: false, error: result.error };
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to delete address";
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Set an address as default
+  async function setDefaultAddress(addressId: string) {
+    return updateAddress(addressId, { isDefault: true });
+  }
+
   return {
     profileForm,
     accountForm,
@@ -212,6 +316,10 @@ export function useProfile() {
     userProfile,
     error,
     updateProfile,
+    addAddress,
+    updateAddress,
+    deleteAddress,
+    setDefaultAddress,
   };
 }
 

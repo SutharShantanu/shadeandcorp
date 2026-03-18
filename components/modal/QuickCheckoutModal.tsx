@@ -17,6 +17,7 @@ import {
   Package,
   Zap,
   Check,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Product } from "@/types/ProductCard";
@@ -31,6 +32,7 @@ import { PriceBreakdown } from "@/components/modal/checkout/PriceBreakdown";
 import { TrustBadges } from "@/components/modal/checkout/TrustBadges";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { useAddresses } from "@/hook/useAddresses";
 
 interface QuickCheckoutModalProps {
   open: boolean;
@@ -53,12 +55,7 @@ interface Address {
   isDefault: boolean;
 }
 
-interface ExtendedUser {
-  id: string;
-  email: string;
-  name: string | null;
-  address?: Address[];
-}
+
 
 import { BankOffer, Coupon, coupons, bankOffers } from "@/lib/constants";
 import Link from "next/link";
@@ -165,36 +162,34 @@ export default function QuickCheckoutModal({
   const [couponSearch, setCouponSearch] = useState("");
   const [currentStep, setCurrentStep] = useState<string>("address");
 
-  // Get user addresses
-  const userAddresses: Address[] = (user as ExtendedUser)?.address || [];
+  // Shared addresses hook — fetch lazily when modal opens
+  const {
+    addresses: displayAddresses,
+    fetching: addressesLoading,
+    fetchAddresses,
+    addAddress,
+  } = useAddresses(false);
 
-  const [localAddresses, setLocalAddresses] = useState<Address[]>([]);
-
+  // Fetch when modal opens
   useEffect(() => {
-    if (userAddresses.length > 0 && localAddresses.length === 0) {
-      setLocalAddresses(userAddresses);
-    }
-  }, [userAddresses]);
+    if (open) fetchAddresses();
+  }, [open]);
 
-  const displayAddresses =
-    localAddresses.length > 0 ? localAddresses : userAddresses;
-  const defaultAddress = displayAddresses.find((addr) => addr.isDefault);
-
-  // Set default address on mount
+  // Auto-select default address once addresses are loaded
   useEffect(() => {
-    if (defaultAddress?._id && !selectedAddress) {
-      setSelectedAddress(defaultAddress._id);
+    if (!selectedAddress && displayAddresses.length > 0) {
+      const def = displayAddresses.find((a) => a.isDefault);
+      if (def?._id) setSelectedAddress(def._id);
     }
-  }, [defaultAddress, selectedAddress]);
+  }, [displayAddresses]);
 
-  const handleAddNewAddress = (data: any) => {
-    const newAddress: Address = {
-      ...data,
-      _id: `temp-${Date.now()}`,
-    };
-    setLocalAddresses((prev) => [...prev, newAddress]);
-    setSelectedAddress(newAddress._id!);
-    toast.success("Address added successfully");
+  const handleAddNewAddress = async (data: any) => {
+    const result = await addAddress(data);
+    if (result.success) {
+      toast.success("Address saved to your profile");
+    } else {
+      toast.error(result.error || "Failed to save address");
+    }
   };
 
   const selectedCouponData = coupons.find(
@@ -309,6 +304,10 @@ export default function QuickCheckoutModal({
   );
 
   const handlePayment = async () => {
+    if (!selectedAddress) {
+      toast.error("Please select a delivery address before proceeding.");
+      return;
+    }
     if (!selectedSize) {
       toast.error("Please select a size before proceeding.");
       return;
@@ -317,24 +316,30 @@ export default function QuickCheckoutModal({
     setIsProcessing(true);
 
     try {
-      await loadRazorpay();
+      const razorpayLoaded = await loadRazorpay();
+      if (!razorpayLoaded) {
+        throw new Error("Failed to load payment gateway. Check your connection.");
+      }
 
       const orderResponse = await fetch("/api/create-razorpay-order", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: total * 100, // Convert to paise
+          amount: Math.round(total * 100), // paise
           currency: "INR",
           product: {
             id: product.id,
             name: product.title,
             size: selectedSize,
             color: selectedColor,
-            quantity: quantity,
+            quantity,
           },
-          coupon: selectedCouponData,
+          coupon: selectedCouponData || null,
+          shippingAddress: selectedAddressData || null,
+          shippingMethod: selectedShippingMethod?.name || "Standard Shipping",
+          giftWrap: isGift
+            ? { enabled: true, message: giftMessage }
+            : { enabled: false },
         }),
       });
 
@@ -348,15 +353,13 @@ export default function QuickCheckoutModal({
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: orderData.order.amount,
         currency: orderData.order.currency,
-        name: "Your Store Name",
-        description: `Purchase: ${product.title}`,
+        name: "Shade & Co.",
+        description: `${product.title}${isGift ? " 🎁 Gift Wrapped" : ""}`,
         order_id: orderData.order.id,
         handler: async function (response: RazorpayResponse) {
           const verificationResponse = await fetch("/api/verify-payment", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -367,19 +370,19 @@ export default function QuickCheckoutModal({
           const verificationData = await verificationResponse.json();
 
           if (verificationData.success) {
-            toast.success("Your order has been placed successfully.");
+            toast.success("🎉 Order placed successfully! Thank you for shopping with us.");
             onOpenChange(false);
           } else {
             throw new Error("Payment verification failed");
           }
         },
         prefill: {
-          name: user?.name || "Customer Name",
-          email: user?.email || "customer@example.com",
-          contact: "9999999999",
+          name: user?.name || "",
+          email: user?.email || "",
+          contact: "",
         },
         theme: {
-          color: "#0F172A",
+          color: "#16a34a", // brand primary green
         },
         modal: {
           ondismiss: function () {
@@ -393,12 +396,14 @@ export default function QuickCheckoutModal({
     } catch (error) {
       console.error("Payment error:", error);
       toast.error(
-        "There was an error processing your payment. Please try again.",
+        error instanceof Error
+          ? error.message
+          : "There was an error processing your payment. Please try again.",
       );
-    } finally {
       setIsProcessing(false);
     }
   };
+
 
   const getStepIndex = (stepId: string) =>
     checkoutSteps.findIndex((s) => s.id === stepId);
@@ -484,14 +489,21 @@ export default function QuickCheckoutModal({
               <div className="min-h-[300px]">
                 {currentStep === "address" && (
                   <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <DeliveryAddress
-                      addresses={displayAddresses}
-                      selectedAddress={selectedAddress}
-                      onAddressChange={(id) => {
-                        setSelectedAddress(id);
-                      }}
-                      onAddAddress={handleAddNewAddress}
-                    />
+                    {addressesLoading ? (
+                      <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
+                        <Loader2 className="size-8 animate-spin text-primary" />
+                        <p className="text-sm">Loading your addresses…</p>
+                      </div>
+                    ) : (
+                      <DeliveryAddress
+                        addresses={displayAddresses}
+                        selectedAddress={selectedAddress}
+                        onAddressChange={(id) => {
+                          setSelectedAddress(id);
+                        }}
+                        onAddAddress={handleAddNewAddress}
+                      />
+                    )}
                     {selectedAddress && (
                       <div className="mt-8 flex justify-end">
                         <Button
@@ -516,7 +528,7 @@ export default function QuickCheckoutModal({
                         onClick={() => setCurrentStep("address")}
                         className="text-muted-foreground"
                       >
-                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                        <ArrowLeft className="w-4 h-4" /> Back
                       </Button>
                     </div>
                     <ShippingMethodSelector
@@ -555,7 +567,7 @@ export default function QuickCheckoutModal({
                         onClick={() => setCurrentStep("shipping")}
                         className="text-muted-foreground"
                       >
-                        <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                        <ArrowLeft className="w-4 h-4" /> Back
                       </Button>
                     </div>
                     <GiftOptions
