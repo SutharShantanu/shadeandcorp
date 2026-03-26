@@ -6,8 +6,9 @@ import ProductPagination from "@/components/site/Pagination";
 import ProductGrid from "@/components/site/ProductGrid";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { AlertCircle, Filter, Search, X } from "lucide-react";
+import { AlertCircle, Filter, Search, X, Home, List, Tag as TagIcon } from "lucide-react";
 import Link from "next/link";
+import { GlobalBreadcrumb, BreadcrumbItemProps } from "@/components/ui/global-breadcrumb";
 
 import { fetchProducts } from "@/lib/product-logic";
 
@@ -64,21 +65,43 @@ export default async function ProductsPage({
 
   const { data: products, success, error, totalPages } = await getProductsFromLib(filters as any);
 
+  const breadcrumbItems: BreadcrumbItemProps[] = [
+    { label: "Home", href: "/", icon: <Home className="w-3.5 h-3.5" /> },
+  ];
+
+  if (filters.category) {
+    breadcrumbItems.push({
+      label: filters.category,
+      href: `/products/${category || ""}`,
+      icon: <List className="w-3.5 h-3.5" />,
+    });
+  }
+
+  if (subCategory) {
+    breadcrumbItems.push({
+      label: formatValue(subCategory)!,
+      icon: <TagIcon className="w-3.5 h-3.5" />,
+    });
+  }
+
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950">
-      <div className="py-8 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      <div className="py-8 max-w-7xl mx-auto space-y-6">
         {/* Header & Mobile Filter Toggle */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {filters.category || "All Products"}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {success ? `${products.length} Items` : "No items found"}
-            </p>
+        <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-2">
+          <div className="space-y-2">
+            <GlobalBreadcrumb items={breadcrumbItems} />
+            <div className="flex gap-2 items-center">
+              <h1 className="text-3xl font-bold tracking-tight">
+                {filters.category || "All Products"}
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                ({success ? `${products.length} Items` : "No items found"})
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="flex items-center gap-4 w-full md:w-auto md:pt-1">
             <div className="lg:hidden w-full md:w-auto">
               <Sheet>
                 <SheetTrigger asChild>
@@ -112,15 +135,15 @@ export default async function ProductsPage({
             <ActiveFilters />
 
             {error ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center text-red-500">
+              <div className="flex flex-col items-center justify-center py-12 text-center text-destructive-foreground">
                 <AlertCircle className="w-12 h-12 mb-4" />
                 <h3 className="text-lg font-semibold">Error loading products</h3>
                 <p>{error}</p>
               </div>
             ) : products.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-center">
-                <div className="bg-zinc-100 rounded-full p-6 mb-4">
-                  <Search className="w-8 h-8 text-zinc-400" />
+                <div className=" rounded-full p-6 mb-4">
+                  <Search className="w-8 h-8" />
                 </div>
                 <h3 className="text-lg font-semibold">No products found</h3>
                 <p className="text-muted-foreground max-w-sm mt-2">

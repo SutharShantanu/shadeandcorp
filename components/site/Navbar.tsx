@@ -64,7 +64,6 @@ import {
   InputGroupInput,
 } from "../ui/input-group";
 import { Dot } from "../ui/dot";
-import { Separator } from "../ui/separator";
 
 const categories = [
   {
@@ -74,23 +73,22 @@ const categories = [
       { title: "Casual Shirts", href: "/products/men/clothing/casual-shirts" },
       { title: "Formal Shirts", href: "/products/men/clothing/formal-shirts" },
       { title: "Jeans", href: "/products/men/clothing/jeans" },
-      {
-        title: "Casual Trousers",
-        href: "/products/men/clothing/casual-trousers",
-      },
-      {
-        title: "Formal Trousers",
-        href: "/products/men/clothing/formal-trousers",
-      },
+      { title: "Casual Trousers", href: "/products/men/clothing/casual-trousers" },
+      { title: "Formal Trousers", href: "/products/men/clothing/formal-trousers" },
       { title: "Shorts", href: "/products/men/clothing/shorts" },
       { title: "Jackets", href: "/products/men/clothing/jackets" },
       { title: "Blazers", href: "/products/men/clothing/blazers" },
       { title: "Sweaters", href: "/products/men/clothing/sweaters" },
       { title: "Sweatshirts", href: "/products/men/clothing/sweatshirts" },
       { title: "Activewear", href: "/products/men/clothing/activewear" },
+      { title: "Loungewear", href: "/products/men/clothing/loungewear" },
+      { title: "Innerwear", href: "/products/men/clothing/innerwear" },
+      { title: "Nightwear", href: "/products/men/clothing/nightwear" },
+      { title: "Winterwear", href: "/products/men/clothing/winterwear" },
+      { title: "Suits", href: "/products/men/clothing/suits" },
+      { title: "Ethnic Wear", href: "/products/men/clothing/ethnic" },
     ],
-    image:
-      "https://images.unsplash.com/photo-1488161628813-99425260dead?w=400&h=300&fit=crop",
+    image: "/images/menu/men.png",
   },
   {
     title: "Women",
@@ -107,9 +105,14 @@ const categories = [
       { title: "Jackets", href: "/products/women/clothing/jackets" },
       { title: "Activewear", href: "/products/women/clothing/activewear" },
       { title: "Lingerie", href: "/products/women/clothing/lingerie" },
+      { title: "Kurtas & Kurtis", href: "/products/women/clothing/kurtas" },
+      { title: "Ethnic Wear", href: "/products/women/clothing/ethnic" },
+      { title: "Sarees", href: "/products/women/clothing/sarees" },
+      { title: "Leggings", href: "/products/women/clothing/leggings" },
+      { title: "Sleepwear", href: "/products/women/clothing/sleepwear" },
+      { title: "Loungewear", href: "/products/women/clothing/loungewear" },
     ],
-    image:
-      "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&h=300&fit=crop",
+    image: "/images/menu/women.png",
   },
   {
     title: "Kids",
@@ -123,8 +126,7 @@ const categories = [
       { title: "Accessories", href: "/products/kids/clothing/accessories" },
       { title: "Winter Wear", href: "/products/kids/clothing/winter-wear" },
     ],
-    image:
-      "https://images.unsplash.com/photo-1540331547168-8b6310d425f9?w=400&h=300&fit=crop",
+    image: "/images/menu/kids.png",
   },
   {
     title: "Collections",
@@ -136,8 +138,7 @@ const categories = [
       { title: "Festive Collection", href: "/products/collections/festive" },
       { title: "Premium Collection", href: "/products/collections/premium" },
     ],
-    image:
-      "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&h=300&fit=crop",
+    image: "/images/menu/collections.png",
   },
   {
     title: "Accessories",
@@ -151,8 +152,7 @@ const categories = [
       { title: "Hats & Caps", href: "/products/accessories/hats" },
       { title: "Scarves", href: "/products/accessories/scarves" },
     ],
-    image:
-      "https://images.unsplash.com/photo-1576053139778-7e32f5f09437?w=400&h=300&fit=crop",
+    image: "/images/menu/accessories.png",
   },
 ];
 
@@ -259,63 +259,61 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div
-                  className={`p-2 lg:p-4 ${hasDetailedCategories ? "w-3xl lg:w-5xl" : "w-xl lg:w-3xl"}`}
+                  className={`p-0 ${hasDetailedCategories ? "w-3xl lg:w-6xl" : "w-xl lg:w-3xl"}`}
                 >
-                  <div
-                    className={`grid gap-4 lg:gap-8 ${hasDetailedCategories ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-2"}`}
-                  >
-                    {/* First Column: Featured Links */}
-                    <div className="flex flex-col gap-6">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-semibold tracking-tight">
-                          {category.title}
-                        </h3>
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() =>
-                            router.push(
-                              `/products/${category.title.toLowerCase()}`,
-                            )
-                          }
-                          className="text-sm flex items-center gap-1 font-medium text-primary hover:text-primary/80 transition-colors"
-                        >
-                          View All <ChevronRight size="16" />
-                        </Button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                        {category.items.map((item) => (
-                          <Link
-                            key={item.title}
-                            href={item.href}
-                            className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-4 p-4">
+                    {/* Left Side: Combined Categories */}
+                    <div className="flex flex-col gap-10">
+                      {/* Top Section: Quick Links */}
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-2xl font-bold tracking-tight">
+                            {category.title}
+                          </h3>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() =>
+                              router.push(
+                                `/products/${category.title.toLowerCase()}`,
+                              )
+                            }
+                            className="rounded-full px-4 font-semibold text-primary hover:bg-primary/5 transition-colors"
                           >
-                            <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30 group-hover:bg-primary transition-colors" />
-                            <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors font-medium">
-                              {item.title}
-                            </span>
-                          </Link>
-                        ))}
+                            View All <ChevronRight size="14" className="ml-1" />
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-3 gap-x-12 gap-y-3 w-fit pr-10">
+                          {category.items.map((item) => (
+                            <Link
+                              key={item.title}
+                              href={item.href}
+                              className="group flex items-center gap-3 rounded-md py-1 transition-colors min-w-[130px]"
+                            >
+                              <div className="h-1 w-1 rounded-full bg-muted-foreground/30 group-hover:bg-primary transition-colors" />
+                              <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                                {item.title}
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Second Column: Detailed Categories (Conditional) */}
-                    {hasDetailedCategories && (
-                      <div className="flex items-center gap-1">
-                        <Separator orientation="vertical" className="h-full" />
-                        <div className="flex flex-col gap-4 pl-2">
-                          <h3 className="text-lg font-semibold tracking-tight">
+                      {/* Bottom Section: Detailed Categories (Conditional) */}
+                      {hasDetailedCategories && (
+                        <div className="space-y-6 pt-6 border-t border-border/40">
+                          <h3 className="text-xl font-bold tracking-tight">
                             Shop by Category
                           </h3>
-                          <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                          <div className="grid grid-cols-4 gap-8 w-fit">
                             {detailedCategories[
                               category.title.toLowerCase() as keyof typeof detailedCategories
                             ]?.map((subcat) => (
-                              <div key={subcat.title} className="space-y-3">
-                                <h5 className="text-sm font-semibold text-foreground/90">
+                              <div key={subcat.title} className="space-y-4 min-w-[140px]">
+                                <h5 className="text-[14px] font-bold text-foreground">
                                   {subcat.title}
                                 </h5>
-                                <ul className="space-y-2">
+                                <ul className="space-y-2.5">
                                   {subcat.items.map((item) => (
                                     <li key={item}>
                                       <Link
@@ -331,31 +329,31 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                             ))}
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
-                    {/* Third Column: Image Banner */}
-                    <div className="relative rounded-xl overflow-hidden group h-full min-h-[300px]">
+                    {/* Right Side: Image Banner */}
+                    <div className="relative group h-full min-h-[500px] rounded-md overflow-hidden">
                       <Image
                         width={400}
-                        height={300}
+                        height={600}
                         src={category.image}
                         alt={category.title}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                       />
-                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute inset-0 p-5 flex flex-col justify-end">
-                        <h4 className="text-white font-semibold text-lg mb-1.5 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                        <h4 className="text-white font-bold text-3xl mb-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
                           {category.title}
                         </h4>
-                        <p className="text-white/80 text-xs mb-3 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100 line-clamp-2">
-                          Discover the latest trends and essential styles.
+                        <p className="text-white/80 text-sm mb-6 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-75">
+                          Explore our curated {category.title.toLowerCase()} collection.
                         </p>
                         <Link
                           href={`/products/${category.title.toLowerCase()}`}
-                          className="inline-flex w-fit items-center justify-center whitespace-nowrap rounded-md text-xs font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-black hover:bg-white/90 h-8 px-3 py-1 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 duration-500 delay-150"
+                          className="w-fit inline-flex h-10 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-black hover:bg-zinc-100 transition-all transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 duration-500 delay-150 shadow-lg"
                         >
-                          Shop Now
+                          Shop Collection
                         </Link>
                       </div>
                     </div>

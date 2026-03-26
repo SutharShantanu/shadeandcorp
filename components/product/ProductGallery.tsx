@@ -64,7 +64,7 @@ export function ProductGallery({
       <div className="hidden lg:flex flex-row gap-4 pb-8 h-[600px]">
         {/* Desktop Thumbnails (Left Side) */}
         {filteredAssets.length > 1 && (
-          <div className="flex flex-col gap-3 overflow-y-auto pr-2 scrollbar-hide w-24 shrink-0">
+          <div className="flex flex-col gap-3 overflow-y-auto p-1.5 scrollbar-hide w-24 shrink-0">
             {filteredAssets.map((asset, idx) => (
               <button
                 key={`thumb-${idx}`}

@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   Heart,
   ShoppingCart,
@@ -34,9 +34,9 @@ import {
 import { Product, Variant } from "@/types/ProductCard";
 import { useAppDispatch, useAppSelector } from "@/lib/store";
 import { add, remove } from "@/features/wishlist/wishlistSlice";
-import QuickCheckoutModal from "@/components/modal/QuickCheckoutModal";
+
 import { bankOffers } from "@/lib/constants";
-import { ProductBreadcrumb } from "@/components/product/ProductBreadcrumb";
+import { GlobalBreadcrumb } from "@/components/ui/global-breadcrumb";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { SizeSelector } from "@/components/product/SizeSelector";
 import { DeliveryCheck } from "@/components/product/DeliveryCheck";
@@ -44,6 +44,7 @@ import { PolicyBadges } from "@/components/product/PolicyBadges";
 import { ReviewsSection } from "@/components/product/ReviewsSection";
 import { EmiAndBankOffersCard } from "@/components/product/EmiAndBankOffersCard";
 import { SimilarProducts } from "@/components/product/SimilarProducts";
+import { Home, List, Tag as TagIcon } from "lucide-react";
 
 // ─────────────────────────────────────────────
 // MAIN PAGE
@@ -59,8 +60,9 @@ export default function ProductDetailPage() {
   const [selectedColor, setSelectedColor] = useState("");
   const [sizeError, setSizeError] = useState("");
   const [sizeChartOpen, setSizeChartOpen] = useState(false);
-  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
+
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const wishlistItems = useAppSelector((s) => s.wishlist.items);
   const isWishlisted = product
@@ -142,7 +144,15 @@ export default function ProductDetailPage() {
       setSizeError("Please select a size to continue");
       return;
     }
-    setShowCheckoutModal(true);
+    
+    const params = new URLSearchParams({
+      product: product?.slug || '',
+      color: selectedColor,
+      size: selectedSize,
+      qty: '1'
+    });
+    
+    router.push(`/checkout/quick?${params.toString()}`);
   };
 
   const handleWishlist = () => {
@@ -248,10 +258,23 @@ export default function ProductDetailPage() {
     <>
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 sm:px-0 space-y-4">
         {/* ── BREADCRUMB ── */}
-        <ProductBreadcrumb
-          category={product.category}
-          title={product.title}
-          slug={product.slug}
+        <GlobalBreadcrumb
+          items={[
+            {
+              label: "Home",
+              href: "/",
+              icon: <Home className="w-3.5 h-3.5" />,
+            },
+            {
+              label: product.category,
+              href: `/products?category=${encodeURIComponent(product.category)}`,
+              icon: <List className="w-3.5 h-3.5" />,
+            },
+            {
+              label: product.title,
+              icon: <TagIcon className="w-3.5 h-3.5" />,
+            },
+          ]}
         />
 
         {/* ── MAIN GRID ── */}
@@ -386,10 +409,10 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Offers */}
-              <EmiAndBankOffersCard
+              {/* <EmiAndBankOffersCard
                 offers={bankOffers}
                 price={selectedVariant?.price || 0}
-              />
+              /> */}
 
               <Separator />
 
@@ -629,16 +652,7 @@ export default function ProductDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {showCheckoutModal && (
-        <QuickCheckoutModal
-          open={showCheckoutModal}
-          onOpenChange={(v: boolean) => setShowCheckoutModal(v)}
-          product={product}
-          selectedSize={selectedSize}
-          selectedColor={selectedColor}
-          quantity={1}
-        />
-      )}
+
     </>
   );
 }

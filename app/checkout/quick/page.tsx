@@ -1,13 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, Fragment } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import React, { useState, useEffect, Fragment, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { loadRazorpay } from "@/lib/razorpay";
 import {
@@ -18,6 +12,8 @@ import {
   Zap,
   Check,
   Loader2,
+  Home,
+  ShoppingCart,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Product } from "@/types/ProductCard";
@@ -34,31 +30,9 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useAddresses } from "@/hook/useAddresses";
 
-interface QuickCheckoutModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  product: Product;
-  selectedSize: string;
-  selectedColor: string;
-  quantity: number;
-}
-
-interface Address {
-  _id?: string;
-  address1: string;
-  address2?: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-  addressType: string;
-  isDefault: boolean;
-}
-
-
-
 import { BankOffer, Coupon, coupons, bankOffers } from "@/lib/constants";
 import Link from "next/link";
+import { GlobalBreadcrumb } from "@/components/ui/global-breadcrumb";
 
 interface ShippingMethod {
   id: string;
@@ -134,21 +108,26 @@ const checkoutSteps = [
   { id: "gift", label: "Options" },
 ];
 
-export default function QuickCheckoutModal({
-  open,
-  onOpenChange,
-  product,
-  selectedSize: initialSize,
-  selectedColor: initialColor,
-  quantity: initialQuantity,
-}: QuickCheckoutModalProps) {
+function QuickCheckoutContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const productSlug = searchParams.get("product");
+  const initialColor = searchParams.get("color") || "";
+  const initialSize = searchParams.get("size") || "";
+  const initialQuantity = parseInt(searchParams.get("qty") || "1", 10);
+
   const { session } = useAuthInfo();
   const user = session?.user;
+
+  // Product Data State
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loadingProduct, setLoadingProduct] = useState(true);
 
   // Product customization states
   const [selectedSize, setSelectedSize] = useState<string>(initialSize);
   const [selectedColor, setSelectedColor] = useState<string>(initialColor);
-  const [quantity, setQuantity] = useState<number>(initialQuantity);
+  const [quantity, setQuantity] = useState<number>(initialQuantity || 1);
 
   // Checkout states
   const [selectedCoupon, setSelectedCoupon] = useState<string>("");
@@ -162,18 +141,13 @@ export default function QuickCheckoutModal({
   const [couponSearch, setCouponSearch] = useState("");
   const [currentStep, setCurrentStep] = useState<string>("address");
 
-  // Shared addresses hook — fetch lazily when modal opens
+  // Shared addresses hook
   const {
     addresses: displayAddresses,
     fetching: addressesLoading,
     fetchAddresses,
     addAddress,
-  } = useAddresses(false);
-
-  // Fetch when modal opens
-  useEffect(() => {
-    if (open) fetchAddresses();
-  }, [open]);
+  } = useAddresses(true);
 
   // Auto-select default address once addresses are loaded
   useEffect(() => {
@@ -182,6 +156,38 @@ export default function QuickCheckoutModal({
       if (def?._id) setSelectedAddress(def._id);
     }
   }, [displayAddresses]);
+
+  // Fetch product data
+  useEffect(() => {
+    if (!productSlug) {
+      toast.error("Invalid product");
+      router.push("/");
+      return;
+    }
+
+    setLoadingProduct(true);
+    fetch(`/api/products/${productSlug}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          const p = data.data;
+          if (!p.variants) p.variants = [];
+          setProduct(p);
+        } else {
+          toast.error("Product not found");
+          router.push("/");
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load product", err);
+        toast.error("Failed to load product details");
+        router.push("/");
+      })
+      .finally(() => {
+        setLoadingProduct(false);
+      });
+  }, [productSlug, router]);
+
 
   const handleAddNewAddress = async (data: any) => {
     const result = await addAddress(data);
@@ -205,14 +211,15 @@ export default function QuickCheckoutModal({
   );
 
   // Calculate totals
-  const selectedVariant =
-    product.variants.find(
-      (v) => v.color.hex === selectedColor && v.size === selectedSize,
-    ) ||
-    product.variants.find((v) => v.color.hex === selectedColor) ||
-    product.variants[0];
+  const selectedVariant = product
+    ? product.variants?.find(
+        (v) => v.color.hex === selectedColor && v.size === selectedSize,
+      ) ||
+      product.variants?.find((v) => v.color.hex === selectedColor) ||
+      product.variants?.[0]
+    : null;
 
-  const subtotal = (selectedVariant?.price || product.basePrice) * quantity;
+  const subtotal = product ? ((selectedVariant?.price || product.basePrice) * quantity) : 0;
   const discount = selectedCouponData
     ? selectedCouponData.type === "percentage"
       ? (subtotal * selectedCouponData.discount) / 100
@@ -304,6 +311,8 @@ export default function QuickCheckoutModal({
   );
 
   const handlePayment = async () => {
+    if (!product) return;
+    
     if (!selectedAddress) {
       toast.error("Please select a delivery address before proceeding.");
       return;
@@ -371,7 +380,7 @@ export default function QuickCheckoutModal({
 
           if (verificationData.success) {
             toast.success("🎉 Order placed successfully! Thank you for shopping with us.");
-            onOpenChange(false);
+            router.push("/profile?tab=orders");
           } else {
             throw new Error("Payment verification failed");
           }
@@ -404,207 +413,233 @@ export default function QuickCheckoutModal({
     }
   };
 
-
   const getStepIndex = (stepId: string) =>
     checkoutSteps.findIndex((s) => s.id === stepId);
   const currentStepIndex = getStepIndex(currentStep);
 
+  if (loadingProduct || !product) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">Preparing Secure Checkout...</p>
+      </div>
+    );
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-6xl overflow-hidden flex flex-col max-h-[95vh] lg:max-h-[85vh]">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            {showCouponUI && (
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={() => setShowCouponUI(false)}
-                className="shrink-0 -ml-2 text-muted-foreground hover:text-foreground"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            )}
-            <DialogTitle>
-              {showCouponUI ? "Available Coupons" : "Secure Checkout"}
-            </DialogTitle>
-          </div>
-        </DialogHeader>
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
+      <GlobalBreadcrumb
+        items={[
+          {
+            label: "Home",
+            href: "/",
+            icon: <Home className="w-3.5 h-3.5" />,
+          },
+          {
+            label: product.title,
+            href: `/product/${product.slug}`,
+            icon: <ShoppingCart className="w-3.5 h-3.5" />,
+          },
+          {
+            label: "Checkout",
+            icon: <CreditCard className="w-3.5 h-3.5" />,
+          },
+        ]}
+      />
 
-        <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
-          {/* Left Column - Checkout Steps */}
-          {!showCouponUI && (
-            <div className="flex-1 p-4 lg:p-6 lg:w-3/5 overflow-y-auto custom-scrollbar">
-              {/* Stepper Header */}
-              <div className="mb-10 flex w-full justify-between items-center px-4">
-                {checkoutSteps.map((step, index) => {
-                  const isActive = step.id === currentStep;
-                  const isPast = index < currentStepIndex;
-                  const isClickable =
-                    isPast ||
-                    (index === 1 && selectedAddress) ||
-                    (index === 2 && selectedAddress);
+      <div className="flex items-center gap-3 mb-8">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            if (showCouponUI) {
+              setShowCouponUI(false);
+            } else {
+              router.back();
+            }
+          }}
+          className="shrink-0 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {showCouponUI ? "Available Coupons" : "Secure Checkout"}
+        </h1>
+      </div>
 
-                  return (
-                    <Fragment key={step.id}>
-                      <div className="flex flex-col items-center shrink-0 relative">
-                        <div
-                          className={cn(
-                            "flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold ring-4 ring-background z-10 transition-all duration-300",
-                            isActive
-                              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110"
-                              : isPast
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted text-muted-foreground opacity-60",
-                          )}
-                        >
-                          {isPast ? (
-                            <Check className="size-5 stroke-3" />
-                          ) : (
-                            index + 1
-                          )}
-                        </div>
-                        <span
-                          className={cn(
-                            "absolute top-12 mt-2 text-[11px] font-bold uppercase tracking-wider transition-colors duration-300",
-                            isActive ? "text-primary" : "text-muted-foreground",
-                          )}
-                        >
-                          {step.label}
-                        </span>
-                      </div>
-                      {index < checkoutSteps.length - 1 && (
-                        <div
-                          data-slot="field-separator"
-                          className="relative -my-2 h-5 text-sm flex-1 mx-2"
-                        >
-                          <Separator className="absolute inset-x-0 top-1/2" />
-                        </div>
-                      )}
-                    </Fragment>
-                  );
-                })}
-              </div>
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Left Column - Checkout Steps */}
+        {!showCouponUI && (
+          <div className="flex-1 lg:w-3/5">
+            {/* Stepper Header */}
+            <div className="mb-10 flex w-full justify-between items-center px-4 md:px-12 bg-card border shadow-sm py-6 rounded-2xl">
+              {checkoutSteps.map((step, index) => {
+                const isActive = step.id === currentStep;
+                const isPast = index < currentStepIndex;
 
-              {/* Step Content */}
-              <div className="min-h-[300px]">
-                {currentStep === "address" && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    {addressesLoading ? (
-                      <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-                        <Loader2 className="size-8 animate-spin text-primary" />
-                        <p className="text-sm">Loading your addresses…</p>
-                      </div>
-                    ) : (
-                      <DeliveryAddress
-                        addresses={displayAddresses}
-                        selectedAddress={selectedAddress}
-                        onAddressChange={(id) => {
-                          setSelectedAddress(id);
-                        }}
-                        onAddAddress={handleAddNewAddress}
-                      />
-                    )}
-                    {selectedAddress && (
-                      <div className="mt-8 flex justify-end">
-                        <Button
-                          size="lg"
-                          className="px-8 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/10"
-                          onClick={() => setCurrentStep("shipping")}
-                        >
-                          Continue to Delivery
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {currentStep === "shipping" && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-xl font-semibold">Delivery Method</h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setCurrentStep("address")}
-                        className="text-muted-foreground"
+                return (
+                  <Fragment key={step.id}>
+                    <div className="flex flex-col items-center shrink-0 relative">
+                      <div
+                        className={cn(
+                          "flex h-12 w-12 items-center justify-center rounded-full text-base font-bold ring-4 ring-background z-10 transition-all duration-300",
+                          isActive
+                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110"
+                            : isPast
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground opacity-60",
+                        )}
                       >
-                        <ArrowLeft className="w-4 h-4" /> Back
-                      </Button>
+                        {isPast ? (
+                          <Check className="size-6 stroke-[3px]" />
+                        ) : (
+                          index + 1
+                        )}
+                      </div>
+                      <span
+                        className={cn(
+                          "absolute top-14 mt-3 text-xs font-bold uppercase tracking-wider transition-colors duration-300",
+                          isActive ? "text-primary flex shrink-0" : "text-muted-foreground flex shrink-0",
+                        )}
+                      >
+                        {step.label}
+                      </span>
                     </div>
-                    <ShippingMethodSelector
-                      methods={shippingMethods}
-                      selectedMethod={shippingMethod}
-                      onMethodChange={(id) => {
-                        setShippingMethod(id);
+                    {index < checkoutSteps.length - 1 && (
+                      <div
+                        data-slot="field-separator"
+                        className="relative -my-2 h-5 text-sm flex-1 mx-2 md:mx-4"
+                      >
+                        <Separator className={cn("absolute inset-x-0 top-1/2 transition-colors", isPast ? "bg-primary" : "")} />
+                      </div>
+                    )}
+                  </Fragment>
+                );
+              })}
+            </div>
+
+            {/* Step Content */}
+            <div className="bg-card border rounded-2xl p-6 md:p-8 shadow-sm min-h-[400px]">
+              {currentStep === "address" && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                  {addressesLoading ? (
+                    <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
+                      <Loader2 className="size-8 animate-spin text-primary" />
+                      <p className="text-sm">Loading your addresses…</p>
+                    </div>
+                  ) : (
+                    <DeliveryAddress
+                      addresses={displayAddresses}
+                      selectedAddress={selectedAddress}
+                      onAddressChange={(id) => {
+                        setSelectedAddress(id);
                       }}
+                      onAddAddress={handleAddNewAddress}
                     />
-                    {shippingMethod && (
-                      <div className="mt-8 flex justify-end">
-                        <Button
-                          size="lg"
-                          className="px-8 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/10"
-                          onClick={() => setCurrentStep("gift")}
-                        >
-                          Continue to Options
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {currentStep === "gift" && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-xl font-semibold">
-                        Gift Options{" "}
-                        <span className="text-muted-foreground font-normal text-sm ml-2">
-                          (Optional)
-                        </span>
-                      </h3>
+                  )}
+                  {selectedAddress && (
+                    <div className="mt-8 flex justify-end">
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        size="lg"
+                        className="px-8 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/10"
                         onClick={() => setCurrentStep("shipping")}
-                        className="text-muted-foreground"
                       >
-                        <ArrowLeft className="w-4 h-4" /> Back
+                        Continue to Delivery
                       </Button>
                     </div>
-                    <GiftOptions
-                      isGift={isGift}
-                      onGiftToggle={setIsGift}
-                      giftMessage={giftMessage}
-                      onMessageChange={setGiftMessage}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          {/* Coupon Selection UI */}
-          {showCouponUI && (
-            <div className="p-4 lg:p-6 w-full lg:w-3/5 mx-auto overflow-y-auto custom-scrollbar">
-              <CouponList
-                searchQuery={couponSearch}
-                onSearchChange={setCouponSearch}
-                customCode={customCouponCode}
-                onCustomCodeChange={setCustomCouponCode}
-                onApplyCustomCode={handleApplyCustomCoupon}
-                eligibleCoupons={eligibleCoupons}
-                ineligibleCoupons={ineligibleCoupons}
-                selectedCoupon={selectedCoupon}
-                onSelectCoupon={handleCouponSelect}
-                subtotal={subtotal}
-                onBack={() => setShowCouponUI(false)}
-                onRemoveCoupon={handleRemoveCoupon}
-              />
-            </div>
-          )}
+                  )}
+                </div>
+              )}
 
-          {/* Right Column - Order Summary Sidebar */}
-          <div className="w-full lg:w-2/5 bg-muted/30 p-6 lg:p-8 border-t lg:border-t-0 lg:border-l overflow-y-auto custom-scrollbar shrink-0">
+              {currentStep === "shipping" && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-2xl font-semibold">Delivery Method</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCurrentStep("address")}
+                      className="text-muted-foreground"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                    </Button>
+                  </div>
+                  <ShippingMethodSelector
+                    methods={shippingMethods}
+                    selectedMethod={shippingMethod}
+                    onMethodChange={(id) => {
+                      setShippingMethod(id);
+                    }}
+                  />
+                  {shippingMethod && (
+                    <div className="mt-8 flex justify-end">
+                      <Button
+                        size="lg"
+                        className="px-8 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/10"
+                        onClick={() => setCurrentStep("gift")}
+                      >
+                        Continue to Options
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {currentStep === "gift" && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-2xl font-semibold">
+                      Gift Options{" "}
+                      <span className="text-muted-foreground font-normal text-base ml-2">
+                        (Optional)
+                      </span>
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setCurrentStep("shipping")}
+                      className="text-muted-foreground"
+                    >
+                      <ArrowLeft className="w-4 h-4 mr-2" /> Back
+                    </Button>
+                  </div>
+                  <GiftOptions
+                    isGift={isGift}
+                    onGiftToggle={setIsGift}
+                    giftMessage={giftMessage}
+                    onMessageChange={setGiftMessage}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Coupon Selection UI */}
+        {showCouponUI && (
+          <div className="flex-1 lg:w-3/5 bg-card border rounded-2xl shadow-sm p-4 lg:p-6">
+            <CouponList
+              searchQuery={couponSearch}
+              onSearchChange={setCouponSearch}
+              customCode={customCouponCode}
+              onCustomCodeChange={setCustomCouponCode}
+              onApplyCustomCode={handleApplyCustomCoupon}
+              eligibleCoupons={eligibleCoupons}
+              ineligibleCoupons={ineligibleCoupons}
+              selectedCoupon={selectedCoupon}
+              onSelectCoupon={handleCouponSelect}
+              subtotal={subtotal}
+              onBack={() => setShowCouponUI(false)}
+              onRemoveCoupon={handleRemoveCoupon}
+            />
+          </div>
+        )}
+
+        {/* Right Column - Order Summary Sidebar */}
+        <div className="w-full lg:w-2/5 shrink-0">
+          <div className="sticky top-24 bg-card border rounded-2xl shadow-sm p-6 lg:p-8 space-y-6">
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4 tracking-tight">
+              <h3 className="text-xl font-bold text-foreground mb-4 tracking-tight">
                 Order Summary
               </h3>
 
@@ -638,25 +673,29 @@ export default function QuickCheckoutModal({
               hasAddress={selectedAddress !== ""}
             />
 
-            <Button
-              className="w-full h-14 text-lg font-medium shadow-md transition-all hover:-translate-y-px active:translate-y-px"
-              onClick={handlePayment}
-              disabled={isProcessing || !selectedSize || !selectedAddress}
-            >
-              {isProcessing ? (
-                <>Processing...</>
-              ) : !selectedAddress ? (
-                "Add Delivery Address"
-              ) : (
-                <>Pay ${total.toFixed(2)}</>
-              )}
-            </Button>
+            <div className="pt-4 border-t border-border">
+              <Button
+                className="w-full h-14 text-xl font-semibold shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
+                onClick={handlePayment}
+                disabled={isProcessing || !selectedSize || !selectedAddress}
+              >
+                {isProcessing ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" /> Processing...
+                  </span>
+                ) : !selectedAddress ? (
+                  "Add Delivery Address"
+                ) : (
+                  <>Pay ${total.toFixed(2)}</>
+                )}
+              </Button>
+            </div>
 
             <TrustBadges
               showFreeShipping={selectedAddress !== "" && shipping === 0}
             />
 
-            <p className="text-xs text-center text-muted-foreground">
+            <p className="text-xs text-center text-muted-foreground mt-6">
               By completing this purchase you agree to our{" "}
               <Link
                 href="#"
@@ -675,7 +714,20 @@ export default function QuickCheckoutModal({
             </p>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
+}
+
+export default function CheckoutQuickPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground">Loading...</p>
+      </div>    
+    }>
+      <QuickCheckoutContent />
+    </Suspense>
+  )
 }

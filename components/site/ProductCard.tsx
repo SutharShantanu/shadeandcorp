@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Heart,
   ShoppingCart,
@@ -27,7 +28,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import QuickCheckoutModal from "../modal/QuickCheckoutModal";
+
 import {
   ActionButtonsProps,
   ColorOptionsProps,
@@ -167,17 +168,23 @@ function SizeSelectionModal({
               )}
             </RadioGroup>
 
-            {/* Size Selection */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-3">
-                <span className="font-medium">Size</span>
+                <p className="text-sm font-semibold uppercase tracking-wide">
+                  Size{" "}
+                  {selectedSize && (
+                    <span className="normal-case font-normal text-muted-foreground ml-1">
+                      — {selectedSize}
+                    </span>
+                  )}
+                </p>
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
-                  className="text-sm text-blue-600 hover:text-blue-700"
+                  className="h-7 px-2 text-xs text-primary hover:text-primary/80"
                   onClick={onOpenSizeChart}
                 >
-                  <Ruler className="w-4 h-4 mr-1" />
+                  <Ruler className="size-2.5" />
                   Size Guide
                 </Button>
               </div>
@@ -388,20 +395,20 @@ function QuickActionButtons({
       <Button
         size="icon"
         variant="ghost"
-        className="h-9 w-9 rounded-full backdrop-blur-md shadow-none transition-all ease-in-out duration-300"
+        className="rounded-full bg-transparent! shadow-none transition-all ease-in-out duration-300"
         onClick={(e) => {
           e.preventDefault();
           onAddToWishlist();
         }}
       >
         <Heart
-          className={`w-4 h-4 transition-all ease-in-out duration-300 ${isWishlisted && "fill-destructive-foreground text-destructive-foreground"}`}
+          className={`transition-all ease-in-out duration-300 ${isWishlisted && "fill-red-400 text-red-400"}`}
         />
       </Button>
       <Button
         size="icon"
         variant="ghost"
-        className="h-9 w-9 rounded-full backdrop-blur-md shadow-none transition-all ease-in-out duration-300"
+        className="rounded-full bg-transparent! shadow-none transition-all ease-in-out duration-300"
       >
         <Share2 className="w-4 h-4" />
       </Button>
@@ -619,13 +626,14 @@ export default function ProductCard({
     return defaultVariant?.color.hex || variants[0]?.color.hex || "";
   });
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showSizeModal, setShowSizeModal] = useState(false);
   const [sizeChartOpen, setSizeChartOpen] = useState(false);
   const [sizeError, setSizeError] = useState("");
   const [pendingAction, setPendingAction] = useState<
     "addToBag" | "buyNow" | null
   >(null);
+
+  const router = useRouter();
 
   // Check if a size is available
   const isSizeAvailable = (size: string) => {
@@ -685,11 +693,16 @@ export default function ProductCard({
       );
       setShowSizeModal(false);
       setPendingAction(null);
-      setShowCheckoutModal(true);
     } else if (action === "buyNow") {
       setShowSizeModal(false);
       setPendingAction(null);
-      setShowCheckoutModal(true);
+      const params = new URLSearchParams({
+        product: product.slug || "",
+        color: selectedColor,
+        size: selectedSize,
+        qty: "1",
+      });
+      router.push(`/checkout/quick?${params.toString()}`);
     }
   };
 
@@ -826,14 +839,7 @@ export default function ProductCard({
             pendingAction={pendingAction}
             onOpenSizeChart={() => setSizeChartOpen(true)}
           />
-          <QuickCheckoutModal
-            open={showCheckoutModal}
-            onOpenChange={setShowCheckoutModal}
-            product={product}
-            selectedSize={selectedSize}
-            selectedColor={selectedColor}
-            quantity={1}
-          />
+
           <SizeChartDrawer
             product={product}
             open={sizeChartOpen}
@@ -911,16 +917,6 @@ export default function ProductCard({
           onOpenSizeChart={() => setSizeChartOpen(true)}
         />
 
-        {/* Quick Checkout Modal */}
-        <QuickCheckoutModal
-          open={showCheckoutModal}
-          onOpenChange={setShowCheckoutModal}
-          product={product}
-          selectedSize={selectedSize}
-          selectedColor={selectedColor}
-          quantity={1}
-        />
-
         {/* Size Chart (no drawer) */}
         <SizeChartDrawer
           product={product}
@@ -944,7 +940,7 @@ function SizeChartDrawer({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-6xl">
         <DialogHeader>
           <DialogTitle>Size Guide</DialogTitle>
         </DialogHeader>

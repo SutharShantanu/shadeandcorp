@@ -143,7 +143,9 @@ export default function ProductFilters() {
     isPrice?: boolean
   }) => {
     const count = countKey ? getSectionFilterCount(countKey) : 0;
-    const hasPriceFilter = isPrice && (searchParams.get("minPrice") || searchParams.get("maxPrice"));
+    const minPrice = searchParams.get("minPrice");
+    const maxPrice = searchParams.get("maxPrice");
+    const hasPriceFilter = isPrice && ((minPrice && minPrice !== "0") || (maxPrice && maxPrice !== "2000"));
 
     return (
       <div className="flex gap-2 items-center">
@@ -217,7 +219,7 @@ export default function ProductFilters() {
               />
             </AccordionTrigger>
             <AccordionContent className="py-2">
-              <div className="space-y-3">
+              <div className="space-y-3 pl-1">
                 {SUB_CATEGORIES.map((cat) => (
                   <div key={cat} className="flex items-center space-x-2">
                     <Checkbox
@@ -407,7 +409,7 @@ export default function ProductFilters() {
       </Accordion>
 
       <Dialog open={sizeGuideOpen} onOpenChange={setSizeGuideOpen}>
-        <DialogContent className="sm:max-w-xl">
+        <DialogContent className="sm:max-w-6xl">
           <DialogHeader>
             <DialogTitle>Size Guide</DialogTitle>
           </DialogHeader>
