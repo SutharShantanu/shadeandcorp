@@ -1,15 +1,9 @@
-import { Quicksand, Raleway, Nabla } from "next/font/google";
+import { Raleway, Nabla } from "next/font/google";
 
-// Quicksand for body text
-export const quicksand = Quicksand({
-    subsets: ["latin"],
-    variable: "--font-quicksand",
-});
-
-// Raleway for headings/titles
+// Raleway for all body and headings
 export const raleway = Raleway({
     subsets: ["latin"],
-    variable: "--font-raleway",
+    variable: "--font-sans",
 });
 
 // Nabla for special/funky highlight text

@@ -65,13 +65,25 @@ export default async function ProductsPage({
 
   const { data: products, success, error, totalPages } = await getProductsFromLib(filters as any);
 
+  // Helper to get a clean display title for categories
+  const getDisplayTitle = (categoryStr: string | undefined): string => {
+    if (!categoryStr) return "All Products";
+
+    const parts = categoryStr.split(',').map(p => p.trim());
+    if (parts.length === 1) return parts[0];
+    if (parts.length === 2) return `${parts[0]} & ${parts[1]}`;
+    return "Mixed Collection";
+  };
+
+  const displayTitle = getDisplayTitle(filters.category);
+
   const breadcrumbItems: BreadcrumbItemProps[] = [
     { label: "Home", href: "/", icon: <Home className="w-3.5 h-3.5" /> },
   ];
 
   if (filters.category) {
     breadcrumbItems.push({
-      label: filters.category,
+      label: displayTitle,
       href: `/products/${category || ""}`,
       icon: <List className="w-3.5 h-3.5" />,
     });
@@ -93,7 +105,7 @@ export default async function ProductsPage({
             <GlobalBreadcrumb items={breadcrumbItems} />
             <div className="flex gap-2 items-center">
               <h1 className="text-3xl font-bold tracking-tight">
-                {filters.category || "All Products"}
+                {displayTitle}
               </h1>
               <p className="text-muted-foreground mt-1">
                 ({success ? `${products.length} Items` : "No items found"})

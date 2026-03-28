@@ -25,11 +25,13 @@ export async function fetchProducts(searchParams: any) {
         const query: Record<string, any> = {};
 
         if (category) {
-            query.category = { $regex: new RegExp(`^${category}$`, "i") };
+            const categories = category.split(",").map((c: string) => new RegExp(`^${c.trim()}$`, "i"));
+            query.category = { $in: categories };
         }
 
         if (subCategory) {
-            query.subCategory = { $regex: new RegExp(`^${subCategory}$`, "i") };
+            const subCategories = subCategory.split(",").map((sc: string) => new RegExp(`^${sc.trim()}$`, "i"));
+            query.subCategory = { $in: subCategories };
         }
 
         if (search) {

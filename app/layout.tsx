@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./providers";
-import { quicksand, raleway, nabla } from "./fonts";
+import { raleway, nabla } from "./fonts";
 import LayoutWrapper from "@/components/LayoutWrapper";
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${quicksand.variable} ${raleway.variable} ${nabla.variable} antialiased font-body`}
+        className={`${raleway.variable} ${nabla.variable} antialiased font-body`}
       >
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>

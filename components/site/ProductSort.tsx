@@ -25,7 +25,7 @@ export default function ProductSort() {
     <div className="flex items-center gap-2">
       <span className="text-sm text-muted-foreground whitespace-nowrap hidden sm:block">Sort by:</span>
       <Select value={currentSort} onValueChange={handleSortChange}>
-        <SelectTrigger className="w-fit">
+        <SelectTrigger size="default" className="w-fit">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent align="end">
