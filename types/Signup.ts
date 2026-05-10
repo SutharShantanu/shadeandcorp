@@ -25,7 +25,7 @@ export interface OtpDialogProps {
 
 export type BaseFormValues = {
   firstName: string;
-  lastName: string;
+  lastName?: string;
   email: string;
   phone: string;
   password: string;

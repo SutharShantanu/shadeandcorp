@@ -12,7 +12,7 @@ import { BaseFormValues } from "@/types/Signup";
 const signupSchema = z
   .object({
     firstName: z.string().min(2, "First name must be at least 2 characters"),
-    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    lastName: z.string().optional(),
     email: z.string().trim(),
     phone: z.string().trim(),
     password: z.string().trim(),

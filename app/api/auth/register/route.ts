@@ -98,19 +98,18 @@ export async function POST(req: Request) {
       { status: 201 }
     )
   } catch (error) {
-    console.error("Register error:", error)
-
-    // Handle duplicate email/phone error from MongoDB
-    if (error instanceof Error && error.message.includes("duplicate key")) {
-      const field = error.message.includes("email") ? "email" : "phone"
-      return NextResponse.json(
-        { ok: false, error: `User with this ${field} already exists` },
-        { status: 409 }
-      )
-    }
+    console.error("Register error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      error
+    })
 
     return NextResponse.json(
-      { ok: false, error: "Server error. Please try again later." },
+      { 
+        ok: false, 
+        error: "Server error", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      },
       { status: 500 }
     )
   }

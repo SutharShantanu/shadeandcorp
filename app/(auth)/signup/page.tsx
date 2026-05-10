@@ -91,7 +91,7 @@ function NameFields({
         name="lastName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Last Name *</FormLabel>
+            <FormLabel>Last Name (Optional)</FormLabel>
             <FormControl>
               <Input
                 id="lastName"
@@ -412,13 +412,10 @@ export default function Signup() {
     if (!isValid) {
       // Show specific error messages
       const firstNameError = form.formState.errors.firstName;
-      const lastNameError = form.formState.errors.lastName;
       const phoneError = form.formState.errors.phone;
 
       if (firstNameError) {
-        toast.error(firstNameError.message || "Please enter your first name");
-      } else if (lastNameError) {
-        toast.error(lastNameError.message || "Please enter your last name");
+        toast.error(firstNameError.message || "First name is required");
       } else if (phoneError) {
         toast.error(phoneError.message || "Please enter a valid phone number");
       }

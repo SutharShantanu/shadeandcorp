@@ -76,7 +76,7 @@ export interface IConnectedProviders {
 
 export interface IUser extends Document {
   firstName: string;
-  lastName: string;
+  lastName?: string;
   email: string;
   password: string;
   phone?: string;
@@ -112,7 +112,7 @@ export interface IUser extends Document {
 // User Schema
 const UserSchema: Schema<IUser> = new Schema({
   firstName: { type: String, required: true, trim: true },
-  lastName: { type: String, required: true, trim: true },
+  lastName: { type: String, required: false, trim: true },
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
   phone: { type: String, trim: true },

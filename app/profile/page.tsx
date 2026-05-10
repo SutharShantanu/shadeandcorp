@@ -363,85 +363,101 @@ function ProfileContent() {
             <Tabs
               value={activeTab}
               onValueChange={handleTabChange}
-              className="w-full"
-              layout="vertical"
+              className="flex flex-col md:flex-row gap-8 min-h-[600px]"
             >
-              <TabsList className="relative z-10">
-                <TabsTrigger
-                  value="profile"
-                  className="flex items-center gap-2"
-                >
-                  <User className="size-4" />
-                  <span className="hidden lg:inline">Profile</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="account"
-                  className="flex items-center gap-2"
-                >
-                  <Shield className="size-4" />
-                  <span className="hidden lg:inline">Account</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="security"
-                  className="flex items-center gap-2"
-                >
-                  <Lock className="size-4" />
-                  <span className="hidden lg:inline">Security</span>
-                </TabsTrigger>
-                <TabsTrigger value="orders" className="flex items-center gap-2">
-                  <Package className="size-4" />
-                  <span className="hidden lg:inline">Orders</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="addresses"
-                  className="flex items-center gap-2"
-                >
-                  <MapPin className="size-4" />
-                  <span className="hidden lg:inline">Addresses</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="billing"
-                  className="flex items-center gap-2"
-                >
-                  <CreditCard className="size-4" />
-                  <span className="hidden lg:inline">Billing</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="notifications"
-                  className="flex items-center gap-2"
-                >
-                  <Bell className="size-4" />
-                  <span className="hidden lg:inline">Preferences</span>
-                </TabsTrigger>
-              </TabsList>
+              <div className="w-full md:w-64 shrink-0">
+                <div className="sticky top-24">
+                  <TabsList className="flex flex-col h-auto w-full bg-transparent p-0 gap-1 items-start">
+                    <div className="px-4 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
+                       Account Settings
+                    </div>
+                    <TabsTrigger
+                      value="profile"
+                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
+                    >
+                      <UserCircle className="size-4 text-zinc-500" />
+                      <span>Profile Info</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="account"
+                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
+                    >
+                      <Shield className="size-4 text-zinc-500" />
+                      <span>Account Details</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="security"
+                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
+                    >
+                      <Lock className="size-4 text-zinc-500" />
+                      <span>Security & Login</span>
+                    </TabsTrigger>
 
-              <TabsContent value="profile">
-                <ProfileDisplayTab userProfile={userProfile} />
-              </TabsContent>
+                    <div className="px-4 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-4 mb-1">
+                       Orders & Shopping
+                    </div>
+                    <TabsTrigger value="orders" className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!">
+                      <Package className="size-4 text-zinc-500" />
+                      <span>My Orders</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="addresses"
+                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
+                    >
+                      <MapPin className="size-4 text-zinc-500" />
+                      <span>Saved Addresses</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="billing"
+                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
+                    >
+                      <CreditCard className="size-4 text-zinc-500" />
+                      <span>Payment Methods</span>
+                    </TabsTrigger>
 
-              <TabsContent value="account">
-                <AccountDisplayTab userProfile={userProfile} />
-              </TabsContent>
+                    <div className="px-4 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-4 mb-1">
+                       Preferences
+                    </div>
+                    <TabsTrigger
+                      value="notifications"
+                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
+                    >
+                      <Bell className="size-4 text-zinc-500" />
+                      <span>Notifications</span>
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+              </div>
 
-              <TabsContent value="security">
-                <SecurityTab userProfile={userProfile} />
-              </TabsContent>
+              <div className="flex-1 bg-white dark:bg-zinc-950/20 rounded-2xl border border-border/40 p-1 md:p-6 min-h-[500px] shadow-xs">
+                <TabsContent value="profile" className="mt-0 outline-hidden">
+                  <ProfileDisplayTab userProfile={userProfile} />
+                </TabsContent>
 
-              <TabsContent value="orders">
-                <OrdersTab userProfile={userProfile} />
-              </TabsContent>
+                <TabsContent value="account" className="mt-0 outline-hidden">
+                  <AccountDisplayTab userProfile={userProfile} />
+                </TabsContent>
 
-              <TabsContent value="addresses">
-                <AddressesTab userProfile={userProfile} />
-              </TabsContent>
+                <TabsContent value="security" className="mt-0 outline-hidden">
+                  <SecurityTab userProfile={userProfile} />
+                </TabsContent>
 
-              <TabsContent value="billing">
-                <BillingTab userProfile={userProfile} />
-              </TabsContent>
+                <TabsContent value="orders" className="mt-0 outline-hidden">
+                  <OrdersTab userProfile={userProfile} />
+                </TabsContent>
 
-              <TabsContent value="notifications">
-                <NotificationsTab userProfile={userProfile} />
-              </TabsContent>
+                <TabsContent value="addresses" className="mt-0 outline-hidden">
+                  <AddressesTab userProfile={userProfile} />
+                </TabsContent>
+
+                <TabsContent value="billing" className="mt-0 outline-hidden">
+                  <BillingTab userProfile={userProfile} />
+                </TabsContent>
+
+                <TabsContent value="notifications" className="mt-0 outline-hidden">
+                  <NotificationsTab userProfile={userProfile} />
+                </TabsContent>
+              </div>
             </Tabs>
           </CardContent>
         </Card>

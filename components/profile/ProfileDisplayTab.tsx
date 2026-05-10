@@ -75,7 +75,7 @@ export default function ProfileDisplayTab({ userProfile }: ProfileDisplayTabProp
               <IconBadge>
                 <User className="h-4 w-4 text-muted-foreground" />
               </IconBadge>
-              <p className="text-sm font-medium">{userProfile?.lastName || "Not set"}</p>
+              <p className="text-sm font-medium">{userProfile?.lastName || "Optional"}</p>
             </div>
           </div>
         </div>

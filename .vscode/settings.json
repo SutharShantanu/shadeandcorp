@@ -1,3 +1,9 @@
 {
-    "CodeGPT.apiKey": "DeepSeek"
+  "CodeGPT.apiKey": "DeepSeek",
+  "mdb.presetConnections": [
+    {
+      "name": "Preset Connection",
+      "connectionString": "mongodb://localhost:27017"
+    }
+  ]
 }

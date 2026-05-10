@@ -121,7 +121,7 @@ export default function ProfileTab({
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Last Name</FormLabel>
+                <FormLabel>Last Name (Optional)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Doe"

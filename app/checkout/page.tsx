@@ -61,7 +61,7 @@ const defaultOrderItems: OrderItem[] = [
 const informationSchema = z.object({
   email: z.string().email("Invalid email address"),
   firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  lastName: z.string().optional(),
   phone: z.string().optional(),
   subscribeToNews: z.boolean().optional(),
 });
@@ -253,7 +253,7 @@ export default function CheckoutPage() {
                 name="lastName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last Name *</FormLabel>
+                    <FormLabel>Last Name (Optional)</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>

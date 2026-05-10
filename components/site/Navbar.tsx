@@ -498,6 +498,7 @@ export function UserMenu({ className }: UserMenuProps) {
           onClick={() => router.push("/login")}
           size="sm"
           variant="outline"
+          className="h-8 text-xs font-semibold px-4 border-zinc-200"
         >
           Login
         </Button>
@@ -505,6 +506,7 @@ export function UserMenu({ className }: UserMenuProps) {
           variant="default"
           onClick={() => router.push("/signup")}
           size="sm"
+          className="h-8 text-xs font-semibold px-4"
         >
           Sign Up
         </Button>
@@ -517,151 +519,97 @@ export function UserMenu({ className }: UserMenuProps) {
   };
 
   const handleSignOut = async () => {
-    signOut();
+    await signOut({ redirect: false });
     router.push("/");
   };
 
   const notifications = session.user?.notifications || [];
-
-  const profileNotifications = getNotificationsByCategory(
-    notifications,
-    "profile",
-  );
-  const orderNotifications = getNotificationsByCategory(
-    notifications,
-    "orders",
-  );
-  const settingsNotifications = getNotificationsByCategory(
-    notifications,
-    "settings",
-  );
+  const orderNotifications = getNotificationsByCategory(notifications, "orders");
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-9 w-9 rounded-full transition-all"
+          className="relative h-8 w-8 rounded-full ring-offset-background transition-all hover:bg-zinc-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 overflow-hidden"
         >
           <AvatarBadge />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-64"
+        className="w-56 p-1.5 shadow-xl rounded-xl border border-zinc-200"
         align="end"
-        forceMount
         sideOffset={8}
       >
-        <TooltipProvider>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-medium leading-none flex items-center gap-1.5">
-                  {session.user?.name}
-                  {session.user?.isEmailVerified ? (
-                    <BadgeCheck className="h-4 w-4" />
-                  ) : (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <BadgeInfo className="h-4 w-4 text-destructive" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Your email is not verified.</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </p>
-              </div>
-              <p className="text-xs leading-none text-muted-foreground truncate">
-                {session.user?.email}
-              </p>
-            </div>
-          </DropdownMenuLabel>
-        </TooltipProvider>
+        <div className="px-3 py-2 mb-1 border-b border-zinc-100/80">
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">Welcome</p>
+          <p className="text-sm font-bold text-zinc-900 truncate">
+            {session.user?.name || "Member"}
+          </p>
+        </div>
 
-        <DropdownMenuSeparator />
-
-        <DropdownMenuGroup>
+        <div className="space-y-0.5">
           <DropdownMenuItem
-            onClick={() => handleNavigation("/profile?tab=profile")}
-            className="relative"
+            onClick={() => handleNavigation("/profile?tab=orders")}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
           >
-            <User className="size-4" />
-            <span>Profile</span>
-            {profileNotifications.length > 0 && (
-              <Dot className="ml-auto" variant="info" />
-            )}
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => handleNavigation("/orders")}
-            className="relative"
-          >
-            <ShoppingBag className="size-4" />
-            <span>My Orders</span>
-            {orderNotifications.length > 0 && (
-              <Dot className="ml-auto" variant="success" />
-            )}
+            <ShoppingBag size={15} className="text-zinc-500" />
+            <span className="text-sm font-medium">Orders</span>
+            {orderNotifications.length > 0 && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
           </DropdownMenuItem>
 
           <DropdownMenuItem
             onClick={() => handleNavigation("/wishlist")}
-            className="relative"
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
           >
-            <Heart className="size-4" />
-            <span>Wishlist</span>
+            <Heart size={15} className="text-zinc-500" />
+            <span className="text-sm font-medium">Wishlist</span>
           </DropdownMenuItem>
-        </DropdownMenuGroup>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="mx-2 my-1" />
 
-        <DropdownMenuGroup>
           <DropdownMenuItem
-            onClick={() => handleNavigation("/addresses")}
-            className="relative"
+            onClick={() => handleNavigation("/profile?tab=profile")}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
           >
-            <MapPin className="size-4" />
-            <span>Addresses</span>
-            {session.user?.hasMissingAddress && (
-              <Dot className="ml-auto" variant="warning" />
-            )}
+            <User size={15} className="text-zinc-500" />
+            <span className="text-sm font-medium">Personal Details</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onClick={() => handleNavigation("/payment-methods")}
-            className="relative"
+            onClick={() => handleNavigation("/profile?tab=addresses")}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
           >
-            <CreditCard className="size-4" />
-            <span>Payment Methods</span>
-            {session.user?.hasMissingPayment && (
-              <Dot className="ml-auto" variant="warning" />
-            )}
+            <MapPin size={15} className="text-zinc-500" />
+            <span className="text-sm font-medium">Saved Addresses</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onClick={() => handleNavigation("/notifications")}
-            className="relative"
+            onClick={() => handleNavigation("/profile?tab=billing")}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
           >
-            <Bell className="size-4" />
-            <span>Notifications</span>
-            {settingsNotifications.length > 0 && (
-              <Dot className="ml-auto" variant="info" />
-            )}
+            <CreditCard size={15} className="text-zinc-500" />
+            <span className="text-sm font-medium">Payment Methods</span>
           </DropdownMenuItem>
-        </DropdownMenuGroup>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="mx-2 my-1" />
 
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => handleNavigation("/settings")}>
-            <Settings className="size-4" />
-            <span>Settings</span>
+          <DropdownMenuItem
+            onClick={() => handleNavigation("/profile?tab=security")}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
+          >
+            <Settings size={15} className="text-zinc-500" />
+            <span className="text-sm font-medium">Edit Profile</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleSignOut} variant="destructive">
-            <LogOut className="size-4" />
-            <span className="text-destructive">Log out</span>
+
+          <DropdownMenuItem
+            onClick={handleSignOut}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-600"
+          >
+            <LogOut size={15} />
+            <span className="text-sm font-bold">Log out</span>
           </DropdownMenuItem>
-        </DropdownMenuGroup>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

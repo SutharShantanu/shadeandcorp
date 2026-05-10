@@ -39,7 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-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
+# editor
+.vscode/
 
 /.agent/
 /.agents/
