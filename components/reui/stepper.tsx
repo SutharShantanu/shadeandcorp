@@ -309,7 +309,7 @@ function StepperTrigger({
       data-loading={isLoading}
       className={cn(
         "focus-visible:border-ring focus-visible:ring-ring/50 inline-flex cursor-pointer items-center outline-none focus-visible:z-10 focus-visible:ring-3 disabled:pointer-events-none disabled:opacity-60",
-        "gap-2 rounded-full",
+        "gap-2.5 rounded-full",
         className
       )}
       onClick={() => setActiveStep(step)}
@@ -335,7 +335,7 @@ function StepperIndicator({
       data-state={state}
       className={cn(
         "border-background bg-accent text-accent-foreground data-[state=completed]:bg-primary data-[state=completed]:text-primary-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground relative flex size-6 shrink-0 items-center justify-center overflow-hidden",
-        "rounded-sm text-[0.625rem]",
+        "rounded-full text-xs",
         className
       )}
     >
@@ -378,7 +378,7 @@ function StepperTitle({ children, className }: React.ComponentProps<"h3">) {
       data-slot="stepper-title"
       data-state={state}
       className={cn(
-        "text-xs leading-none font-medium",
+        "text-sm leading-none font-medium",
         className
       )}
     >
@@ -398,7 +398,7 @@ function StepperDescription({
       data-slot="stepper-description"
       data-state={state}
       className={cn(
-        "text-muted-foreground text-xs/relaxed",
+        "text-muted-foreground text-sm",
         className
       )}
     >

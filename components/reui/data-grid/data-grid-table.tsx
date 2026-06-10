@@ -33,9 +33,9 @@ const headerCellSpacingVariants = cva("", {
   variants: {
     size: {
       dense:
-        "px-2 h-7",
+        "px-2 h-8",
       default:
-        "px-2.5",
+        "px-3",
     },
   },
   defaultVariants: {
@@ -47,9 +47,9 @@ const bodyCellSpacingVariants = cva("", {
   variants: {
     size: {
       dense:
-        "px-2 py-1",
+        "px-2 py-1.5",
       default:
-        "px-2.5 py-1.5",
+        "px-3 py-2",
     },
   },
   defaultVariants: {
@@ -61,9 +61,9 @@ const footerCellSpacingVariants = cva("", {
   variants: {
     size: {
       dense:
-        "px-2 py-1",
+        "px-2 py-1.5",
       default:
-        "px-2.5 py-1.5",
+        "px-3 py-2",
     },
   },
   defaultVariants: {
@@ -428,7 +428,7 @@ function DataGridTableBase({ children }: { children: ReactNode }) {
     <table
       data-slot="data-grid-table"
       className={cn(
-        "text-foreground text-xs/relaxed caption-bottom text-left align-middle font-normal rtl:text-right",
+        "text-foreground text-sm caption-bottom text-left align-middle font-normal rtl:text-right",
         props.tableLayout?.columnsResizable ? "min-w-0" : "w-full min-w-full",
         props.tableLayout?.width === "auto" ? "table-auto" : "table-fixed",
         !props.tableLayout?.columnsResizable && "",
@@ -631,7 +631,7 @@ function DataGridTableHeadRowCell<TData>({
         isLastLeftPinned ? "left" : isFirstRightPinned ? "right" : undefined
       }
       className={cn(
-        "text-secondary-foreground/80 h-8 relative text-left align-middle font-normal rtl:text-right [&:has([role=checkbox])]:pe-0",
+        "text-secondary-foreground/80 h-9 relative text-left align-middle font-normal rtl:text-right [&:has([role=checkbox])]:pe-0",
         headerCellSpacing,
         props.tableLayout?.cellBorder && "border-e",
         props.tableLayout?.columnsResizable &&
@@ -789,9 +789,9 @@ function DataGridTableBody({ children }: { children: ReactNode }) {
       className={cn(
         "[&_tr:last-child]:border-0",
         props.tableLayout?.rowRounded &&
-          "[&_td:first-child]:rounded-l-4xl",
+          "[&_td:first-child]:rounded-l-lg",
         props.tableLayout?.rowRounded &&
-          "[&_td:last-child]:rounded-r-4xl",
+          "[&_td:last-child]:rounded-r-lg",
         props.tableClassNames?.body
       )}
     >
@@ -1098,7 +1098,7 @@ function DataGridTableEmpty() {
     <tr>
       <td
         colSpan={Math.max(visibleColumnCount, 1)}
-        className="text-muted-foreground text-xs/relaxed py-6 text-center"
+        className="text-muted-foreground text-sm py-6 text-center"
       >
         {props.emptyMessage || "No data available"}
       </td>
@@ -1111,7 +1111,7 @@ function DataGridTableLoader() {
 
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-      <div className="text-muted-foreground bg-card rounded-md text-xs/relaxed flex items-center gap-2 border px-4 py-2 leading-none font-medium">
+      <div className="text-muted-foreground bg-card rounded-lg text-sm flex items-center gap-2 border px-4 py-2 leading-none font-medium">
         <Spinner className="size-5 opacity-60" />
         {props.loadingMessage || "Loading..."}
       </div>

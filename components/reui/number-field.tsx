@@ -14,14 +14,14 @@ const NumberFieldContext = createContext<{
 } | null>(null)
 
 const numberFieldGroupVariants = cva(
-  "relative flex w-full justify-between border border-input data-disabled:pointer-events-none data-disabled:opacity-50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive focus-within:has-aria-invalid:border-destructive focus-within:has-aria-invalid:ring-destructive/20 dark:focus-within:has-aria-invalid:ring-destructive/40 rounded-md bg-input/20 dark:bg-input/30 transition-colors focus-within:border-ring focus-within:ring-ring/30 focus-within:ring-2",
+  "relative flex w-full justify-between border border-input data-disabled:pointer-events-none data-disabled:opacity-50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive focus-within:has-aria-invalid:border-destructive focus-within:has-aria-invalid:ring-destructive/20 dark:focus-within:has-aria-invalid:ring-destructive/40 rounded-lg bg-transparent dark:bg-input/30 transition-colors focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-3",
   {
     variants: {
       size: {
-        sm: "h-6 text-xs/relaxed",
+        sm: "h-7 text-sm",
         default:
-          "h-7 text-xs/relaxed",
-        lg: "h-8 text-xs/relaxed",
+          "h-8 text-sm",
+        lg: "h-9 text-sm",
       },
     },
     defaultVariants: {
@@ -35,10 +35,10 @@ const numberFieldButtonVariants = cva(
   {
     variants: {
       size: {
-        sm: "px-1.5 [&_svg:not([class*='size-'])]:size-3",
+        sm: "px-1.5 [&_svg:not([class*='size-'])]:size-3.5",
         default:
-          "px-1.5 [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "px-2 [&_svg:not([class*='size-'])]:size-3.5",
+          "px-2 [&_svg:not([class*='size-'])]:size-4",
+        lg: "px-2.5 [&_svg:not([class*='size-'])]:size-4",
       },
     },
     defaultVariants: {
@@ -52,10 +52,10 @@ const numberFieldInputVariants = cva(
   {
     variants: {
       size: {
-        sm: "px-1.5 py-0.5",
+        sm: "px-2 py-0.5",
         default:
-          "px-2 py-0.5",
-        lg: "px-2.5 py-1",
+          "px-2.5 py-1",
+        lg: "px-2.5 py-1.5",
       },
     },
     defaultVariants: {
@@ -132,7 +132,7 @@ function NumberFieldDecrement({
     <NumberFieldPrimitive.Decrement
       className={cn(
         numberFieldButtonVariants({ size }),
-        "rounded-s-md border-e-0",
+        "rounded-s-lg border-e-0",
         className
       )}
       data-slot="number-field-decrement"
@@ -167,7 +167,7 @@ function NumberFieldIncrement({
     <NumberFieldPrimitive.Increment
       className={cn(
         numberFieldButtonVariants({ size }),
-        "rounded-e-md border-s-0",
+        "rounded-e-lg border-s-0",
         className
       )}
       data-slot="number-field-increment"

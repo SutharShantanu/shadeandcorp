@@ -151,7 +151,7 @@ function DataGridPagination(props: DataGridPaginationProps): React.JSX.Element {
           mergedProps?.sizesSkeleton
         ) : (
           <>
-            <div className="text-muted-foreground text-xs/relaxed">
+            <div className="text-muted-foreground text-sm">
               {mergedProps.rowsPerPageLabel}
             </div>
             <Select
@@ -180,7 +180,7 @@ function DataGridPagination(props: DataGridPaginationProps): React.JSX.Element {
           mergedProps?.infoSkeleton
         ) : (
           <>
-            <div className="text-muted-foreground text-xs/relaxed order-2 text-nowrap sm:order-1">
+            <div className="text-muted-foreground text-sm order-2 text-nowrap sm:order-1">
               {paginationInfo}
             </div>
             {pageCount > 1 && (
