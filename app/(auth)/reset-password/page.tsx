@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
-import { PasswordStrength } from "@/components/auth/PasswordStrength";
+import { PasswordInput } from "@/components/ui/password-input";
 import NavigateHomeButton from "@/components/NavigateHomeButton";
 
 const resetSchema = z
@@ -35,8 +35,6 @@ function ResetPasswordContent() {
     const router = useRouter();
     const [password, setPassword] = useState("");
     const [confirm, setConfirm] = useState("");
-    const [showPwd, setShowPwd] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [done, setDone] = useState(false);
 
@@ -125,40 +123,26 @@ function ResetPasswordContent() {
                             <form onSubmit={handleSubmit} className="space-y-5" aria-label="Reset password form">
                                 <div className="space-y-2">
                                     <label htmlFor="password" className="text-sm font-medium">New Password</label>
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            id="password"
-                                            type={showPwd ? "text" : "password"}
-                                            autoComplete="new-password"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            placeholder="••••••••"
-                                            required
-                                            className="flex-1"
-                                        />
-                                        <Button type="button" variant="ghost" size="icon" onClick={() => setShowPwd(v => !v)}>
-                                            {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                        </Button>
-                                    </div>
-                                    <PasswordStrength password={password} />
+                                    <PasswordInput
+                                        id="password"
+                                        autoComplete="new-password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="••••••••"
+                                        required
+                                        showStrengthIndicator={true}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <label htmlFor="confirm" className="text-sm font-medium">Confirm Password</label>
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            id="confirm"
-                                            type={showConfirm ? "text" : "password"}
-                                            autoComplete="new-password"
-                                            value={confirm}
-                                            onChange={(e) => setConfirm(e.target.value)}
-                                            placeholder="Repeat password"
-                                            required
-                                            className="flex-1"
-                                        />
-                                        <Button type="button" variant="ghost" size="icon" onClick={() => setShowConfirm(v => !v)}>
-                                            {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                                        </Button>
-                                    </div>
+                                    <PasswordInput
+                                        id="confirm"
+                                        autoComplete="new-password"
+                                        value={confirm}
+                                        onChange={(e) => setConfirm(e.target.value)}
+                                        placeholder="Repeat password"
+                                        required
+                                    />
                                 </div>
                                 <Button
                                     type="submit"

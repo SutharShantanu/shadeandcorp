@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
+import { ButtonGroup } from "./ui/button-group";
 import { BrandIcon } from "./BrandIcon";
 import { Spinner } from "./ui/spinner";
 
@@ -34,7 +35,7 @@ const SocialLoginButtons = () => {
   };
 
   return (
-    <div className="flex items-center gap-3">
+    <ButtonGroup className="w-full">
       <Button
         type="button"
         variant="outline"
@@ -76,7 +77,7 @@ const SocialLoginButtons = () => {
         )}
         <span>Continue with GitHub</span>
       </Button>
-    </div>
+    </ButtonGroup>
   );
 };
 export default SocialLoginButtons;

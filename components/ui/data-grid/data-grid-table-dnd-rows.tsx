@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   createContext,
@@ -10,8 +10,8 @@ import {
   useMemo,
   useRef,
   useState,
-} from "react"
-import { useDataGrid } from "@/components/reui/data-grid/data-grid"
+} from "react";
+import { useDataGrid } from "@/components/ui/data-grid/data-grid";
 import {
   DataGridTableBase,
   DataGridTableBody,
@@ -27,7 +27,7 @@ import {
   DataGridTableHeadRowCellResize,
   DataGridTableRowSpacer,
   DataGridTableViewport,
-} from "@/components/reui/data-grid/data-grid-table"
+} from "@/components/ui/data-grid/data-grid-table";
 import {
   closestCenter,
   DndContext,
@@ -39,29 +39,29 @@ import {
   useSensors,
   type DragEndEvent,
   type Modifier,
-} from "@dnd-kit/core"
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
-import { Cell, flexRender, HeaderGroup, Row } from "@tanstack/react-table"
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Cell, flexRender, HeaderGroup, Row } from "@tanstack/react-table";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { GripHorizontalIcon } from "lucide-react"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { GripHorizontalIcon } from "lucide-react";
 
 // Context to share sortable listeners from row to handle
-type SortableContextValue = ReturnType<typeof useSortable>
+type SortableContextValue = ReturnType<typeof useSortable>;
 const SortableRowContext = createContext<Pick<
   SortableContextValue,
   "attributes" | "listeners"
-> | null>(null)
+> | null>(null);
 
 function DataGridTableDndRowHandle({ className }: { className?: string }) {
-  const context = useContext(SortableRowContext)
+  const context = useContext(SortableRowContext);
 
   if (!context) {
     // Fallback if context is not available (shouldn't happen in normal usage)
@@ -71,14 +71,13 @@ function DataGridTableDndRowHandle({ className }: { className?: string }) {
         size="icon-sm"
         className={cn(
           "size-7 cursor-grab opacity-70 hover:bg-transparent hover:opacity-100 active:cursor-grabbing",
-          className
+          className,
         )}
         disabled
       >
-        <GripHorizontalIcon
-        />
+        <GripHorizontalIcon />
       </Button>
-    )
+    );
   }
 
   return (
@@ -87,15 +86,14 @@ function DataGridTableDndRowHandle({ className }: { className?: string }) {
       size="icon-sm"
       className={cn(
         "size-7 cursor-grab opacity-70 hover:bg-transparent hover:opacity-100 active:cursor-grabbing",
-        className
+        className,
       )}
       {...context.attributes}
       {...context.listeners}
     >
-      <GripHorizontalIcon
-      />
+      <GripHorizontalIcon />
     </Button>
-  )
+  );
 }
 
 function DataGridTableDndRow<TData>({ row }: { row: Row<TData> }) {
@@ -108,7 +106,7 @@ function DataGridTableDndRow<TData>({ row }: { row: Row<TData> }) {
     listeners,
   } = useSortable({
     id: row.id,
-  })
+  });
 
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -117,7 +115,7 @@ function DataGridTableDndRow<TData>({ row }: { row: Row<TData> }) {
     zIndex: isDragging ? 1 : 0,
     position: "relative",
     cursor: isDragging ? "grabbing" : undefined,
-  }
+  };
 
   return (
     <SortableRowContext.Provider value={{ attributes, listeners }}>
@@ -132,11 +130,11 @@ function DataGridTableDndRow<TData>({ row }: { row: Row<TData> }) {
             <DataGridTableBodyRowCell cell={cell} key={colIndex}>
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </DataGridTableBodyRowCell>
-          )
+          );
         })}
       </DataGridTableBodyRow>
     </SortableRowContext.Provider>
-  )
+  );
 }
 
 function DataGridTableDndRows<TData>({
@@ -144,36 +142,36 @@ function DataGridTableDndRows<TData>({
   dataIds,
   footerContent,
 }: {
-  handleDragEnd: (event: DragEndEvent) => void
-  dataIds: UniqueIdentifier[]
-  footerContent?: ReactNode
+  handleDragEnd: (event: DragEndEvent) => void;
+  dataIds: UniqueIdentifier[];
+  footerContent?: ReactNode;
 }) {
-  const { table, isLoading, props } = useDataGrid()
-  const pagination = table.getState().pagination
-  const tableContainerRef = useRef<HTMLDivElement>(null)
-  const [isDraggingRow, setIsDraggingRow] = useState(false)
+  const { table, isLoading, props } = useDataGrid();
+  const pagination = table.getState().pagination;
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const [isDraggingRow, setIsDraggingRow] = useState(false);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
     useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {})
-  )
+    useSensor(KeyboardSensor, {}),
+  );
 
   useEffect(() => {
-    if (!isDraggingRow) return
+    if (!isDraggingRow) return;
 
-    const { body, documentElement } = document
-    const previousBodyCursor = body.style.cursor
-    const previousDocumentCursor = documentElement.style.cursor
+    const { body, documentElement } = document;
+    const previousBodyCursor = body.style.cursor;
+    const previousDocumentCursor = documentElement.style.cursor;
 
-    body.style.cursor = "grabbing"
-    documentElement.style.cursor = "grabbing"
+    body.style.cursor = "grabbing";
+    documentElement.style.cursor = "grabbing";
 
     return () => {
-      body.style.cursor = previousBodyCursor
-      documentElement.style.cursor = previousDocumentCursor
-    }
-  }, [isDraggingRow])
+      body.style.cursor = previousBodyCursor;
+      documentElement.style.cursor = previousDocumentCursor;
+    };
+  }, [isDraggingRow]);
 
   const modifiers = useMemo(() => {
     const restrictToTableContainer: Modifier = ({
@@ -181,26 +179,26 @@ function DataGridTableDndRows<TData>({
       draggingNodeRect,
     }) => {
       if (!tableContainerRef.current || !draggingNodeRect) {
-        return transform
+        return transform;
       }
 
-      const containerRect = tableContainerRef.current.getBoundingClientRect()
-      const { x, y } = transform
+      const containerRect = tableContainerRef.current.getBoundingClientRect();
+      const { x, y } = transform;
 
-      const minX = containerRect.left - draggingNodeRect.left
-      const maxX = containerRect.right - draggingNodeRect.right
-      const minY = containerRect.top - draggingNodeRect.top
-      const maxY = containerRect.bottom - draggingNodeRect.bottom
+      const minX = containerRect.left - draggingNodeRect.left;
+      const maxX = containerRect.right - draggingNodeRect.right;
+      const minY = containerRect.top - draggingNodeRect.top;
+      const maxY = containerRect.bottom - draggingNodeRect.bottom;
 
       return {
         ...transform,
         x: Math.max(minX, Math.min(maxX, x)),
         y: Math.max(minY, Math.min(maxY, y)),
-      }
-    }
+      };
+    };
 
-    return [restrictToVerticalAxis, restrictToTableContainer]
-  }, [])
+    return [restrictToVerticalAxis, restrictToTableContainer];
+  }, []);
 
   return (
     <DndContext
@@ -209,8 +207,8 @@ function DataGridTableDndRows<TData>({
       modifiers={modifiers}
       onDragCancel={() => setIsDraggingRow(false)}
       onDragEnd={(event) => {
-        setIsDraggingRow(false)
-        handleDragEnd(event)
+        setIsDraggingRow(false);
+        handleDragEnd(event);
       }}
       onDragStart={() => setIsDraggingRow(true)}
       sensors={sensors}
@@ -231,7 +229,7 @@ function DataGridTableDndRows<TData>({
                 return (
                   <DataGridTableHeadRow headerGroup={headerGroup} key={index}>
                     {headerGroup.headers.map((header, index) => {
-                      const { column } = header
+                      const { column } = header;
 
                       return (
                         <DataGridTableHeadRowCell header={header} key={index}>
@@ -240,13 +238,13 @@ function DataGridTableDndRows<TData>({
                             <div className="truncate">
                               {flexRender(
                                 header.column.columnDef.header,
-                                header.getContext()
+                                header.getContext(),
                               )}
                             </div>
                           ) : (
                             flexRender(
                               header.column.columnDef.header,
-                              header.getContext()
+                              header.getContext(),
                             )
                           )}
                           {props.tableLayout?.columnsResizable &&
@@ -254,10 +252,10 @@ function DataGridTableDndRows<TData>({
                               <DataGridTableHeadRowCellResize header={header} />
                             )}
                         </DataGridTableHeadRowCell>
-                      )
+                      );
                     })}
                   </DataGridTableHeadRow>
-                )
+                );
               })}
           </DataGridTableHead>
 
@@ -279,7 +277,7 @@ function DataGridTableDndRows<TData>({
                       >
                         {column.columnDef.meta?.skeleton}
                       </DataGridTableBodyRowSkeletonCell>
-                    )
+                    );
                   })}
                 </DataGridTableBodyRowSkeleton>
               ))
@@ -289,7 +287,7 @@ function DataGridTableDndRows<TData>({
                 strategy={verticalListSortingStrategy}
               >
                 {table.getRowModel().rows.map((row: Row<TData>) => {
-                  return <DataGridTableDndRow row={row} key={row.id} />
+                  return <DataGridTableDndRow row={row} key={row.id} />;
                 })}
               </SortableContext>
             ) : (
@@ -303,7 +301,7 @@ function DataGridTableDndRows<TData>({
         </DataGridTableBase>
       </DataGridTableViewport>
     </DndContext>
-  )
+  );
 }
 
-export { DataGridTableDndRowHandle, DataGridTableDndRows }
+export { DataGridTableDndRowHandle, DataGridTableDndRows };

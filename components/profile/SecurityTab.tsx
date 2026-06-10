@@ -15,7 +15,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PasswordInput } from "@/components/ui/password-input";
-import { PasswordStrength } from "@/components/auth/PasswordStrength";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -722,11 +721,11 @@ export default function SecurityTab({ userProfile }: SecurityTabProps) {
                           id="new-password"
                           autoComplete="new-password"
                           placeholder="Create a strong password"
+                          showStrengthIndicator={true}
                           {...field}
                           value={field.value || ""}
                         />
                       </FormControl>
-                      <PasswordStrength password={field.value || ""} />
                       <FormMessage />
                     </FormItem>
                   )}

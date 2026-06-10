@@ -11,6 +11,7 @@ import { LoginFormValues } from "@/types/Login";
 const loginFormSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().optional().default(false),
 });
 
 // Create a new type since we removed phone from the schema
@@ -23,8 +24,8 @@ export function useLogin() {
 
   const form = useForm<EmailLoginFormValues>({
     resolver: zodResolver(loginFormSchema),
-    defaultValues: { email: "", password: "" },
-    mode: "all",
+    defaultValues: { email: "", password: "", rememberMe: false },
+    mode: "onChange",
   });
 
   async function onSubmit(data: EmailLoginFormValues) {
@@ -54,13 +55,28 @@ export function useLogin() {
         }
 
         form.setError("root", { type: "manual", message });
-        return;
+        return false;
       }
 
       if (result?.ok) {
+        if (data.rememberMe && window.PasswordCredential) {
+          try {
+            const cred = new PasswordCredential({
+              id: data.email,
+              password: data.password,
+              name: data.email,
+            });
+            await navigator.credentials.store(cred);
+          } catch (e) {
+            console.error("Failed to store credentials", e);
+          }
+        }
+
         router.push("/");
         router.refresh();
+        return true;
       }
+      return false;
     } catch (err: unknown) {
       let message = "An unexpected error occurred. Please try again.";
 
@@ -69,6 +85,7 @@ export function useLogin() {
       }
 
       form.setError("root", { type: "manual", message });
+      return false;
     } finally {
       setLoading(false);
     }

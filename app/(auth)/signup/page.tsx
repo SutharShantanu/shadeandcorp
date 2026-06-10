@@ -15,7 +15,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/input-group";
+import { UserIcon, MailIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { toast } from "sonner";
@@ -29,7 +30,7 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import SocialLoginButtons from "@/components/SocialLoginButton";
-import { PasswordStrength } from "@/components/auth/PasswordStrength";
+
 
 // Name Fields Component
 function NameFields({
@@ -47,14 +48,19 @@ function NameFields({
           <FormItem>
             <FormLabel>First Name *</FormLabel>
             <FormControl>
-              <Input
-                id="firstName"
-                type="text"
-                placeholder="John"
-                aria-label="First Name"
-                {...field}
-                value={field.value || ""}
-              />
+              <InputGroup>
+                <InputGroupAddon>
+                  <UserIcon className="h-4 w-4" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="firstName"
+                  type="text"
+                  placeholder="John"
+                  aria-label="First Name"
+                  {...field}
+                  value={field.value || ""}
+                />
+              </InputGroup>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -68,14 +74,19 @@ function NameFields({
           <FormItem>
             <FormLabel>Last Name (Optional)</FormLabel>
             <FormControl>
-              <Input
-                id="lastName"
-                type="text"
-                placeholder="Doe"
-                aria-label="Last Name"
-                {...field}
-                value={field.value || ""}
-              />
+              <InputGroup>
+                <InputGroupAddon>
+                  <UserIcon className="h-4 w-4" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="lastName"
+                  type="text"
+                  placeholder="Doe"
+                  aria-label="Last Name"
+                  {...field}
+                  value={field.value || ""}
+                />
+              </InputGroup>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -118,11 +129,20 @@ export default function Signup() {
     }
 
     setIsSubmitting(true);
-    try {
-      await onSubmit(form.getValues());
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast.promise(
+      new Promise((resolve, reject) => {
+        onSubmit(form.getValues()).then((success) => {
+          setIsSubmitting(false);
+          if (success) resolve("Successfully signed up");
+          else reject(new Error("Failed to sign up"));
+        });
+      }),
+      {
+        loading: "Creating account...",
+        success: "Successfully signed up!",
+        error: "Failed to create account. Please check your details.",
+      }
+    );
   };
 
   if (!isReady) return <Loading />;
@@ -182,14 +202,19 @@ export default function Signup() {
                         <FormItem>
                           <FormLabel>Email Address *</FormLabel>
                           <FormControl>
-                            <Input
-                              id="email"
-                              type="email"
-                              placeholder="you@example.com"
-                              aria-label="Email Address"
-                              {...field}
-                              value={field.value || ""}
-                            />
+                            <InputGroup>
+                              <InputGroupAddon>
+                                <MailIcon className="h-4 w-4" />
+                              </InputGroupAddon>
+                              <InputGroupInput
+                                id="email"
+                                type="email"
+                                placeholder="you@example.com"
+                                aria-label="Email Address"
+                                {...field}
+                                value={field.value || ""}
+                              />
+                            </InputGroup>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -207,12 +232,12 @@ export default function Signup() {
                               id="password"
                               aria-label="Password"
                               placeholder="Enter your password"
+                              showStrengthIndicator={!!field.value}
                               {...field}
                               value={field.value || ""}
                             />
                           </FormControl>
                           <FormMessage />
-                          {field.value && <PasswordStrength password={field.value as string} />}
                         </FormItem>
                       )}
                     />

@@ -15,11 +15,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/input-group";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 import { Spinner } from "@/components/ui/spinner";
 import { PasswordInput } from "@/components/ui/password-input";
+import { Checkbox } from "@/components/ui/checkbox";
 import Loading from "@/components/ui/loading";
 import {
   Field,
@@ -28,14 +30,13 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import Image from "next/image";
-import { CircleQuestionMark } from "lucide-react";
+import { CircleQuestionMark, MailIcon } from "lucide-react";
 import NavigateHomeButton from "@/components/NavigateHomeButton";
 import SocialLoginButtons from "@/components/SocialLoginButton";
 
 export default function Login() {
   const router = useRouter();
   const { form, loading, onSubmit } = useLogin();
-  const [showErrors, setShowErrors] = useState(false);
 
   const isReady = true;
   const session = null;
@@ -46,8 +47,19 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowErrors(true);
-    await onSubmit(form.getValues());
+    toast.promise(
+      new Promise((resolve, reject) => {
+        onSubmit(form.getValues()).then((success) => {
+          if (success) resolve("Successfully signed in");
+          else reject(new Error("Failed to sign in"));
+        });
+      }),
+      {
+        loading: "Signing in...",
+        success: "Successfully signed in!",
+        error: "Failed to sign in. Please check your credentials.",
+      }
+    );
   };
 
   if (!isReady) return <Loading />;
@@ -118,16 +130,22 @@ export default function Login() {
                           <FormItem>
                             <FormLabel>Email Address</FormLabel>
                             <FormControl>
-                              <Input
-                                id="email"
-                                type="email"
-                                placeholder="you@example.com"
-                                aria-label="Email Address"
-                                {...field}
-                                value={field.value || ""}
-                              />
+                              <InputGroup>
+                                <InputGroupAddon align="inline-start">
+                                  <MailIcon className="h-4 w-4 text-muted-foreground" />
+                                </InputGroupAddon>
+                                <InputGroupInput
+                                  id="email"
+                                  type="email"
+                                  placeholder="you@example.com"
+                                  aria-label="Email Address"
+                                  autoComplete="username"
+                                  {...field}
+                                  value={field.value || ""}
+                                />
+                              </InputGroup>
                             </FormControl>
-                            {showErrors && <FormMessage />}
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
@@ -143,19 +161,39 @@ export default function Login() {
                                 id="password"
                                 aria-label="Password"
                                 placeholder="Enter your password"
+                                autoComplete="current-password"
                                 {...field}
                                 value={field.value || ""}
                               />
                             </FormControl>
-                            {showErrors && <FormMessage />}
+                            <FormMessage />
                           </FormItem>
                         )}
                       />
 
-                      <div className="flex justify-end text-muted-foreground">
+                      <div className="flex items-center justify-between mt-2">
+                        <FormField
+                          control={form.control}
+                          name="rememberMe"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center space-x-1 space-y-0">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel className="text-sm font-normal text-muted-foreground cursor-pointer">
+                                  Remember me
+                                </FormLabel>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
                         <Link
                           href="/forgot-password"
-                          className="hover:underline underline-offset-2 text-sm flex items-center gap-1"
+                          className="hover:underline underline-offset-2 text-sm text-muted-foreground flex items-center gap-1"
                         >
                           Forgot Password
                           <CircleQuestionMark size={14} className="" />
