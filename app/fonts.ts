@@ -1,4 +1,4 @@
-import { Raleway, Nabla } from "next/font/google";
+import { Raleway, Nabla, Roboto_Mono } from "next/font/google";
 
 // Raleway for all body and headings
 export const raleway = Raleway({
@@ -10,4 +10,10 @@ export const raleway = Raleway({
 export const nabla = Nabla({
     subsets: ["latin"],
     variable: "--font-nabla",
+});
+
+// Roboto Mono for numbers and specific fields
+export const robotoMono = Roboto_Mono({
+    subsets: ["latin"],
+    variable: "--font-mono",
 });

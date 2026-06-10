@@ -92,7 +92,7 @@ function InputComponent({ className, ...props }: ComponentProps<typeof Input>) {
   return (
     <Input
       className={cn(
-        "rounded-s-none focus:z-1",
+        "rounded-s-none focus:z-1 font-mono",
         variant === "sm" &&
           "h-7",
         variant === "lg" &&

@@ -48,7 +48,7 @@ const numberFieldButtonVariants = cva(
 )
 
 const numberFieldInputVariants = cva(
-  "w-full min-w-0 flex-1 bg-transparent text-center tabular-nums outline-none",
+  "w-full min-w-0 flex-1 bg-transparent text-center tabular-nums outline-none font-mono",
   {
     variants: {
       size: {

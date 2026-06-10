@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./providers";
-import { raleway, nabla } from "./fonts";
+import { raleway, nabla, robotoMono } from "./fonts";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import { Instrument_Sans, Raleway } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -21,9 +21,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", instrumentSans.variable, ralewayHeading.variable)}>
+    <html lang="en" suppressHydrationWarning className={cn("font-sans", instrumentSans.variable, ralewayHeading.variable, robotoMono.variable)}>
       <body
-        className={`${raleway.variable} ${nabla.variable} antialiased font-body`}
+        className={`${raleway.variable} ${nabla.variable} ${robotoMono.variable} antialiased font-body`}
       >
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>

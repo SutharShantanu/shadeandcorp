@@ -154,6 +154,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <InputGroupInput
             id={inputId}
             ref={ref}
+            className="font-mono"
             placeholder="Your Password"
             type={isVisible ? "text" : "password"}
             value={value}
