@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { Github, Mail, Link2, CheckCircle2, XCircle } from "lucide-react";
-import Image from "next/image";
+import { BrandIcon } from "@/components/BrandIcon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
@@ -49,11 +49,10 @@ export default function ConnectedAccountsTab({ userProfile }: ConnectedAccountsT
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="flex items-center justify-center size-12 rounded-lg bg-white border">
-                  <Image
-                    src="https://cdn-icons-png.flaticon.com/64/281/281764.png"
-                    alt="Google"
-                    width={32}
-                    height={32}
+                  <BrandIcon
+                    name="google"
+                    width={24}
+                    height={24}
                   />
                 </div>
                 <div>
@@ -101,11 +100,10 @@ export default function ConnectedAccountsTab({ userProfile }: ConnectedAccountsT
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="flex items-center justify-center size-12 rounded-lg bg-white border">
-                  <Image
-                    src="https://cdn-icons-png.flaticon.com/64/2111/2111432.png"
-                    alt="GitHub"
-                    width={32}
-                    height={32}
+                  <BrandIcon
+                    name="github"
+                    width={24}
+                    height={24}
                   />
                 </div>
                 <div>

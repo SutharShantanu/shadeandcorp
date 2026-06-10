@@ -4,7 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "./ui/button";
-import Image from "next/image";
+import { BrandIcon } from "./BrandIcon";
 import { Spinner } from "./ui/spinner";
 
 const SocialLoginButtons = () => {
@@ -46,11 +46,10 @@ const SocialLoginButtons = () => {
         {loading === "google" ? (
           <Spinner className="h-4 w-4" />
         ) : (
-          <Image
-            src="https://cdn-icons-png.flaticon.com/64/281/281764.png"
-            alt="google-logo"
-            width={100}
-            height={100}
+          <BrandIcon
+            name="google"
+            width={20}
+            height={20}
             className="w-5 h-5"
           />
         )}
@@ -67,11 +66,11 @@ const SocialLoginButtons = () => {
         {loading === "github" ? (
           <Spinner className="h-4 w-4" />
         ) : (
-          <Image
-            src="https://cdn-icons-png.flaticon.com/64/2111/2111432.png"
-            alt="github-logo"
-            width={100}
-            height={100}
+          <BrandIcon
+            name="github"
+            variant="dark"
+            width={20}
+            height={20}
             className="w-5 h-5"
           />
         )}

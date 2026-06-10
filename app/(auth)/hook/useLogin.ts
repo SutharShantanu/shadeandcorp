@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,126 +8,31 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { LoginFormValues } from "@/types/Login";
 
-const loginFormSchema = z
-  .object({
-    email: z.string(),
-    phone: z.string(),
-    password: z.string(),
-  })
-  .superRefine((data, ctx) => {
-    const hasEmail = data.email.trim() !== "";
-    const hasPhone = data.phone.trim() !== "";
-    const hasPassword = data.password.trim() !== "";
+const loginFormSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
+});
 
-    // Require exactly one login method
-    if (!hasEmail) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Email is required",
-        path: ["email"],
-      });
-      if (!hasPassword) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Password is required",
-          path: ["password"],
-        });
-      }
-    }
-    if (!hasPhone) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Phone number is required.",
-        path: ["phone"],
-      });
-    }
-
-    if (hasEmail && hasPhone) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Please use either email or phone number, not both",
-        path: ["phone"],
-      });
-      return;
-    }
-
-    // Email flow
-    if (hasEmail) {
-      const emailCheck = z.string().email().safeParse(data.email);
-      if (!emailCheck.success) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Please enter a valid email address",
-          path: ["email"],
-        });
-      }
-
-      if (!hasPassword) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Password is required",
-          path: ["password"],
-        });
-      }
-    }
-
-    // Phone flow - OTP based, no password required
-    if (hasPhone) {
-      const digits = data.phone.replace(/\D/g, "");
-      if (digits.length < 10) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Phone number must be at least 10 digits",
-          path: ["phone"],
-        });
-      }
-      // Password not required for phone login (uses OTP instead)
-    }
-  });
-
-export type LoginForm = UseFormReturn<LoginFormValues>;
+// Create a new type since we removed phone from the schema
+export type EmailLoginFormValues = z.infer<typeof loginFormSchema>;
+export type LoginForm = UseFormReturn<EmailLoginFormValues>;
 
 export function useLogin() {
   const router = useRouter();
-  const [loginMethod, setLoginMethod] = useState<"email" | "phone">("email");
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<LoginFormValues>({
+  const form = useForm<EmailLoginFormValues>({
     resolver: zodResolver(loginFormSchema),
-    defaultValues: { email: "", phone: "", password: "" },
+    defaultValues: { email: "", password: "" },
     mode: "all",
   });
 
-  const updateLoginMethod = useCallback(
-    (method: "email" | "phone") => {
-      setLoginMethod(method);
-      form.clearErrors();
-
-      if (method === "email") {
-        form.setValue("phone", "");
-      } else if (method === "phone") {
-        form.setValue("email", "");
-        form.setValue("password", "");
-      }
-    },
-    [form]
-  );
-
-  async function onSubmit(data: LoginFormValues) {
+  async function onSubmit(data: EmailLoginFormValues) {
     setLoading(true);
 
     try {
-      const hasEmail = data.email.trim() !== "";
-      const hasPhone = data.phone.trim() !== "";
-
-      const actualMethod = hasEmail
-        ? "email"
-        : hasPhone
-        ? "phone"
-        : loginMethod;
-
       const result = await signIn("credentials", {
-        emailOrPhone: actualMethod === "email" ? data.email : data.phone,
+        emailOrPhone: data.email, // The backend still expects emailOrPhone
         password: data.password,
         redirect: false,
       });
@@ -169,7 +74,7 @@ export function useLogin() {
     }
   }
 
-  return { form, loading, onSubmit, loginMethod, updateLoginMethod };
+  return { form, loading, onSubmit };
 }
 
 export default useLogin;

@@ -2,44 +2,19 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { X } from "lucide-react"
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current transition-all ease-in-out",
+  "group/alert relative grid w-full gap-0.5 rounded-2xl border px-4 py-3 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-18 has-[>svg]:grid-cols-[auto_1fr] has-[>svg]:gap-x-2.5 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg]:text-current *:[svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default: "bg-card text-card-foreground",
         destructive:
-          "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
-        outline:
-          "bg-background text-foreground border-input dark:bg-input/30",
-        secondary:
-          "bg-secondary text-secondary-foreground border-none",
-        // hover:bg-secondary/80
-        ghost:
-          "bg-transparent border-none",
-        // hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50
-        link:
-          "text-primary underline-offset-4",
-        // hover:underline
-      },
-      color: {
-        default: "",
-        success:
-          "bg-green-500/10 text-green-700 border-green-500/20 dark:bg-green-500/20 dark:text-green-400 dark:border-green-500/30 [&>svg]:text-green-600 dark:[&>svg]:text-green-400",
-        info:
-          "bg-blue-500/10 text-blue-700 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30 [&>svg]:text-blue-600 dark:[&>svg]:text-blue-400",
-        warning:
-          "bg-amber-500/10 text-amber-700 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30 [&>svg]:text-amber-600 dark:[&>svg]:text-amber-400",
-        danger:
-          "bg-red-500/10 text-red-700 border-red-500/20 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30 [&>svg]:text-red-600 dark:[&>svg]:text-red-400",
+          "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
       },
     },
     defaultVariants: {
       variant: "default",
-      color: "default",
     },
   }
 )
@@ -47,14 +22,13 @@ const alertVariants = cva(
 function Alert({
   className,
   variant,
-  color,
   ...props
 }: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
   return (
     <div
       data-slot="alert"
       role="alert"
-      className={cn(alertVariants({ variant, color }), className)}
+      className={cn(alertVariants({ variant }), className)}
       {...props}
     />
   )
@@ -65,7 +39,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="alert-title"
       className={cn(
-        "col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight",
+        "font-medium group-has-[>svg]/alert:col-start-2 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground",
         className
       )}
       {...props}
@@ -81,7 +55,7 @@ function AlertDescription({
     <div
       data-slot="alert-description"
       className={cn(
-        "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
+        "text-sm text-balance text-muted-foreground md:text-pretty [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-foreground [&_p:not(:last-child)]:mb-4",
         className
       )}
       {...props}
@@ -89,28 +63,14 @@ function AlertDescription({
   )
 }
 
-function AlertClose({
-  className,
-  onClick,
-  ...props
-}: React.ComponentProps<typeof Button>) {
+function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <Button
-      type="button"
-      size="icon"
-      variant="ghost"
-      onClick={onClick}
-      data-slot="alert-close"
-      className={cn(
-        "absolute right-3 top-3 h-8 w-8",
-        "text-muted-foreground hover:text-foreground",
-        className
-      )}
+    <div
+      data-slot="alert-action"
+      className={cn("absolute top-2.5 right-3", className)}
       {...props}
-    >
-      <X className="h-4 w-4" />
-    </Button>
+    />
   )
 }
 
-export { Alert, AlertTitle, AlertDescription, AlertClose }
+export { Alert, AlertTitle, AlertDescription, AlertAction }
