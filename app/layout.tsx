@@ -24,7 +24,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={cn(
-            , "font-sans", instrumentSans.variable, ralewayHeading.variable)}
+            "font-sans", instrumentSans.variable, ralewayHeading.variable)}
     >
       <body
         className="antialiased font-body"

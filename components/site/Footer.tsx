@@ -92,7 +92,7 @@ function FooterLink({ href, children }: { href: string; children: ReactNode }) {
       className="group/link-button inline-flex items-center text-sm text-muted-foreground hover:text-foreground motion-safe:transition-colors"
     >
       {children}
-      <ArrowUpRightIcon aria-hidden="true" className="ml-1 h-3 w-3 motion-safe:transition-transform group-hover/link-button:rotate-45" />
+      <ArrowUpRightIcon aria-hidden="true" className="ml-1 size-3 motion-safe:transition-transform group-hover/link-button:rotate-45" />
     </Link>
   )
 }
@@ -200,7 +200,7 @@ export function Footer({
               <div className="flex items-center gap-4">
                 <Link href="#" className="hover:opacity-80 transition-opacity">
                   <Image 
-                    src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_ENs.svg" 
+                    src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" 
                     alt="Get it on Google Play" 
                     width={135} 
                     height={40} 
