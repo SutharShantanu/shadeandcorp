@@ -2,6 +2,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
+import NavigateHomeButton from "@/components/NavigateHomeButton";
 import { useState } from "react";
 import { type Control, type FieldValues, type UseFormReturn } from "react-hook-form";
 import { SignupForm, useSignup } from "@/app/(auth)/hook/useSignup";
@@ -152,134 +154,184 @@ export default function Signup() {
 
   return (
     <motion.div
-      className="flex min-h-svh flex-col items-center justify-center"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5 }}
+      className="flex flex-col flex-1 items-center justify-center p-4 sm:p-8 bg-transparent"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
     >
       <motion.div
-        className="flex w-full max-w-lg flex-col gap-y-6"
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
+        className="flex w-full max-w-5xl flex-col md:flex-row relative"
+        initial={{ y: 30, opacity: 0, filter: "blur(10px)" }}
+        animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        <Card className="w-full max-w-lg p-8 gap-0">
-          <CardHeader>
-            <motion.div
-              className="text-center my-4 w-full flex flex-col items-center "
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+        <div className="absolute -inset-1 bg-gradient-to-l from-primary/30 via-primary/10 to-primary/30 rounded-[2.5rem] blur-xl opacity-50 pointer-events-none" />
+        <Card className="w-full flex flex-col md:flex-row overflow-hidden border-border/50 bg-background/60 backdrop-blur-2xl shadow-2xl rounded-3xl p-0 relative z-10">
+          
+          {/* Form Side */}
+          <div className="w-full flex flex-col md:w-7/12 py-10 px-6 sm:px-12 gap-y-6">
+            <CardHeader className="p-0">
+              <motion.div
+                className="w-full flex flex-col"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <CardTitle className="text-3xl font-bold tracking-tight mb-2">
+                  Create an account
+                </CardTitle>
+                <p className="text-muted-foreground text-sm">
+                  Join us today and get started
+                </p>
+              </motion.div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Form {...(form as unknown as UseFormReturn<FieldValues>)}>
+                <form
+                  onSubmit={handleEmailSubmit}
+                  className="space-y-5"
+                  aria-label="Signup form"
+                >
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <FieldGroup>
+                      <Field>
+                        <SocialLoginButtons />
+                        <FieldSeparator className="my-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                          Or continue with email
+                        </FieldSeparator>
+
+                        <NameFields form={form} />
+
+                        <FormField
+                          control={control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-medium">Email Address *</FormLabel>
+                              <FormControl>
+                                <InputGroup className="transition-shadow focus-within:ring-2 focus-within:ring-primary/20">
+                                  <InputGroupAddon align="inline-start">
+                                    <MailIcon className="h-4 w-4 text-muted-foreground" />
+                                  </InputGroupAddon>
+                                  <InputGroupInput
+                                    id="email"
+                                    type="email"
+                                    placeholder="you@example.com"
+                                    aria-label="Email Address"
+                                    {...field}
+                                    value={field.value || ""}
+                                  />
+                                </InputGroup>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm font-medium">Password *</FormLabel>
+                              <FormControl>
+                                <div className="transition-shadow focus-within:ring-2 focus-within:ring-primary/20 rounded-md">
+                                  <PasswordInput
+                                    id="password"
+                                    aria-label="Password"
+                                    placeholder="Create a strong password"
+                                    showStrengthIndicator={!!field.value}
+                                    {...field}
+                                    value={field.value || ""}
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="pt-2">
+                          <Button
+                            type="submit"
+                            disabled={loading || isSubmitting || !isEmailFormValid}
+                            aria-busy={loading || isSubmitting}
+                            className="w-full h-11 transition-all active:scale-[0.98]"
+                          >
+                            {loading || isSubmitting ? (
+                              <motion.div className="flex items-center gap-2">
+                                <Spinner className="h-4 w-4" />
+                                <span>Creating account...</span>
+                              </motion.div>
+                            ) : (
+                              "Create Account"
+                            )}
+                          </Button>
+                        </div>
+                      </Field>
+                    </FieldGroup>
+                  </motion.div>
+                </form>
+              </Form>
+
+              <motion.div 
+                className="text-center flex items-center justify-center gap-1 mx-auto w-fit mt-6 text-sm text-muted-foreground"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                Already have an account?
+                <Link
+                  href="/login"
+                  className="text-foreground hover:text-primary transition-colors hover:underline underline-offset-4 font-semibold ml-1"
+                >
+                  Sign In
+                </Link>
+              </motion.div>
+            </CardContent>
+
+            <motion.div 
+              className="mt-auto pt-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
             >
-              <CardTitle className="text-2xl font-semibold">
-                Create an account
-              </CardTitle>
-              <p className="text-muted-foreground text-sm">
-                Sign up to get started
-              </p>
+              <FieldDescription className="text-center text-xs text-muted-foreground">
+                By clicking continue, you agree to our{" "}
+                <Link href="#" className="hover:text-foreground transition-colors hover:underline underline-offset-4 font-medium">Terms of Service</Link> and{" "}
+                <Link href="#" className="hover:text-foreground transition-colors hover:underline underline-offset-4 font-medium">Privacy Policy</Link>.
+              </FieldDescription>
             </motion.div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Form {...(form as unknown as UseFormReturn<FieldValues>)}>
-              <form
-                onSubmit={handleEmailSubmit}
-                className="space-y-4"
-                aria-label="Signup form"
+          </div>
+
+          {/* Image Side */}
+          <div className="relative w-full md:w-5/12 h-48 md:h-auto overflow-hidden group">
+            <NavigateHomeButton />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
+            <Image
+              src="https://picsum.photos/800/1200?blur=4"
+              alt="Join us"
+              width={800}
+              height={1200}
+              className="object-cover w-full h-full transform transition-transform duration-1000 group-hover:scale-105"
+              priority
+            />
+            <div className="absolute bottom-8 left-8 right-8 z-20 text-balance hidden md:block">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.6 }}
               >
-                <FieldGroup>
-                  <Field>
-                    <SocialLoginButtons />
-                    <FieldSeparator className="my-3">
-                      Or continue with email
-                    </FieldSeparator>
-
-                    <NameFields form={form} />
-
-                    <FormField
-                      control={control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email Address *</FormLabel>
-                          <FormControl>
-                            <InputGroup>
-                              <InputGroupAddon>
-                                <MailIcon className="h-4 w-4" />
-                              </InputGroupAddon>
-                              <InputGroupInput
-                                id="email"
-                                type="email"
-                                placeholder="you@example.com"
-                                aria-label="Email Address"
-                                {...field}
-                                value={field.value || ""}
-                              />
-                            </InputGroup>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password *</FormLabel>
-                          <FormControl>
-                            <PasswordInput
-                              id="password"
-                              aria-label="Password"
-                              placeholder="Enter your password"
-                              showStrengthIndicator={!!field.value}
-                              {...field}
-                              value={field.value || ""}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="space-y-3 mt-4">
-                      <Button
-                        type="submit"
-                        disabled={loading || isSubmitting || !isEmailFormValid}
-                        aria-busy={loading || isSubmitting}
-                        className="w-full"
-                      >
-                        {loading || isSubmitting ? (
-                          <motion.div className="flex items-center gap-1">
-                            <Spinner className="h-4 w-4" />
-                            <span>Creating account...</span>
-                          </motion.div>
-                        ) : (
-                          "Sign up"
-                        )}
-                      </Button>
-                    </div>
-                  </Field>
-                </FieldGroup>
-              </form>
-            </Form>
-
-            <div className="text-center flex items-center justify-center gap-1 mx-auto w-fit mt-4 text-sm">
-              Already have an account?
-              <Link
-                href="/login"
-                className="hover:underline underline-offset-2 text-sm font-medium"
-              >
-                Sign In
-              </Link>
+                <h2 className="text-2xl font-bold text-white drop-shadow-md mb-2">Join the Community</h2>
+                <p className="text-white/80 text-sm drop-shadow">Unlock exclusive features and start your journey with us.</p>
+              </motion.div>
             </div>
-          </CardContent>
+          </div>
         </Card>
-        <FieldDescription className="px-6 text-center">
-          By clicking continue, you agree to our{" "}
-          <Link href="#" className="hover:underline underline-offset-2 font-medium">Terms of Service</Link> and{" "}
-          <Link href="#" className="hover:underline underline-offset-2 font-medium">Privacy Policy</Link>.
-        </FieldDescription>
       </motion.div>
     </motion.div>
   );

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import authOptions from "@/lib/auth";
-import connectDB from "@/lib/mongoDB";
+import connectDB from "@/lib/infrastructure/mongoDB";
 import User from "@/models/User";
 import { AddressTypeEnum } from "@/models/User";
 

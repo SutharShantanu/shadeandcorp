@@ -16,7 +16,7 @@ import { Phone, CheckCircle2 } from "lucide-react";
 import { Spinner } from "../ui/spinner";
 import { useSession } from "next-auth/react";
 import { IconBadge } from "../ui/icon-badge";
-import { setupRecaptcha } from "@/lib/firebaseClient";
+import { setupRecaptcha } from "@/lib/infrastructure/firebaseClient";
 
 interface VerifyPhoneModalProps {
     open: boolean;

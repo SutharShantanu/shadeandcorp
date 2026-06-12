@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { setupRecaptcha } from "@/lib/firebaseClient";
+import { setupRecaptcha } from "@/lib/infrastructure/firebaseClient";
 import VerifyPhoneModal from "@/components/modal/VerifyPhoneModal";
 import { cn } from "@/lib/utils";
 import {
@@ -292,7 +292,6 @@ export default function AccountTab({
                           captionLayout="dropdown"
                           startMonth={new Date(1900, 0)}
                           endMonth={new Date()}
-                          initialFocus
                         />
                       </PopoverContent>
                     </Popover>

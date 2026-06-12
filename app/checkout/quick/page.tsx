@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Fragment, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { loadRazorpay } from "@/lib/razorpay";
+import { loadRazorpay } from "@/lib/infrastructure/razorpay";
 import {
   CreditCard,
   ArrowLeft,

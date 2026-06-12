@@ -326,7 +326,7 @@ function ProfileContent() {
         <Card>
           <CardHeader>
             {missingInfo.length > 0 && !alertDismissed && (
-              <Alert variant="secondary" color="warning">
+              <Alert variant="warning">
                 <Info className="h-4 w-4" />
 
                 <AlertDescription className="flex items-start gap-4">
@@ -472,10 +472,6 @@ function ProfileContent() {
             placeholder="Search settings..."
             value={searchQuery}
             onValueChange={setSearchQuery}
-            onClose={() => {
-              setSearchOpen(false);
-              setSearchQuery("");
-            }}
           />
           <CommandList className="max-h-[90svh]">
             <CommandEmpty>

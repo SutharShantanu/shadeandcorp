@@ -57,9 +57,6 @@ export interface ISession {
 // Interface for Payment Method
 export interface IPaymentMethod {
   type: "credit-card" | "debit-card" | "upi" | "net-banking";
-  cardNumber?: string;
-  expiryDate?: string;
-  cvc?: string;
   cardHolderName: string;
   upiId?: string;
   accountNumber?: string;
@@ -146,9 +143,6 @@ const UserSchema: Schema<IUser> = new Schema({
   }],
   paymentMethods: [{
     type: { type: String, enum: ["credit-card", "debit-card", "upi", "net-banking"], required: true },
-    cardNumber: { type: String },
-    expiryDate: { type: String },
-    cvc: { type: String },
     cardHolderName: { type: String, required: true },
     upiId: { type: String },
     accountNumber: { type: String },
@@ -193,15 +187,7 @@ UserSchema.pre<IUser>('save', function () {
 
     this.paymentMethods.forEach((method: IPaymentMethod, index: number) => {
       if (method.type === 'credit-card' || method.type === 'debit-card') {
-        if (!method.cardNumber) {
-          errors[`paymentMethods.${index}.cardNumber`] = 'Card number is required for card payments';
-        }
-        if (!method.expiryDate) {
-          errors[`paymentMethods.${index}.expiryDate`] = 'Expiry date is required for card payments';
-        }
-        if (!method.cvc) {
-          errors[`paymentMethods.${index}.cvc`] = 'CVC is required for card payments';
-        }
+        // Only integration tokens/IDs should be stored, handled by a payment provider.
       } else if (method.type === 'upi') {
         if (!method.upiId) {
           errors[`paymentMethods.${index}.upiId`] = 'UPI ID is required for UPI payments';

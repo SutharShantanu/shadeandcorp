@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="100%" height="100%">
+  <defs>
+    <linearGradient id="flowerGradient" gradientUnits="userSpaceOnUse" x1="-450" y1="200" x2="450" y2="-200">
+      <stop offset="0%" stop-color="#844DF7" />
+      <stop offset="50%" stop-color="#6FA3F5" />
+      <stop offset="100%" stop-color="#4FE4EC" />
+    </linearGradient>
+  </defs>
+  
+  <g fill="url(#flowerGradient)" transform="translate(500, 500)">
+    <path d="M 0 0 C -95 -160, -145 -390, 0 -460 C 145 -390, 95 -160, 0 0" />
+    <path d="M 0 0 C -95 -160, -145 -390, 0 -460 C 145 -390, 95 -160, 0 0" transform="rotate(60)" />
+    <path d="M 0 0 C -95 -160, -145 -390, 0 -460 C 145 -390, 95 -160, 0 0" transform="rotate(120)" />
+    <path d="M 0 0 C -95 -160, -145 -390, 0 -460 C 145 -390, 95 -160, 0 0" transform="rotate(180)" />
+    <path d="M 0 0 C -95 -160, -145 -390, 0 -460 C 145 -390, 95 -160, 0 0" transform="rotate(240)" />
+    <path d="M 0 0 C -95 -160, -145 -390, 0 -460 C 145 -390, 95 -160, 0 0" transform="rotate(300)" />
+  </g>
+</svg>

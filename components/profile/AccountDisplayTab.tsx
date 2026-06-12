@@ -28,7 +28,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { IconBadge } from "../ui/icon-badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { firebaseAuth, setupRecaptcha } from "@/lib/firebaseClient";
+import { firebaseAuth, setupRecaptcha } from "@/lib/infrastructure/firebaseClient";
 import { signInWithPhoneNumber } from "firebase/auth";
 import { Spinner } from "../ui/spinner";
 import { Card, CardContent, CardHeader } from "../ui/card";

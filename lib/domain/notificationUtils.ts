@@ -1,4 +1,4 @@
-import type { UserNotification } from "./next-auth.d";
+import type { UserNotification } from "../next-auth";
 
 interface UserData {
     isEmailVerified?: boolean;

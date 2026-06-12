@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import authOptions from "@/lib/auth";
-import connectDB from "@/lib/mongoDB";
+import connectDB from "@/lib/infrastructure/mongoDB";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
-import transporter from "@/lib/nodemailer";
+import transporter from "@/lib/infrastructure/nodemailer";
 
 // Helper function to send password change confirmation email
 async function sendPasswordChangeEmail(email: string, firstName: string): Promise<void> {

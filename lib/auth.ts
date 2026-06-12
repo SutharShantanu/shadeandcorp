@@ -4,11 +4,11 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import mongoose from "mongoose";
 import { type NextAuthOptions } from "next-auth";
 import { getDeviceInfo } from "@/lib/deviceUtils";
-import connectDB from "@/lib/mongoDB";
+import connectDB from "@/lib/infrastructure/mongoDB";
 import User, { IUser } from "@/models/User";
-import { createUser, updateUser } from "@/lib/db";
+import { createUser, updateUser } from "@/lib/infrastructure/db";
 import { otpStoreService } from "@/lib/otpStore";
-import { generateUserNotifications } from "@/lib/notificationUtils";
+import { generateUserNotifications } from "@/lib/domain/notificationUtils";
 
 interface GeoData {
   ip?: string;

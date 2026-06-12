@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { setEmailVerificationToken, setPasswordResetToken, setPhoneVerificationCode } from './db';
+import { setEmailVerificationToken, setPasswordResetToken, setPhoneVerificationCode } from './infrastructure/db';
 
 export function generateToken(): string {
   return randomBytes(32).toString('hex');

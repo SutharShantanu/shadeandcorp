@@ -19,7 +19,7 @@ export async function GET() {
 
   if (process.env.MONGODB_URI) {
     try {
-      const { default: connectDB } = await import("@/lib/mongoDB");
+      const { default: connectDB } = await import("@/lib/infrastructure/mongoDB");
       const conn = await connectDB();
       dbStatus = conn.connection.readyState === 1 ? "CONNECTED" : `STATE: ${conn.connection.readyState}`;
     } catch (err: any) {

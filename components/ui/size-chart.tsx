@@ -196,7 +196,7 @@ export function SizeChart({ category, brand }: SizeChartProps = {}) {
           <TabsContent value={region}>
             <div className="border rounded-md overflow-hidden">
               <Table>
-                <TableHeader sticky>
+                <TableHeader>
                   <TableRow>
                     <TableHead>Size</TableHead>
                     <TableHead>Chest ({unit})</TableHead>

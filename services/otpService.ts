@@ -1,4 +1,4 @@
-import { adminAuth } from "@/lib/firebaseAdmin";
+import { adminAuth } from "@/lib/infrastructure/firebaseAdmin";
 
 interface UserData {
   firstName?: string;

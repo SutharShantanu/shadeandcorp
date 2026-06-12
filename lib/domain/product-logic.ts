@@ -1,4 +1,4 @@
-import connectDB from "@/lib/mongoDB";
+import connectDB from "@/lib/infrastructure/mongoDB";
 import Product from "@/models/Product";
 import Variant from "@/models/Variant";
 import Asset from "@/models/Asset";

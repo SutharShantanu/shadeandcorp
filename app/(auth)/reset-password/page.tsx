@@ -76,7 +76,7 @@ function ResetPasswordContent() {
 
     return (
         <motion.div
-            className="flex flex-col min-h-svh items-center justify-center bg-linear-to-br from-background via-background to-muted/30 p-4"
+            className="flex flex-col flex-1 items-center justify-center p-4 bg-transparent"
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
         >
@@ -169,7 +169,7 @@ function ResetPasswordContent() {
 export default function ResetPasswordPage() {
     return (
         <Suspense fallback={
-            <div className="flex min-h-svh items-center justify-center">
+            <div className="flex flex-1 items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
         }>

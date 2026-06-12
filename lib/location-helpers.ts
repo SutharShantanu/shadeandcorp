@@ -17,7 +17,7 @@ export const filterCountries = (
     whitelist: string[],
     blacklist: string[]
 ): CountryRegion[] => {
-    let countriesListedFirst: CountryRegion[] = [];
+    const countriesListedFirst: CountryRegion[] = [];
     let filteredCountries = countries;
 
     if (whitelist.length > 0) {
@@ -58,7 +58,7 @@ export const filterRegions = (
     whitelist: string[],
     blacklist: string[]
 ) => {
-    let regionsListedFirst: Region[] = [];
+    const regionsListedFirst: Region[] = [];
     let filteredRegions = regions;
 
     if (whitelist.length > 0) {

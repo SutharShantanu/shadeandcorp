@@ -154,7 +154,7 @@ function EditProfileContent() {
               value={activeTab}
               onValueChange={handleTabChange}
               className="w-full"
-              layout="vertical"
+              orientation="vertical"
             >
               <TabsList className="relative z-10">
                 <TabsTrigger

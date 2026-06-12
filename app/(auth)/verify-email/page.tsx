@@ -61,7 +61,7 @@ function VerifyEmailContent() {
   }, [token]);
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
+    <div className="flex flex-1 w-full items-center justify-center p-4 bg-transparent">
       <Card className="w-full max-w-md shadow-lg border-muted/40">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/50">

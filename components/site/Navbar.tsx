@@ -40,7 +40,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import AvatarBadge from "@/components/site/AvatarBadge";
 import { useAppSelector } from "@/lib/store";
-import { getNotificationsByCategory } from "@/lib/notificationUtils";
+import { getNotificationsByCategory } from "@/lib/domain/notificationUtils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,6 +64,7 @@ import {
   InputGroupInput,
 } from "../ui/input-group";
 import { Dot } from "../ui/dot";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const categories = [
   {
@@ -376,6 +377,13 @@ export function SearchBar({ className }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 500);
+
+  useEffect(() => {
+    if (debouncedQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(debouncedQuery)}`);
+    }
+  }, [debouncedQuery, router]);
 
   const handleSearch = () => {
     if (query.trim()) {
@@ -428,6 +436,7 @@ export function SearchBar({ className }: SearchBarProps) {
     </div>
   );
 }
+
 interface ActionButtonsProps {
   wishlistCount?: number;
   cartCount?: number;
@@ -685,8 +694,8 @@ export default function Navbar({ className }: { className?: string }) {
         <div className="flex items-center gap-4">
           <MobileMenu categories={categories} />
 
-          <Link href="/" className="text-2xl font-bold font-body md:text-4xl">
-            Shade & Co
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/assets/shadeandcorp_log.svg" alt="Shade & Corp" width={100} height={100} className="h-8 md:h-10 w-auto" />
           </Link>
         </div>
 

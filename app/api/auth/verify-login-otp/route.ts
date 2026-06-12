@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/mongoDB";
+import connectDB from "@/lib/infrastructure/mongoDB";
 import User from "@/models/User";
 import { getDeviceInfo } from "@/lib/deviceUtils";
 import { otpStoreService } from "@/lib/otpStore";

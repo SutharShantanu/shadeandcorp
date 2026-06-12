@@ -1,5 +1,5 @@
 import User, { IUser } from '@/models/User';
-import connectDB from '@/lib/mongoDB';
+import connectDB from '@/lib/infrastructure/mongoDB';
 
 export async function getUserByEmail(email: string): Promise<IUser | null> {
   await connectDB();

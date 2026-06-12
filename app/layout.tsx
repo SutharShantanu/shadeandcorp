@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "./providers";
-import { raleway, nabla, robotoMono } from "./fonts";
 import LayoutWrapper from "@/components/LayoutWrapper";
-import { Instrument_Sans, Raleway } from "next/font/google";
 import { cn } from "@/lib/utils";
-
-const ralewayHeading = Raleway({subsets:['latin'],variable:'--font-heading'});
-
-const instrumentSans = Instrument_Sans({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,9 +15,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", instrumentSans.variable, ralewayHeading.variable, robotoMono.variable)}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(
+        "font-sans"
+      )}
+    >
       <body
-        className={`${raleway.variable} ${nabla.variable} ${robotoMono.variable} antialiased font-body`}
+        className="antialiased font-body"
+        suppressHydrationWarning
       >
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>

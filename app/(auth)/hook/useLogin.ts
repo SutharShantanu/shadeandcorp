@@ -11,7 +11,7 @@ import { LoginFormValues } from "@/types/Login";
 const loginFormSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
-  rememberMe: z.boolean().optional().default(false),
+  rememberMe: z.boolean(),
 });
 
 // Create a new type since we removed phone from the schema
@@ -59,9 +59,9 @@ export function useLogin() {
       }
 
       if (result?.ok) {
-        if (data.rememberMe && window.PasswordCredential) {
+        if (data.rememberMe && 'PasswordCredential' in window) {
           try {
-            const cred = new PasswordCredential({
+            const cred = new (window as any).PasswordCredential({
               id: data.email,
               password: data.password,
               name: data.email,

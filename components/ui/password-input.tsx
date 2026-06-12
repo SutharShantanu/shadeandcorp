@@ -103,7 +103,7 @@ function PasswordStrength({ password }: { password: string }) {
             >
               <Badge
                 variant={req.passed ? "success-light" : "outline"}
-                className={req.passed ? `justify-center` : `justify-center text-muted-foreground`}
+                className={req.passed ? "justify-center" : "justify-center text-muted-foreground"}
               >
                 {req.passed ? (
                   <CheckCircle2 className="h-3 w-3" />
@@ -154,7 +154,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <InputGroupInput
             id={inputId}
             ref={ref}
-            className="font-mono"
+            className={cn(currentPassword ? "font-mono" : "font-sans")}
             placeholder="Your Password"
             type={isVisible ? "text" : "password"}
             value={value}

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { registerSchema } from "@/types/auth"
-import { getUserByEmail, getUserByPhone, createUser } from "@/lib/db"
-import connectDB from "@/lib/mongoDB"
+import { getUserByEmail, getUserByPhone, createUser } from "@/lib/infrastructure/db"
+import connectDB from "@/lib/infrastructure/mongoDB"
 import { RoleEnum } from "@/models/User"
 import { parsePhoneNumber } from "libphonenumber-js";
 

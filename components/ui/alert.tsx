@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "class-variance-authority"
+import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -89,4 +90,20 @@ function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-export { Alert, AlertTitle, AlertDescription, AlertAction }
+function AlertClose({ className, ...props }: React.ComponentProps<"button">) {
+  return (
+    <button
+      data-slot="alert-close"
+      className={cn(
+        "absolute right-2 top-2 p-1 rounded-md opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+        className
+      )}
+      {...props}
+    >
+      <X className="h-4 w-4" />
+      <span className="sr-only">Close</span>
+    </button>
+  )
+}
+
+export { Alert, AlertTitle, AlertDescription, AlertAction, AlertClose }

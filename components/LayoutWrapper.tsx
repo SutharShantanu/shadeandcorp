@@ -2,7 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/site/Navbar";
-import Footer from "@/components/site/Footer";
+import { Footer } from "@/components/site/Footer";
+import { footerConfig } from "@/config/footer";
 
 // Auth pages that should not show Navbar and Footer
 const authPages = ["/login", "/signup", "/forgot-password", "/reset-password"];
@@ -23,7 +24,7 @@ export default function LayoutWrapper({
     <>
       <Navbar />
       <div className="min-h-[calc(100svh-64px)]">{children}</div>
-      <Footer />
+      <Footer {...footerConfig} />
     </>
   );
 }

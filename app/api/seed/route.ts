@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
-import connectDB from "@/lib/mongoDB";
+import connectDB from "@/lib/infrastructure/mongoDB";
 import Product from "@/models/Product";
 import Variant from "@/models/Variant";
 import Asset from "@/models/Asset";
-import { fetchUnsplashImages } from "@/lib/unsplash";
-import { uploadImageToBlob } from "@/lib/blob-upload";
+import { fetchUnsplashImages } from "@/lib/infrastructure/unsplash";
+import { uploadImageToBlob } from "@/lib/infrastructure/blob-upload";
 
 export async function GET() {
   try {

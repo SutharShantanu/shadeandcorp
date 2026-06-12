@@ -10,7 +10,7 @@ import { AlertCircle, Filter, Search, X, Home, List, Tag as TagIcon } from "luci
 import Link from "next/link";
 import { GlobalBreadcrumb, BreadcrumbItemProps } from "@/components/ui/global-breadcrumb";
 
-import { fetchProducts } from "@/lib/product-logic";
+import { fetchProducts } from "@/lib/domain/product-logic";
 
 // Fetch results helper (optional, can just call fetchProducts)
 async function getProductsFromLib(searchParams: any) {
