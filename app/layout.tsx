@@ -3,6 +3,11 @@ import "./globals.css";
 import Providers from "./providers";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import { cn } from "@/lib/utils";
+import { Instrument_Sans, Raleway } from "next/font/google";
+
+const ralewayHeading = Raleway({subsets:['latin'],variable:'--font-heading'});
+
+const instrumentSans = Instrument_Sans({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -19,8 +24,7 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={cn(
-        "font-sans"
-      )}
+            , "font-sans", instrumentSans.variable, ralewayHeading.variable)}
     >
       <body
         className="antialiased font-body"
