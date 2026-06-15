@@ -43,12 +43,12 @@ function PasswordStrength({ password }: { password: string }) {
           : "Strong";
   const barColor =
     passed <= 2
-      ? "bg-red-500"
+      ? "bg-destructive"
       : passed === 3
-        ? "bg-amber-500"
+        ? "bg-warning"
         : passed === 4
-          ? "bg-blue-500"
-          : "bg-green-600";
+          ? "bg-info"
+          : "bg-success";
 
   const requirements = [
     { key: "length", label: "8+ chars", passed: checks.length },
@@ -60,7 +60,7 @@ function PasswordStrength({ password }: { password: string }) {
 
   return (
     <motion.div
-      className="space-y-2 mt-2"
+      className="space-y-2 p-2"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -73,9 +73,7 @@ function PasswordStrength({ password }: { password: string }) {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
         >
-          <Badge variant="secondary">
-            {Math.round(percent)}%
-          </Badge>
+          <Badge variant="secondary">{Math.round(percent)}%</Badge>
         </motion.div>
       </div>
       <motion.div
@@ -103,7 +101,11 @@ function PasswordStrength({ password }: { password: string }) {
             >
               <Badge
                 variant={req.passed ? "success-light" : "outline"}
-                className={req.passed ? "justify-center" : "justify-center text-muted-foreground"}
+                className={
+                  req.passed
+                    ? "justify-center"
+                    : "justify-center text-muted-foreground"
+                }
               >
                 {req.passed ? (
                   <CheckCircle2 className="h-3 w-3" />
@@ -147,14 +149,14 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             {label}
           </Label>
         )}
-        <InputGroup className={className}>
+        <InputGroup className={cn("h-auto flex-wrap overflow-hidden", className)}>
           <InputGroupAddon align="inline-start">
             <Lock className="h-4 w-4 text-muted-foreground" />
           </InputGroupAddon>
           <InputGroupInput
             id={inputId}
             ref={ref}
-            className={cn(currentPassword ? "font-mono" : "font-sans")}
+            className={cn(currentPassword ? "font-mono" : "font-sans", "min-w-0")}
             placeholder="Your Password"
             type={isVisible ? "text" : "password"}
             value={value}
@@ -180,10 +182,13 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
               </span>
             </InputGroupButton>
           </InputGroupAddon>
+          
+          {showStrengthIndicator && (
+            <div className="w-full basis-full border-t border-input bg-input order-last">
+              <PasswordStrength password={currentPassword} />
+            </div>
+          )}
         </InputGroup>
-        {showStrengthIndicator && (
-          <PasswordStrength password={currentPassword} />
-        )}
       </div>
     );
   },

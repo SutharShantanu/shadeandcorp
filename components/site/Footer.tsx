@@ -14,13 +14,14 @@ import { Field, FieldError } from "@/components/ui/field"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "sonner"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group"
-import { CalendarDays, Heart, ArrowUpRightIcon, MailIcon, ArrowRightIcon } from "lucide-react"
+import { CalendarDays, Heart, ArrowUpRightIcon, MailIcon, ArrowRightIcon, Loader2 } from "lucide-react"
 
 const newsletterSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -163,11 +164,29 @@ export function Footer({
   const { register, handleSubmit, formState: { errors }, reset } = useForm<NewsletterFormValues>({
     resolver: zodResolver(newsletterSchema)
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onNewsletterSubmit = (data: NewsletterFormValues) => {
+  const onNewsletterSubmit = async (data: NewsletterFormValues) => {
     if (data.honeypot) return;
-    console.log("Newsletter subscription:", data.email);
-    reset();
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        toast.error(result.message || "Something went wrong.");
+      } else {
+        toast.success(result.message || "Successfully subscribed!");
+        reset();
+      }
+    } catch (e) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -263,8 +282,8 @@ export function Footer({
                         placeholder="Enter your email"
                         {...register("email")}
                       />
-                      <InputGroupButton type="submit" variant="default" size="icon-sm">
-                        <ArrowRightIcon />
+                      <InputGroupButton type="submit" variant="default" size="icon-sm" disabled={isSubmitting}>
+                        {isSubmitting ? <Loader2 className="animate-spin size-4" /> : <ArrowRightIcon />}
                       </InputGroupButton>
                     </InputGroup>
                     {errors.email && (

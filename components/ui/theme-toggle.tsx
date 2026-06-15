@@ -8,19 +8,20 @@ import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
   const { theme = "light", setTheme } = useTheme();
-  // const [mounted, setMounted] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false)
 
-  // React.useEffect(() => {
-  //   setMounted(true)
-  // }, [])
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
-  // if (!mounted) {
-  //   return (
-  //     <Button variant="outline" size="icon-sm">
-  //       <span className="sr-only">Toggle theme</span>
-  //     </Button>
-  //   );
-  // }
+  if (!mounted) {
+    return (
+      <Button variant="outline" size="icon-sm" className="relative">
+        <SunIcon className="size-4 opacity-0" />
+        <span className="sr-only">Toggle theme</span>
+      </Button>
+    );
+  }
 
   const toggleTheme = () => {
     if (theme === "light") {

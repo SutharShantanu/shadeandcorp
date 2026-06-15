@@ -238,9 +238,8 @@ export function AddressDialog({
                     name="address1"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-bold uppercase text-muted-foreground">
-                          Address Line 1 *
-                        </FormLabel>
+                        <FormLabel className="text-xs font-bold uppercase text-muted-foreground" required>
+                          Address Line 1</FormLabel>
                         <FormControl>
                           <div className="flex gap-2">
                             <Input
@@ -316,9 +315,8 @@ export function AddressDialog({
                       name="country"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-bold uppercase text-muted-foreground">
-                            Country *
-                          </FormLabel>
+                          <FormLabel className="text-xs font-bold uppercase text-muted-foreground" required>
+                            Country</FormLabel>
                           <FormControl>
                             <CountrySelect
                               value={field.value}
@@ -339,9 +337,8 @@ export function AddressDialog({
                       name="state"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-bold uppercase text-muted-foreground">
-                            State *
-                          </FormLabel>
+                          <FormLabel className="text-xs font-bold uppercase text-muted-foreground" required>
+                            State</FormLabel>
                           <FormControl>
                             <StateSelect
                               countryCode={form.watch("country") || ""}
@@ -365,9 +362,8 @@ export function AddressDialog({
                       name="city"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-bold uppercase text-muted-foreground">
-                            City *
-                          </FormLabel>
+                          <FormLabel className="text-xs font-bold uppercase text-muted-foreground" required>
+                            City</FormLabel>
                           <FormControl>
                             <CitySelect
                               countryCode={form.watch("country") || ""}
@@ -386,9 +382,8 @@ export function AddressDialog({
                       name="zipCode"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-xs font-bold uppercase text-muted-foreground">
-                            ZIP Code *
-                          </FormLabel>
+                          <FormLabel className="text-xs font-bold uppercase text-muted-foreground" required>
+                            ZIP Code</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Enter ZIP"

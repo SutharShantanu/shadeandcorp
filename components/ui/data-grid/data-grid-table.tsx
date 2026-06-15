@@ -162,7 +162,7 @@ function startDataGridColumnResizeOnEnd<TData>(
   const updateOffset = (clientXPos?: number, commit = false) => {
     if (typeof clientXPos !== "number") return;
 
-    const nextColumnSizing: Record<string, number> = {};
+    let nextColumnSizing: Record<string, number> = {};
     const deltaOffset = (clientXPos - dragStartClientX) * directionMultiplier;
     const deltaPercentage = Math.max(deltaOffset / startSize, -0.999999);
 

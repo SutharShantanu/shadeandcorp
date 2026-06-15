@@ -512,7 +512,7 @@ export default function BillingTab({
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payment Type *</FormLabel>
+                      <FormLabel required>Payment Type</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -562,7 +562,7 @@ export default function BillingTab({
                       name="cardHolderName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>UPI Name *</FormLabel>
+                          <FormLabel required>UPI Name</FormLabel>
                           <FormControl>
                             <Input placeholder="John Doe" {...field} />
                           </FormControl>
@@ -576,7 +576,7 @@ export default function BillingTab({
                       name="upiId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>UPI ID *</FormLabel>
+                          <FormLabel required>UPI ID</FormLabel>
                           <FormControl>
                             <UpiInput
                               value={field.value || ""}
@@ -599,7 +599,7 @@ export default function BillingTab({
                       name="cardHolderName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Account Holder Name *</FormLabel>
+                          <FormLabel required>Account Holder Name</FormLabel>
                           <FormControl>
                             <Input placeholder="John Doe" {...field} />
                           </FormControl>
@@ -613,7 +613,7 @@ export default function BillingTab({
                       name="accountNumber"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Account Number *</FormLabel>
+                          <FormLabel required>Account Number</FormLabel>
                           <FormControl>
                             <Input placeholder="Account number" {...field} />
                           </FormControl>
@@ -719,7 +719,7 @@ export default function BillingTab({
                   name="type"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Payment Type *</FormLabel>
+                      <FormLabel required>Payment Type</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -769,7 +769,7 @@ export default function BillingTab({
                       name="cardHolderName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>UPI Name *</FormLabel>
+                          <FormLabel required>UPI Name</FormLabel>
                           <FormControl>
                             <Input placeholder="John Doe" {...field} />
                           </FormControl>
@@ -782,7 +782,7 @@ export default function BillingTab({
                       name="upiId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>UPI ID *</FormLabel>
+                          <FormLabel required>UPI ID</FormLabel>
                           <FormControl>
                             <UpiInput
                               value={field.value || ""}
@@ -805,7 +805,7 @@ export default function BillingTab({
                       name="cardHolderName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Account Holder Name *</FormLabel>
+                          <FormLabel required>Account Holder Name</FormLabel>
                           <FormControl>
                             <Input placeholder="John Doe" {...field} />
                           </FormControl>
@@ -818,7 +818,7 @@ export default function BillingTab({
                       name="accountNumber"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Account Number *</FormLabel>
+                          <FormLabel required>Account Number</FormLabel>
                           <FormControl>
                             <Input placeholder="Account number" {...field} />
                           </FormControl>

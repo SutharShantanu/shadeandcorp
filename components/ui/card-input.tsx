@@ -83,7 +83,7 @@ export function CardInput<TFormValues extends FieldValues>({
                     name={fieldNames.cardHolderName}
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel htmlFor={`holder-${id}`}>Cardholder Name</FormLabel>
+                            <FormLabel htmlFor={`holder-${id}`} required>Cardholder Name</FormLabel>
                             <FormControl>
                                 <Input
                                     id={`holder-${id}`}
@@ -106,7 +106,7 @@ export function CardInput<TFormValues extends FieldValues>({
                     name={fieldNames.cardNumber}
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel htmlFor={`number-${id}`}>Card Number</FormLabel>
+                            <FormLabel htmlFor={`number-${id}`} required>Card Number</FormLabel>
                             <FormControl>
                                 <InputGroup>
                                     <InputGroupInput
@@ -147,7 +147,7 @@ export function CardInput<TFormValues extends FieldValues>({
                         name={fieldNames.expiryDate}
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel htmlFor={`expiry-${id}`}>Expiry Date</FormLabel>
+                                <FormLabel htmlFor={`expiry-${id}`} required>Expiry Date</FormLabel>
                                 <FormControl>
                                     <InputGroup>
                                         <InputGroupInput

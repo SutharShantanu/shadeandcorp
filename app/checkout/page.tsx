@@ -225,7 +225,7 @@ export default function CheckoutPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Address *</FormLabel>
+                    <FormLabel required>Email Address</FormLabel>
                     <FormControl>
                       <Input {...field} type="email" />
                     </FormControl>
@@ -239,7 +239,7 @@ export default function CheckoutPage() {
                 name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name *</FormLabel>
+                    <FormLabel required>First Name</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -306,7 +306,7 @@ export default function CheckoutPage() {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address *</FormLabel>
+                    <FormLabel required>Address</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Street address" />
                     </FormControl>
@@ -321,7 +321,7 @@ export default function CheckoutPage() {
                   name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City *</FormLabel>
+                      <FormLabel required>City</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -335,7 +335,7 @@ export default function CheckoutPage() {
                   name="state"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>State *</FormLabel>
+                      <FormLabel required>State</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -351,7 +351,7 @@ export default function CheckoutPage() {
                   name="zipCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Zip Code *</FormLabel>
+                      <FormLabel required>Zip Code</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -365,7 +365,7 @@ export default function CheckoutPage() {
                   name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Country *</FormLabel>
+                      <FormLabel required>Country</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -387,7 +387,7 @@ export default function CheckoutPage() {
                 name="cardNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Card Number *</FormLabel>
+                    <FormLabel required>Card Number</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -405,7 +405,7 @@ export default function CheckoutPage() {
                 name="cardName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cardholder Name *</FormLabel>
+                    <FormLabel required>Cardholder Name</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="John Doe" />
                     </FormControl>
@@ -420,7 +420,7 @@ export default function CheckoutPage() {
                   name="expiryDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Expiry Date *</FormLabel>
+                      <FormLabel required>Expiry Date</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="MM/YY" maxLength={5} />
                       </FormControl>
@@ -434,7 +434,7 @@ export default function CheckoutPage() {
                   name="cvv"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>CVV *</FormLabel>
+                      <FormLabel required>CVV</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="123" maxLength={4} />
                       </FormControl>

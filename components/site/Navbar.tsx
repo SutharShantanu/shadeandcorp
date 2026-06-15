@@ -260,41 +260,43 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <div
-                  className={`p-0 ${hasDetailedCategories ? "w-3xl lg:w-6xl" : "w-xl lg:w-3xl"}`}
+                  className={`p-1 bg-background/95 backdrop-blur-2xl border-none shadow-2xl rounded-2xl ${hasDetailedCategories ? "w-[900px]" : "w-[650px]"}`}
                 >
-                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-4 p-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 p-6">
                     {/* Left Side: Combined Categories */}
-                    <div className="flex flex-col gap-10">
+                    <div className="flex flex-col gap-8">
                       {/* Top Section: Quick Links */}
-                      <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-2xl font-bold tracking-tight">
-                            {category.title}
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between border-b border-border/40 pb-3">
+                          <h3 className="text-lg font-bold tracking-tight">
+                            {category.title} Featured
                           </h3>
                           <Button
-                            variant="secondary"
+                            variant="ghost"
                             size="sm"
                             onClick={() =>
                               router.push(
                                 `/products/${category.title.toLowerCase()}`,
                               )
                             }
-                            className="rounded-full px-4 font-semibold text-primary hover:bg-primary/5 transition-colors"
+                            className="text-xs font-semibold text-primary hover:bg-primary/10 rounded-full transition-colors"
                           >
                             View All <ChevronRight size="14" className="ml-1" />
                           </Button>
                         </div>
-                        <div className="grid grid-cols-3 gap-x-12 gap-y-3 w-fit pr-10">
-                          {category.items.map((item) => (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {category.items.slice(0, 9).map((item) => (
                             <Link
                               key={item.title}
                               href={item.href}
-                              className="group flex items-center gap-3 rounded-md py-1 transition-colors min-w-[130px]"
+                              className="group flex flex-col justify-center rounded-xl p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-all duration-300"
                             >
-                              <div className="h-1 w-1 rounded-full bg-muted-foreground/30 group-hover:bg-primary transition-colors" />
-                              <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                                {item.title}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <div className="h-1.5 w-1.5 rounded-full bg-primary/20 group-hover:bg-primary group-hover:scale-150 transition-all duration-300" />
+                                <span className="text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors">
+                                  {item.title}
+                               </span>
+                              </div>
                             </Link>
                           ))}
                         </div>
@@ -302,16 +304,16 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
 
                       {/* Bottom Section: Detailed Categories (Conditional) */}
                       {hasDetailedCategories && (
-                        <div className="space-y-6 pt-6 border-t border-border/40">
-                          <h3 className="text-xl font-bold tracking-tight">
+                        <div className="space-y-5 pt-5 border-t border-border/40">
+                          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                             Shop by Category
                           </h3>
-                          <div className="grid grid-cols-4 gap-8 w-fit">
+                          <div className="grid grid-cols-4 gap-6">
                             {detailedCategories[
                               category.title.toLowerCase() as keyof typeof detailedCategories
                             ]?.map((subcat) => (
-                              <div key={subcat.title} className="space-y-4 min-w-[140px]">
-                                <h5 className="text-[14px] font-bold text-foreground">
+                              <div key={subcat.title} className="space-y-3">
+                                <h5 className="text-sm font-bold text-foreground">
                                   {subcat.title}
                                 </h5>
                                 <ul className="space-y-2.5">
@@ -319,7 +321,7 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                                     <li key={item}>
                                       <Link
                                         href={`/products/${category.title.toLowerCase()}/${subcat.title.toLowerCase()}/${item.toLowerCase().replace(/ /g, "-")}`}
-                                        className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                                        className="block text-[13px] text-muted-foreground hover:text-primary hover:translate-x-1 transition-all duration-300"
                                       >
                                         {item}
                                       </Link>
@@ -334,27 +336,27 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                     </div>
 
                     {/* Right Side: Image Banner */}
-                    <div className="relative group h-full min-h-[500px] rounded-md overflow-hidden">
+                    <div className="relative group h-full min-h-[400px] rounded-2xl overflow-hidden shadow-lg border border-border/10">
                       <Image
                         width={400}
                         height={600}
                         src={category.image}
                         alt={category.title}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                        <h4 className="text-white font-bold text-3xl mb-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                          {category.title}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                        <h4 className="text-white font-bold text-2xl mb-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                          {category.title} Collection
                         </h4>
-                        <p className="text-white/80 text-sm mb-6 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-75">
-                          Explore our curated {category.title.toLowerCase()} collection.
+                        <p className="text-white/70 text-xs mb-5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-75">
+                          Explore the latest trends in our curated {category.title.toLowerCase()} collection.
                         </p>
                         <Link
                           href={`/products/${category.title.toLowerCase()}`}
-                          className="w-fit inline-flex h-10 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-black hover:bg-zinc-100 transition-all transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 duration-500 delay-150 shadow-lg"
+                          className="w-fit inline-flex h-9 items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-5 text-xs font-bold text-white hover:bg-white hover:text-black transition-all transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 duration-500 delay-150"
                         >
-                          Shop Collection
+                          Shop Now
                         </Link>
                       </div>
                     </div>

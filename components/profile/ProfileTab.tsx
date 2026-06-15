@@ -104,7 +104,7 @@ export default function ProfileTab({
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>First Name</FormLabel>
+                <FormLabel required>First Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="John"
@@ -141,7 +141,7 @@ export default function ProfileTab({
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel required>Email</FormLabel>
               <Select
                 value={field.value || userProfile?.email || ""}
                 onValueChange={field.onChange}

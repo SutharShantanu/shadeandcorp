@@ -189,7 +189,7 @@ export default function ContactPage() {
                                                 name="name"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Your name</FormLabel>
+                                                        <FormLabel required>Your name</FormLabel>
                                                         <FormControl>
                                                             <InputGroup>
                                                                 <InputGroupInput
@@ -214,7 +214,7 @@ export default function ContactPage() {
                                                 name="email"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Email</FormLabel>
+                                                        <FormLabel required>Email</FormLabel>
                                                         <FormControl>
                                                             <InputGroup>
                                                                 <InputGroupInput
@@ -266,7 +266,7 @@ export default function ContactPage() {
                                                 name="topic"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Topic</FormLabel>
+                                                        <FormLabel required>Topic</FormLabel>
                                                         <FormControl>
                                                             <Select onValueChange={field.onChange} value={field.value}>
                                                                 <SelectTrigger>
@@ -324,7 +324,7 @@ export default function ContactPage() {
                                             name="subject"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Subject</FormLabel>
+                                                    <FormLabel required>Subject</FormLabel>
                                                     <FormControl>
                                                         <Input placeholder="How can we help?" {...field} />
                                                     </FormControl>
@@ -338,7 +338,7 @@ export default function ContactPage() {
                                             name="message"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Message</FormLabel>
+                                                    <FormLabel required>Message</FormLabel>
                                                     <FormControl>
                                                         <Textarea rows={6} placeholder="Write your message here..." {...field} />
                                                     </FormControl>
