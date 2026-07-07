@@ -184,7 +184,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           </InputGroupAddon>
           
           {showStrengthIndicator && (
-            <div className="w-full basis-full border-t border-input bg-input order-last">
+            <div className="w-full basis-full border-t border-input bg-input/20 order-last">
               <PasswordStrength password={currentPassword} />
             </div>
           )}

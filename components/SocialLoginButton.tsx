@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { Button } from "./ui/button";
 import { ButtonGroup } from "./ui/button-group";
 import { BrandIcon } from "./BrandIcon";
@@ -10,7 +11,13 @@ import { Spinner } from "./ui/spinner";
 
 const SocialLoginButtons = () => {
   const router = useRouter();
+  const { theme, resolvedTheme } = useTheme();
   const [loading, setLoading] = useState<"google" | "github" | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSocialLogin = async (provider: "google" | "github") => {
     setLoading(provider);
@@ -69,7 +76,7 @@ const SocialLoginButtons = () => {
         ) : (
           <BrandIcon
             name="github"
-            variant="dark"
+            variant={mounted && (resolvedTheme === "dark" || theme === "dark") ? "dark" : "default"}
             width={20}
             height={20}
             className="w-5 h-5"

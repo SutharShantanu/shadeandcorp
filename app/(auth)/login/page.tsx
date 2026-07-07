@@ -80,7 +80,7 @@ export default function Login() {
       animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
     >
-      <Card className="w-full max-w-5xl flex flex-col md:flex-row justify-between overflow-hidden bg-card/80 backdrop-blur-3xl p-0 z-10">
+      <Card className="w-full max-w-5xl flex flex-col md:flex-row justify-between overflow-hidden p-0 z-10">
         <AuthImageSide
           title="Welcome Back"
           description="We are glad to see you again. Sign in to access your dashboard."
@@ -160,7 +160,7 @@ export default function Login() {
                               <PasswordInput
                                 id="password"
                                 aria-label="Password"
-                                placeholder="********"
+                                placeholder="Enter Your Password"
                                 autoComplete="current-password"
                                 {...field}
                                 value={field.value || ""}
@@ -241,7 +241,7 @@ export default function Login() {
             </Form>
 
             <motion.div
-              className="text-center flex items-center justify-center gap-1 mx-auto w-fit text-sm text-muted-foreground"
+              className="text-center flex items-center justify-center gap-1 mx-auto w-fit text-sm text-muted-foreground mt-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -249,7 +249,7 @@ export default function Login() {
               Don&apos;t have an account?
               <Link
                 href="/signup"
-                className="text-foreground hover:text-primary transition-colors hover:underline underline-offset-4 font-semibold ml-1"
+                className="text-foreground hover:text-primary transition-colors hover:underline underline-offset-4 ml-1"
               >
                 Create one now
               </Link>

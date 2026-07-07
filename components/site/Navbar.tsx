@@ -10,12 +10,24 @@ import {
   User,
   Settings,
   LogOut,
-  BadgeCheck,
   CreditCard,
   MapPin,
-  Bell,
-  BadgeInfo,
   ChevronRight,
+  ArrowRight,
+  Eye,
+  Shirt,
+  Scissors,
+  Briefcase,
+  Footprints,
+  Sun,
+  Moon,
+  Snowflake,
+  Sparkles,
+  Baby,
+  Watch,
+  Glasses,
+  Gem,
+  Star,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useRef, useState } from "react";
@@ -38,6 +50,7 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ExpandableButton } from "@/components/extended/button";
 import AvatarBadge from "@/components/site/AvatarBadge";
 import { useAppSelector } from "@/lib/store";
 import { getNotificationsByCategory } from "@/lib/domain/notificationUtils";
@@ -45,9 +58,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuGroup,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -63,8 +74,60 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "../ui/input-group";
-import { Dot } from "../ui/dot";
 import { useDebounce } from "@/hooks/use-debounce";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Separator } from "../ui/separator";
+import { Dot } from "../ui/dot";
+
+const getCategoryImageUrl = (title: string) => {
+  const t = title.toLowerCase();
+  if (
+    t.includes("shirt") ||
+    t.includes("top") ||
+    t.includes("sweater") ||
+    t.includes("clothing")
+  )
+    return "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop";
+  if (
+    t.includes("jean") ||
+    t.includes("trouser") ||
+    t.includes("short") ||
+    t.includes("legging")
+  )
+    return "https://images.unsplash.com/photo-1542272604-787c3835535d?w=100&h=100&fit=crop";
+  if (t.includes("active") || t.includes("footwear") || t.includes("shoe"))
+    return "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop";
+  if (t.includes("winter") || t.includes("snow") || t.includes("jacket"))
+    return "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=100&h=100&fit=crop";
+  if (t.includes("watch") || t.includes("glass") || t.includes("accessor"))
+    return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop";
+  if (t.includes("bag") || t.includes("wallet"))
+    return "https://images.unsplash.com/photo-1584916201218-f4242ceb4809?w=100&h=100&fit=crop";
+  if (t.includes("dress") || t.includes("skirt"))
+    return "https://images.unsplash.com/photo-1515347619152-19c2e0b57134?w=100&h=100&fit=crop";
+  if (t.includes("suit") || t.includes("blazer"))
+    return "https://images.unsplash.com/photo-1594938298596-70f58fb3ba68?w=100&h=100&fit=crop";
+  if (t.includes("inner") || t.includes("lingerie"))
+    return "https://images.unsplash.com/photo-1590544158496-d24269d03a11?w=100&h=100&fit=crop";
+  if (t.includes("baby") || t.includes("infant"))
+    return "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=100&h=100&fit=crop";
+  if (t.includes("jewel") || t.includes("premium"))
+    return "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100&h=100&fit=crop";
+  if (t.includes("summer") || t.includes("sun"))
+    return "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=100&h=100&fit=crop";
+  if (t.includes("night") || t.includes("sleep") || t.includes("lounge"))
+    return "https://images.unsplash.com/photo-1606132711717-b73f71c4d7ec?w=100&h=100&fit=crop";
+  if (
+    t.includes("ethnic") ||
+    t.includes("kurta") ||
+    t.includes("saree") ||
+    t.includes("festive") ||
+    t.includes("party")
+  )
+    return "https://images.unsplash.com/photo-1583391733958-d25e07fac0ec?w=100&h=100&fit=crop";
+
+  return "https://images.unsplash.com/photo-1445205170230-053b83016050?w=100&h=100&fit=crop";
+};
 
 const categories = [
   {
@@ -74,8 +137,14 @@ const categories = [
       { title: "Casual Shirts", href: "/products/men/clothing/casual-shirts" },
       { title: "Formal Shirts", href: "/products/men/clothing/formal-shirts" },
       { title: "Jeans", href: "/products/men/clothing/jeans" },
-      { title: "Casual Trousers", href: "/products/men/clothing/casual-trousers" },
-      { title: "Formal Trousers", href: "/products/men/clothing/formal-trousers" },
+      {
+        title: "Casual Trousers",
+        href: "/products/men/clothing/casual-trousers",
+      },
+      {
+        title: "Formal Trousers",
+        href: "/products/men/clothing/formal-trousers",
+      },
       { title: "Shorts", href: "/products/men/clothing/shorts" },
       { title: "Jackets", href: "/products/men/clothing/jackets" },
       { title: "Blazers", href: "/products/men/clothing/blazers" },
@@ -89,7 +158,7 @@ const categories = [
       { title: "Suits", href: "/products/men/clothing/suits" },
       { title: "Ethnic Wear", href: "/products/men/clothing/ethnic" },
     ],
-    image: "/images/menu/men.png",
+    image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=800&auto=format&fit=crop",
   },
   {
     title: "Women",
@@ -113,7 +182,7 @@ const categories = [
       { title: "Sleepwear", href: "/products/women/clothing/sleepwear" },
       { title: "Loungewear", href: "/products/women/clothing/loungewear" },
     ],
-    image: "/images/menu/women.png",
+    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format&fit=crop",
   },
   {
     title: "Kids",
@@ -127,7 +196,7 @@ const categories = [
       { title: "Accessories", href: "/products/kids/clothing/accessories" },
       { title: "Winter Wear", href: "/products/kids/clothing/winter-wear" },
     ],
-    image: "/images/menu/kids.png",
+    image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=800&auto=format&fit=crop",
   },
   {
     title: "Collections",
@@ -139,7 +208,7 @@ const categories = [
       { title: "Festive Collection", href: "/products/collections/festive" },
       { title: "Premium Collection", href: "/products/collections/premium" },
     ],
-    image: "/images/menu/collections.png",
+    image: "https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800&auto=format&fit=crop",
   },
   {
     title: "Accessories",
@@ -153,7 +222,7 @@ const categories = [
       { title: "Hats & Caps", href: "/products/accessories/hats" },
       { title: "Scarves", href: "/products/accessories/scarves" },
     ],
-    image: "/images/menu/accessories.png",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800&auto=format&fit=crop",
   },
 ];
 
@@ -245,6 +314,21 @@ interface CategoryNavigationProps {
 
 export function CategoryNavigation({ className }: CategoryNavigationProps) {
   const router = useRouter();
+  const [featuredBadgeText, setFeaturedBadgeText] = useState(
+    "Featured Collection",
+  );
+
+  useEffect(() => {
+    fetch("/api/settings?key=featuredBadgeText")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setFeaturedBadgeText(data.data);
+        }
+      })
+      .catch((err) => console.error("Error fetching setting:", err));
+  }, []);
+
   return (
     <NavigationMenu className={className}>
       <NavigationMenuList>
@@ -255,109 +339,198 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
             category.title === "Kids";
           return (
             <NavigationMenuItem key={category.title}>
-              <NavigationMenuTrigger className="bg-transparent h-9 px-4 py-2">
-                {category.title}
-              </NavigationMenuTrigger>
+              <NavigationMenuTrigger>{category.title}</NavigationMenuTrigger>
               <NavigationMenuContent>
-                <div
-                  className={`p-1 bg-background/95 backdrop-blur-2xl border-none shadow-2xl rounded-2xl ${hasDetailedCategories ? "w-[900px]" : "w-[650px]"}`}
-                >
-                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 p-6">
-                    {/* Left Side: Combined Categories */}
-                    <div className="flex flex-col gap-8">
-                      {/* Top Section: Quick Links */}
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between border-b border-border/40 pb-3">
-                          <h3 className="text-lg font-bold tracking-tight">
-                            {category.title} Featured
+                <div className="overflow-hidden w-5xl">
+                  <div className="grid lg:grid-cols-3">
+                    {/* Left Content */}
+                    <div className="p-4 lg:p-6 flex flex-col col-span-2 gap-4 space-4">
+                      <Badge variant="secondary">{featuredBadgeText}</Badge>
+                      {/* Header */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-xl font-semibold tracking-tight">
+                            {category.title}
                           </h3>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              router.push(
-                                `/products/${category.title.toLowerCase()}`,
-                              )
-                            }
-                            className="text-xs font-semibold text-primary hover:bg-primary/10 rounded-full transition-colors"
-                          >
-                            View All <ChevronRight size="14" className="ml-1" />
-                          </Button>
+                          <p className="text-sm text-muted-foreground">
+                            Discover our curated selection of premium products.
+                          </p>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {category.items.slice(0, 9).map((item) => (
-                            <Link
-                              key={item.title}
-                              href={item.href}
-                              className="group flex flex-col justify-center rounded-xl p-3 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-all duration-300"
-                            >
-                              <div className="flex items-center gap-2">
-                                <div className="h-1.5 w-1.5 rounded-full bg-primary/20 group-hover:bg-primary group-hover:scale-150 transition-all duration-300" />
-                                <span className="text-sm font-medium text-foreground/70 group-hover:text-foreground transition-colors">
-                                  {item.title}
-                               </span>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
+
+                        <ExpandableButton
+                          text="View All"
+                          onClick={() =>
+                            router.push(
+                              `/products/${category.title.toLowerCase()}`,
+                            )
+                          }
+                        />
                       </div>
 
-                      {/* Bottom Section: Detailed Categories (Conditional) */}
+                      {/* Featured Cards */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {category.items.slice(0, 6).map((item: any) => (
+                          <Link key={item.title} href={item.href}>
+                            <Card className="group h-full bg-muted ring-0">
+                              <CardContent>
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-3">
+                                    {/* Image Placeholder */}
+                                    <div className="h-10 w-10 shrink-0 rounded-md bg-muted overflow-hidden relative">
+                                      <Image
+                                        src={
+                                          item.image ||
+                                          getCategoryImageUrl(item.title)
+                                        }
+                                        alt={item.title}
+                                        fill
+                                        className="object-cover"
+                                      />
+                                    </div>
+                                    <div>
+                                      <h4 className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-1">
+                                        {item.title}
+                                      </h4>
+
+                                      <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+                                        Explore collection
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-primary group-hover:translate-x-1" />
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        ))}
+                      </div>
+
                       {hasDetailedCategories && (
-                        <div className="space-y-5 pt-5 border-t border-border/40">
-                          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                            Shop by Category
-                          </h3>
-                          <div className="grid grid-cols-4 gap-6">
-                            {detailedCategories[
-                              category.title.toLowerCase() as keyof typeof detailedCategories
-                            ]?.map((subcat) => (
-                              <div key={subcat.title} className="space-y-3">
-                                <h5 className="text-sm font-bold text-foreground">
-                                  {subcat.title}
-                                </h5>
-                                <ul className="space-y-2.5">
-                                  {subcat.items.map((item) => (
-                                    <li key={item}>
-                                      <Link
-                                        href={`/products/${category.title.toLowerCase()}/${subcat.title.toLowerCase()}/${item.toLowerCase().replace(/ /g, "-")}`}
-                                        className="block text-[13px] text-muted-foreground hover:text-primary hover:translate-x-1 transition-all duration-300"
-                                      >
-                                        {item}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            ))}
+                        <>
+                          <div>
+                            <div className="mb-4 flex items-center gap-2">
+                              <Badge
+                                variant="outline"
+                                className="uppercase tracking-wider"
+                              >
+                                Shop by category
+                              </Badge>
+                            </div>
+
+                            <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+                              {detailedCategories[
+                                category.title.toLowerCase() as keyof typeof detailedCategories
+                              ]?.map((subcat) => (
+                                <div key={subcat.title}>
+                                  <div className="pb-3">
+                                    <p className="text-sm">{subcat.title}</p>
+                                  </div>
+
+                                  <CardContent className="pt-0">
+                                    <div className="space-y-2">
+                                      {subcat.items.slice(0, 5).map((item) => (
+                                        <Link
+                                          key={item}
+                                          href={`/products/${category.title.toLowerCase()}/${subcat.title.toLowerCase()}/${item
+                                            .toLowerCase()
+                                            .replace(/ /g, "-")}`}
+                                          className="group flex items-center gap-3 text-xs text-muted-foreground hover:text-primary transition-colors"
+                                        >
+                                          <Dot className="opacity-20 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1" />
+                                          <span>{item}</span>
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  </CardContent>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
+                        </>
                       )}
                     </div>
 
-                    {/* Right Side: Image Banner */}
-                    <div className="relative group h-full min-h-[400px] rounded-2xl overflow-hidden shadow-lg border border-border/10">
-                      <Image
-                        width={400}
-                        height={600}
-                        src={category.image}
-                        alt={category.title}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                        <h4 className="text-white font-bold text-2xl mb-1 translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                          {category.title} Collection
-                        </h4>
-                        <p className="text-white/70 text-xs mb-5 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-75">
-                          Explore the latest trends in our curated {category.title.toLowerCase()} collection.
-                        </p>
-                        <Link
-                          href={`/products/${category.title.toLowerCase()}`}
-                          className="w-fit inline-flex h-9 items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-5 text-xs font-bold text-white hover:bg-white hover:text-black transition-all transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 duration-500 delay-150"
-                        >
-                          Shop Now
-                        </Link>
+                    {/* Promo Banner */}
+                    <div className="relative border-l border-border/50">
+                      <div className="relative h-full min-h-[500px] overflow-hidden">
+                        <Image
+                          src={category.image}
+                          alt={category.title}
+                          fill
+                          className="object-cover transition-transform duration-700 hover:scale-105"
+                        />
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+
+                        <div className="absolute inset-0 flex flex-col justify-end p-6">
+                          <Badge className="mb-3 w-fit">New Arrivals</Badge>
+
+                          <h3 className="text-3xl font-bold text-white leading-tight">
+                            {category.title}
+                            <br />
+                            Collection
+                          </h3>
+
+                          <p className="mt-3 text-sm text-white/80">
+                            Premium quality products crafted for modern
+                            lifestyles.
+                          </p>
+
+                          <div className="mt-6 flex gap-2">
+                            <Button asChild size="sm" className="group">
+                              <Link
+                                href={`/products/${category.title.toLowerCase()}`}
+                              >
+                                Shop Collection
+                                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                              </Link>
+                            </Button>
+
+                            <Button asChild variant="secondary" size="sm">
+                              <Link
+                                href={`/products/${category.title.toLowerCase()}`}
+                              >
+                                Explore
+                              </Link>
+                            </Button>
+                          </div>
+
+                          <div className="mt-8 grid grid-cols-3 gap-3">
+                            <Card className="bg-white/10 backdrop-blur-md border-white/20">
+                              <CardContent className="p-3">
+                                <p className="text-lg font-bold text-white">
+                                  500+
+                                </p>
+                                <p className="text-[10px] text-white/70">
+                                  Products
+                                </p>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="bg-white/10 backdrop-blur-md border-white/20">
+                              <CardContent className="p-3">
+                                <p className="text-lg font-bold text-white">
+                                  4.8★
+                                </p>
+                                <p className="text-[10px] text-white/70">
+                                  Rating
+                                </p>
+                              </CardContent>
+                            </Card>
+
+                            <Card className="bg-white/10 backdrop-blur-md border-white/20">
+                              <CardContent className="p-3">
+                                <p className="text-lg font-bold text-white">
+                                  24h
+                                </p>
+                                <p className="text-[10px] text-white/70">
+                                  Dispatch
+                                </p>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -416,8 +589,8 @@ export function SearchBar({ className }: SearchBarProps) {
   }, []);
 
   return (
-    <div className={`flex w-1/3 items-center ${className}`}>
-      <InputGroup className="border-transparent shadow-none">
+    <div className={`flex max-w-2xs w-full items-center ${className}`}>
+      <InputGroup>
         <InputGroupInput
           ref={inputRef}
           placeholder="Search products..."
@@ -456,12 +629,22 @@ export function ActionButtons({
         <Tooltip>
           <TooltipTrigger asChild>
             <Link href="/wishlist">
-              <Button variant="ghost" size="icon" className="relative">
-                <Heart className="h-5 w-5 fill-red-400 stroke-red-400" />
+              <Button
+                variant="outline"
+                size="icon"
+                className="relative"
+                aria-label={`Wishlist (${wishlistCount})`}
+              >
+                <Heart
+                  className="h-5 w-5 fill-red-400 stroke-red-400"
+                  aria-hidden="true"
+                />
                 {wishlistCount > 0 && (
                   <Badge
                     variant="destructive"
-                    className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
+                    size="xs"
+                    className="absolute -top-2 -right-2 rounded-full px-1"
+                    aria-hidden="true"
                   >
                     {wishlistCount}
                   </Badge>
@@ -475,12 +658,19 @@ export function ActionButtons({
         <Tooltip>
           <TooltipTrigger asChild>
             <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingBag className="h-5 w-5" />
+              <Button
+                variant="outline"
+                size="icon"
+                className="relative"
+                aria-label="User menu"
+              >
+                <ShoppingBag className="h-5 w-5" aria-hidden="true" />
                 {cartCount > 0 && (
                   <Badge
-                    variant="default"
-                    className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
+                    variant="destructive"
+                    size="xs"
+                    className="absolute -top-2 -right-2 rounded-full px-1"
+                    aria-hidden="true"
                   >
                     {cartCount}
                   </Badge>
@@ -509,7 +699,6 @@ export function UserMenu({ className }: UserMenuProps) {
           onClick={() => router.push("/login")}
           size="sm"
           variant="outline"
-          className="h-8 text-xs font-semibold px-4 border-zinc-200"
         >
           Login
         </Button>
@@ -517,7 +706,6 @@ export function UserMenu({ className }: UserMenuProps) {
           variant="default"
           onClick={() => router.push("/signup")}
           size="sm"
-          className="h-8 text-xs font-semibold px-4"
         >
           Sign Up
         </Button>
@@ -535,90 +723,128 @@ export function UserMenu({ className }: UserMenuProps) {
   };
 
   const notifications = session.user?.notifications || [];
-  const orderNotifications = getNotificationsByCategory(notifications, "orders");
+  const orderNotifications = getNotificationsByCategory(
+    notifications,
+    "orders",
+  );
 
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
-          className="relative h-8 w-8 rounded-full ring-offset-background transition-all hover:bg-zinc-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 overflow-hidden"
+          variant="outline"
+          size="icon"
+          className="relative"
+          aria-label={`User Menu`}
         >
           <AvatarBadge />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-56 p-1.5 shadow-xl rounded-xl border border-zinc-200"
-        align="end"
-        sideOffset={8}
-      >
-        <div className="px-3 py-2 mb-1 border-b border-zinc-100/80">
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">Welcome</p>
-          <p className="text-sm font-bold text-zinc-900 truncate">
-            {session.user?.name || "Member"}
-          </p>
+      <DropdownMenuContent className="w-fit min-w-64" align="end">
+        <div className="px-2 py-2 mb-2 flex items-center gap-3 border-b border-zinc-100/80 pb-3">
+          <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center border border-zinc-200 shadow-sm">
+            <User size={18} className="text-zinc-600" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <p className="text-sm font-semibold text-zinc-900 truncate">
+              {session.user?.name || "Member"}
+            </p>
+            <p className="text-[11px] font-medium text-zinc-500 truncate">
+              {session.user?.email || "Welcome back!"}
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-0.5">
+        <div className="space-y-1">
           <DropdownMenuItem
             onClick={() => handleNavigation("/profile?tab=orders")}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
           >
-            <ShoppingBag size={15} className="text-zinc-500" />
+            <ShoppingBag size={15} />
             <span className="text-sm font-medium">Orders</span>
-            {orderNotifications.length > 0 && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+            {orderNotifications.length > 0 && (
+              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-[10px] font-bold text-white shadow-sm">
+                {orderNotifications.length}
+              </span>
+            )}
           </DropdownMenuItem>
 
-          <DropdownMenuItem
-            onClick={() => handleNavigation("/wishlist")}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
-          >
-            <Heart size={15} className="text-zinc-500" />
+          <DropdownMenuItem onClick={() => handleNavigation("/wishlist")}>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-zinc-200/60 transition-all">
+              <Heart
+                size={15}
+                className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
+              />
+            </div>
             <span className="text-sm font-medium">Wishlist</span>
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator className="mx-2 my-1" />
+          <DropdownMenuSeparator className="mx-2 my-1.5 opacity-50" />
 
           <DropdownMenuItem
             onClick={() => handleNavigation("/profile?tab=profile")}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
+            className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-colors focus:bg-zinc-100/80 focus:text-zinc-900 group"
           >
-            <User size={15} className="text-zinc-500" />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-zinc-200/60 transition-all">
+              <User
+                size={15}
+                className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
+              />
+            </div>
             <span className="text-sm font-medium">Personal Details</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
             onClick={() => handleNavigation("/profile?tab=addresses")}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
+            className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-colors focus:bg-zinc-100/80 focus:text-zinc-900 group"
           >
-            <MapPin size={15} className="text-zinc-500" />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-zinc-200/60 transition-all">
+              <MapPin
+                size={15}
+                className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
+              />
+            </div>
             <span className="text-sm font-medium">Saved Addresses</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
             onClick={() => handleNavigation("/profile?tab=billing")}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
+            className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-colors focus:bg-zinc-100/80 focus:text-zinc-900 group"
           >
-            <CreditCard size={15} className="text-zinc-500" />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-zinc-200/60 transition-all">
+              <CreditCard
+                size={15}
+                className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
+              />
+            </div>
             <span className="text-sm font-medium">Payment Methods</span>
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator className="mx-2 my-1" />
+          <DropdownMenuSeparator className="mx-2 my-1.5 opacity-50" />
 
           <DropdownMenuItem
             onClick={() => handleNavigation("/profile?tab=security")}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer focus:bg-zinc-100 focus:text-zinc-900"
+            className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-colors focus:bg-zinc-100/80 focus:text-zinc-900 group"
           >
-            <Settings size={15} className="text-zinc-500" />
-            <span className="text-sm font-medium">Edit Profile</span>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-zinc-200/60 transition-all">
+              <Settings
+                size={15}
+                className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
+              />
+            </div>
+            <span className="text-sm font-medium">Settings</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
             onClick={handleSignOut}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-600"
+            className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700 group mt-1"
           >
-            <LogOut size={15} />
-            <span className="text-sm font-bold">Log out</span>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50/50 group-hover:bg-red-100 group-hover:shadow-sm border border-transparent group-hover:border-red-200/60 transition-all">
+              <LogOut
+                size={15}
+                className="text-red-500 group-hover:text-red-600 transition-colors"
+              />
+            </div>
+            <span className="text-sm font-semibold">Log out</span>
           </DropdownMenuItem>
         </div>
       </DropdownMenuContent>
@@ -697,18 +923,24 @@ export default function Navbar({ className }: { className?: string }) {
           <MobileMenu categories={categories} />
 
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/assets/shadeandcorp_log.svg" alt="Shade & Corp" width={100} height={100} className="h-8 md:h-10 w-auto" />
+            <Image
+              src="/assets/shadeandcorp_log.svg"
+              alt="Shade & Corp"
+              width={100}
+              height={100}
+              className="h-8 md:h-10 w-auto"
+            />
           </Link>
         </div>
 
         {/* Center Section - Navigation & Search */}
         <nav className="hidden flex-1 items-center gap-6 md:flex">
           <CategoryNavigation />
-          <SearchBar />
         </nav>
 
         {/* Right Section - Actions & User Menu */}
         <div className="flex items-center gap-2">
+          <SearchBar />
           <ActionButtons wishlistCount={wishlistCount} cartCount={cartCount} />
           <UserMenu />
         </div>

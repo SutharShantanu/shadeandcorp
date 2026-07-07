@@ -3,24 +3,27 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import NavigateHomeButton from "@/components/NavigateHomeButton";
+import { cn } from "@/lib/utils";
 
 interface AuthImageSideProps {
   title: string;
   description: string;
   keywords?: string;
+  className?: string;
 }
 
 export default function AuthImageSide({
   title,
   description,
-  keywords = "nature",
+  keywords = "shopping",
+  className,
 }: AuthImageSideProps) {
-  const imageUrl = `https://loremflickr.com/800/1200/${keywords}`;
+  const imageUrl = `https://picsum.photos/seed/${keywords}/800/1200`;
 
   return (
-    <div className="relative w-full md:w-5/12 h-40 md:h-auto overflow-hidden group">
+    <div className={cn("relative w-full md:w-5/12 h-40 md:h-auto overflow-hidden group", className)}>
       <NavigateHomeButton />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent z-10" />
       <Image
         src={imageUrl}
         alt={title}
@@ -36,10 +39,10 @@ export default function AuthImageSide({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.6 }}
         >
-          <h2 className="text-2xl font-bold text-white drop-shadow-md mb-2">
+          <h2 className="text-2xl font-bold drop-shadow-md mb-2">
             {title}
           </h2>
-          <p className="text-white/80 text-sm drop-shadow">
+          <p className="text-muted-foreground text-sm drop-shadow">
             {description}
           </p>
         </motion.div>
