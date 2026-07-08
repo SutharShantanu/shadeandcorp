@@ -5,9 +5,19 @@ import LayoutWrapper from "@/components/LayoutWrapper";
 import { cn } from "@/lib/utils";
 import { Instrument_Sans, Raleway } from "next/font/google";
 
-const ralewayHeading = Raleway({subsets:['latin'],variable:'--font-heading'});
+const ralewayHeading = Raleway({
+  subsets: ['latin'],
+  variable: '--font-heading',
+  display: 'swap',
+  preload: false,
+});
 
-const instrumentSans = Instrument_Sans({subsets:['latin'],variable:'--font-sans'});
+const instrumentSans = Instrument_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+  preload: false,
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",

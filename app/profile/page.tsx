@@ -5,7 +5,14 @@ import { motion } from "framer-motion";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ExpandableButton } from "@/components/extended/button";
+import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  AlertAction,
+} from "@/components/ui/alert";
 import {
   User,
   Shield,
@@ -21,6 +28,11 @@ import {
   Palette,
   UserCircle,
   Link2,
+  Phone,
+  Mail,
+  Gift,
+  ShieldAlert,
+  History,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -48,6 +60,8 @@ import OrdersTab from "@/components/profile/OrdersTab";
 import AddressesTab from "@/components/profile/AddressesTab";
 import SecurityTab from "@/components/profile/SecurityTab";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { Dot } from "@/components/ui/dot";
+import { cn } from "@/lib/utils";
 
 const VALID_TABS = [
   "profile",
@@ -134,6 +148,29 @@ const SEARCH_ITEMS = [
   },
 ] as const;
 
+const PROFILE_TABS = [
+  {
+    heading: "Account Settings",
+    items: [
+      { value: "profile", label: "Profile Info", icon: UserCircle },
+      { value: "account", label: "Account Details", icon: Shield },
+      { value: "security", label: "Security & Login", icon: Lock },
+    ],
+  },
+  {
+    heading: "Orders & Shopping",
+    items: [
+      { value: "orders", label: "My Orders", icon: Package },
+      { value: "addresses", label: "Saved Addresses", icon: MapPin },
+      { value: "billing", label: "Payment Methods", icon: CreditCard },
+    ],
+  },
+  {
+    heading: "Preferences",
+    items: [{ value: "notifications", label: "Notifications", icon: Bell }],
+  },
+];
+
 function ProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -153,7 +190,6 @@ function ProfileContent() {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [alertDismissed, setAlertDismissed] = useState(false);
   const [shouldOpenModal, setShouldOpenModal] = useState(
     actionFromUrl === "add",
   );
@@ -162,27 +198,42 @@ function ProfileContent() {
   const missingInfo = useMemo(() => {
     const missing = [];
     if (!userProfile?.addresses || userProfile.addresses.length === 0) {
-      missing.push({ label: "shipping address", tab: "addresses" });
+      missing.push({
+        label: "shipping address",
+        tab: "addresses",
+        icon: MapPin,
+      });
     }
     if (
       !userProfile?.paymentMethods ||
       userProfile.paymentMethods.length === 0
     ) {
-      missing.push({ label: "payment method", tab: "billing" });
+      missing.push({
+        label: "payment method",
+        tab: "billing",
+        icon: CreditCard,
+      });
     }
     if (!userProfile?.phone) {
-      missing.push({ label: "phone number", tab: "account" });
+      missing.push({ label: "phone number", tab: "account", icon: Phone });
     } else if (!userProfile?.isPhoneVerified) {
-      missing.push({ label: "phone verification", tab: "account" });
+      missing.push({
+        label: "phone verification",
+        tab: "account",
+        icon: ShieldAlert,
+      });
     }
     if (!userProfile?.isEmailVerified) {
-      missing.push({ label: "email verification", tab: "account" });
+      missing.push({ label: "email verification", tab: "account", icon: Mail });
     }
     if (!userProfile?.birthday) {
-      missing.push({ label: "birthday", tab: "account" });
+      missing.push({ label: "birthday", tab: "account", icon: Gift });
     }
     return missing;
   }, [userProfile]);
+
+  const hasMissingInfo = (tabName: string) =>
+    missingInfo.some((info) => info.tab === tabName);
 
   // Search functionality with smart filtering
   const filteredSearchItems = useMemo(() => {
@@ -286,187 +337,171 @@ function ProfileContent() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Profile</h1>
-            <p className="text-muted-foreground">
-              Manage your account settings and preferences.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-2">
-            <div className="flex items-center gap-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setSearchOpen(true)}
-                className="hidden md:flex items-center gap-2 font-normal"
-              >
-                <Search className="h-4 w-4" />
-                Search settings
-                <KbdGroup className="ml-2">
-                  <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
-                </KbdGroup>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/edit-profile?tab=${activeTab}`)}
-                className=""
-              >
-                <PencilLine className="size-4" />
-                <span>Edit Profile</span>
-              </Button>
-            </div>
-            {lastUpdated && (
-              <Badge variant="secondary" className="text-xs justify-self-end">
-                Last updated: {lastUpdated}
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        <Card>
-          <CardHeader>
-            {missingInfo.length > 0 && !alertDismissed && (
+        <Frame>
+          {missingInfo.length > 0 && (
+            <FrameHeader>
               <Alert variant="warning">
-                <Info className="h-4 w-4" />
-
-                <AlertDescription className="flex items-start gap-4">
-                  <div className="flex-1">
-                    <p className="font-medium">Complete your profile</p>
-
-                    <p className="text-xs mb-2">
-                      You&apos;re missing the following information:
+                <Info />
+                <AlertTitle className="flex items-center justify-between gap-2">
+                  Complete your profile
+                  <Badge variant="warning-outline">
+                    {Math.round(((5 - missingInfo.length) / 5) * 100)}%
+                    Completed
+                  </Badge>
+                </AlertTitle>
+                <AlertDescription>
+                  <div className="space-y-4 mt-2">
+                    <p>
+                      You&apos;re missing {missingInfo.length}{" "}
+                      {missingInfo.length === 1 ? "item" : "items"}. Adding them
+                      helps secure your account and improve your experience.
                     </p>
 
-                    <ul className="list-disc list-inside space-y-0.5">
-                      {missingInfo.map((item, index) => (
-                        <li key={index}>
-                          <button
+                    <div className="flex flex-wrap gap-2">
+                      {missingInfo.map((item, index) => {
+                        const Icon = item.icon;
+                        return (
+                          <Badge
+                            key={index}
+                            variant="outline"
                             onClick={() =>
                               router.push(
                                 `/edit-profile?tab=${item.tab}&action=add`,
                               )
                             }
-                            className="hover:underline capitalize inline cursor-pointer"
+                            className="cursor-pointer capitalize flex items-start gap-1"
                           >
-                            {item.label}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+                            <Icon className="h-3 w-3" />
+                            Add {item.label}
+                          </Badge>
+                        );
+                      })}
+                    </div>
                   </div>
                 </AlertDescription>
-                <AlertClose onClick={() => setAlertDismissed(true)} />
               </Alert>
-            )}
-          </CardHeader>
-          <CardContent className="">
-            <Tabs
-              value={activeTab}
-              onValueChange={handleTabChange}
-              className="flex flex-col md:flex-row gap-8 min-h-[600px]"
-            >
-              <div className="w-full md:w-64 shrink-0">
-                <div className="sticky top-24">
-                  <TabsList className="flex flex-col h-auto w-full bg-transparent p-0 gap-1 items-start">
-                    <div className="px-4 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                       Account Settings
-                    </div>
-                    <TabsTrigger
-                      value="profile"
-                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
-                    >
-                      <UserCircle className="size-4 text-zinc-500" />
-                      <span>Profile Info</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="account"
-                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
-                    >
-                      <Shield className="size-4 text-zinc-500" />
-                      <span>Account Details</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="security"
-                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
-                    >
-                      <Lock className="size-4 text-zinc-500" />
-                      <span>Security & Login</span>
-                    </TabsTrigger>
+            </FrameHeader>
+          )}
 
-                    <div className="px-4 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-4 mb-1">
-                       Orders & Shopping
+          <FramePanel>
+            <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold mb-2">Profile</h1>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-muted-foreground">
+                  <p>Manage your account settings and preferences.</p>
+                  {lastUpdated && (
+                    <div className="flex items-center gap-2 text-xs opacity-70">
+                      <History />
+                      <span>Updated {lastUpdated}</span>
                     </div>
-                    <TabsTrigger value="orders" className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!">
-                      <Package className="size-4 text-zinc-500" />
-                      <span>My Orders</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="addresses"
-                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
-                    >
-                      <MapPin className="size-4 text-zinc-500" />
-                      <span>Saved Addresses</span>
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="billing"
-                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
-                    >
-                      <CreditCard className="size-4 text-zinc-500" />
-                      <span>Payment Methods</span>
-                    </TabsTrigger>
-
-                    <div className="px-4 py-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-4 mb-1">
-                       Preferences
-                    </div>
-                    <TabsTrigger
-                      value="notifications"
-                      className="w-full justify-start gap-2.5 px-4 py-2 rounded-lg data-[state=active]:bg-zinc-100 data-[state=active]:text-zinc-900 hover:bg-zinc-50 transition-all text-sm font-medium border-0 shadow-none ring-0!"
-                    >
-                      <Bell className="size-4 text-zinc-500" />
-                      <span>Notifications</span>
-                    </TabsTrigger>
-                  </TabsList>
+                  )}
                 </div>
               </div>
-
-              <div className="flex-1 bg-white dark:bg-zinc-950/20 rounded-2xl border border-border/40 p-1 md:p-6 min-h-[500px] shadow-xs">
-                <TabsContent value="profile" className="mt-0 outline-hidden">
-                  <ProfileDisplayTab userProfile={userProfile} />
-                </TabsContent>
-
-                <TabsContent value="account" className="mt-0 outline-hidden">
-                  <AccountDisplayTab userProfile={userProfile} />
-                </TabsContent>
-
-                <TabsContent value="security" className="mt-0 outline-hidden">
-                  <SecurityTab userProfile={userProfile} />
-                </TabsContent>
-
-                <TabsContent value="orders" className="mt-0 outline-hidden">
-                  <OrdersTab userProfile={userProfile} />
-                </TabsContent>
-
-                <TabsContent value="addresses" className="mt-0 outline-hidden">
-                  <AddressesTab userProfile={userProfile} />
-                </TabsContent>
-
-                <TabsContent value="billing" className="mt-0 outline-hidden">
-                  <BillingTab userProfile={userProfile} />
-                </TabsContent>
-
-                <TabsContent value="notifications" className="mt-0 outline-hidden">
-                  <NotificationsTab userProfile={userProfile} />
-                </TabsContent>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={() => setSearchOpen(true)}
+                  className="hidden md:flex items-center gap-2 font-normal"
+                >
+                  <Search className="h-4 w-4" />
+                  Search settings
+                  <KbdGroup className="ml-2">
+                    <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
+                  </KbdGroup>
+                </Button>
+                <ExpandableButton
+                  text="Edit Profile"
+                  icon={PencilLine}
+                  variant="outline"
+                  onClick={() => router.push(`/edit-profile?tab=${activeTab}`)}
+                />
               </div>
-            </Tabs>
-          </CardContent>
-        </Card>
+            </div>
+
+            <Card className="h-fit">
+              <CardContent>
+                <Tabs
+                  value={activeTab}
+                  onValueChange={handleTabChange}
+                  orientation="vertical"
+                  className="flex flex-col md:flex-row gap-4 min-h-[600px]"
+                >
+                  <div className="w-full md:w-64 shrink-0">
+                    <div className="sticky top-0">
+                      <TabsList className="flex flex-col h-auto w-full gap-1 items-start">
+                        {PROFILE_TABS.map((group, index) => (
+                          <div key={group.heading} className="w-full">
+                            <div
+                              className={cn(
+                                "px-4 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1",
+                                index > 0 && "mt-4",
+                              )}
+                            >
+                              {group.heading}
+                            </div>
+                            {group.items.map((item) => {
+                              const Icon = item.icon;
+                              return (
+                                <TabsTrigger
+                                  key={item.value}
+                                  value={item.value}
+                                >
+                                  <Icon className="size-4 shrink-0" />
+                                  <span className="flex-1 text-left">
+                                    {item.label}
+                                  </span>
+                                  {hasMissingInfo(item.value) && (
+                                    <Dot variant="warning" />
+                                  )}
+                                </TabsTrigger>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </TabsList>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 min-h-[500px]">
+                    <TabsContent value="profile">
+                      <ProfileDisplayTab userProfile={userProfile} />
+                    </TabsContent>
+
+                    <TabsContent value="account">
+                      <AccountDisplayTab userProfile={userProfile} />
+                    </TabsContent>
+
+                    <TabsContent value="security">
+                      <SecurityTab userProfile={userProfile} />
+                    </TabsContent>
+
+                    <TabsContent value="orders">
+                      <OrdersTab userProfile={userProfile} />
+                    </TabsContent>
+
+                    <TabsContent value="addresses">
+                      <AddressesTab userProfile={userProfile} />
+                    </TabsContent>
+
+                    <TabsContent value="billing">
+                      <BillingTab userProfile={userProfile} />
+                    </TabsContent>
+
+                    <TabsContent value="notifications">
+                      <NotificationsTab userProfile={userProfile} />
+                    </TabsContent>
+                  </div>
+                </Tabs>
+              </CardContent>
+            </Card>
+          </FramePanel>
+        </Frame>
 
         {/* Search Command Dialog */}
         <CommandDialog
           open={searchOpen}
           onOpenChange={setSearchOpen}
-          className="max-w-2xl"
+          className="max-w-4xl"
         >
           <CommandInput
             placeholder="Search settings..."

@@ -12,22 +12,7 @@ import {
   LogOut,
   CreditCard,
   MapPin,
-  ChevronRight,
   ArrowRight,
-  Eye,
-  Shirt,
-  Scissors,
-  Briefcase,
-  Footprints,
-  Sun,
-  Moon,
-  Snowflake,
-  Sparkles,
-  Baby,
-  Watch,
-  Glasses,
-  Gem,
-  Star,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useRef, useState } from "react";
@@ -57,7 +42,9 @@ import { getNotificationsByCategory } from "@/lib/domain/notificationUtils";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -75,48 +62,58 @@ import {
   InputGroupInput,
 } from "../ui/input-group";
 import { useDebounce } from "@/hooks/use-debounce";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Separator } from "../ui/separator";
+import { Card, CardContent } from "../ui/card";
 import { Dot } from "../ui/dot";
+import { cn } from "@/lib/utils";
 
 const getCategoryImageUrl = (title: string) => {
   const t = title.toLowerCase();
+  // Using picsum.photos with deterministic seeds — always available, no auth needed
   if (
     t.includes("shirt") ||
     t.includes("top") ||
     t.includes("sweater") ||
     t.includes("clothing")
   )
-    return "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop";
+    return "https://picsum.photos/seed/clothing/100/100";
   if (
     t.includes("jean") ||
     t.includes("trouser") ||
     t.includes("short") ||
     t.includes("legging")
   )
-    return "https://images.unsplash.com/photo-1542272604-787c3835535d?w=100&h=100&fit=crop";
-  if (t.includes("active") || t.includes("footwear") || t.includes("shoe"))
-    return "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop";
+    return "https://picsum.photos/seed/jeans/100/100";
+  if (t.includes("active") || t.includes("activewear"))
+    return "https://picsum.photos/seed/activewear/100/100";
+  if (
+    t.includes("footwear") ||
+    t.includes("shoe") ||
+    t.includes("boot") ||
+    t.includes("sandal")
+  )
+    return "https://picsum.photos/seed/shoes/100/100";
   if (t.includes("winter") || t.includes("snow") || t.includes("jacket"))
-    return "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=100&h=100&fit=crop";
-  if (t.includes("watch") || t.includes("glass") || t.includes("accessor"))
-    return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop";
-  if (t.includes("bag") || t.includes("wallet"))
-    return "https://images.unsplash.com/photo-1584916201218-f4242ceb4809?w=100&h=100&fit=crop";
+    return "https://picsum.photos/seed/winter/100/100";
+  if (t.includes("watch") || t.includes("glass") || t.includes("sunglass"))
+    return "https://picsum.photos/seed/watch/100/100";
+  if (t.includes("accessor"))
+    return "https://picsum.photos/seed/accessories/100/100";
+  if (t.includes("bag") || t.includes("wallet") || t.includes("backpack"))
+    return "https://picsum.photos/seed/bags/100/100";
   if (t.includes("dress") || t.includes("skirt"))
-    return "https://images.unsplash.com/photo-1515347619152-19c2e0b57134?w=100&h=100&fit=crop";
+    return "https://picsum.photos/seed/dress/100/100";
   if (t.includes("suit") || t.includes("blazer"))
-    return "https://images.unsplash.com/photo-1594938298596-70f58fb3ba68?w=100&h=100&fit=crop";
+    return "https://picsum.photos/seed/suit/100/100";
   if (t.includes("inner") || t.includes("lingerie"))
-    return "https://images.unsplash.com/photo-1590544158496-d24269d03a11?w=100&h=100&fit=crop";
+    return "https://picsum.photos/seed/innerwear/100/100";
   if (t.includes("baby") || t.includes("infant"))
-    return "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=100&h=100&fit=crop";
+    return "https://picsum.photos/seed/baby/100/100";
   if (t.includes("jewel") || t.includes("premium"))
-    return "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=100&h=100&fit=crop";
+    return "https://picsum.photos/seed/jewelry/100/100";
   if (t.includes("summer") || t.includes("sun"))
-    return "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=100&h=100&fit=crop";
-  if (t.includes("night") || t.includes("sleep") || t.includes("lounge"))
-    return "https://images.unsplash.com/photo-1606132711717-b73f71c4d7ec?w=100&h=100&fit=crop";
+    return "https://picsum.photos/seed/summer/100/100";
+  if (t.includes("lounge") || t.includes("night") || t.includes("sleep"))
+    return "https://picsum.photos/seed/lounge/100/100";
   if (
     t.includes("ethnic") ||
     t.includes("kurta") ||
@@ -124,9 +121,19 @@ const getCategoryImageUrl = (title: string) => {
     t.includes("festive") ||
     t.includes("party")
   )
-    return "https://images.unsplash.com/photo-1583391733958-d25e07fac0ec?w=100&h=100&fit=crop";
-
-  return "https://images.unsplash.com/photo-1445205170230-053b83016050?w=100&h=100&fit=crop";
+    return "https://picsum.photos/seed/festive/100/100";
+  if (t.includes("boys") || t.includes("girls") || t.includes("kids"))
+    return "https://picsum.photos/seed/kids/100/100";
+  if (t.includes("uniform") || t.includes("school"))
+    return "https://picsum.photos/seed/school/100/100";
+  if (t.includes("hat") || t.includes("cap") || t.includes("scarf"))
+    return "https://picsum.photos/seed/hats/100/100";
+  if (t.includes("belt")) return "https://picsum.photos/seed/belts/100/100";
+  // Deterministic fallback based on first char of title for variety
+  const seed = encodeURIComponent(
+    t.replace(/\s+/g, "-").slice(0, 12) || "fashion",
+  );
+  return `https://picsum.photos/seed/${seed}/100/100`;
 };
 
 const categories = [
@@ -158,7 +165,7 @@ const categories = [
       { title: "Suits", href: "/products/men/clothing/suits" },
       { title: "Ethnic Wear", href: "/products/men/clothing/ethnic" },
     ],
-    image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?q=80&w=800&auto=format&fit=crop",
+    image: "https://picsum.photos/seed/men/800/800",
   },
   {
     title: "Women",
@@ -182,7 +189,7 @@ const categories = [
       { title: "Sleepwear", href: "/products/women/clothing/sleepwear" },
       { title: "Loungewear", href: "/products/women/clothing/loungewear" },
     ],
-    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800&auto=format&fit=crop",
+    image: "https://picsum.photos/seed/women/800/800",
   },
   {
     title: "Kids",
@@ -196,7 +203,7 @@ const categories = [
       { title: "Accessories", href: "/products/kids/clothing/accessories" },
       { title: "Winter Wear", href: "/products/kids/clothing/winter-wear" },
     ],
-    image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=800&auto=format&fit=crop",
+    image: "https://picsum.photos/seed/kids/800/800",
   },
   {
     title: "Collections",
@@ -208,7 +215,7 @@ const categories = [
       { title: "Festive Collection", href: "/products/collections/festive" },
       { title: "Premium Collection", href: "/products/collections/premium" },
     ],
-    image: "https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800&auto=format&fit=crop",
+    image: "https://picsum.photos/seed/collections/800/800",
   },
   {
     title: "Accessories",
@@ -222,7 +229,7 @@ const categories = [
       { title: "Hats & Caps", href: "/products/accessories/hats" },
       { title: "Scarves", href: "/products/accessories/scarves" },
     ],
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=800&auto=format&fit=crop",
+    image: "https://picsum.photos/seed/accessories/800/800",
   },
 ];
 
@@ -308,6 +315,37 @@ const detailedCategories = {
   ],
 };
 
+// Image component with graceful error fallback
+function CategoryImage({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) {
+  const [errored, setErrored] = useState(false);
+  if (errored) {
+    return (
+      <div
+        className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/10 text-[8px] text-muted-foreground font-medium text-center px-1 leading-tight ${className}`}
+      >
+        {alt.slice(0, 2).toUpperCase()}
+      </div>
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      className={cn("object-cover", className)}
+      onError={() => setErrored(true)}
+    />
+  );
+}
+
 interface CategoryNavigationProps {
   className?: string;
 }
@@ -377,14 +415,12 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                                   <div className="flex items-center gap-3">
                                     {/* Image Placeholder */}
                                     <div className="h-10 w-10 shrink-0 rounded-md bg-muted overflow-hidden relative">
-                                      <Image
+                                      <CategoryImage
                                         src={
                                           item.image ||
                                           getCategoryImageUrl(item.title)
                                         }
                                         alt={item.title}
-                                        fill
-                                        className="object-cover"
                                       />
                                     </div>
                                     <div>
@@ -454,11 +490,10 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                     {/* Promo Banner */}
                     <div className="relative border-l border-border/50">
                       <div className="relative h-full min-h-[500px] overflow-hidden">
-                        <Image
+                        <CategoryImage
                           src={category.image}
                           alt={category.title}
-                          fill
-                          className="object-cover transition-transform duration-700 hover:scale-105"
+                          className="transition-transform duration-700 hover:scale-105"
                         />
 
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
@@ -731,122 +766,83 @@ export function UserMenu({ className }: UserMenuProps) {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="relative"
-          aria-label={`User Menu`}
-        >
+        <Button variant="outline" size="icon" aria-label={`User Menu`}>
           <AvatarBadge />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-fit min-w-64" align="end">
-        <div className="px-2 py-2 mb-2 flex items-center gap-3 border-b border-zinc-100/80 pb-3">
-          <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 flex items-center justify-center border border-zinc-200 shadow-sm">
-            <User size={18} className="text-zinc-600" />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <p className="text-sm font-semibold text-zinc-900 truncate">
-              {session.user?.name || "Member"}
-            </p>
-            <p className="text-[11px] font-medium text-zinc-500 truncate">
-              {session.user?.email || "Welcome back!"}
-            </p>
-          </div>
-        </div>
 
-        <div className="space-y-1">
+      <DropdownMenuContent className="w-64" align="end">
+        <DropdownMenuLabel>
+          <div className="flex flex-col">
+            <span>{session.user?.name || "Member"}</span>
+            <span className="text-xs text-muted-foreground">
+              {session.user?.email}
+            </span>
+          </div>
+        </DropdownMenuLabel>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
           <DropdownMenuItem
             onClick={() => handleNavigation("/profile?tab=orders")}
           >
-            <ShoppingBag size={15} />
-            <span className="text-sm font-medium">Orders</span>
-            {orderNotifications.length > 0 && (
-              <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-[10px] font-bold text-white shadow-sm">
-                {orderNotifications.length}
-              </span>
-            )}
+            <ShoppingBag />
+            <span>Orders</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem onClick={() => handleNavigation("/wishlist")}>
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-zinc-200/60 transition-all">
-              <Heart
-                size={15}
-                className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
-              />
-            </div>
-            <span className="text-sm font-medium">Wishlist</span>
+            <Heart />
+            <span>Wishlist</span>
           </DropdownMenuItem>
+        </DropdownMenuGroup>
 
-          <DropdownMenuSeparator className="mx-2 my-1.5 opacity-50" />
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Account</DropdownMenuLabel>
 
           <DropdownMenuItem
             onClick={() => handleNavigation("/profile?tab=profile")}
-            className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-colors focus:bg-zinc-100/80 focus:text-zinc-900 group"
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-zinc-200/60 transition-all">
-              <User
-                size={15}
-                className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
-              />
-            </div>
-            <span className="text-sm font-medium">Personal Details</span>
+            <User />
+            <span>Personal Details</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
             onClick={() => handleNavigation("/profile?tab=addresses")}
-            className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-colors focus:bg-zinc-100/80 focus:text-zinc-900 group"
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-zinc-200/60 transition-all">
-              <MapPin
-                size={15}
-                className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
-              />
-            </div>
-            <span className="text-sm font-medium">Saved Addresses</span>
+            <MapPin />
+            <span>Saved Addresses</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem
             onClick={() => handleNavigation("/profile?tab=billing")}
-            className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-colors focus:bg-zinc-100/80 focus:text-zinc-900 group"
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-zinc-200/60 transition-all">
-              <CreditCard
-                size={15}
-                className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
-              />
-            </div>
-            <span className="text-sm font-medium">Payment Methods</span>
+            <CreditCard />
+            <span>Payment Methods</span>
           </DropdownMenuItem>
+        </DropdownMenuGroup>
 
-          <DropdownMenuSeparator className="mx-2 my-1.5 opacity-50" />
+        <DropdownMenuSeparator />
 
+        <DropdownMenuGroup>
           <DropdownMenuItem
             onClick={() => handleNavigation("/profile?tab=security")}
-            className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer transition-colors focus:bg-zinc-100/80 focus:text-zinc-900 group"
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-50 group-hover:bg-white group-hover:shadow-sm border border-transparent group-hover:border-zinc-200/60 transition-all">
-              <Settings
-                size={15}
-                className="text-zinc-500 group-hover:text-zinc-900 transition-colors"
-              />
-            </div>
-            <span className="text-sm font-medium">Settings</span>
+            <Settings />
+            <span>Settings</span>
           </DropdownMenuItem>
+        </DropdownMenuGroup>
 
-          <DropdownMenuItem
-            onClick={handleSignOut}
-            className="flex items-center gap-3 px-2 py-2 rounded-xl cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700 group mt-1"
-          >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50/50 group-hover:bg-red-100 group-hover:shadow-sm border border-transparent group-hover:border-red-200/60 transition-all">
-              <LogOut
-                size={15}
-                className="text-red-500 group-hover:text-red-600 transition-colors"
-              />
-            </div>
-            <span className="text-sm font-semibold">Log out</span>
+        <DropdownMenuSeparator />
+
+        <DropdownMenuGroup>
+          <DropdownMenuItem variant="destructive" onClick={handleSignOut}>
+            <LogOut />
+            <span>Log out</span>
           </DropdownMenuItem>
-        </div>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
