@@ -6,6 +6,7 @@ import { Provider } from "react-redux"
 import { store } from "@/lib/store"
 import { Toaster } from "@/components/ui/sonner"
 import { ThemeProvider } from "next-themes"
+import { TooltipProvider } from "@/components/ui/tooltip"
 
 // Suppress the React 19 false positive warning from next-themes
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
@@ -21,8 +22,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <Provider store={store}>
       <SessionProvider>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-          <Toaster position="bottom-right" richColors closeButton />
+          <TooltipProvider>
+            {children}
+            <Toaster position="bottom-right" richColors closeButton />
+          </TooltipProvider>
         </ThemeProvider>
       </SessionProvider>
     </Provider>

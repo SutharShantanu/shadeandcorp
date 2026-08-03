@@ -52,26 +52,18 @@ import {
 import Loading from "@/components/ui/loading";
 import { useProfile } from "@/app/(auth)/hook/useProfile";
 
-import ProfileDisplayTab from "@/components/profile/ProfileDisplayTab";
-import AccountDisplayTab from "@/components/profile/AccountDisplayTab";
-import BillingTab from "@/components/profile/BillingTab";
-import NotificationsTab from "@/components/profile/NotificationsTab";
-import OrdersTab from "@/components/profile/OrdersTab";
-import AddressesTab from "@/components/profile/AddressesTab";
-import SecurityTab from "@/components/profile/SecurityTab";
+import ProfileDisplayTab from "@/components/profile/view/ProfileDisplayTab";
+import AccountDisplayTab from "@/components/profile/view/AccountDisplayTab";
+import BillingTab from "@/components/profile/edit/BillingTab";
+import NotificationsTab from "@/components/profile/edit/NotificationsTab";
+import OrdersTab from "@/components/profile/view/OrdersTab";
+import AddressesTab from "@/components/profile/edit/AddressesTab";
+import SecurityTab from "@/components/profile/edit/SecurityTab";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Dot } from "@/components/ui/dot";
 import { cn } from "@/lib/utils";
 
-const VALID_TABS = [
-  "profile",
-  "account",
-  "security",
-  "orders",
-  "addresses",
-  "billing",
-  "notifications",
-] as const;
+import { VALID_TABS, PROFILE_TABS } from "@/components/profile/shared/profile-tabs";
 
 const SEARCH_ITEMS = [
   {
@@ -148,28 +140,6 @@ const SEARCH_ITEMS = [
   },
 ] as const;
 
-const PROFILE_TABS = [
-  {
-    heading: "Account Settings",
-    items: [
-      { value: "profile", label: "Profile Info", icon: UserCircle },
-      { value: "account", label: "Account Details", icon: Shield },
-      { value: "security", label: "Security & Login", icon: Lock },
-    ],
-  },
-  {
-    heading: "Orders & Shopping",
-    items: [
-      { value: "orders", label: "My Orders", icon: Package },
-      { value: "addresses", label: "Saved Addresses", icon: MapPin },
-      { value: "billing", label: "Payment Methods", icon: CreditCard },
-    ],
-  },
-  {
-    heading: "Preferences",
-    items: [{ value: "notifications", label: "Notifications", icon: Bell }],
-  },
-];
 
 function ProfileContent() {
   const router = useRouter();
@@ -181,13 +151,12 @@ function ProfileContent() {
   // Get tab from URL query parameter, default to "profile"
   const tabFromUrl = searchParams.get("tab");
   const actionFromUrl = searchParams.get("action");
-  const initialTab =
+  const activeTab =
     tabFromUrl && VALID_TABS.includes(tabFromUrl as (typeof VALID_TABS)[number])
       ? tabFromUrl
       : actionFromUrl === "add"
         ? "addresses"
         : "profile";
-  const [activeTab, setActiveTab] = useState(initialTab);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [shouldOpenModal, setShouldOpenModal] = useState(
@@ -273,18 +242,7 @@ function ProfileContent() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // Sync activeTab with URL parameters
-  useEffect(() => {
-    const currentTab = searchParams.get("tab");
-    if (
-      currentTab &&
-      VALID_TABS.includes(currentTab as (typeof VALID_TABS)[number])
-    ) {
-      setActiveTab(currentTab);
-    }
-  }, [searchParams]);
-
-  // Update URL when tab changes (state updates via useEffect)
+  // Update URL when tab changes
   const handleTabChange = (value: string) => {
     const newUrl = `/profile?tab=${value}`;
     router.replace(newUrl, { scroll: false });
@@ -292,10 +250,10 @@ function ProfileContent() {
 
   // Redirect to login if unauthenticated (using useEffect to avoid render-time navigation)
   useEffect(() => {
-    if (status === "unauthenticated" || !session) {
+    if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status, session, router]);
+  }, [status, router]);
 
   if (status === "loading" || fetching) {
     return <Loading />;
@@ -386,14 +344,14 @@ function ProfileContent() {
           <FramePanel>
             <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex-1">
-                <h1 className="text-3xl font-bold mb-2">Profile</h1>
+                <h1 className="text-3xl font-bold">Profile</h1>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-muted-foreground">
                   <p>Manage your account settings and preferences.</p>
                   {lastUpdated && (
-                    <div className="flex items-center gap-2 text-xs opacity-70">
-                      <History />
+                    <Badge variant="outline" className="flex items-center gap-1 text-xs">
+                      <History className="size-3 text-muted-foreground" />
                       <span>Updated {lastUpdated}</span>
-                    </div>
+                    </Badge>
                   )}
                 </div>
               </div>
@@ -417,83 +375,77 @@ function ProfileContent() {
                 />
               </div>
             </div>
+            <Tabs
+              value={activeTab}
+              onValueChange={handleTabChange}
+              orientation="vertical"
+              className="flex flex-col md:flex-row w-full border rounded-xl overflow-hidden"
+            >
+              <div className="w-full md:w-64 ">
+                <div className="sticky top-0 h-full">
+                  <TabsList className="flex flex-col p-4 justify-normal h-full! w-full gap-1 items-start">
+                    {PROFILE_TABS.map((group, index) => (
+                      <div key={group.heading} className="w-full">
+                        <div
+                          className={cn(
+                            "px-3 py-1.5 text-tiny font-bold text-muted-foreground uppercase tracking-wider mb-1",
+                            index > 0 && "mt-2",
+                          )}
+                        >
+                          {group.heading}
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          {group.items.map((item) => {
+                            const Icon = item.icon;
+                            return (
+                              <TabsTrigger key={item.value} value={item.value}>
+                                <Icon className="size-4 shrink-0" />
+                                <span className="flex-1 text-left">
+                                  {item.label}
+                                </span>
+                                {hasMissingInfo(item.value) && (
+                                  <Dot variant="warning" />
+                                )}
+                              </TabsTrigger>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </TabsList>
+                </div>
+              </div>
 
-            <Card className="h-fit">
-              <CardContent>
-                <Tabs
-                  value={activeTab}
-                  onValueChange={handleTabChange}
-                  orientation="vertical"
-                  className="flex flex-col md:flex-row gap-4 min-h-[600px]"
-                >
-                  <div className="w-full md:w-64 shrink-0">
-                    <div className="sticky top-0">
-                      <TabsList className="flex flex-col h-auto w-full gap-1 items-start">
-                        {PROFILE_TABS.map((group, index) => (
-                          <div key={group.heading} className="w-full">
-                            <div
-                              className={cn(
-                                "px-4 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1",
-                                index > 0 && "mt-4",
-                              )}
-                            >
-                              {group.heading}
-                            </div>
-                            {group.items.map((item) => {
-                              const Icon = item.icon;
-                              return (
-                                <TabsTrigger
-                                  key={item.value}
-                                  value={item.value}
-                                >
-                                  <Icon className="size-4 shrink-0" />
-                                  <span className="flex-1 text-left">
-                                    {item.label}
-                                  </span>
-                                  {hasMissingInfo(item.value) && (
-                                    <Dot variant="warning" />
-                                  )}
-                                </TabsTrigger>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      </TabsList>
-                    </div>
-                  </div>
+              <div className="flex-1 p-4 md:p-6">
+                <TabsContent value="profile">
+                  <ProfileDisplayTab userProfile={userProfile} />
+                </TabsContent>
 
-                  <div className="flex-1 min-h-[500px]">
-                    <TabsContent value="profile">
-                      <ProfileDisplayTab userProfile={userProfile} />
-                    </TabsContent>
+                <TabsContent value="account">
+                  <AccountDisplayTab userProfile={userProfile} />
+                </TabsContent>
 
-                    <TabsContent value="account">
-                      <AccountDisplayTab userProfile={userProfile} />
-                    </TabsContent>
+                <TabsContent value="security">
+                  <SecurityTab userProfile={userProfile} />
+                </TabsContent>
 
-                    <TabsContent value="security">
-                      <SecurityTab userProfile={userProfile} />
-                    </TabsContent>
+                <TabsContent value="orders">
+                  <OrdersTab userProfile={userProfile} />
+                </TabsContent>
 
-                    <TabsContent value="orders">
-                      <OrdersTab userProfile={userProfile} />
-                    </TabsContent>
+                <TabsContent value="addresses">
+                  <AddressesTab userProfile={userProfile} />
+                </TabsContent>
 
-                    <TabsContent value="addresses">
-                      <AddressesTab userProfile={userProfile} />
-                    </TabsContent>
+                <TabsContent value="billing">
+                  <BillingTab userProfile={userProfile} />
+                </TabsContent>
 
-                    <TabsContent value="billing">
-                      <BillingTab userProfile={userProfile} />
-                    </TabsContent>
-
-                    <TabsContent value="notifications">
-                      <NotificationsTab userProfile={userProfile} />
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              </CardContent>
-            </Card>
+                <TabsContent value="notifications">
+                  <NotificationsTab userProfile={userProfile} />
+                </TabsContent>
+              </div>
+            </Tabs>
           </FramePanel>
         </Frame>
 
@@ -501,7 +453,7 @@ function ProfileContent() {
         <CommandDialog
           open={searchOpen}
           onOpenChange={setSearchOpen}
-          className="max-w-4xl"
+          className="max-w-4xl sm:max-w-4xl"
         >
           <CommandInput
             placeholder="Search settings..."
@@ -524,7 +476,6 @@ function ProfileContent() {
                 <CommandItem
                   className="elipse "
                   onSelect={() => {
-                    setActiveTab("profile");
                     handleTabChange("profile");
                     setSearchOpen(false);
                     setSearchQuery("");
@@ -547,7 +498,6 @@ function ProfileContent() {
                 </CommandItem>
                 <CommandItem
                   onSelect={() => {
-                    setActiveTab("security");
                     handleTabChange("security");
                     setSearchOpen(false);
                     setSearchQuery("");
@@ -571,7 +521,6 @@ function ProfileContent() {
                         <CommandItem
                           key={`${category}-${index}`}
                           onSelect={() => {
-                            setActiveTab(item.tab);
                             handleTabChange(item.tab);
                             setSearchOpen(false);
                             setSearchQuery("");

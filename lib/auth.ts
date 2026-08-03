@@ -9,6 +9,7 @@ import User, { IUser } from "@/models/User";
 import { createUser, updateUser } from "@/lib/infrastructure/db";
 import { otpStoreService } from "@/lib/otpStore";
 import { generateUserNotifications } from "@/lib/domain/notificationUtils";
+import { headers } from "next/headers";
 
 interface GeoData {
   ip?: string;
@@ -19,6 +20,49 @@ interface GeoData {
   org?: string;
   latitude?: number;
   longitude?: number;
+}
+
+async function getSessionData(reqHeaders?: any) {
+  let ip = "Unknown";
+  let userAgent = "";
+  
+  try {
+    if (reqHeaders && Object.keys(reqHeaders).length > 0) {
+      ip = reqHeaders["x-forwarded-for"]?.split(",")[0] || reqHeaders["x-real-ip"] || "Unknown";
+      userAgent = reqHeaders["user-agent"] || "";
+    } else {
+      const h = await headers();
+      ip = h.get("x-forwarded-for")?.split(",")[0] || h.get("x-real-ip") || "Unknown";
+      userAgent = h.get("user-agent") || "";
+    }
+  } catch (e) {
+    console.warn("Could not get headers:", e);
+  }
+
+  let geoData: GeoData = {};
+  try {
+    if (ip && ip !== "Unknown" && ip !== "::1" && ip !== "127.0.0.1") {
+      const geoResponse = await fetch(`http://ipapi.co/${ip}/json/`);
+      geoData = await geoResponse.json();
+    }
+  } catch (err) {
+    console.warn("Geo API error:", err instanceof Error ? err.message : 'Unknown error');
+  }
+
+  const deviceInfo = getDeviceInfo(userAgent);
+
+  return {
+    ipAddress: geoData.ip || ip || 'Unknown',
+    city: geoData.city,
+    region: geoData.region,
+    country: geoData.country_name,
+    timezone: geoData.timezone,
+    org: geoData.org,
+    latitude: geoData.latitude,
+    longitude: geoData.longitude,
+    deviceInfo: JSON.stringify(deviceInfo) || userAgent,
+    loggedInAt: new Date(),
+  };
 }
 
 export const authOptions: NextAuthOptions = {
@@ -72,35 +116,9 @@ export const authOptions: NextAuthOptions = {
             }
           }
 
-          // Track login session
-          const ip = req?.headers?.["x-forwarded-for"]?.split(",")[0] ||
-            req?.headers?.["x-real-ip"];
-
-          let geoData: GeoData = {};
-          try {
-            if (ip) {
-              const geoResponse = await fetch(`http://ipapi.co/${ip}/json/`);
-              geoData = await geoResponse.json();
-            }
-          } catch (err) {
-            console.warn("Geo API error:", err instanceof Error ? err.message : 'Unknown error');
-          }
-
-          const userAgent = req?.headers?.["user-agent"] || "";
-          const deviceInfo = getDeviceInfo(userAgent);
-
-          user.sessions.push({
-            ipAddress: geoData.ip || ip || 'Unknown',
-            city: geoData.city,
-            region: geoData.region,
-            country: geoData.country_name,
-            timezone: geoData.timezone,
-            org: geoData.org,
-            latitude: geoData.latitude,
-            longitude: geoData.longitude,
-            deviceInfo: JSON.stringify(deviceInfo) || userAgent,
-            loggedInAt: new Date(),
-          });
+            // Track login session
+            const sessionData = await getSessionData(req?.headers);
+            user.sessions.push(sessionData);
 
           if (!user.connectedProviders) {
             user.connectedProviders = { google: false, github: false, credentials: true };
@@ -219,6 +237,9 @@ export const authOptions: NextAuthOptions = {
               },
             };
 
+            const sessionData = await getSessionData();
+            newUserData.sessions = [sessionData];
+
             await createUser(newUserData);
           } else {
             // Update existing user's last login
@@ -241,12 +262,15 @@ export const authOptions: NextAuthOptions = {
               if (account.provider === "github") {
                 connectedProviders.github = true;
               }
+              
+              const sessionData = await getSessionData();
 
               await updateUser(userId, {
                 lastLogin: new Date(),
                 profilePicture: user.image || existingUser.profilePicture,
-                connectedProviders
-              });
+                connectedProviders,
+                $push: { sessions: sessionData }
+              } as any);
             } else {
               console.error("SignIn error: Invalid user ID for update", existingUser);
               throw new Error('Invalid user ID for update');

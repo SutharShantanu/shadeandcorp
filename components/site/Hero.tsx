@@ -109,7 +109,8 @@ const EmblaCarousel: React.FC<PropType> = ({
               />
               
               {/* Overlay for better text readability */}
-              <div className={`absolute inset-0 bg-black/20 ${slide.theme === 'dark' ? 'bg-black/30' : ''}`} />
+              <div className={`absolute inset-0 bg-black/25 ${slide.theme === 'dark' ? 'bg-black/40' : ''}`} />
+              <div className="absolute top-0 left-0 right-0 h-44 bg-gradient-to-b from-black/50 via-black/15 to-transparent pointer-events-none z-10" />
               
               {/* Content Overlay */}
               <div className="absolute inset-0 flex items-center">

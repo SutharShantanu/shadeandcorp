@@ -312,7 +312,7 @@ export default function ProductFilters() {
                         <div className={cn("w-2 h-2 rounded-full bg-white", color.name === "White" ? "bg-black" : "")} />
                       )}
                     </div>
-                    <span className="text-[10px] text-muted-foreground group-hover:text-foreground">{color.name}</span>
+                    <span className="text-tiny text-muted-foreground group-hover:text-foreground">{color.name}</span>
                   </div>
                 ))}
               </div>
@@ -332,13 +332,13 @@ export default function ProductFilters() {
             </AccordionTrigger>
             <AccordionContent className="py-2">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Select Size</span>
+                <span className="text-tiny text-muted-foreground uppercase tracking-wider font-semibold">Select Size</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setSizeGuideOpen(true);
                   }}
-                  className="text-[10px] flex items-center gap-1 text-primary hover:underline font-medium"
+                  className="text-tiny flex items-center gap-1 text-primary hover:underline font-medium"
                 >
                   <Ruler className="size-2.5" />
                   Size Guide

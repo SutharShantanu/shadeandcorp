@@ -13,7 +13,11 @@ import {
   CreditCard,
   MapPin,
   ArrowRight,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useRef, useState } from "react";
 import { MenuIcon } from "@/components/ui/menu";
@@ -39,6 +43,7 @@ import { ExpandableButton } from "@/components/extended/button";
 import AvatarBadge from "@/components/site/AvatarBadge";
 import { useAppSelector } from "@/lib/store";
 import { getNotificationsByCategory } from "@/lib/domain/notificationUtils";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -136,7 +141,19 @@ const getCategoryImageUrl = (title: string) => {
   return `https://picsum.photos/seed/${seed}/100/100`;
 };
 
-const categories = [
+interface CategoryItem {
+  title: string;
+  href: string;
+  image?: string;
+}
+
+interface Category {
+  title: string;
+  items: CategoryItem[];
+  image?: string;
+}
+
+const categories: Category[] = [
   {
     title: "Men",
     items: [
@@ -402,44 +419,47 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                               `/products/${category.title.toLowerCase()}`,
                             )
                           }
+                          icon={<ArrowRight />}
                         />
                       </div>
 
                       {/* Featured Cards */}
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {category.items.slice(0, 6).map((item: any) => (
-                          <Link key={item.title} href={item.href}>
-                            <Card className="group h-full bg-muted ring-0">
-                              <CardContent>
-                                <div className="flex items-center justify-between gap-3">
-                                  <div className="flex items-center gap-3">
-                                    {/* Image Placeholder */}
-                                    <div className="h-10 w-10 shrink-0 rounded-md bg-muted overflow-hidden relative">
-                                      <CategoryImage
-                                        src={
-                                          item.image ||
-                                          getCategoryImageUrl(item.title)
-                                        }
-                                        alt={item.title}
-                                      />
-                                    </div>
-                                    <div>
-                                      <h4 className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-1">
-                                        {item.title}
-                                      </h4>
+                        {category.items
+                          .slice(0, 6)
+                          .map((item: CategoryItem) => (
+                            <Link key={item.title} href={item.href}>
+                              <Card className="group h-full bg-muted ring-0">
+                                <CardContent>
+                                  <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3">
+                                      {/* Image Placeholder */}
+                                      <div className="h-10 w-10 shrink-0 rounded-md bg-muted overflow-hidden relative">
+                                        <CategoryImage
+                                          src={
+                                            item.image ||
+                                            getCategoryImageUrl(item.title)
+                                          }
+                                          alt={item.title}
+                                        />
+                                      </div>
+                                      <div>
+                                        <h4 className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-1">
+                                          {item.title}
+                                        </h4>
 
-                                      <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                                        Explore collection
-                                      </p>
+                                        <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
+                                          Explore collection
+                                        </p>
+                                      </div>
                                     </div>
+
+                                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-primary group-hover:translate-x-1" />
                                   </div>
-
-                                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-primary group-hover:translate-x-1" />
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </Link>
-                        ))}
+                                </CardContent>
+                              </Card>
+                            </Link>
+                          ))}
                       </div>
 
                       {hasDetailedCategories && (
@@ -491,7 +511,10 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                     <div className="relative border-l border-border/50">
                       <div className="relative h-full min-h-[500px] overflow-hidden">
                         <CategoryImage
-                          src={category.image}
+                          src={
+                            category.image ||
+                            getCategoryImageUrl(category.title)
+                          }
                           alt={category.title}
                           className="transition-transform duration-700 hover:scale-105"
                         />
@@ -537,7 +560,7 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                                 <p className="text-lg font-bold text-white">
                                   500+
                                 </p>
-                                <p className="text-[10px] text-white/70">
+                                <p className="text-tiny text-white/70">
                                   Products
                                 </p>
                               </CardContent>
@@ -548,7 +571,7 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                                 <p className="text-lg font-bold text-white">
                                   4.8★
                                 </p>
-                                <p className="text-[10px] text-white/70">
+                                <p className="text-tiny text-white/70">
                                   Rating
                                 </p>
                               </CardContent>
@@ -559,7 +582,7 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                                 <p className="text-lg font-bold text-white">
                                   24h
                                 </p>
-                                <p className="text-[10px] text-white/70">
+                                <p className="text-tiny text-white/70">
                                   Dispatch
                                 </p>
                               </CardContent>
@@ -671,7 +694,7 @@ export function ActionButtons({
                 aria-label={`Wishlist (${wishlistCount})`}
               >
                 <Heart
-                  className="h-5 w-5 fill-red-400 stroke-red-400"
+                  className="h-5 w-5 text-red-500 fill-red-500/20 hover:fill-red-500 transition-colors"
                   aria-hidden="true"
                 />
                 {wishlistCount > 0 && (
@@ -699,7 +722,10 @@ export function ActionButtons({
                 className="relative"
                 aria-label="User menu"
               >
-                <ShoppingBag className="h-5 w-5" aria-hidden="true" />
+                <ShoppingBag
+                  className="h-5 w-5 text-foreground"
+                  aria-hidden="true"
+                />
                 {cartCount > 0 && (
                   <Badge
                     variant="destructive"
@@ -726,6 +752,14 @@ interface UserMenuProps {
 export function UserMenu({ className }: UserMenuProps) {
   const { data: session } = useSession();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      setMounted(true);
+    });
+  }, []);
 
   if (!session) {
     return (
@@ -773,7 +807,7 @@ export function UserMenu({ className }: UserMenuProps) {
 
       <DropdownMenuContent className="w-64" align="end">
         <DropdownMenuLabel>
-          <div className="flex flex-col">
+          <div className="flex flex-col select-none">
             <span>{session.user?.name || "Member"}</span>
             <span className="text-xs text-muted-foreground">
               {session.user?.email}
@@ -832,6 +866,54 @@ export function UserMenu({ className }: UserMenuProps) {
           >
             <Settings />
             <span>Settings</span>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="flex items-center justify-between cursor-default"
+            onSelect={(e) => e.preventDefault()}
+          >
+            <div className="flex items-center gap-2">
+              {mounted && theme === "dark" ? (
+                <Moon />
+              ) : mounted && theme === "light" ? (
+                <Sun />
+              ) : (
+                <Monitor />
+              )}
+              <span>Theme</span>
+            </div>
+            <ToggleGroup
+              type="single"
+              size="sm"
+              variant="outline"
+              spacing={0}
+              value={mounted && theme ? theme : "system"}
+              onValueChange={(val) => {
+                if (val) setTheme(val);
+              }}
+            >
+              <ToggleGroupItem
+                value="light"
+                aria-label="Light theme"
+                title="Light"
+              >
+                <Sun className="size-3.5" />
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="dark"
+                aria-label="Dark theme"
+                title="Dark"
+              >
+                <Moon className="size-3.5" />
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="system"
+                aria-label="System theme"
+                title="System"
+              >
+                <Monitor className="size-3.5" />
+              </ToggleGroupItem>
+            </ToggleGroup>
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
@@ -911,9 +993,12 @@ export default function Navbar({ className }: { className?: string }) {
 
   return (
     <header
-      className={`sticky top-0 z-50 backdrop-blur-sm shadow-sm ${className}`}
+      className={cn(
+        "sticky top-0 z-50 transition-all duration-300 border-b bg-background border-border py-4",
+        className,
+      )}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 py-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
         {/* Left Section - Mobile Menu & Logo */}
         <div className="flex items-center gap-4">
           <MobileMenu categories={categories} />

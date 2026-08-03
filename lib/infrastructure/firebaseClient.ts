@@ -20,6 +20,16 @@ export const firebaseAuth = firebaseApp ? getAuth(firebaseApp) : null as any;
 
 // OTP Recaptcha Setup
 export const setupRecaptcha = () => {
+  if (!firebaseAuth) {
+    console.warn("Firebase Auth is not initialized. Mocking RecaptchaVerifier for development.");
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = {
+        verify: async () => "mock_recaptcha_token",
+        clear: () => {},
+      } as any;
+    }
+    return;
+  }
   if (!window.recaptchaVerifier) {
     window.recaptchaVerifier = new RecaptchaVerifier(
       firebaseAuth,

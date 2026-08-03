@@ -133,7 +133,7 @@ export function DeliveryAddress({
                       {address.isDefault && (
                         <Badge
                           variant="secondary"
-                          className="text-[10px] px-2 py-0.5"
+                          className="text-tiny px-2 py-0.5"
                         >
                           Default
                         </Badge>

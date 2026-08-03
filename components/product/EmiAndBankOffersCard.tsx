@@ -99,7 +99,7 @@ export function EmiAndBankOffersCard({
                   Easy Installments
                 </p>
               </div>
-              <span className="text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+              <span className="text-tiny font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                 No Cost EMI available
               </span>
             </div>
@@ -147,7 +147,7 @@ export function EmiAndBankOffersCard({
                       <span className="text-xs font-semibold text-foreground tabular-nums">
                         Total: ₹{totalPayable.toLocaleString()}
                       </span>
-                      <span className="text-[10px] text-muted-foreground tabular-nums">
+                      <span className="text-tiny text-muted-foreground tabular-nums">
                         Interest: ₹{totalInterest.toLocaleString()} @{" "}
                         {plan.rate}% p.a.
                       </span>
@@ -210,7 +210,7 @@ export function EmiAndBankOffersCard({
                             {offer.description}
                           </p>
                           <span
-                            className={`inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-md border shrink-0 ${getOfferBadgeStyle(offer.type)}`}
+                            className={`inline-flex items-center text-tiny font-bold px-1.5 py-0.5 rounded-md border shrink-0 ${getOfferBadgeStyle(offer.type)}`}
                           >
                             {offer.type === "upi"
                               ? `₹${offer.discount} OFF`

@@ -235,7 +235,7 @@ export function CheckoutAddressForm({
                           </Button>
                         </div>
                       </FormControl>
-                      <FormMessage className="text-[10px]" />
+                      <FormMessage className="text-tiny" />
                     </FormItem>
                   )}
                 />
@@ -269,7 +269,7 @@ export function CheckoutAddressForm({
                               {...field}
                             />
                           </FormControl>
-                          <FormMessage className="text-[10px]" />
+                          <FormMessage className="text-tiny" />
                         </FormItem>
                       )}
                     />
@@ -295,7 +295,7 @@ export function CheckoutAddressForm({
                             }}
                           />
                         </FormControl>
-                        <FormMessage className="text-[10px]" />
+                        <FormMessage className="text-tiny" />
                       </FormItem>
                     )}
                   />
@@ -317,7 +317,7 @@ export function CheckoutAddressForm({
                             }}
                           />
                         </FormControl>
-                        <FormMessage className="text-[10px]" />
+                        <FormMessage className="text-tiny" />
                       </FormItem>
                     )}
                   />
@@ -340,7 +340,7 @@ export function CheckoutAddressForm({
                             onChange={field.onChange}
                           />
                         </FormControl>
-                        <FormMessage className="text-[10px]" />
+                        <FormMessage className="text-tiny" />
                       </FormItem>
                     )}
                   />
@@ -358,7 +358,7 @@ export function CheckoutAddressForm({
                             {...field}
                           />
                         </FormControl>
-                        <FormMessage className="text-[10px]" />
+                        <FormMessage className="text-tiny" />
                       </FormItem>
                     )}
                   />
@@ -411,7 +411,7 @@ export function CheckoutAddressForm({
                           ))}
                         </RadioGroupPrimitive.Root>
                       </FormControl>
-                      <FormMessage className="text-[10px]" />
+                      <FormMessage className="text-tiny" />
                     </FormItem>
                   )}
                 />
@@ -469,7 +469,7 @@ export function CheckoutAddressForm({
                           />
                         </Field>
                       </FormControl>
-                      <FormMessage className="text-[10px]" />
+                      <FormMessage className="text-tiny" />
                     </FormItem>
                   )}
                 />

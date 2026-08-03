@@ -45,5 +45,8 @@ next-env.d.ts
 /.agent/
 /.agents/
 /.claude/
+/.cursor/
+/.opencode/
+/.vscode/
 skills-lock.json
 .env*.local

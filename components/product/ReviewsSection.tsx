@@ -421,7 +421,7 @@ export function ReviewCard({
       {review.reply && (
         <div className="mt-4 ml-4 pl-4 border-l-2 border-primary/20 bg-muted/20 py-2 pr-4 rounded-r-lg">
           <div className="flex items-center gap-2 mb-1">
-            <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground shrink-0">
+            <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-tiny font-bold text-primary-foreground shrink-0">
               S
             </div>
             <span className="text-xs font-semibold text-primary">

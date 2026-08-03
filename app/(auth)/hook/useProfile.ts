@@ -308,6 +308,60 @@ export function useProfile() {
     return updateAddress(addressId, { isDefault: true });
   }
 
+  // Delete a specific session
+  async function deleteSession(sessionIndex: number) {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/user/profile/sessions?index=${sessionIndex}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
+      if (result.ok) {
+        setUserProfile((prev) =>
+          prev ? { ...prev, sessions: result.sessions } : prev
+        );
+        return { success: true, message: result.message };
+      } else {
+        setError(result.error || "Failed to log out session");
+        return { success: false, error: result.error };
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to log out session";
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Delete all other sessions
+  async function deleteAllOtherSessions() {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/user/profile/sessions?action=all_others", {
+        method: "DELETE",
+      });
+      const result = await response.json();
+      if (result.ok) {
+        setUserProfile((prev) =>
+          prev ? { ...prev, sessions: result.sessions } : prev
+        );
+        return { success: true, message: result.message };
+      } else {
+        setError(result.error || "Failed to log out all other sessions");
+        return { success: false, error: result.error };
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to log out all other sessions";
+      setError(msg);
+      return { success: false, error: msg };
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return {
     profileForm,
     accountForm,
@@ -320,6 +374,8 @@ export function useProfile() {
     updateAddress,
     deleteAddress,
     setDefaultAddress,
+    deleteSession,
+    deleteAllOtherSessions,
   };
 }
 
