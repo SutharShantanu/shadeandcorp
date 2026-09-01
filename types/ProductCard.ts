@@ -64,6 +64,7 @@ export interface ProductImageSectionProps {
   isWishlisted: boolean;
   isOutOfStock: boolean;
   discountPercentage: number;
+  priceDropAmount?: number;
   onAddToWishlist: () => void;
   selectedColorName?: string;
 }
@@ -79,6 +80,7 @@ export interface ProductInfoHeaderProps {
 export interface PriceSectionProps {
   product: Product;
   savings: number;
+  priceDropAmount?: number;
 }
 
 export interface ColorOptionsProps {

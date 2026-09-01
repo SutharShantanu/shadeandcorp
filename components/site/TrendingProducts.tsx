@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import ProductCard from "./ProductCard";
+import ProductCarousel from "./ProductCarousel";
 import { Product } from "@/types/ProductCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import NumberFlow from "@number-flow/react";
 import { Zap, Clock, TrendingUp, Star, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import SectionCtaButton from "@/components/site/SectionCtaButton";
 
 // Enhanced product data matching our new Product type
 const rawTrendingProducts = [
@@ -340,7 +341,7 @@ const CountdownTimer = ({ endDate }: { endDate: Date }) => {
               value={item.value}
             />
           </div>
-          <span className="text-sm text-gray-600 mt-2 font-medium">
+          <span className="text-sm text-muted-foreground mt-2 font-medium">
             {item.label}
           </span>
         </div>
@@ -394,27 +395,19 @@ const CategoryFilter = ({
 
   return (
     <ScrollArea className="w-full whitespace-nowrap">
-      <div className="flex space-x-2 pb-4">
+      <div className="flex space-x-2 pb-4 justify-center">
         {categories.map((category) => (
           <Button
             key={category.id}
             variant={selectedCategory === category.id ? "default" : "outline"}
             onClick={() => onCategoryChange(category.id)}
-            className={`rounded-full px-6 py-3 h-auto transition-all duration-300 ${
-              selectedCategory === category.id
-                ? "bg-black text-white shadow-lg"
-                : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
-            }`}
+            className="rounded-full px-5 py-2.5 h-auto transition-all duration-300 cursor-pointer shadow-2xs"
           >
             <span className="mr-2">{category.icon}</span>
             {category.label}
             <Badge
-              variant="secondary"
-              className={`ml-2 ${
-                selectedCategory === category.id
-                  ? "bg-white text-black"
-                  : "bg-gray-100 text-gray-600"
-              }`}
+              variant={selectedCategory === category.id ? "secondary" : "outline"}
+              className="ml-2 text-xs"
             >
               {category.count}
             </Badge>
@@ -444,27 +437,6 @@ export default function TrendingProducts() {
                 product.tags?.includes(selectedCategory.toLowerCase()),
             );
 
-  // Event handlers for product actions
-  const handleAddToCart = (
-    product: Product,
-    quantity: number,
-    size: string,
-    color: string,
-  ) => {
-    console.log("Add to cart:", {
-      product: product.title,
-      quantity,
-      size,
-      color,
-    });
-    // Implement your cart logic here
-  };
-
-  const handleAddToWishlist = (product: Product) => {
-    console.log("Add to wishlist:", product.title);
-    // Implement your wishlist logic here
-  };
-
   return (
     <section className="py-16 md:py-24">
       <div className="max-w-7xl mx-auto">
@@ -477,23 +449,23 @@ export default function TrendingProducts() {
           className="text-center mb-12"
         >
           <Badge
-            variant="outline"
-            className="mb-4 px-4 py-1 text-sm font-semibold border-red-300 text-red-600"
+            variant="destructive"
+            className="mb-4 px-4 py-1 text-xs font-semibold uppercase tracking-wider"
           >
             LIMITED TIME OFFER
           </Badge>
-          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
+          <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
             Special Offers & Collections
           </h2>
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
             Discover our exclusive collections with limited-time discounts.
             Don&apos;t miss out on these amazing deals!
           </p>
 
           {/* Countdown Timer */}
-          <div className="flex flex-col items-center gap-4 bg-white rounded-2xl p-6 shadow-lg border border-gray-100 max-w-md mx-auto">
-            <div className="flex items-center gap-2 text-red-600 font-semibold">
-              <Clock className="w-5 h-5" />
+          <div className="flex flex-col items-center gap-4 bg-card rounded-2xl p-6 shadow-md border border-border max-w-md mx-auto">
+            <div className="flex items-center gap-2 text-destructive font-semibold text-sm">
+              <Clock className="w-4 h-4" />
               <span>Sale Ends In:</span>
             </div>
             <CountdownTimer endDate={saleEndDate} />
@@ -514,43 +486,31 @@ export default function TrendingProducts() {
           />
         </motion.div>
 
-        {/* Products Grid */}
+        {/* Products Carousel */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           viewport={{ once: true }}
-          className="columns-1 sm:columns-2 lg:columns-4 gap-4 space-y-4"
         >
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="break-inside-avoid">
-              <ProductCard
-                product={product}
-                onAddToCart={handleAddToCart}
-                onAddToWishlist={handleAddToWishlist}
-              />
-            </div>
-          ))}
+          <ProductCarousel
+            products={filteredProducts}
+            title="Special Offers & Trending Items"
+            subtitle="Swipe through our curated high-demand items with exclusive discounts"
+            badgeText="Featured Deals"
+            autoplay={true}
+            autoplayDelay={4000}
+          />
         </motion.div>
 
         {/* View All Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center mt-12"
+        <SectionCtaButton
+          href="/products"
+          variant="outline"
+          delay={0.6}
         >
-          <Link
-            href="/products"
-            className="rounded-full px-8 py-6 border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition-all duration-300 font-semibold text-base"
-          >
-            View All Special Offers
-            <span className="ml-2 transform group-hover:translate-x-1 transition-transform duration-300">
-              <ArrowRight />
-            </span>
-          </Link>
-        </motion.div>
+          View All Special Offers
+        </SectionCtaButton>
       </div>
     </section>
   );

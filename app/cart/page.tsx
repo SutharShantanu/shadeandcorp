@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Truck,
   Shield,
+  Bookmark,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,6 +28,9 @@ import { CouponButton } from "@/components/modal/checkout/CouponButton";
 import { CouponList } from "@/components/modal/checkout/CouponList";
 import { coupons, bankOffers } from "@/lib/constants";
 import { toast } from "sonner";
+import { SimilarProducts } from "@/components/product/SimilarProducts";
+import { useAppDispatch } from "@/lib/store";
+import { add as addToWishlist } from "@/features/wishlist/wishlistSlice";
 
 
 interface CartItem {
@@ -77,15 +81,9 @@ const initialCartItems: CartItem[] = [
   },
 ];
 
-const recommendedProducts = [
-  { id: "r1", name: "Related Product 1", price: 29.99 },
-  { id: "r2", name: "Related Product 2", price: 29.99 },
-  { id: "r3", name: "Related Product 3", price: 29.99 },
-  { id: "r4", name: "Related Product 4", price: 29.99 },
-];
-
 export default function CartPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
   
   const [selectedCoupon, setSelectedCoupon] = useState<string>("");
@@ -126,7 +124,6 @@ export default function CartPage() {
     new Set(cartItems.map((item) => item.id))
   );
 
-
   const handleSelectItem = (itemId: string) => {
     const newSelected = new Set(selectedItems);
     if (newSelected.has(itemId)) {
@@ -166,12 +163,60 @@ export default function CartPage() {
     });
   };
 
-  const handleToggleFavorite = (itemId: string) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, isFavorite: !item.isFavorite } : item
-      )
+  const handleSaveForLater = (item: CartItem) => {
+    dispatch(
+      addToWishlist({
+        id: item.id,
+        title: item.name,
+        brand: item.brand,
+        description: item.details,
+        basePrice: item.price,
+        slug: item.name.toLowerCase().replace(/ /g, "-"),
+        variants: [
+          {
+            id: `v-${item.id}`,
+            color: { name: "Default", hex: "#000000" },
+            size: "M",
+            sku: `SKU-${item.id}`,
+            price: item.price,
+            originalPrice: item.originalPrice || item.price,
+            discount: item.originalPrice
+              ? Math.round(
+                  ((item.originalPrice - item.price) / item.originalPrice) * 100
+                )
+              : 0,
+            stockQuantity: 10,
+            isDefault: true,
+          },
+        ],
+        assets: [
+          {
+            id: `a-${item.id}`,
+            type: "image",
+            role: "thumbnail",
+            url: item.image,
+            alt: item.name,
+            order: 1,
+          },
+        ],
+      })
     );
+
+    handleRemoveItem(item.id);
+
+    toast.success(`Moved "${item.name}" to your wishlist!`, {
+      action: {
+        label: "View Wishlist",
+        onClick: () => router.push("/wishlist"),
+      },
+    });
+  };
+
+  const handleToggleFavorite = (itemId: string) => {
+    const item = cartItems.find((c) => c.id === itemId);
+    if (item) {
+      handleSaveForLater(item);
+    }
   };
 
   const selectedCartItems = cartItems.filter((item) =>
@@ -356,53 +401,48 @@ export default function CartPage() {
                             )}
                           </div>
 
-                          <div className="flex items-center gap-4">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => handleToggleFavorite(item.id)}
-                            >
-                              <Heart
-                                className={`h-4 w-4 ${
-                                  item.isFavorite
-                                    ? "fill-red-500 text-red-500"
-                                    : ""
-                                }`}
-                              />
-                            </Button>
-
-                            <div className="flex items-center gap-2 border rounded-md">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex items-center gap-1 border rounded-lg bg-background">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8"
+                                className="h-7 w-7 cursor-pointer"
                                 onClick={() =>
                                   handleQuantityChange(item.id, -1)
                                 }
                               >
-                                <Minus className="h-4 w-4" />
+                                <Minus className="h-3.5 w-3.5" />
                               </Button>
-                              <span className="px-3 py-1 min-w-[3rem] text-center">
+                              <span className="px-2.5 py-0.5 min-w-[2.5rem] text-center text-xs font-semibold">
                                 {item.quantity}
                               </span>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8"
+                                className="h-7 w-7 cursor-pointer"
                                 onClick={() => handleQuantityChange(item.id, 1)}
                               >
-                                <Plus className="h-4 w-4" />
+                                <Plus className="h-3.5 w-3.5" />
                               </Button>
                             </div>
 
                             <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs h-7 gap-1.5 rounded-lg cursor-pointer"
+                              onClick={() => handleSaveForLater(item)}
+                            >
+                              <Bookmark className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span>Save for Later</span>
+                            </Button>
+
+                            <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              className="h-7 w-7 text-muted-foreground hover:text-destructive cursor-pointer"
                               onClick={() => handleRemoveItem(item.id)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>
                         </div>
@@ -497,20 +537,7 @@ export default function CartPage() {
 
         {/* You might also like Section */}
         <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6">You might also like</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {recommendedProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="aspect-square bg-gray-100 rounded-lg mb-3 flex items-center justify-center">
-                    <div className="w-12 h-12 bg-gray-300 rounded-full opacity-50" />
-                  </div>
-                  <h3 className="font-semibold mb-2">{product.name}</h3>
-                  <p className="text-lg font-bold">${product.price.toFixed(2)}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <SimilarProducts category="Men" currentSlug="" />
         </div>
       </div>
 

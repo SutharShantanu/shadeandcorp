@@ -39,7 +39,6 @@ import {
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ExpandableButton } from "@/components/extended/button";
 import AvatarBadge from "@/components/site/AvatarBadge";
 import { useAppSelector } from "@/lib/store";
 import { getNotificationsByCategory } from "@/lib/domain/notificationUtils";
@@ -69,71 +68,101 @@ import {
 import { useDebounce } from "@/hooks/use-debounce";
 import { Card, CardContent } from "../ui/card";
 import { Dot } from "../ui/dot";
+import { MarqueeText } from "../ui/marquee-text";
 import { cn } from "@/lib/utils";
 
 const getCategoryImageUrl = (title: string) => {
   const t = title.toLowerCase();
   // Using picsum.photos with deterministic seeds — always available, no auth needed
   if (
+    t.includes("topwear") ||
     t.includes("shirt") ||
     t.includes("top") ||
+    t.includes("blouse") ||
     t.includes("sweater") ||
     t.includes("clothing")
   )
     return "https://picsum.photos/seed/clothing/100/100";
   if (
+    t.includes("bottomwear") ||
     t.includes("jean") ||
     t.includes("trouser") ||
     t.includes("short") ||
+    t.includes("skirt") ||
+    t.includes("pant") ||
     t.includes("legging")
   )
     return "https://picsum.photos/seed/jeans/100/100";
-  if (t.includes("active") || t.includes("activewear"))
-    return "https://picsum.photos/seed/activewear/100/100";
   if (
     t.includes("footwear") ||
     t.includes("shoe") ||
     t.includes("boot") ||
-    t.includes("sandal")
+    t.includes("sandal") ||
+    t.includes("sneaker") ||
+    t.includes("heel") ||
+    t.includes("flat")
   )
     return "https://picsum.photos/seed/shoes/100/100";
-  if (t.includes("winter") || t.includes("snow") || t.includes("jacket"))
-    return "https://picsum.photos/seed/winter/100/100";
-  if (t.includes("watch") || t.includes("glass") || t.includes("sunglass"))
-    return "https://picsum.photos/seed/watch/100/100";
-  if (t.includes("accessor"))
+  if (
+    t.includes("accessor") ||
+    t.includes("cap") ||
+    t.includes("hat") ||
+    t.includes("scarf")
+  )
     return "https://picsum.photos/seed/accessories/100/100";
-  if (t.includes("bag") || t.includes("wallet") || t.includes("backpack"))
-    return "https://picsum.photos/seed/bags/100/100";
-  if (t.includes("dress") || t.includes("skirt"))
-    return "https://picsum.photos/seed/dress/100/100";
-  if (t.includes("suit") || t.includes("blazer"))
-    return "https://picsum.photos/seed/suit/100/100";
-  if (t.includes("inner") || t.includes("lingerie"))
-    return "https://picsum.photos/seed/innerwear/100/100";
-  if (t.includes("baby") || t.includes("infant"))
-    return "https://picsum.photos/seed/baby/100/100";
-  if (t.includes("jewel") || t.includes("premium"))
-    return "https://picsum.photos/seed/jewelry/100/100";
-  if (t.includes("summer") || t.includes("sun"))
-    return "https://picsum.photos/seed/summer/100/100";
-  if (t.includes("lounge") || t.includes("night") || t.includes("sleep"))
-    return "https://picsum.photos/seed/lounge/100/100";
+  if (t.includes("active") || t.includes("activewear") || t.includes("sport"))
+    return "https://picsum.photos/seed/activewear/100/100";
   if (
     t.includes("ethnic") ||
+    t.includes("indian") ||
     t.includes("kurta") ||
     t.includes("saree") ||
     t.includes("festive") ||
-    t.includes("party")
+    t.includes("party") ||
+    t.includes("lehenga")
   )
     return "https://picsum.photos/seed/festive/100/100";
-  if (t.includes("boys") || t.includes("girls") || t.includes("kids"))
+  if (t.includes("dress") || t.includes("jumpsuit"))
+    return "https://picsum.photos/seed/dress/100/100";
+  if (
+    t.includes("inner") ||
+    t.includes("lounge") ||
+    t.includes("lingerie") ||
+    t.includes("sleep")
+  )
+    return "https://picsum.photos/seed/lounge/100/100";
+  if (
+    t.includes("winter") ||
+    t.includes("snow") ||
+    t.includes("jacket") ||
+    t.includes("coat")
+  )
+    return "https://picsum.photos/seed/winter/100/100";
+  if (t.includes("watch")) return "https://picsum.photos/seed/watch/100/100";
+  if (
+    t.includes("bag") ||
+    t.includes("wallet") ||
+    t.includes("backpack") ||
+    t.includes("handbag")
+  )
+    return "https://picsum.photos/seed/bags/100/100";
+  if (t.includes("glass") || t.includes("sunglass"))
+    return "https://picsum.photos/seed/sunglasses/100/100";
+  if (t.includes("belt")) return "https://picsum.photos/seed/belts/100/100";
+  if (t.includes("jewel") || t.includes("premium"))
+    return "https://picsum.photos/seed/jewelry/100/100";
+  if (t.includes("boys")) return "https://picsum.photos/seed/boys/100/100";
+  if (t.includes("girls")) return "https://picsum.photos/seed/girls/100/100";
+  if (t.includes("kids") || t.includes("child"))
     return "https://picsum.photos/seed/kids/100/100";
+  if (t.includes("baby") || t.includes("infant") || t.includes("toddler"))
+    return "https://picsum.photos/seed/baby/100/100";
   if (t.includes("uniform") || t.includes("school"))
     return "https://picsum.photos/seed/school/100/100";
-  if (t.includes("hat") || t.includes("cap") || t.includes("scarf"))
-    return "https://picsum.photos/seed/hats/100/100";
-  if (t.includes("belt")) return "https://picsum.photos/seed/belts/100/100";
+  if (t.includes("summer") || t.includes("sun"))
+    return "https://picsum.photos/seed/summer/100/100";
+  if (t.includes("suit") || t.includes("blazer") || t.includes("tailor"))
+    return "https://picsum.photos/seed/suit/100/100";
   // Deterministic fallback based on first char of title for variety
   const seed = encodeURIComponent(
     t.replace(/\s+/g, "-").slice(0, 12) || "fashion",
@@ -157,94 +186,68 @@ const categories: Category[] = [
   {
     title: "Men",
     items: [
-      { title: "T-Shirts", href: "/products/men/clothing/t-shirts" },
-      { title: "Casual Shirts", href: "/products/men/clothing/casual-shirts" },
-      { title: "Formal Shirts", href: "/products/men/clothing/formal-shirts" },
-      { title: "Jeans", href: "/products/men/clothing/jeans" },
-      {
-        title: "Casual Trousers",
-        href: "/products/men/clothing/casual-trousers",
-      },
-      {
-        title: "Formal Trousers",
-        href: "/products/men/clothing/formal-trousers",
-      },
-      { title: "Shorts", href: "/products/men/clothing/shorts" },
-      { title: "Jackets", href: "/products/men/clothing/jackets" },
-      { title: "Blazers", href: "/products/men/clothing/blazers" },
-      { title: "Sweaters", href: "/products/men/clothing/sweaters" },
-      { title: "Sweatshirts", href: "/products/men/clothing/sweatshirts" },
-      { title: "Activewear", href: "/products/men/clothing/activewear" },
-      { title: "Loungewear", href: "/products/men/clothing/loungewear" },
-      { title: "Innerwear", href: "/products/men/clothing/innerwear" },
-      { title: "Nightwear", href: "/products/men/clothing/nightwear" },
-      { title: "Winterwear", href: "/products/men/clothing/winterwear" },
-      { title: "Suits", href: "/products/men/clothing/suits" },
-      { title: "Ethnic Wear", href: "/products/men/clothing/ethnic" },
+      { title: "Topwear", href: "/products/men/topwear" },
+      { title: "Bottomwear", href: "/products/men/bottomwear" },
+      { title: "Footwear", href: "/products/men/footwear" },
+      { title: "Accessories", href: "/products/men/accessories" },
+      { title: "Activewear", href: "/products/men/activewear" },
+      { title: "Ethnic Wear", href: "/products/men/ethnic-wear" },
+      { title: "Innerwear & Loungewear", href: "/products/men/innerwear" },
+      { title: "Winterwear", href: "/products/men/winterwear" },
+      { title: "Suits & Tailoring", href: "/products/men/suits" },
     ],
     image: "https://picsum.photos/seed/men/800/800",
   },
   {
     title: "Women",
     items: [
-      { title: "Dresses", href: "/products/women/clothing/dresses" },
-      { title: "Tops", href: "/products/women/clothing/tops" },
-      { title: "T-Shirts", href: "/products/women/clothing/t-shirts" },
-      { title: "Jeans", href: "/products/women/clothing/jeans" },
-      { title: "Trousers", href: "/products/women/clothing/trousers" },
-      { title: "Skirts", href: "/products/women/clothing/skirts" },
-      { title: "Jumpsuits", href: "/products/women/clothing/jumpsuits" },
-      { title: "Blouses", href: "/products/women/clothing/blouses" },
-      { title: "Sweaters", href: "/products/women/clothing/sweaters" },
-      { title: "Jackets", href: "/products/women/clothing/jackets" },
-      { title: "Activewear", href: "/products/women/clothing/activewear" },
-      { title: "Lingerie", href: "/products/women/clothing/lingerie" },
-      { title: "Kurtas & Kurtis", href: "/products/women/clothing/kurtas" },
-      { title: "Ethnic Wear", href: "/products/women/clothing/ethnic" },
-      { title: "Sarees", href: "/products/women/clothing/sarees" },
-      { title: "Leggings", href: "/products/women/clothing/leggings" },
-      { title: "Sleepwear", href: "/products/women/clothing/sleepwear" },
-      { title: "Loungewear", href: "/products/women/clothing/loungewear" },
+      { title: "Topwear", href: "/products/women/topwear" },
+      { title: "Bottomwear", href: "/products/women/bottomwear" },
+      { title: "Indian & Ethnic Wear", href: "/products/women/ethnic-wear" },
+      { title: "Footwear", href: "/products/women/footwear" },
+      { title: "Accessories & Bags", href: "/products/women/accessories" },
+      { title: "Dresses & Jumpsuits", href: "/products/women/dresses" },
+      { title: "Activewear & Loungewear", href: "/products/women/activewear" },
+      { title: "Lingerie & Sleepwear", href: "/products/women/lingerie" },
+      { title: "Winterwear", href: "/products/women/winterwear" },
     ],
     image: "https://picsum.photos/seed/women/800/800",
   },
   {
     title: "Kids",
     items: [
-      { title: "Boys Clothing", href: "/products/kids/clothing/boys" },
-      { title: "Girls Clothing", href: "/products/kids/clothing/girls" },
-      { title: "Infants", href: "/products/kids/clothing/infants" },
-      { title: "School Uniforms", href: "/products/kids/clothing/uniforms" },
-      { title: "Party Wear", href: "/products/kids/clothing/party-wear" },
-      { title: "Footwear", href: "/products/kids/clothing/footwear" },
-      { title: "Accessories", href: "/products/kids/clothing/accessories" },
-      { title: "Winter Wear", href: "/products/kids/clothing/winter-wear" },
+      { title: "Boys Clothing", href: "/products/kids/boys" },
+      { title: "Girls Clothing", href: "/products/kids/girls" },
+      { title: "Infants (0-2 Yrs)", href: "/products/kids/infants" },
+      { title: "Footwear", href: "/products/kids/footwear" },
+      { title: "Toys & Accessories", href: "/products/kids/accessories" },
+      { title: "School Uniforms", href: "/products/kids/uniforms" },
+      { title: "Party Wear", href: "/products/kids/party-wear" },
+      { title: "Winter Wear", href: "/products/kids/winter-wear" },
     ],
     image: "https://picsum.photos/seed/kids/800/800",
   },
   {
     title: "Collections",
     items: [
-      { title: "Summer 2025", href: "/products/collections/summer-2025" },
+      { title: "Summer Collection", href: "/products/collections/summer" },
       { title: "Winter Essentials", href: "/products/collections/winter" },
-      { title: "Active Wear", href: "/products/collections/active" },
-      { title: "Loungewear", href: "/products/collections/lounge" },
+      { title: "Activewear", href: "/products/collections/activewear" },
+      { title: "Loungewear", href: "/products/collections/loungewear" },
       { title: "Festive Collection", href: "/products/collections/festive" },
-      { title: "Premium Collection", href: "/products/collections/premium" },
+      { title: "Runway Edition", href: "/products/collections/runway" },
     ],
     image: "https://picsum.photos/seed/collections/800/800",
   },
   {
     title: "Accessories",
     items: [
-      { title: "Bags & Backpacks", href: "/products/accessories/bags" },
       { title: "Watches", href: "/products/accessories/watches" },
+      { title: "Bags & Backpacks", href: "/products/accessories/bags" },
       { title: "Sunglasses", href: "/products/accessories/sunglasses" },
-      { title: "Belts", href: "/products/accessories/belts" },
-      { title: "Wallets", href: "/products/accessories/wallets" },
+      { title: "Belts & Wallets", href: "/products/accessories/belts" },
       { title: "Jewelry", href: "/products/accessories/jewelry" },
-      { title: "Hats & Caps", href: "/products/accessories/hats" },
-      { title: "Scarves", href: "/products/accessories/scarves" },
+      { title: "Hats, Caps & Scarves", href: "/products/accessories/hats" },
     ],
     image: "https://picsum.photos/seed/accessories/800/800",
   },
@@ -290,20 +293,26 @@ const detailedCategories = {
   ],
   women: [
     {
-      title: "Western Wear",
-      items: ["Dresses", "Tops", "T-Shirts", "Jeans", "Trousers", "Skirts"],
+      title: "Topwear",
+      items: ["T-Shirts", "Tops", "Blouses", "Shirts", "Sweaters", "Jackets"],
     },
     {
-      title: "Indian Wear",
-      items: ["Kurtas", "Sarees", "Lehengas", "Salwar Suits", "Blouses"],
+      title: "Bottomwear",
+      items: ["Jeans", "Trousers", "Skirts", "Leggings", "Shorts", "Jumpsuits"],
     },
     {
-      title: "Footwear",
-      items: ["Heels", "Flats", "Sandals", "Sports Shoes", "Boots"],
+      title: "Indian & Ethnic Wear",
+      items: [
+        "Kurtas & Kurtis",
+        "Sarees",
+        "Lehengas",
+        "Salwar Suits",
+        "Dupattas",
+      ],
     },
     {
-      title: "Beauty & Accessories",
-      items: ["Jewelry", "Handbags", "Watches", "Sunglasses", "Scarves"],
+      title: "Footwear & Accessories",
+      items: ["Heels", "Flats", "Sneakers", "Handbags", "Jewelry", "Watches"],
     },
   ],
   kids: [
@@ -326,8 +335,8 @@ const detailedCategories = {
       ],
     },
     {
-      title: "Toys & Accessories",
-      items: ["Backpacks", "Shoes", "Hats", "Water Bottles", "Stationery"],
+      title: "Footwear & Accessories",
+      items: ["Shoes", "Sandals", "Backpacks", "Hats & Caps", "Stationery"],
     },
   ],
 };
@@ -395,8 +404,8 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
           return (
             <NavigationMenuItem key={category.title}>
               <NavigationMenuTrigger>{category.title}</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="overflow-hidden w-5xl">
+              <NavigationMenuContent className="p-0">
+                <div className="overflow-hidden min-w-5xl w-fit">
                   <div className="grid lg:grid-cols-3">
                     {/* Left Content */}
                     <div className="p-4 lg:p-6 flex flex-col col-span-2 gap-4 space-4">
@@ -412,19 +421,22 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                           </p>
                         </div>
 
-                        <ExpandableButton
-                          text="View All"
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           onClick={() =>
                             router.push(
                               `/products/${category.title.toLowerCase()}`,
                             )
                           }
-                          icon={<ArrowRight />}
-                        />
+                        >
+                          View All
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </Button>
                       </div>
 
                       {/* Featured Cards */}
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
                         {category.items
                           .slice(0, 6)
                           .map((item: CategoryItem) => (
@@ -443,15 +455,9 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                                           alt={item.title}
                                         />
                                       </div>
-                                      <div>
-                                        <h4 className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-1">
-                                          {item.title}
-                                        </h4>
-
-                                        <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
-                                          Explore collection
-                                        </p>
-                                      </div>
+                                      <h4 className="font-medium text-sm group-hover:text-primary transition-colors line-clamp-1">
+                                        {item.title}
+                                      </h4>
                                     </div>
 
                                     <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all duration-300 group-hover:text-primary group-hover:translate-x-1" />
@@ -474,16 +480,19 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                               </Badge>
                             </div>
 
-                            <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 items-start">
                               {detailedCategories[
                                 category.title.toLowerCase() as keyof typeof detailedCategories
                               ]?.map((subcat) => (
-                                <div key={subcat.title}>
-                                  <div className="pb-3">
-                                    <p className="text-sm">{subcat.title}</p>
+                                <div key={subcat.title} className="min-w-0 flex flex-col justify-start">
+                                  <div className="h-6 mb-3 min-w-0 flex items-center">
+                                    <MarqueeText
+                                      text={subcat.title}
+                                      textClassName="text-sm font-semibold text-foreground tracking-tight"
+                                    />
                                   </div>
 
-                                  <CardContent className="pt-0">
+                                  <CardContent className="pt-0 p-0">
                                     <div className="space-y-2">
                                       {subcat.items.slice(0, 5).map((item) => (
                                         <Link
@@ -491,10 +500,12 @@ export function CategoryNavigation({ className }: CategoryNavigationProps) {
                                           href={`/products/${category.title.toLowerCase()}/${subcat.title.toLowerCase()}/${item
                                             .toLowerCase()
                                             .replace(/ /g, "-")}`}
-                                          className="group flex items-center gap-3 text-xs text-muted-foreground hover:text-primary transition-colors"
+                                          className="group flex items-center gap-2 text-xs text-muted-foreground hover:text-primary transition-colors min-w-0"
                                         >
-                                          <Dot className="opacity-20 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1" />
-                                          <span>{item}</span>
+                                          <Dot className="opacity-20 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1 shrink-0" />
+                                          <span className="truncate">
+                                            {item}
+                                          </span>
                                         </Link>
                                       ))}
                                     </div>
@@ -694,7 +705,7 @@ export function ActionButtons({
                 aria-label={`Wishlist (${wishlistCount})`}
               >
                 <Heart
-                  className="h-5 w-5 text-red-500 fill-red-500/20 hover:fill-red-500 transition-colors"
+                  className="h-5 w-5 text-red-500 fill-red-500/20 hover:fill-red-500 transition-all ease-in-out"
                   aria-hidden="true"
                 />
                 {wishlistCount > 0 && (
@@ -998,7 +1009,7 @@ export default function Navbar({ className }: { className?: string }) {
         className,
       )}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 sm:px-0">
         {/* Left Section - Mobile Menu & Logo */}
         <div className="flex items-center gap-4">
           <MobileMenu categories={categories} />

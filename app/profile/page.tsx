@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
-import { ExpandableButton } from "@/components/extended/button";
 import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 import {
   Alert,
@@ -367,12 +366,13 @@ function ProfileContent() {
                     <Kbd>Ctrl</Kbd>+<Kbd>K</Kbd>
                   </KbdGroup>
                 </Button>
-                <ExpandableButton
-                  text="Edit Profile"
-                  icon={PencilLine}
+                <Button
                   variant="outline"
                   onClick={() => router.push(`/edit-profile?tab=${activeTab}`)}
-                />
+                >
+                  <PencilLine className="h-4 w-4 mr-1" />
+                  Edit Profile
+                </Button>
               </div>
             </div>
             <Tabs

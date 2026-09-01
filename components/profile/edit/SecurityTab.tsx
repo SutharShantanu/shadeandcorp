@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExpandableButton, SlidingButton } from "@/components/extended/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import {
   Empty,
@@ -259,7 +258,7 @@ export default function SecurityTab({
           <h4 className="text-sm font-semibold">Recent Login Sessions</h4>
           {sortedSessions.length >= 3 && (
             <Link href="/edit-profile/sessions">
-              <SlidingButton text="View All" variant="secondary" />
+              <Button variant="secondary" size="sm">View All</Button>
             </Link>
           )}
         </div>

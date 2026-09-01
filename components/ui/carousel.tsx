@@ -138,12 +138,12 @@ function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       ref={carouselRef}
-      className="overflow-hidden"
+      className="overflow-hidden h-full"
       data-slot="carousel-content"
     >
       <div
         className={cn(
-          "flex",
+          "flex h-full",
           orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
           className
         )}
@@ -185,7 +185,7 @@ function CarouselPrevious({
       variant={variant}
       size={size}
       className={cn(
-        "absolute touch-manipulation rounded-full",
+        "absolute touch-manipulation rounded-full bg-black/40 border-0 hover:bg-black/60 hover:scale-110 transition-all ease-in-out group",
         orientation === "horizontal"
           ? "inset-y-0 -left-12 my-auto"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -195,7 +195,7 @@ function CarouselPrevious({
       onClick={scrollPrev}
       {...props}
     >
-      <ChevronLeftIcon />
+      <ChevronLeftIcon className="text-white group-hover:-translate-x-0.5 transition-all ease-in-out" />
       <span className="sr-only">Previous slide</span>
     </Button>
   )
@@ -215,7 +215,7 @@ function CarouselNext({
       variant={variant}
       size={size}
       className={cn(
-        "absolute touch-manipulation rounded-full",
+        "absolute touch-manipulation rounded-full bg-black/40 border-0 hover:bg-black/60 hover:scale-110 transition-all ease-in-out group",
         orientation === "horizontal"
           ? "inset-y-0 -right-12 my-auto"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -225,7 +225,7 @@ function CarouselNext({
       onClick={scrollNext}
       {...props}
     >
-      <ChevronRightIcon />
+      <ChevronRightIcon className="text-white group-hover:translate-x-0.5 transition-all ease-in-out" />
       <span className="sr-only">Next slide</span>
     </Button>
   )

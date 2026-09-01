@@ -19,7 +19,6 @@ import { Frame, FrameHeader, FramePanel } from "@/components/ui/frame";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ExpandableButton } from "@/components/extended/button";
 import Loading from "@/components/ui/loading";
 import { useProfile } from "@/app/(auth)/hook/useProfile";
 
@@ -140,12 +139,13 @@ function EditProfileContent() {
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <ExpandableButton
+                <Button
                   variant="outline"
                   onClick={() => router.push(`/profile?tab=${activeTab}`)}
-                  text="Back to Profile"
-                  icon={ChevronLeft}
-                />
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Back to Profile
+                </Button>
               </div>
             </div>
           </FrameHeader>

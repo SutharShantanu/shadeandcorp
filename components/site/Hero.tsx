@@ -1,19 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import useEmblaCarousel from "embla-carousel-react";
-import { EmblaOptionsType } from "embla-carousel";
-import AutoPlay from "embla-carousel-autoplay";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 import Fade from "embla-carousel-fade";
 import { motion } from "framer-motion";
-import { DotButton, useDotButton } from "../ui/embla-carousel-dot-button";
-import {
-  NextButton,
-  PrevButton,
-  usePrevNextButtons,
-} from "../ui/embla-carousel-arrow-button";
+import { Button } from "@/components/ui/button";
+import { Pause, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type SlideType = {
   image: string;
@@ -25,120 +27,225 @@ type SlideType = {
   theme?: "light" | "dark";
 };
 
-type PropType = {
-  slides: SlideType[];
-  options?: EmblaOptionsType;
-};
-
 // Fashion-focused slides with compelling content
 const slides: SlideType[] = [
   {
-    image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1200&h=800&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1200&h=800&fit=crop",
     alt: "Summer Fashion Collection",
     title: "Summer Collection 2024",
     subtitle: "Discover the latest trends in warm-weather fashion",
     ctaText: "Shop Now",
     ctaLink: "/collection/summer",
-    theme: "light"
+    theme: "light",
   },
   {
-    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&h=800&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&h=800&fit=crop",
     alt: "New Arrivals",
     title: "New Arrivals",
     subtitle: "Fresh styles just dropped. Be the first to shop",
     ctaText: "Explore New",
     ctaLink: "/new-arrivals",
-    theme: "dark"
+    theme: "dark",
   },
   {
-    image: "https://images.unsplash.com/photo-1506152983158-b4a74a01c721?w=1200&h=800&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1506152983158-b4a74a01c721?w=1200&h=800&fit=crop",
     alt: "Seasonal Sale",
     title: "Up to 50% Off",
     subtitle: "Limited time offer on selected items",
     ctaText: "Shop Sale",
     ctaLink: "/sale",
-    theme: "light"
+    theme: "light",
   },
   {
-    image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&h=800&fit=crop", 
+    image:
+      "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=1200&h=800&fit=crop",
     alt: "Designer Collaboration",
     title: "Designer Collaboration",
     subtitle: "Exclusive collection with leading designers",
     ctaText: "Discover",
     ctaLink: "/designers",
-    theme: "dark"
-  }
+    theme: "dark",
+  },
 ];
 
-const EmblaCarousel: React.FC<PropType> = ({
-  slides,
-  options = { loop: true },
-}) => {
-  const autoplayOptions = { delay: 6000, stopOnInteraction: false };
-  const [emblaRef, emblaApi] = useEmblaCarousel(options, [
-    Fade(),
-    AutoPlay(autoplayOptions),
-  ]);
+const SLIDE_DURATION = 6000; // Slide timer duration in ms
 
-  const { selectedIndex, scrollSnaps, onDotButtonClick } =
-    useDotButton(emblaApi);
-  const {
-    prevBtnDisabled,
-    nextBtnDisabled,
-    onPrevButtonClick,
-    onNextButtonClick,
-  } = usePrevNextButtons(emblaApi);
+export default function Hero() {
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(1);
+  const [count, setCount] = useState(slides.length);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const elapsedRef = useRef(0);
+  const lastTimeRef = useRef<number | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+
+  // Setup plugins for shadcn Carousel
+  const plugins = useMemo(() => {
+    return [Fade()];
+  }, []);
+
+  useEffect(() => {
+    if (!api) return;
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    const onSelect = () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+      elapsedRef.current = 0;
+      setProgress(0);
+      lastTimeRef.current = null;
+    };
+
+    api.on("select", onSelect);
+    api.on("reInit", onSelect);
+
+    return () => {
+      api.off("select", onSelect);
+      api.off("reInit", onSelect);
+    };
+  }, [api]);
+
+  const isEffectivePlaying = isPlaying && !isHovered;
+
+  useEffect(() => {
+    if (!isEffectivePlaying || !api) {
+      lastTimeRef.current = null;
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+      return;
+    }
+
+    const animate = (time: number) => {
+      if (lastTimeRef.current === null) {
+        lastTimeRef.current = time;
+      }
+
+      const delta = time - lastTimeRef.current;
+      lastTimeRef.current = time;
+
+      elapsedRef.current += delta;
+
+      if (elapsedRef.current >= SLIDE_DURATION) {
+        elapsedRef.current = 0;
+        setProgress(0);
+        lastTimeRef.current = null;
+        if (api.canScrollNext()) {
+          api.scrollNext();
+        } else {
+          api.scrollTo(0);
+        }
+      } else {
+        const currentProgress = (elapsedRef.current / SLIDE_DURATION) * 100;
+        setProgress(currentProgress);
+        rafIdRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    rafIdRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
+  }, [isEffectivePlaying, api]);
+
+  const toggleAutoplay = useCallback(() => {
+    if (isEffectivePlaying) {
+      setIsPlaying(false);
+    } else {
+      setIsPlaying(true);
+      setIsHovered(false);
+    }
+  }, [isEffectivePlaying]);
+
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (!api) return;
+      api.scrollTo(index);
+      if (api.selectedScrollSnap() === index) {
+        elapsedRef.current = 0;
+        setProgress(0);
+        lastTimeRef.current = null;
+      }
+    },
+    [api],
+  );
 
   return (
-    <div className="embla relative overflow-hidden w-full max-w-7xl mx-auto h-[70vh] min-h-[500px] md:h-[80vh]">
-      <div className="embla__viewport h-full" ref={emblaRef}>
-        <div className="embla__container flex h-full">
+    <motion.section
+      className="relative overflow-hidden w-full h-[70vh]"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+    >
+      {/* Shadcn Carousel Component - Full Width */}
+      <Carousel
+        setApi={setApi}
+        opts={{ loop: true }}
+        plugins={plugins}
+        className="h-full w-full"
+      >
+        <CarouselContent className="h-full -ml-0">
           {slides.map((slide, index) => (
-            <div
-              key={index}
-              className="embla__slide relative flex-[0_0_100%] h-full"
-            >
+            <CarouselItem key={index} className="pl-0 h-full relative w-full">
               {/* Background Image */}
               <Image
                 src={slide.image}
                 alt={slide.alt || `slide-${index}`}
                 fill
-                className="object-cover"
+                className="object-cover object-center"
                 priority={index === 0}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
+                sizes="100vw"
               />
-              
-              {/* Overlay for better text readability */}
-              <div className={`absolute inset-0 bg-black/25 ${slide.theme === 'dark' ? 'bg-black/40' : ''}`} />
-              <div className="absolute top-0 left-0 right-0 h-44 bg-gradient-to-b from-black/50 via-black/15 to-transparent pointer-events-none z-10" />
-              
-              {/* Content Overlay */}
-              <div className="absolute inset-0 flex items-center">
-                <div className="container mx-auto px-6 md:px-8">
-                  <div className={`max-w-lg ${
-                    slide.theme === 'dark' ? 'text-white' : 'text-gray-900'
-                  }`}>
+
+              {/* Overlays for contrast and depth */}
+              <div
+                className={cn(
+                  "absolute inset-0 bg-black/35",
+                  slide.theme === "dark" && "bg-black/50",
+                )}
+              />
+              <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none z-10" />
+
+              {/* Hero Content Overlay */}
+              <div className="absolute inset-0 flex items-center z-15">
+                <div className="max-w-7xl mx-auto w-full px-6 sm:px-8 md:px-12">
+                  <div className="max-w-xl text-white">
                     <motion.div
+                      key={current}
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.8, delay: 0.2 }}
+                      transition={{ duration: 0.7, delay: 0.1 }}
                     >
-                      <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+                      <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold mb-4 leading-tight tracking-tight drop-shadow-md">
                         {slide.title}
                       </h1>
-                      <p className="text-xl md:text-2xl mb-8 opacity-90 leading-relaxed">
+                      <p className="text-lg sm:text-xl md:text-2xl mb-8 opacity-95 leading-relaxed font-normal drop-shadow-xs">
                         {slide.subtitle}
                       </p>
                       <div className="flex flex-col sm:flex-row gap-4">
                         <Link
                           href={slide.ctaLink}
-                          className="bg-black text-white px-8 py-4 rounded-full font-semibold hover:bg-gray-800 transition-colors duration-300 text-center text-lg"
+                          className="bg-primary text-primary-foreground px-8 py-4 rounded-full font-semibold hover:bg-primary/90 transition-all duration-300 text-center text-lg shadow-xl hover:shadow-2xl active:scale-98"
                         >
                           {slide.ctaText}
                         </Link>
                         <Link
                           href="/shop-all"
-                          className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-black transition-all duration-300 text-center text-lg"
+                          className="border-2 border-white/80 text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-black transition-all duration-300 text-center text-lg backdrop-blur-md bg-white/10"
                         >
                           Shop All
                         </Link>
@@ -147,83 +254,66 @@ const EmblaCarousel: React.FC<PropType> = ({
                   </div>
                 </div>
               </div>
-            </div>
+            </CarouselItem>
           ))}
-        </div>
-      </div>
+        </CarouselContent>
 
-      {/* Navigation Arrows */}
-      <div className="absolute inset-0 flex items-center justify-between px-4 md:px-6 pointer-events-none">
-        <div className="pointer-events-auto">
-          <PrevButton
-            onClick={onPrevButtonClick}
-            disabled={prevBtnDisabled}
-            enabled={!prevBtnDisabled}
-          />
-        </div>
-        <div className="pointer-events-auto">
-          <NextButton
-            onClick={onNextButtonClick}
-            disabled={nextBtnDisabled}
-            enabled={!nextBtnDisabled}
-          />
-        </div>
-      </div>
+        {/* Floating Navigation Arrows with Blur Depth */}
+        <CarouselPrevious className="left-4 md:left-8 backdrop-blur-xl z-25 shadow-2xl transition-all size-8" />
+        <CarouselNext className="right-4 md:right-8 backdrop-blur-xl z-25 shadow-2xl transition-all size-8" />
+      </Carousel>
 
-      {/* Dots Indicator */}
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center">
-        <div className="embla__dots flex gap-3 bg-black/30 backdrop-blur-sm rounded-full px-4 py-2">
-          {scrollSnaps.map((_, index) => (
-            <DotButton
-              key={index}
-              selected={index === selectedIndex}
-              onClick={() => onDotButtonClick(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === selectedIndex 
-                  ? 'bg-white scale-125' 
-                  : 'bg-white/60 hover:bg-white/80'
-              }`}
-            />
-          ))}
+      {/* Separated Floating Control Chips (Counter, Dots, Play/Pause) with Uniform Height (h-8) */}
+      <div className="absolute bottom-5 left-0 right-0 z-25 flex items-center justify-center gap-3">
+        {/* Chip 1: Slide Counter */}
+        <div className="h-8 touch-manipulation rounded-full bg-black/40 border-0 hover:bg-black/60 backdrop-blur-xl px-4 text-xs font-mono text-white shadow-2xl select-none transition-all ease-in-out flex items-center justify-center font-semibold overflow-hidden">
+          <span>
+            {String(current).padStart(2, "0")} /{" "}
+            {String(count).padStart(2, "0")}
+          </span>
         </div>
-      </div>
 
-      {/* Quick Stats Bar */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 text-center">
-            <div>
-              <p className="font-semibold text-lg">Free Shipping</p>
-              <p className="text-sm text-gray-600">On orders over $50</p>
-            </div>
-            <div>
-              <p className="font-semibold text-lg">Easy Returns</p>
-              <p className="text-sm text-gray-600">30-day policy</p>
-            </div>
-            <div>
-              <p className="font-semibold text-lg">Secure Payment</p>
-              <p className="text-sm text-gray-600">100% protected</p>
-            </div>
-            <div>
-              <p className="font-semibold text-lg">24/7 Support</p>
-              <p className="text-sm text-gray-600">Always here to help</p>
-            </div>
-          </div>
+        {/* Chip 2: Pagination Dots with Animated Progress Fill */}
+        <div className="h-8 flex items-center justify-center gap-2.5 touch-manipulation rounded-full bg-black/40 border-0 hover:bg-black/60 backdrop-blur-xl px-5 shadow-2xl transition-all ease-in-out">
+          {slides.map((_, index) => {
+            const isActive = current - 1 === index;
+            return (
+              <button
+                key={index}
+                onClick={() => scrollTo(index)}
+                aria-label={`Go to slide ${index + 1}`}
+                className={cn(
+                  "h-2.5 rounded-full bg-muted-foreground transition-all ease-in-out cursor-pointer focus:outline-hidden relative overflow-hidden flex items-center",
+                  isActive ? "w-10" : "w-2.5 hover:bg-primary",
+                )}
+              >
+                {isActive && (
+                  <div
+                    className="h-full bg-white rounded-full shadow-sm"
+                    style={{ width: `${progress}%` }}
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
-      </div>
-    </div>
-  );
-};
 
-export default function Hero() {
-  return (
-    <motion.section
-      className="relative"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-    >
-      <EmblaCarousel slides={slides} />
+        {/* Chip 3: Autoplay Play/Pause Toggle */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleAutoplay}
+          aria-label={isEffectivePlaying ? "Pause autoplay" : "Start autoplay"}
+          className="h-8 w-8 touch-manipulation rounded-full bg-black/40 border-0 hover:bg-black/60 hover:scale-110 backdrop-blur-xl shadow-2xl transition-all ease-in-out text-white hover:text-white p-0 shrink-0 flex items-center justify-center"
+          title={isEffectivePlaying ? "Pause autoplay" : "Start autoplay"}
+        >
+          {isEffectivePlaying ? (
+            <Pause className="size-4" />
+          ) : (
+            <Play className="size-4 ml-0.5" />
+          )}
+        </Button>
+      </div>
     </motion.section>
   );
 }

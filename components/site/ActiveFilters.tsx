@@ -65,16 +65,14 @@ export default function ActiveFilters() {
     <div className="flex flex-wrap items-center gap-2 mb-6">
       {/* Price Chip */}
       {hasPriceFilter && (
-        <Badge variant="destructive" className="h-8 rounded-full">
-          <div className="flex items-center gap-1 text-xs h-full">
-            <span>
-              ${minPrice || 0} - ${maxPrice || 2000}
-            </span>
-            <X
-              className="w-3.5 h-3.5 cursor-pointer hover:text-destructive transition-colors ml-1"
-              onClick={removePriceFilter}
-            />
-          </div>
+        <Badge variant="secondary" className="h-7 rounded-full px-2.5 py-0.5 text-xs font-normal gap-1 border border-border">
+          <span>
+            ${minPrice || 0} - ${maxPrice || 2000}
+          </span>
+          <X
+            className="w-3.5 h-3.5 cursor-pointer hover:text-destructive transition-colors ml-0.5"
+            onClick={removePriceFilter}
+          />
         </Badge>
       )}
 
@@ -82,27 +80,25 @@ export default function ActiveFilters() {
       {groupedFilters.map((group) => (
         <Fragment key={group.section}>
           {group.values.map((val) => (
-            <Badge key={`${group.section}-${val}`} variant="destructive" className="h-8 rounded-full">
-              <div className="flex items-center gap-1 text-xs h-full">
-                <span className="capitalize">{val}</span>
-                <X
-                  className="w-3.5 h-3.5 cursor-pointer hover:text-destructive transition-colors ml-1"
-                  onClick={() => removeFilter(group.section, val)}
-                />
-              </div>
+            <Badge key={`${group.section}-${val}`} variant="secondary" className="h-7 rounded-full px-2.5 py-0.5 text-xs font-normal gap-1 border border-border">
+              <span className="capitalize">{val}</span>
+              <X
+                className="w-3.5 h-3.5 cursor-pointer hover:text-destructive transition-colors ml-0.5"
+                onClick={() => removeFilter(group.section, val)}
+              />
             </Badge>
           ))}
         </Fragment>
       ))}
 
       <Button
-        variant="secondary"
+        variant="ghost"
         size="sm"
         onClick={clearAll}
-        className="gap-1 rounded-full text-xs h-8"
+        className="gap-1 rounded-full text-xs h-7 text-muted-foreground hover:text-destructive px-2"
       >
         Clear All
-        <X className="size-4 hover:text-destructive" />
+        <X className="size-3.5" />
       </Button>
     </div>
   );

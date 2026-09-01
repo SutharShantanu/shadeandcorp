@@ -13,6 +13,9 @@ import {
   Star,
   Ruler,
   ArrowRight,
+  Bell,
+  BellRing,
+  TrendingDown,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -248,6 +251,7 @@ function ProductImageSection({
   isWishlisted,
   isOutOfStock,
   discountPercentage,
+  priceDropAmount,
   onAddToWishlist,
   selectedColorName,
 }: ProductImageSectionProps) {
@@ -322,6 +326,7 @@ function ProductImageSection({
       <ProductBadges
         product={product}
         discountPercentage={discountPercentage}
+        priceDropAmount={priceDropAmount}
       />
 
       {/* Quick Actions */}
@@ -345,15 +350,34 @@ function ProductImageSection({
 interface ProductBadgesProps {
   product: Product;
   discountPercentage: number;
+  priceDropAmount?: number;
 }
 
-function ProductBadges({ product, discountPercentage }: ProductBadgesProps) {
+function ProductBadges({
+  product,
+  discountPercentage,
+  priceDropAmount,
+}: ProductBadgesProps) {
   return (
-    <div className="absolute top-3 left-3 flex flex-col gap-2">
+    <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-20 pointer-events-none">
+      {priceDropAmount && priceDropAmount > 0 ? (
+        <Badge className="border-0 text-tiny font-bold py-0.5 px-2 bg-emerald-600 text-white shadow-2xs flex items-center gap-1">
+          <TrendingDown className="h-3 w-3" />
+          <span>${priceDropAmount} DROP</span>
+        </Badge>
+      ) : discountPercentage > 0 ? (
+        <Badge
+          color="danger"
+          className="border-0 text-tiny uppercase font-semibold py-0.5 px-2"
+        >
+          -{discountPercentage}%
+        </Badge>
+      ) : null}
+
       {product.isNew && (
         <Badge
           color="default"
-          className="border-0 text-xs uppercase font-semibold py-1"
+          className="border-0 text-tiny uppercase font-semibold py-0.5 px-2"
         >
           New
         </Badge>
@@ -361,23 +385,15 @@ function ProductBadges({ product, discountPercentage }: ProductBadgesProps) {
       {product.isBestSeller && (
         <Badge
           color="warning"
-          className="border-0 text-xs uppercase font-semibold py-1"
+          className="border-0 text-tiny uppercase font-semibold py-0.5 px-2"
         >
           Bestseller
-        </Badge>
-      )}
-      {discountPercentage > 0 && (
-        <Badge
-          color="danger"
-          className="border-0 text-xs uppercase font-semibold py-1"
-        >
-          -{discountPercentage}%
         </Badge>
       )}
       {product.isFeatured && (
         <Badge
           color="info"
-          className="border-0 text-xs uppercase font-semibold py-1"
+          className="border-0 text-tiny uppercase font-semibold py-0.5 px-2"
         >
           Featured
         </Badge>
@@ -402,7 +418,7 @@ function QuickActionButtons({
         }}
       >
         <Heart
-          className={`transition-all ease-in-out duration-300 ${isWishlisted && "fill-red-400 text-red-400"}`}
+          className={`h-5 w-5 text-red-500 fill-red-500/20 hover:fill-red-500 transition-all ease-in-out ${isWishlisted && "fill-red-400 text-red-400"}`}
         />
       </Button>
       <Button
@@ -445,14 +461,20 @@ function ProductInfoHeader({ product }: ProductInfoHeaderProps) {
 
 // ==================== COMPONENT: PriceSection ====================
 
-function PriceSection({ product, savings }: PriceSectionProps) {
+function PriceSection({ product, savings, priceDropAmount }: PriceSectionProps) {
   return (
-    <motion.div layoutId={`product-price-${product.id}`} className="space-y-1">
-      <div className="flex items-center gap-2">
-        <span className="text-xl font-bold ">${product.basePrice}</span>
-        {savings > 0 && (
-          <p className="text-xs font-medium">You save ${savings.toFixed(2)}</p>
-        )}
+    <motion.div layoutId={`product-price-${product.id}`} className="space-y-0.5 min-w-0">
+      <div className="flex items-baseline gap-1.5 flex-wrap">
+        <span className="text-xl font-bold tracking-tight">${product.basePrice}</span>
+        {priceDropAmount && priceDropAmount > 0 ? (
+          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+            Save ${priceDropAmount}
+          </span>
+        ) : savings > 0 ? (
+          <span className="text-xs font-medium text-muted-foreground">
+            Save ${savings.toFixed(0)}
+          </span>
+        ) : null}
       </div>
     </motion.div>
   );
@@ -581,26 +603,56 @@ function ActionButtons({
   isOutOfStock,
   onAddToCart,
   onBuyNow,
-}: ActionButtonsProps) {
+  isRestockSubscribed,
+  onToggleRestockAlert,
+}: ActionButtonsProps & {
+  isRestockSubscribed?: boolean;
+  onToggleRestockAlert?: () => void;
+}) {
+  if (isOutOfStock) {
+    return (
+      <div className="flex gap-2 items-center w-full">
+        <Button
+          variant={isRestockSubscribed ? "secondary" : "outline"}
+          size="sm"
+          className="w-full text-xs font-semibold gap-1.5 cursor-pointer shadow-xs"
+          onClick={onToggleRestockAlert}
+        >
+          {isRestockSubscribed ? (
+            <>
+              <BellRing className="w-3.5 h-3.5 text-primary" />
+              <span>Restock Alert Set</span>
+            </>
+          ) : (
+            <>
+              <Bell className="w-3.5 h-3.5" />
+              <span>Notify When in Stock</span>
+            </>
+          )}
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex gap-2 items-center">
       <Button
-        className="flex-1"
+        className="flex-1 cursor-pointer"
         size="sm"
         disabled={isOutOfStock}
         onClick={onAddToCart}
       >
-        <ShoppingCart className="w-4 h-4" />
+        <ShoppingCart className="w-4 h-4 mr-1.5" />
         Add to Bag
       </Button>
       <Button
         variant="outline"
-        className="flex-1"
+        className="flex-1 cursor-pointer"
         size="sm"
         disabled={isOutOfStock}
         onClick={onBuyNow}
       >
-        <Zap className="w-4 h-4" />
+        <Zap className="w-4 h-4 mr-1.5" />
         Buy Now
       </Button>
     </div>
@@ -626,6 +678,7 @@ export default function ProductCard({
     return defaultVariant?.color.hex || variants[0]?.color.hex || "";
   });
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isRestockSubscribed, setIsRestockSubscribed] = useState(false);
   const [showSizeModal, setShowSizeModal] = useState(false);
   const [sizeChartOpen, setSizeChartOpen] = useState(false);
   const [sizeError, setSizeError] = useState("");
@@ -634,6 +687,20 @@ export default function ProductCard({
   >(null);
 
   const router = useRouter();
+
+  const handleToggleRestockAlert = () => {
+    setIsRestockSubscribed(!isRestockSubscribed);
+    if (!isRestockSubscribed) {
+      toast.success(
+        `Restock alert set! We'll notify you as soon as ${product.title} is back in stock.`,
+        { id: `restock-${product.id}` }
+      );
+    } else {
+      toast.info(`Restock alert removed for ${product.title}.`, {
+        id: `restock-${product.id}`,
+      });
+    }
+  };
 
   // Check if a size is available
   const isSizeAvailable = (size: string) => {
@@ -727,6 +794,26 @@ export default function ProductCard({
       : 0);
   const isOutOfStock = product.variants.every((v) => v.stockQuantity === 0);
 
+  // Check for price drop in details section
+  const addedPrice = (product as any).addedPrice;
+  const priceDropAmount = useMemo(() => {
+    if (addedPrice && addedPrice > currentPrice) {
+      return Math.round(addedPrice - currentPrice);
+    }
+    if (savings > 0) {
+      return Math.round(savings);
+    }
+    return 0;
+  }, [addedPrice, currentPrice, savings]);
+
+  const priceDropPercent = useMemo(() => {
+    const orig = addedPrice || originalPrice;
+    if (orig && priceDropAmount > 0) {
+      return Math.round((priceDropAmount / orig) * 100);
+    }
+    return discountPercentage || 0;
+  }, [addedPrice, originalPrice, priceDropAmount, discountPercentage]);
+
   if (layout === "list") {
     return (
       <TooltipProvider>
@@ -741,6 +828,7 @@ export default function ProductCard({
               isWishlisted={isWishlisted}
               isOutOfStock={isOutOfStock}
               discountPercentage={discountPercentage}
+              priceDropAmount={priceDropAmount}
               onAddToWishlist={handleAddToWishlist}
               selectedColorName={
                 product.variants.find((v) => v.color.hex === selectedColor)
@@ -776,7 +864,11 @@ export default function ProductCard({
                 {product.description}
               </p>
 
-              <PriceSection product={product} savings={savings} />
+              <PriceSection
+                product={product}
+                savings={savings}
+                priceDropAmount={priceDropAmount}
+              />
 
               <div className="flex gap-6 pt-2">
                 <div className="space-y-1">
@@ -790,32 +882,52 @@ export default function ProductCard({
               </div>
             </div>
 
-            <div className="flex gap-3 pt-6 mt-auto border-t border-primary-foreground">
-              <Button
-                className="flex-1"
-                onClick={handleAddToCart}
-                disabled={isOutOfStock}
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Bag
-              </Button>
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={handleBuyNow}
-                disabled={isOutOfStock}
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                Buy Now
-              </Button>
+            <div className="flex gap-3 pt-6 mt-auto border-t border-border">
+              {isOutOfStock ? (
+                <Button
+                  variant={isRestockSubscribed ? "secondary" : "outline"}
+                  className="flex-1 text-xs gap-1.5 cursor-pointer"
+                  onClick={handleToggleRestockAlert}
+                >
+                  {isRestockSubscribed ? (
+                    <>
+                      <BellRing className="w-4 h-4 text-primary mr-1" />
+                      Restock Alert Set
+                    </>
+                  ) : (
+                    <>
+                      <Bell className="w-4 h-4 mr-1" />
+                      Notify When in Stock
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    className="flex-1 cursor-pointer"
+                    onClick={handleAddToCart}
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Add to Bag
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 cursor-pointer"
+                    onClick={handleBuyNow}
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    Buy Now
+                  </Button>
+                </>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleAddToWishlist}
-                className="shrink-0 text-muted-foreground hover:text-destructive-foreground"
+                className="shrink-0 text-muted-foreground hover:text-destructive cursor-pointer"
               >
                 <Heart
-                  className={`w-5 h-5 ${isWishlisted ? "fill-destructive-foreground text-destructive-foreground" : ""}`}
+                  className={`w-5 h-5 ${isWishlisted ? "fill-destructive text-destructive" : ""}`}
                 />
               </Button>
             </div>
@@ -862,6 +974,7 @@ export default function ProductCard({
             isWishlisted={isWishlisted}
             isOutOfStock={isOutOfStock}
             discountPercentage={discountPercentage}
+            priceDropAmount={priceDropAmount}
             onAddToWishlist={handleAddToWishlist}
             selectedColorName={
               product.variants.find((v) => v.color.hex === selectedColor)?.color
@@ -872,14 +985,18 @@ export default function ProductCard({
 
         {/* Info Container */}
         <div className="p-4 flex flex-col bg-background z-30 transition-all duration-500">
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {/* Subtitle/Brand */}
-            <div className="transition-all duration-500 transform group-hover:-translate-y-1">
+            <div className="transition-all duration-500 transform group-hover:-translate-y-0.5">
               <ProductInfoHeader product={product} />
             </div>
 
             <div className="flex items-end justify-between gap-2 transition-all duration-500">
-              <PriceSection product={product} savings={savings} />
+              <PriceSection
+                product={product}
+                savings={savings}
+                priceDropAmount={priceDropAmount}
+              />
               <ColorOptions
                 product={product}
                 selectedColor={selectedColor}
@@ -894,6 +1011,8 @@ export default function ProductCard({
               isOutOfStock={isOutOfStock}
               onAddToCart={handleAddToCart}
               onBuyNow={handleBuyNow}
+              isRestockSubscribed={isRestockSubscribed}
+              onToggleRestockAlert={handleToggleRestockAlert}
             />
           </div>
         </div>
